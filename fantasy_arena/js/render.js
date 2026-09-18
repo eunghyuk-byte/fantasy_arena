@@ -346,6 +346,7 @@ function renderCard(c, playable) {
   }, 0);
   return `<div class="card ${playable ? "playable" : ""}" data-id="${c.id}">
     <img class="card-face" id="${uid}" alt="${c.name}">
+    ${playable ? '<span class="play-glow" aria-hidden="true"></span>' : ""}
   </div>`;
 }
 

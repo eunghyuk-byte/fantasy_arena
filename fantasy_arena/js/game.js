@@ -163,7 +163,12 @@ function renderHeroSlot(p, isMe) {
   const icon = (typeof TRIBE_ICONS !== "undefined" && TRIBE_ICONS[p.hero.id]) || "";
   const hurt = p._hurt && p._hurt.dmg ? " hurt" : "";
   const tick = p._hurt && p._hurt.dmg ? `<div class="hp-tick">-${p._hurt.dmg}</div>` : "";
-  return `<div class="hero-slot ${isMe ? "mine" : ""}${hurt}" title="${p.name}">
+  let canTarget = false;
+  try {
+    if (ui.targeting) canTarget = ui.targeting.targets.some(t => t.kind === "hero" && t.owner === p);
+    if (ui.attacker && !isMe) canTarget = attackTargets(meView().me, ui.attacker).some(t => t.kind === "hero");
+  } catch (e) {}
+  return `<div class="hero-slot hero-portrait ${isMe ? "mine" : ""}${hurt}${canTarget ? " can-target" : ""}" data-hero="${isMe ? "me" : "opp"}" title="${p.name}">
     ${icon ? `<img src="${icon}" alt="${p.name}">` : ""}
     <div class="hero-hp">${p.hp}</div>
     <div class="hero-mana">${p.mana}/${p.maxMana}</div>
@@ -259,12 +264,21 @@ function playSpellFx(card) {
     if (!stage) { resolve(); return; }
     stage.innerHTML = "";
     if (name) name.textContent = "";
-    if (fxCard) {
-      const src = card.face || (typeof composeCardFace === "function" ? composeCardFace(card) : "");
+    const paintCard = (src) => {
+      if (!fxCard) return;
       fxCard.innerHTML = src ? '<img src="'+src+'" alt="">' : "";
       fxCard.classList.remove("out");
       void fxCard.offsetWidth;
       fxCard.classList.add("in");
+    };
+    if (fxCard) {
+      const ready = card.face || (typeof CARD_FACE !== "undefined" && CARD_FACE[card.id]) || "";
+      if (ready && typeof ready === "string" && !ready.includes("[object")) paintCard(ready);
+      if (typeof composeCardFace === "function") {
+        Promise.resolve(composeCardFace(card)).then(src => {
+          if (src && typeof src === "string") paintCard(src);
+        }).catch(() => {});
+      }
     }
     const kind = (card.spell && card.spell.type) || "burst";
     if (stage) stage.dataset.elem = (card.tribe || card.element || "earth");
@@ -674,10 +688,16 @@ function setDropGlow(on) {
 function slotIndexFromPoint(x, y) {
   const board = document.getElementById("myBoard");
   if (!board) return 0;
-  const r = board.getBoundingClientRect();
-  if (x < r.left || x > r.right) return 6;
-  const t = (x - r.left) / Math.max(1, r.width);
-  return Math.max(0, Math.min(5, Math.floor(t * 6)));
+  const slots = [...board.querySelectorAll(".slot")];
+  if (!slots.length) return 0;
+  let best = 0, bestD = 1e9;
+  slots.forEach((sl, i) => {
+    const r = sl.getBoundingClientRect();
+    if (r.width < 2) return;
+    const d = Math.abs(x - (r.left + r.width / 2));
+    if (d < bestD) { bestD = d; best = i; }
+  });
+  return Math.max(0, Math.min(5, best));
 }
 function bindHandCard(el, card) {
   el.onpointerenter = () => showPeek(el);
@@ -764,10 +784,11 @@ document.getElementById("game").addEventListener("click", (e) => {
   if (e.target.id === "endBtn") { Sfx.playTurn && Sfx.playTurn(); endTurn(); return; }
   if (e.target.id === "giveBtn") { confirmGiveUp(); return; }
   if (e.target.id === "powerBtn" || e.target.closest("#powerBtn")) { return; }
-  const portrait = e.target.closest(".hero-portrait");
+  const portrait = e.target.closest(".hero-portrait, .hero-slot, .hud-hero");
   if (portrait) {
     const { me, opp } = meView();
-    const who = portrait.dataset.hero === "me" ? me : opp;
+    const side = portrait.dataset.hero || (portrait.closest("#myStrip") ? "me" : "opp");
+    const who = side === "me" ? me : opp;
     if (ui.targeting) {
       const hit = ui.targeting.targets.find(t => t.kind === "hero" && t.owner === who);
       if (hit) {

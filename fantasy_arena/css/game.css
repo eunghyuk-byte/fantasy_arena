@@ -1843,3 +1843,55 @@
     --slot-w: calc(var(--slot-h) * 0.66) !important;
   }
 
+
+
+/* ===== P0 overrides (last wins) ===== */
+.board {
+  justify-content: flex-start !important;
+  padding-left: 10% !important;
+  padding-right: 6% !important;
+}
+.slot.empty {
+  visibility: hidden !important;
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+#dropGlow { display: none; }
+#dropGlow.on { display: block !important; }
+
+.play-glow {
+  display: none;
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 2px solid rgba(255, 226, 148, .95);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 5;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.card.playable > .play-glow { display: block !important; }
+.card.playable { position: relative; overflow: hidden; }
+.card.playable .card-face {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.minion.can-target,
+.hero-slot.can-target,
+.hero-portrait.can-target {
+  outline: 2px solid #ff6b4a !important;
+  outline-offset: 2px !important;
+  cursor: pointer !important;
+}
+
+@media (max-width: 720px) {
+  .side { display: flex !important; flex-direction: column; }
+}
