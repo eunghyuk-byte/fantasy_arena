@@ -182,14 +182,17 @@ function hideScreens() {
 function showGame() {
   hideScreens();
   document.getElementById("game").classList.add("active");
+  try { Bgm.to("battle", 900); } catch (e) {}
 }
 function backTitle() {
   hideScreens();
   document.getElementById("title").classList.add("active");
+  try { Bgm.to("menu", 800); } catch (e) {}
 }
 function showBuilder() {
   hideScreens();
   document.getElementById("deckBuilder").classList.add("active");
+  try { Bgm.to("menu", 600); } catch (e) {}
   if (!draftDeck.length) {
     const saved = loadSavedDecks()[selectedHero.id];
     draftDeck = Array.isArray(saved) ? saved.slice() : [];
