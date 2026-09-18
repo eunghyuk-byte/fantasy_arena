@@ -143,7 +143,25 @@ function paintSmall(ctx, text, x, y, neg) {
 
 
 
-async function composeCardFace(c, opts={}) {
+async function punchFrame(img) {
+  try {
+    const c = document.createElement("canvas");
+    c.width = img.width; c.height = img.height;
+    const x = c.getContext("2d");
+    x.drawImage(img, 0, 0);
+    const id = x.getImageData(0, 0, c.width, c.height);
+    const d = id.data;
+    const w = c.width, h = c.height;
+    for (let i = 0; i < d.length; i += 4) {
+      const px = ((i / 4) % w), py = ((i / 4) / w) | 0;
+      const edge = px < w * 0.04 || px > w * 0.96 || py < h * 0.025 || py > h * 0.975;
+      if (edge && d[i] < 22 && d[i+1] < 18 && d[i+2] < 16) d[i+3] = 0;
+    }
+    x.putImageData(id, 0, 0);
+    return c;
+  } catch (e) { return img; }
+}
+function composeCardFace(c, opts={}) {
   const W = 768, H = 1152;
   const canvas = document.createElement("canvas");
   canvas.width = W; canvas.height = H;
@@ -221,7 +239,7 @@ async function composeCardFace(c, opts={}) {
 
   ctx.restore();
   const frame = await loadImg(frameUrl);
-  if (frame) ctx.drawImage(frame, 0, 0, W, H);
+  if (frame) ctx.drawImage(punchFrame(frame), 0, 0, W, H);
 
   ctx.save();
   ctx.font = "800 " + Math.round(H*0.042) + "px 'Noto Sans KR', sans-serif";
