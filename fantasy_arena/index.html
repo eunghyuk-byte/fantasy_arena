@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>판마스톤 — 카드 배틀</title>
+<link rel="stylesheet" href="css/game.css" />
+</head>
+<body>
+<button class="bgm-btn" id="bgmBtn" title="모험 BGM">♪</button>
+<div id="app">
+  <section id="title" class="screen active">
+    <h1 class="title">룬스톤</h1>
+    <div class="subtitle">종족을 고르세요 · 오리지널 규칙 축소판</div>
+    <div class="hero-picks" id="heroPicks"></div>
+    <button class="menu-btn" id="btnDeck">덱 구성</button>
+    <button class="menu-btn" id="btnAi">이 덱으로 컴퓨터와 대결</button>
+    <button class="menu-btn ghost" id="btnPvp">같은 화면 1대1 (핫시트)</button>
+    <button class="menu-btn ghost" id="btnHelp">도움말 · 종족</button>
+    <p style="margin-top:18px;color:#9a8864;font-size:13px;max-width:520px;text-align:center;line-height:1.5">
+      50체력 · 마나 1~10 · 전장 7 · 손패 10 · 도발/돌진/보호막/전투의 함성<br>
+      선공 3장, 후공 4장 + 동전.
+    </p>
+  </section>
+
+
+  
+<div class="help-pop" id="helpPop">
+  <div class="help-box">
+    <h2>도움말</h2>
+    <h3>기본 규칙</h3>
+    <p>영웅 체력 50. 덱 30장. 전투는 공/방/체 순이며 피해는 max(0, 공−방)입니다. 영웅 능력은 없습니다. 전장 왼쪽부터 하수인이 놓이고 맨 오른쪽 7번째 칸은 영웅입니다. 하수인은 최대 6장입니다. 턴을 종료하면 내 하수인이 왼쪽부터 자동으로 공격합니다. 상대 하수인이 없으면 영웅이 피해를 받습니다. 공격으로 상대 하수인이 죽으면 반격하지 않습니다. 살아남은 하수인만 반격합니다.</p>
+    <h3>카드 등급</h3>
+    <p>등급은 일반 · 희귀 · 영웅 · 전설 네 가지입니다. 일반과 희귀는 같은 카드 최대 2장, 영웅과 전설은 덱에 1장만 넣을 수 있습니다.</p>
+    <h3>헤더 · 종족</h3>
+    <p>유닛 카드 상단(마나 오른쪽)에는 그 카드의 고유 종족이 표시됩니다. 속성과는 다른 개념으로, 같은 속성 덱 안에도 여러 종족이 섞여 있습니다. 주문 카드 헤더에는 술법이 표시됩니다.</p>
+    <div id="raceHelpList"></div>
+    <button class="menu-btn" id="btnHelpClose" style="min-width:160px;margin-top:16px">닫기</button>
+  </div>
+</div>
+
+  <section id="deckBuilder" class="screen">
+    <div class="builder">
+      <div class="builder-col">
+        <div class="builder-top">
+          <h2 id="poolTitle">카드 목록</h2>
+          <div>
+            <div class="rarity-bar" id="rarityBar">
+              <button data-r="all" class="on">전체</button>
+              <button data-r="common">일반</button>
+              <button data-r="rare">희귀</button>
+              <button data-r="heroic">영웅</button>
+              <button data-r="legendary">전설</button>
+            </div>
+            <button class="menu-btn ghost" id="btnAutoFill" style="min-width:auto;margin:0 6px 0 0;padding:8px 12px">남은 칸 자동</button>
+            <button class="menu-btn ghost" id="btnClearDeck" style="min-width:auto;margin:0;padding:8px 12px">비우기</button>
+          </div>
+        </div>
+        <div class="pool-grid" id="cardPool"></div>
+      </div>
+      <div class="builder-col">
+        <div class="builder-top">
+          <h2>내 덱</h2>
+          <button class="menu-btn ghost" id="btnBackMenu" style="min-width:auto;margin:0;padding:8px 12px">메뉴</button>
+        </div>
+        <div class="deck-meta" id="deckMeta">0 / 30</div>
+        <div class="deck-list" id="deckList"></div>
+        <button class="menu-btn" id="btnSaveDeck" style="width:100%;margin-top:12px">덱 저장</button>
+        <button class="menu-btn" id="btnPlaySaved" style="width:100%">이 덱으로 플레이</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="game">
+    <img id="boardBgLayer" alt="">
+    <div id="dropGlow"></div>
+    <div class="playfield">
+      <div class="col-main">
+        <div class="hero-row opp" id="oppHeroRow"></div>
+        <div class="opp-hand" id="oppHand"></div>
+        <div class="board opp" id="oppBoard"></div>
+        <div class="board" id="myBoard"></div>
+        <div class="log" id="log"></div>
+        <div class="corner-mana opp" id="oppManaGem">0/0</div>
+        <div class="corner-mana me" id="myManaGem">0/0</div>
+        <div class="hero-row me" id="myHeroRow"></div>
+        <div class="my-hand" id="myHand"></div>
+        <div class="hint" id="hint"></div>
+      </div>
+      <div class="col-hud">
+        <div class="hero-strip" id="oppStrip"></div>
+        <div class="hero-strip" id="myStrip"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="coin-layer" id="coinLayer">
+  <div class="coin-box" id="coinBox"></div>
+</div>
+
+<div class="card-pop" id="cardMenuPop">
+  <div class="card-menu">
+    <h3 id="cardMenuTitle">카드</h3>
+    <button class="menu-btn" id="btnCardAdd">카드 추가</button>
+    <button class="menu-btn" id="btnCardLore">카드 설명보기</button>
+    <button class="menu-btn ghost" id="btnCardMenuClose">닫기</button>
+  </div>
+</div>
+<div class="card-pop" id="cardLorePop">
+  <div class="lore-box">
+    <div class="lore-card" id="loreCardSlot"></div>
+    <div class="lore-side">
+      <h3 id="loreName"></h3>
+      <div class="lore-meta" id="loreMeta"></div>
+      <p id="loreText"></p>
+      <button class="menu-btn" id="btnLoreAdd">이 카드 추가</button>
+      <button class="menu-btn ghost" id="btnLoreClose">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div id="spellFx">
+  <div class="fx-veil"></div>
+  <div class="fx-card" id="fxCard"></div>
+  <div class="fx-stage" id="fxStage"></div>
+  <div class="fx-name" id="fxName"></div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+
+<script src="js/cards-data.js"></script>
+<script src="js/vfx.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/render.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
