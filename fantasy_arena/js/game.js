@@ -88,7 +88,7 @@ function draw(p, n = 1) {
       log(`${p.name}의 손패가 가득 차 ${CARD_MAP[id].name}이(가) 불탔다`);
     } else {
       p.hand.push(cloneCard(id));
-      if (!p.isAI) flyDrawCard();
+      if (!p.isAI) p._drew = true;
     }
   }
 }
@@ -97,33 +97,37 @@ function draw(p, n = 1) {
 
 function flyDrawCard() {
   try { Sfx.playDraw && Sfx.playDraw(); } catch (e) {}
-  const pile = document.querySelector("#myStrip .pile-art") || document.querySelector("#myStrip .deck-pile");
+  const pile = document.querySelector("#myStrip .pile-stack") || document.querySelector("#myStrip .deck-pile");
   const hand = document.getElementById("myHand");
   if (!pile || !hand) return;
+  const cards = [...hand.querySelectorAll(".card")];
+  const last = cards[cards.length - 1];
   const a = pile.getBoundingClientRect();
-  const b = hand.getBoundingClientRect();
+  const b = last ? last.getBoundingClientRect() : hand.getBoundingClientRect();
+  if (last) last.style.opacity = "0";
   const ghost = document.createElement("div");
   ghost.className = "draw-ghost";
-  const face = hand.querySelector(".card-face");
-  if (face && face.src) {
-    ghost.innerHTML = `<img src="${face.src}" style="width:100%;height:100%;object-fit:contain;display:block">`;
-  }
-  Object.assign(ghost.style, {
-    width: Math.max(48, a.width) + "px",
-    height: Math.max(70, a.height) + "px",
-    left: a.left + "px",
-    top: a.top + "px",
-    transform: "rotate(-8deg) scale(.92)",
-    transition: "left .8s cubic-bezier(.2,.72,.18,1), top .8s cubic-bezier(.2,.72,.18,1), transform .8s cubic-bezier(.2,.72,.18,1)"
-  });
+  const face = last && last.querySelector(".card-face");
+  if (face && face.src) ghost.innerHTML = '<img src="'+face.src+'" alt="">';
+  const w = last ? b.width : 72;
+  const h = last ? b.height : 108;
+  ghost.style.cssText = "position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+w+"px;height:"+h+"px;z-index:120;pointer-events:none;transform-origin:center center;";
   document.body.appendChild(ghost);
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    ghost.style.left = (b.left + b.width * 0.42) + "px";
-    ghost.style.top = (b.top + b.height * 0.08) + "px";
-    ghost.style.transform = "rotate(-16deg) scale(1.55)";
-  }));
-  setTimeout(() => ghost.remove(), 860);
+  const dx = (b.left + b.width/2) - (a.left + a.width/2);
+  const dy = (b.top + b.height/2) - (a.top + a.height/2);
+  const anim = ghost.animate([
+    { transform: "translate(0,0) rotate(-18deg) scale(.72)", offset: 0 },
+    { transform: "translate("+(dx*0.45)+"px,"+(dy*0.35-90)+"px) rotate(12deg) scale(.92)", offset: 0.45 },
+    { transform: "translate("+dx+"px,"+dy+"px) rotate(0deg) scale(1)", offset: 1 }
+  ], { duration: 720, easing: "cubic-bezier(.2,.72,.12,1)", fill: "forwards" });
+  const done = () => {
+    ghost.remove();
+    if (last) last.style.opacity = "";
+  };
+  anim.onfinish = done;
+  setTimeout(done, 800);
 }
+
 
 function pickEnemyTribe(mine, vsAI) {
   if (vsAI) return TRIBES.find(tr => tr.id === "earth") || mine;

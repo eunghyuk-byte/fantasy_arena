@@ -33,6 +33,10 @@ function render() {
   if (mm) mm.textContent = me.mana + "/" + me.maxMana;
   layoutHandFan();
   layoutOppFan();
+  if (me._drew) {
+    me._drew = false;
+    requestAnimationFrame(() => { try { flyDrawCard(); } catch (e) {} });
+  }
 
   const handEls = document.querySelectorAll("#myHand .card");
   const nHand = handEls.length;
@@ -451,11 +455,16 @@ function heroStrip(p, isMe, myTurn) {
   const endReady = isMe && myTurn;
   const icon = (typeof TRIBE_ICONS !== "undefined" && TRIBE_ICONS[p.hero.id]) || "";
   const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
+  const nDeck = p.deck.length;
+  const layers = Math.min(6, Math.max(1, Math.ceil(nDeck / 5)));
+  let stack = "";
+  for (let i = 0; i < layers; i++) {
+    stack += `<i class="pile-layer" style="--i:${i};background-image:url('${hud.deck || ""}')"></i>`;
+  }
   const pile = `
-      <div class="deck-pile">
-        <div class="pile-art" style="background-image:url('${hud.deck || ""}')"></div>
-        <div>덱 ${p.deck.length}</div>
-        <div>손 ${p.hand.length}</div>
+      <div class="deck-pile" data-n="${nDeck}">
+        <div class="pile-stack">${stack}</div>
+        <div class="pile-count">${nDeck}</div>
       </div>`;
   const hero = `<div class="hud-hero">${renderHeroSlot(p, isMe)}</div>`;
   if (!isMe) return `<div class="side">${pile}${hero}</div>`;
