@@ -96,6 +96,7 @@ function draw(p, n = 1) {
 
 
 function flyDrawCard() {
+  try { Sfx.playDraw && Sfx.playDraw(); } catch (e) {}
   const pile = document.querySelector("#myStrip .pile-art") || document.querySelector("#myStrip .deck-pile");
   const hand = document.getElementById("myHand");
   if (!pile || !hand) return;
@@ -219,6 +220,7 @@ function playCard(p, card, target) {
   p.mana -= card.cost;
   p.hand = p.hand.filter(c => c.uid !== card.uid);
   if (card.type === "minion") {
+    try { Sfx.playSummon && Sfx.playSummon(); } catch (e) {}
     const m = card;
     m.canAttack = (m.keywords || []).includes("charge");
     m.attacksLeft = m.canAttack ? 1 : 0;
@@ -391,6 +393,7 @@ function dealToTarget(srcOwner, target, n) {
 
 function dealHero(p, n) {
   if (!n) return;
+  try { Sfx.playHeroHit && Sfx.playHeroHit(); } catch (e) {}
   const from = p.hp;
   p.hp -= n;
   p._hurt = { from, to: p.hp, dmg: n };
@@ -1208,6 +1211,7 @@ document.getElementById("bgmBtn").onclick = (e) => {
 };
 document.body.addEventListener("click", () => {
   if (!TavernBgm.isOn()) TavernBgm.start();
+  try { Sfx.warmup && Sfx.warmup(); } catch (e) {}
 }, { once: true });
 
 
@@ -1231,3 +1235,9 @@ document.getElementById("cardLorePop").addEventListener("click", e => {
   if (e.target.id === "cardLorePop") closeCardPops();
 });
 
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest("button,.menu-btn,.end-btn,.give-btn,.hero-card")) {
+    try { Sfx.playClick && Sfx.playClick(); } catch (err) {}
+  }
+}, true);

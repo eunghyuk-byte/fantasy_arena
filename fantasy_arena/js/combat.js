@@ -146,6 +146,11 @@ function checkWin() {
 function finish(winner) {
   state.over = true;
   state.winner = winner;
+  try {
+    if (winner === "무승부") Sfx.playLose && Sfx.playLose();
+    else if (winner === "나") Sfx.playWin && Sfx.playWin();
+    else Sfx.playLose && Sfx.playLose();
+  } catch (e) {}
   render();
   const meWin = winner === "나";
   document.getElementById("modal").innerHTML = `
