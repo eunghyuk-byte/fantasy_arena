@@ -1895,3 +1895,57 @@
 @media (max-width: 720px) {
   .side { display: flex !important; flex-direction: column; }
 }
+
+
+/* ===== SIZE restore (hand + board minions) ===== */
+#game.active {
+  --hand-h: 32%;
+  --card-w: calc(36cqh * 0.66);
+  overflow: visible;
+}
+#game.active .playfield,
+#game.active .col-main {
+  overflow: visible;
+}
+.col-main {
+  grid-template-rows: 9% 31% 31% 27% 2% !important;
+}
+.board {
+  --slot-h: clamp(168px, 26cqh, 228px) !important;
+  --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 18%) / 6.2)) !important;
+  justify-content: flex-start !important;
+  overflow: visible !important;
+}
+.slot, .slot .minion, .minion {
+  width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  flex: 0 0 var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+}
+.slot.empty {
+  visibility: hidden !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  flex: 0 0 var(--slot-w) !important;
+}
+#game.active .my-hand {
+  overflow: visible !important;
+  height: 100% !important;
+  align-items: flex-end !important;
+}
+#game.active .my-hand .card {
+  height: min(94%, 38cqh) !important;
+  width: calc(min(94%, 38cqh) * 0.66) !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+#game.active .my-hand .card:hover {
+  transform: translateY(-28px) scale(1.10) !important;
+  z-index: 30 !important;
+}
+.hud-hero .hero-slot {
+  width: clamp(62px, 13cqh, 86px) !important;
+  height: clamp(93px, 19.5cqh, 129px) !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
