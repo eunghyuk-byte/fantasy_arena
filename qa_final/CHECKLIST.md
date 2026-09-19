@@ -2,7 +2,7 @@
 
 **User:** 김응혁 / PM  
 **Date:** 2026-09-19 (KST)  
-**Base HEAD at start:** `57c4727` (SGZ30 already on main)  
+**Final HEAD:** `db9f9e3` (from `57c4727`) (SGZ30 already on main)  
 **Evidence:** `qa_final/*.png`, `playtest_results.json`
 
 | ID | Item | Status | Notes |
