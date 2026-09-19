@@ -165,7 +165,7 @@ async function punchFrame(img) {
     return c;
   } catch (e) { return img; }
 }
-function composeCardFace(c, opts={}) {
+async function composeCardFace(c, opts={}) {
   const W = 768, H = 1152;
   const canvas = document.createElement("canvas");
   canvas.width = W; canvas.height = H;
@@ -243,7 +243,7 @@ function composeCardFace(c, opts={}) {
 
   ctx.restore();
   const frame = await loadImg(frameUrl);
-  if (frame) ctx.drawImage(punchFrame(frame), 0, 0, W, H);
+  if (frame) ctx.drawImage(await punchFrame(frame), 0, 0, W, H);
 
   ctx.save();
   ctx.font = "800 " + Math.round(H*0.042) + "px 'Noto Sans KR', sans-serif";
