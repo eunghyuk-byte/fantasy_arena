@@ -2072,3 +2072,36 @@
   width: 100%; height: 100%; object-fit: contain; display: block;
   filter: drop-shadow(0 12px 16px rgba(0,0,0,.5));
 }
+
+
+/* ===== layout QA fixes A3 + hover clip ===== */
+.board .slot.empty {
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}
+.board .slot.filled {
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+}
+.board {
+  justify-content: flex-start !important;
+}
+
+html, body {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+#app {
+  overflow: visible !important;
+}
+#game.active, #game.active .playfield, #game.active .col-main, #game.active .my-hand {
+  overflow: visible !important;
+}
