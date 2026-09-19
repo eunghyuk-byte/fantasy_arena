@@ -179,6 +179,9 @@ async function punchFrame(img) {
       const px = ((i / 4) % w), py = ((i / 4) / w) | 0;
       const edge = px < w * 0.04 || px > w * 0.96 || py < h * 0.025 || py > h * 0.975;
       if (edge && d[i] < 22 && d[i+1] < 18 && d[i+2] < 16) d[i+3] = 0;
+      // unit/*.jpg frames use near-white placeholders in the portrait window — punch them out
+      const inArt = px > w * 0.08 && px < w * 0.92 && py > h * 0.08 && py < h * 0.58;
+      if (inArt && d[i] > 240 && d[i+1] > 240 && d[i+2] > 240) d[i+3] = 0;
     }
     x.putImageData(id, 0, 0);
     return c;
