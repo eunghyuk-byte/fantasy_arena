@@ -1243,7 +1243,7 @@
     z-index: 2;
   }
   #game.active .my-hand .card {
-    margin-left: calc(min(120%, 38cqh) * 0.66 * -0.42) !important;
+    margin-left: calc(min(120%, 38cqh) * 0.66 * var(--hand-overlap, 0.58) * -1) !important;
   }
   #game.active .opp-hand .back {
     margin-left: -18px !important;
@@ -1457,8 +1457,8 @@
   }
   #game.active .my-hand {
     justify-content: center !important;
-    padding-left: 7% !important;
-    padding-right: 2% !important;
+    padding-left: 8px !important;
+    padding-right: calc(var(--hud-col, 96px) + 8px) !important;
   }
   .card.playable::after,
   .my-hand .card::after,
@@ -3659,12 +3659,13 @@ html, body {
   box-sizing: border-box !important;
 }
 
-/* Hand fan: tight Hearthstone-like overlap (~42%), large cards, no yellow border boxes */
+/* Hand fan: tight HS-like overlap (JS --hand-overlap ~0.52–0.64), centered in visible parchment */
 #game.active .my-hand,
 #game.active #myHand {
   z-index: 6 !important;
-  padding-right: calc(var(--hud-col, 96px) + 12px) !important;
-  padding-left: 4% !important;
+  /* Equal optical center: left pad mirrors right pad minus HUD overlay width */
+  padding-left: 8px !important;
+  padding-right: calc(var(--hud-col, 96px) + 8px) !important;
   justify-content: center !important;
 }
 #game.active .my-hand .card,
@@ -3676,7 +3677,7 @@ html, body {
   width: calc(min(120%, 38cqh) * 0.66) !important;
   max-width: calc(min(120%, 38cqh) * 0.66) !important;
   aspect-ratio: 0.66 / 1 !important;
-  margin-left: calc(min(120%, 38cqh) * 0.66 * -0.42) !important;
+  margin-left: calc(min(120%, 38cqh) * 0.66 * var(--hand-overlap, 0.58) * -1) !important;
   outline: none !important;
   border: none !important;
   background: transparent !important;

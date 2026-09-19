@@ -414,13 +414,17 @@ function layoutHandFan() {
   if (!wrap) return;
   const cards = [...wrap.querySelectorAll(".card")];
   const n = cards.length;
+  // Hearthstone-like: tighter than 0.42; denser as hand grows (paper fan, not spread)
+  const overlap = n <= 1 ? 0 : (n <= 4 ? 0.52 : n <= 7 ? 0.58 : 0.64);
+  const rotStep = n <= 5 ? 3.6 : 2.8;
+  wrap.style.setProperty("--hand-overlap", String(overlap));
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
-    // Hearthstone-like tight arc: ~42% of card-width overlap (paper hand, not spread)
-    el.style.transform = `translateY(${Math.abs(t)*8}px) rotate(${t*4.2}deg)`;
+    el.style.transform = `translateY(${Math.abs(t)*7}px) rotate(${t*rotStep}deg)`;
     el.style.zIndex = String(20 + i);
-    const w = el.getBoundingClientRect().width || el.offsetWidth || 80;
-    el.style.setProperty("margin-left", i ? Math.round(-w * 0.42) + "px" : "0", "important");
+    // Prefer layout width (offsetWidth) so rotate AABB does not inflate the margin
+    const w = el.offsetWidth || el.getBoundingClientRect().width || 80;
+    el.style.setProperty("margin-left", i ? Math.round(-w * overlap) + "px" : "0", "important");
   });
 }
 
