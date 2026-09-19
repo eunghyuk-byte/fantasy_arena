@@ -528,6 +528,7 @@ function showPeek(el) {
 function placeDropGlow(on, x, y) {
   const glow = document.getElementById("dropGlow");
   const game = document.getElementById("game");
+  if (typeof setDropGlow === "function") setDropGlow(!!on);
   if (!glow || !game) return;
   if (!on) { glow.classList.remove("on"); return; }
   const mine = document.getElementById("myBoard");
@@ -590,6 +591,18 @@ function slotIndexFromPoint(x, y) {
 function bindHandCard(el, card) {
   el.onpointerenter = () => showPeek(el);
   el.onpointerleave = hidePeek;
+  let lastTapAt = 0;
+  const playFromHand = () => {
+    if (!canDropCard(card)) return;
+    window._dropSlot = 0;
+    try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (e) {}
+    onHandClick(card);
+  };
+  el.ondblclick = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    playFromHand();
+  };
   el.onpointerdown = (ev) => {
     hidePeek();
     if (ev.button != null && ev.button !== 0) return;
@@ -600,12 +613,20 @@ function bindHandCard(el, card) {
     const r = el.getBoundingClientRect();
     const ghost = el.cloneNode(true);
     ghost.classList.add("drag-ghost");
+    const face = el.querySelector("img.card-face, img");
+    const gFace = ghost.querySelector("img.card-face, img");
+    if (face && gFace && !gFace.getAttribute("src") && (face.currentSrc || face.src)) {
+      gFace.src = face.currentSrc || face.src;
+    }
     ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
     document.body.appendChild(ghost);
     el.classList.add("dragging");
+    const startX = ev.clientX, startY = ev.clientY;
+    let dragMoved = false;
     _drag = { card, el, ghost, pid: ev.pointerId };
     const move = (e) => {
       if (!_drag) return;
+      if (Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > 10) dragMoved = true;
       _drag.ghost.style.left = e.clientX + "px";
       _drag.ghost.style.top = e.clientY + "px";
       placeDropGlow(overBoard(e.clientX, e.clientY) && canDropCard(_drag.card), e.clientX, e.clientY);
@@ -623,6 +644,19 @@ function bindHandCard(el, card) {
       if (ok) {
         Sfx.playCardDrop();
         onHandClick(cardRef);
+        lastTapAt = 0;
+        return;
+      }
+      if (!dragMoved) {
+        const now = Date.now();
+        if (now - lastTapAt < 300) {
+          lastTapAt = 0;
+          playFromHand();
+        } else {
+          lastTapAt = now;
+        }
+      } else {
+        lastTapAt = 0;
       }
     };
     window.addEventListener("pointermove", move, true);

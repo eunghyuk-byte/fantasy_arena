@@ -177,7 +177,7 @@
     box-shadow: inset 0 0 0 3px #ffe08a, 0 0 28px rgba(255, 214, 110, .65);
     border-color: #ffe7a8;
   }
-  #game.active > *:not(#boardBgLayer) { position: relative; z-index: 2; }
+  #game.active > *:not(#boardBgLayer):not(#dropGlow) { position: relative; z-index: 2; }
   #game.active > #boardBgLayer {
     position: absolute !important;
     inset: 0 !important;
@@ -1216,7 +1216,8 @@
     border-radius: 6px;
   }
   #game.active .opp-hand .back:first-child { margin-left: 0; }
-  #dropGlow { display: none !important; }
+  /* neutralized: dropGlow restored in final override */
+  /* #dropGlow { display: none !important; } */
 
 
   .hero-row { pointer-events: none; }
@@ -1280,9 +1281,8 @@
   .corner-mana.opp { top: 18px !important; right: 18px !important; bottom: auto !important; }
   .corner-mana.me { top: auto !important; bottom: 22%; right: 18px !important; }
   .card.playable::after { content: none !important; display: none !important; }
-  #game.active.drop-ready #myBoard {
-    box-shadow: none !important;
-  }
+  /* neutralized: drop-ready #myBoard box-shadow restored in FINAL */
+  /* #game.active.drop-ready #myBoard { box-shadow: none !important; } */
   #game.active .my-hand .card {
     outline: none !important;
   }
@@ -1770,7 +1770,8 @@
     padding-right: 5% !important;
     justify-content: flex-start !important;
   }
-  .play-glow { display: none !important; }
+  /* neutralized: play-glow restored in final override */
+  /* .play-glow { display: none !important; } */
   .card.playable::after,
   #game.active .my-hand .card.playable::after {
     content: none !important;
@@ -2104,4 +2105,136 @@ html, body {
 }
 #game.active, #game.active .playfield, #game.active .col-main, #game.active .my-hand {
   overflow: visible !important;
+}
+
+
+/* ===== FINAL mobile visual + dropGlow (last wins) ===== */
+#game.active > #dropGlow {
+  position: absolute !important;
+  z-index: 40 !important;
+  pointer-events: none !important;
+}
+#dropGlow {
+  display: none;
+}
+#dropGlow.on {
+  display: block !important;
+}
+
+.play-glow {
+  display: none;
+  position: absolute !important;
+  inset: 0 !important;
+  box-sizing: border-box !important;
+  border: 2px solid rgba(255, 226, 148, .95) !important;
+  border-radius: 10px !important;
+  pointer-events: none !important;
+  z-index: 5 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  width: auto !important;
+  height: auto !important;
+}
+.card.playable > .play-glow,
+.minion.playable > .play-glow {
+  display: block !important;
+}
+.card.playable,
+#game.active .my-hand .card.playable {
+  position: relative !important;
+  overflow: visible !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+.card.playable .card-face,
+#game.active .my-hand .card.playable .card-face,
+.minion.playable .card-face {
+  outline: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+  filter: none !important;
+}
+.card.playable::after,
+#game.active .my-hand .card.playable::after,
+.minion.playable::after {
+  content: none !important;
+  display: none !important;
+}
+
+.board {
+  --slot-h: clamp(200px, 32vmin, 280px) !important;
+  --slot-w: calc(var(--slot-h) * 0.66) !important;
+  justify-content: flex-start !important;
+  overflow: visible !important;
+}
+.board .slot.filled {
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+}
+.board .slot.filled .minion,
+.board .slot .minion,
+.slot.filled .minion,
+.minion {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: none !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+.board .slot.filled .minion .card-face,
+.minion .card-face {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+.board .slot.empty {
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}
+
+.drag-ghost {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 200 !important;
+  pointer-events: none !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+}
+.drag-ghost img,
+.drag-ghost .card-face {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ===== FINAL drop-ready restore ===== */
+
+#game.active.drop-ready #myBoard {
+  box-shadow: inset 0 0 0 3px rgba(255, 224, 140, .85), 0 0 22px rgba(255,210,100,.35) !important;
+  border-radius: 18px !important;
 }
