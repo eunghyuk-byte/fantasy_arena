@@ -6,8 +6,8 @@ All binary media under `assets/audio/` are free for commercial use. Prefer CC0 w
 
 | File | Source | License | Notes |
 |------|--------|---------|-------|
-| `menu.ogg` | [Town Theme RPG](https://opengameart.org/content/town-theme-rpg) by cynicmusic (pixelsphere.org) — converted from MP3 to Ogg Vorbis stereo 48 kHz | CC0 | ~97s loopable |
-| `battle.ogg` | [Heartfelt Battle](https://opengameart.org/content/heartfelt-battle-loopable-fantasy-stringspianohorn) by request — re-encoded Ogg Vorbis stereo 48 kHz | CC0 | ~157s loopable fantasy battle |
+| `menu.ogg` | [Town Theme RPG](https://opengameart.org/content/town-theme-rpg) by cynicmusic (pixelsphere.org) — converted from MP3 to Ogg Vorbis stereo 48 kHz | CC0 | ~195s (2× seamless self-concat), loudnorm ≈−16 LUFS |
+| `battle.ogg` | [Heartfelt Battle](https://opengameart.org/content/heartfelt-battle-loopable-fantasy-stringspianohorn) by request — re-encoded Ogg Vorbis stereo 48 kHz | CC0 | ~180s (self-concat then trim), loudnorm ≈−16 LUFS |
 
 ## SFX (`sfx/`) — Kenney.nl CC0 (primary)
 
@@ -44,6 +44,22 @@ When no matching free download was available for elemental spell hits, short mul
 - [Fairy Battles](https://opengameart.org/content/fairy-battles) (CC0) and [Hope orchestral battle](https://opengameart.org/content/hopeorchestral-battle-music) (CC0) — strong battle candidates; Heartfelt Battle chosen for length/feel.
 - Pleasant Creek / Medieval Town (CC-BY 3.0) — skipped to keep BGM CC0-only.
 
+
+
+## Loudness balance (post-91a8b47 SOUND review)
+
+Applied with ffmpeg on 2026-09-19 based on listen review of `91a8b47`:
+
+| Asset | Before (approx.) | After |
+|-------|------------------|-------|
+| `bgm/menu.ogg` | −13 LUFS, ~97s | ≈−16 LUFS, ~195s (seamless 2× concat) |
+| `bgm/battle.ogg` | −21 LUFS, ~157s | ≈−16 LUFS, 180s (2× concat, trim ≥180) |
+| `sfx_slash_crit.ogg` | −16 LUFS (quieter than slash −14) | ≈−12 LUFS (louder than slash ≈−15) |
+| `sfx_parry.ogg` | −28 LUFS | ≈−16 LUFS (+20 dB then true-peak limit) |
+| Other short SFX | mixed −11…−31 / some hot peaks | roughly −14…−16 LUFS, peak-aware (`volume`/`acompressor` + `alimiter`, TP ≲ −0.1 dB) |
+
+No files removed. Spell beds and Kenney sources unchanged aside from gain/limiting/re-encode.
+
 ## Encoding
 
-Most SFX: stereo, 44.1 kHz, `libvorbis` q≈5. BGM: stereo, 48 kHz, `libvorbis` q≈6 via ffmpeg.
+Most SFX: stereo, 44.1 kHz, `libvorbis` q≈5. BGM: stereo, 48 kHz, `libvorbis` q≈6 via ffmpeg. BGM two-pass `loudnorm` I=−16 TP=−1.5; SFX gain/limit as in Loudness balance note.
