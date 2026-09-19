@@ -65,13 +65,15 @@ function render() {
     bindHandCard(el, me.hand[i]);
   });
   document.querySelectorAll("#myBoard .minion").forEach(el => {
-    el.onclick = () => onMinionClick(me, findOn(me, el.dataset.uid), "me");
-    el.onpointerenter = () => showPeek(el);
+    const m = findOn(me, el.dataset.uid);
+    el.onclick = () => onMinionClick(me, m, "me");
+    el.onpointerenter = () => showPeek(el, m);
     el.onpointerleave = hidePeek;
   });
   document.querySelectorAll("#oppBoard .minion").forEach(el => {
-    el.onclick = () => onMinionClick(opp, findOn(opp, el.dataset.uid), "opp");
-    el.onpointerenter = () => showPeek(el);
+    const m = findOn(opp, el.dataset.uid);
+    el.onclick = () => onMinionClick(opp, m, "opp");
+    el.onpointerenter = () => showPeek(el, m);
     el.onpointerleave = hidePeek;
   });
 
@@ -377,7 +379,7 @@ async function paintStatCoins(ctx, c, W, H) {
 
 const _faceWait = new Map();
 function faceSrc(c, opts, el) {
-  const key = ["v64atk", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.atkSkill || 1, c.text || ""].join("|");
+  const key = ["v65atk", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.atkSkill || 1, c.text || ""].join("|");
   if (_faceWait.has(key)) {
     _faceWait.get(key).then(src => { if (el) el.src = src; });
     return _faceWait.get(key);

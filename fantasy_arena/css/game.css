@@ -3709,3 +3709,49 @@ html, body {
   0% { opacity: 1; transform: scale(1.04); }
   100% { opacity: .85; transform: scale(1); }
 }
+
+
+/* —— attack specials help + HS-style peek tip —— */
+.atk-skill-help { margin: 8px 0 12px; }
+.atk-skill-item {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 7px 0; border-bottom: 1px solid #3a2a18;
+}
+.atk-skill-item b { color: #f3e2b0; font-size: 15px; }
+.atk-skill-item span { color: #cbb58a; font-size: 13px; line-height: 1.45; }
+
+#cardPeek { overflow: visible !important; }
+#cardPeek .atk-skill-tip {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 18%;
+  width: min(220px, 28vw);
+  padding: 12px 14px;
+  background: linear-gradient(180deg, #2a1c10 0%, #1a1208 100%);
+  border: 2px solid #c9a227;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.55);
+  color: #f3e2b0;
+  pointer-events: none;
+  text-align: left;
+}
+#cardPeek .atk-skill-tip-name {
+  font-weight: 900;
+  font-size: 16px;
+  color: #ffe9a8;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+#cardPeek .atk-skill-tip-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #dcc9a0;
+}
+@media (max-width: 720px) {
+  #cardPeek .atk-skill-tip {
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translateX(-50%);
+    width: min(260px, 80vw);
+  }
+}

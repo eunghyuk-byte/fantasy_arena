@@ -599,16 +599,40 @@ function hidePeek() {
   const p = document.getElementById("cardPeek");
   if (p) p.remove();
 }
-function showPeek(el) {
+function resolvePeekCard(el, cardHint) {
+  if (cardHint && cardHint.id) return cardHint;
+  if (!el) return null;
+  const id = el.dataset && el.dataset.id;
+  if (id && typeof CARD_MAP !== "undefined" && CARD_MAP[id]) return CARD_MAP[id];
+  const uid = el.dataset && el.dataset.uid;
+  if (uid && typeof state !== "undefined" && state) {
+    for (const pl of [state.p1, state.p2]) {
+      if (!pl || !pl.board) continue;
+      const m = pl.board.find(x => x.uid === uid);
+      if (m) return m;
+    }
+  }
+  return null;
+}
+function showPeek(el, cardHint) {
   if (_drag || !el) return;
   const img = el.querySelector("img.card-face, img");
   if (!img || !img.src) return;
   hidePeek();
+  const card = resolvePeekCard(el, cardHint);
+  const sk = card ? ((card.atkSkill >= 2 && card.atkSkill <= 10) ? (card.atkSkill | 0) : 0) : 0;
+  const label = (sk && typeof ATK_SKILL_LABEL !== "undefined") ? ATK_SKILL_LABEL[sk] : "";
+  const desc = (sk && typeof ATK_SKILL_DESC !== "undefined") ? ATK_SKILL_DESC[sk] : "";
   const peek = document.createElement("div");
   peek.id = "cardPeek";
-  peek.innerHTML = `<img src="${img.src}" alt="">`;
+  let tip = "";
+  if (sk && label) {
+    tip = `<div class="atk-skill-tip"><div class="atk-skill-tip-name">${label}</div><div class="atk-skill-tip-desc">${desc || ""}</div></div>`;
+  }
+  peek.innerHTML = `<img src="${img.src}" alt="">${tip}`;
   document.body.appendChild(peek);
   const w = Math.min(300, window.innerHeight * 0.42);
+  // Center card; tip sits to the right (HS-style keyword panel)
   peek.style.cssText = "position:fixed;left:50%;top:46%;width:"+w+"px;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;";
 }
 
@@ -676,7 +700,7 @@ function slotIndexFromPoint(x, y) {
   return Math.max(0, Math.min(5, best));
 }
 function bindHandCard(el, card) {
-  el.onpointerenter = () => showPeek(el);
+  el.onpointerenter = () => showPeek(el, card);
   el.onpointerleave = hidePeek;
   let lastTapAt = 0;
   const playFromHand = () => {
@@ -986,6 +1010,17 @@ document.getElementById("btnPlaySaved").onclick = () => {
 /* 약 3분 모험 BGM — 오리지널 Web Audio 악보, 구간이 바뀌며 루프 */
 
 function openHelp() {
+  const skBox = document.getElementById("atkSkillHelpList");
+  if (skBox && !skBox.dataset.ready && typeof ATK_SKILL_LABEL !== "undefined") {
+    const desc = (typeof ATK_SKILL_DESC !== "undefined") ? ATK_SKILL_DESC : {};
+    let html = "";
+    for (let i = 1; i <= 10; i++) {
+      html += '<div class="atk-skill-item"><b>' + i + '. ' + (ATK_SKILL_LABEL[i] || "") +
+        '</b><span>' + (desc[i] || "") + '</span></div>';
+    }
+    skBox.innerHTML = html;
+    skBox.dataset.ready = "1";
+  }
   const box = document.getElementById("raceHelpList");
   if (box && !box.dataset.ready) {
     box.innerHTML = "<h3>종족 도감 (" + RACE_LORE.length + ")</h3>" + RACE_LORE.map(r =>
