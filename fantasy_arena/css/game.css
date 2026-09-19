@@ -2607,3 +2607,24 @@ html, body {
   margin: 0 !important;
   display: block !important;
 }
+
+/* ===== FINAL OVERRIDE: hero/deck scale to half of board slot-h ===== */
+/* Promote --slot-h so .col-hud (sibling of .col-main) can inherit it */
+#game.active, .playfield, .board {
+  --slot-h: clamp(96px, 26cqh, 168px) !important;
+  --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 24%) / 6.5)) !important;
+}
+.hud-hero .hero-slot, .hud-hero .hero-portrait {
+  --hero-h: calc(var(--slot-h) * 0.5) !important;
+  width: calc(var(--hero-h) * 0.66) !important;
+  height: var(--hero-h) !important;
+}
+.deck-pile {
+  width: calc(var(--slot-h) * 0.5 * 0.66) !important;
+}
+.pile-stack {
+  height: calc(var(--slot-h) * 0.5 * 0.92) !important;
+}
+.board {
+  justify-content: flex-start !important;
+}
