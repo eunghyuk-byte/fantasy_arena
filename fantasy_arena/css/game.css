@@ -2633,3 +2633,131 @@ html, body {
 #myBoard, #oppBoard, .board, .board.opp {
   justify-content: flex-start !important;
 }
+
+/* ===== FINAL OVERRIDE: restore LARGE battlefield size + kill hand border boxes ===== */
+#game.active, .playfield, .board, #myBoard, #oppBoard, .col-main, .col-hud {
+  --slot-h: clamp(200px, 32vmin, 280px) !important;
+  --slot-w: calc(var(--slot-h) * 0.66) !important;
+}
+.board,
+#myBoard,
+#oppBoard {
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  padding-left: max(52px, 16%) !important;
+  padding-right: max(52px, 16%) !important;
+  padding-top: max(6px, 1.5%) !important;
+  padding-bottom: max(6px, 1.5%) !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: clamp(4px, 0.7cqi, 10px) !important;
+  /* kill any leftover shrink caps */
+  --slot-h: clamp(200px, 32vmin, 280px) !important;
+  --slot-w: calc(var(--slot-h) * 0.66) !important;
+}
+.col-main {
+  grid-template-rows: 6% 40% 40% 12% 2% !important;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .col-main {
+    grid-template-rows: 5% 42% 42% 9% 2% !important;
+  }
+  .board, #myBoard, #oppBoard {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+  }
+}
+.board .slot.empty,
+#myBoard .slot.empty,
+#oppBoard .slot.empty {
+  visibility: hidden !important;
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+.board .slot.filled,
+#myBoard .slot.filled,
+#oppBoard .slot.filled,
+.board .slot:not(.empty),
+#myBoard .slot:not(.empty) {
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+.board .minion,
+#myBoard .minion,
+#oppBoard .minion,
+.slot.filled .minion,
+.board .slot .minion {
+  width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-width: var(--slot-w) !important;
+  min-height: var(--slot-h) !important;
+  max-width: var(--slot-w) !important;
+  max-height: var(--slot-h) !important;
+  margin: 0 !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+  flex: 0 0 var(--slot-w) !important;
+}
+.board .minion .card-face,
+#myBoard .minion .card-face,
+#oppBoard .minion .card-face,
+.board .minion img.card-face,
+.minion .card-face {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+.hud-hero .hero-slot, .hud-hero .hero-portrait {
+  --hero-h: calc(var(--slot-h) * 0.5) !important;
+  width: calc(var(--hero-h) * 0.66) !important;
+  height: var(--hero-h) !important;
+}
+.deck-pile {
+  width: calc(var(--slot-h) * 0.5 * 0.66) !important;
+}
+.pile-stack {
+  height: calc(var(--slot-h) * 0.5 * 0.92) !important;
+}
+#myHand, .my-hand, #game.active .my-hand {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+#game.active .my-hand .card.playable > .play-glow,
+#game.active .my-hand .card > .play-glow,
+.my-hand .play-glow,
+#myHand .play-glow {
+  display: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+#game.active .my-hand .card,
+#game.active .my-hand .card.playable,
+#game.active .my-hand .card .card-face,
+#myHand .card,
+#myHand .card.playable,
+#myHand .card .card-face {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
