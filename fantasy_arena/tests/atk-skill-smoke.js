@@ -60,6 +60,17 @@ assert(p.atk === 0 && p.def === 4, 'petrify(8) before damage');
 const c = { name: 'F', atk: 5, def: 3, hp: 6, maxHp: 6 };
 ctx.applyAtkSkillOnStart({ name: 'A', atkSkill: 10 }, c);
 assert(c.atk === 5 && c.hp === 6, 'trample(10) no pre-mutator');
+assert(/남은 공격력/.test(ctx.ATK_SKILL_DESC[10]), 'DESC 10 leftover trample');
+// leftover-ATK trample math: ATK5 vs DEF1 → 4 HP potential; target HP2 → leftover 2
+{
+  const pot = ctx.calcAtkSkillHpDamage({ atkSkill: 10 }, 5, 1, 0, { def: 1 }).hpDmg;
+  assert(pot === 4, 'trample primary HP pot after DEF');
+  const leftover = Math.max(0, pot - 2);
+  assert(leftover === 2, 'trample leftover after kill');
+  const hopDmg = Math.max(0, leftover - 3); // next DEF 3 ≥ leftover → 0
+  assert(hopDmg === 0, 'trample hop stops if leftover ≤ next DEF');
+  assert(Math.max(0, leftover - 1) === 1, 'trample hop ATK=leftover vs next DEF');
+}
 
 assert(ctx.calcAtkSkillHpDamage({ atkSkill: 2 }, 7, 4, 0, Object.assign({ def: 4 }, {})).hpDmg === 3, 'penetrate remainder');
 const d = { def: 4 };

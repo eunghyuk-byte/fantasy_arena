@@ -294,12 +294,14 @@ function doAttack(p, attacker, target, auto) {
         Vfx.death(deadEl);
         await waitMs(520);
 
-        // —— 10 돌파공격 option A: full attack chain to next after each kill; cap = board size ——
+        // —— 10 돌파공격: leftover-ATK trample (Monster Train–style); NOT full aAtk re-strike ——
+        // leftover = max(0, primaryHpDmgPotential - hpAbsorbed); each hop uses leftover as ATK vs that target's DEF.
         if (sk === 10 && attacker.hp > 0 && !attacker.dying) {
-          const boardCap = Math.max(1, foe.board.length + 1); // remaining + already killed primary guard
+          let leftover = Math.max(0, hpDmg - hpBefore);
+          const boardCap = Math.max(1, foe.board.length + 1);
           let hops = 0;
           let lastUid = def.uid;
-          while (hops < boardCap && attacker.hp > 0 && !attacker.dying) {
+          while (leftover > 0 && hops < boardCap && attacker.hp > 0 && !attacker.dying) {
             const living = foe.board.filter(m => m.hp > 0 && !m.dying && m.uid !== lastUid);
             // prefer next-in-row (index after last), else first living
             let next = null;
@@ -312,29 +314,31 @@ function doAttack(p, attacker, target, auto) {
             }
             if (!next) next = living[0] || null;
             if (!next) {
-              // board empty → hero face (one hop)
+              // board empty → hero face with leftover only
               if (!foe.board.some(m => m.hp > 0 && !m.dying)) {
-                log(`${attacker.name} 돌파 → 영웅`);
+                log(`${attacker.name} 돌파 → 영웅 (잔여 ${leftover})`);
                 const isMeHero = foe === meView().me;
                 const hEl = Vfx.heroOf(isMeHero);
-                const hCalc = calcAtkSkillHpDamage(attacker, aAtk, 0, aDefVal, null);
-                await Vfx.attackSeq(Vfx.elOf(attacker.uid), hEl, hCalc.hpDmg, false);
-                dealHero(foe, hCalc.hpDmg);
+                await Vfx.attackSeq(Vfx.elOf(attacker.uid), hEl, leftover, false);
+                dealHero(foe, leftover);
                 render();
                 await waitMs(300);
               }
               break;
             }
-            hops++;
-            log(`${attacker.name} 돌파 → ${next.name} (${hops})`);
             const nBlocked = Math.max(0, next.def || 0);
-            const nCalc = calcAtkSkillHpDamage(attacker, aAtk, nBlocked, aDefVal, next);
-            const nDmg = nCalc.hpDmg;
-            log(`${next.name} 방어 ${nBlocked}` + (sk === 2 ? "" : "") + ` → 체력피해 ${nDmg}`);
-            await Vfx.attackSeq(Vfx.elOf(attacker.uid), Vfx.elOf(next.uid), nDmg, nDmg >= attacker.atk + 2);
+            if (leftover <= nBlocked) {
+              log(`${attacker.name} 돌파 → ${next.name} 잔여 ${leftover} ≤ 방어 ${nBlocked} · 돌파 종료`);
+              break;
+            }
+            hops++;
+            const nDmg = Math.max(0, leftover - nBlocked);
+            log(`${attacker.name} 돌파 → ${next.name} (${hops}) 잔여ATK ${leftover}`);
+            log(`${next.name} 방어 ${nBlocked} → 체력피해 ${nDmg}`);
+            await Vfx.attackSeq(Vfx.elOf(attacker.uid), Vfx.elOf(next.uid), nDmg, false);
             const nb = next.hp;
             damageMinion(foe, next, nDmg);
-            if (sk === 6) { /* trample is skill 10 only */ }
+            // chain hops: pure leftover HP dmg only (no lifesteal / other skill effects)
             render();
             await waitMs(280);
             if (next.hp > 0 && !next.dying) {
@@ -344,6 +348,7 @@ function doAttack(p, attacker, target, auto) {
             log(`${next.name} 격파`);
             Vfx.death(Vfx.elOf(next.uid));
             await waitMs(400);
+            leftover = Math.max(0, nDmg - nb);
             lastUid = next.uid;
           }
         }

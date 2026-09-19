@@ -18,7 +18,7 @@
 (NO 방어무시 / 혼란)
 
 - **광역공격**: all enemy minions; per-target DEF; `atk ≤ def → 0 HP dmg`. Cards keep ATK 1–2.
-- **돌파공격**: chain to next after kill (cap = board size).
+- **돌파공격**: leftover ATK trample after kill (overkill after DEF to next; each hop re-applies that target's DEF; cap = board size; optional hero face with leftover).
 
 ## SGZ30
 
