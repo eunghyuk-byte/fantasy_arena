@@ -2,6 +2,10 @@
 
 > LOCKED identities — apply to fantasy core + SGZ30.
 > 방코인≤기본방 (방 최하0).
+>
+> **코스트 커브 공식(승인 대기):** → [`BALANCE_CURVE.md`](./BALANCE_CURVE.md)  
+> → 표준 1–9 베이스라인 · DEF 하드캡 · 종족 편차 · 스킬 세금 · 전설9 타깃 · 포인트 밴드.  
+> **카드 수치 적용은 공식 승인 후.** `cards-data.js` / 게임 코드 수정 금지(본 단계).
 
 | Attribute | Identity | Coins | Tradeoff |
 |-----------|----------|-------|----------|
@@ -25,3 +29,5 @@
 See `qa_sgz30/BALANCE_DRAFT.md` (or this doc + `cards-data.js`). Legends martial cost 9: 마초/장비/조운/관우/황충/여포. 광역 on 곽가/가후/육손/주유/제갈량/사마의.
 
 IMAGE follow-up: new SGZ non-legend cards currently reuse tribe-legend art placeholders.
+
+카드 밸런스 수치안은 **`BALANCE_CURVE.md` 승인 전 적용하지 않음.**
