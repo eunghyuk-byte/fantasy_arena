@@ -361,9 +361,10 @@ function buildSpellFx(stage, kind, card) {
 
 
 function needsTarget(card) {
-  const fx = card.type === "spell" ? card.spell : card.battlecry;
-  if (!fx) return false;
-  return ["dmg", "kill", "buff"].includes(fx.type) && fx.target;
+  // Minion battlecry targeting removed; only spells with an explicit target.
+  if (card.type !== "spell" || !card.spell) return false;
+  const fx = card.spell;
+  return ["dmg", "kill", "buff"].includes(fx.type) && !!fx.target;
 }
 
 function validTargets(p, fx) {
@@ -758,7 +759,7 @@ function onHandClick(card) {
   if (me.mana < card.cost) return;
   if (card.type === "minion" && me.board.length >= MAX_BOARD) return;
   if (needsTarget(card)) {
-    const fx = card.type === "spell" ? card.spell : card.battlecry;
+    const fx = card.type === "spell" ? card.spell : null;
     const targets = validTargets(me, fx);
     if (!targets.length) {
       if (card.type === "minion") { playCard(me, card, null); render(); }

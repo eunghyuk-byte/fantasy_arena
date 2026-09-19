@@ -292,12 +292,18 @@ async function composeCardFace(c, opts={}) {
     ctx.restore();
   }
 
-  const txt = (c.text && c.text !== "전설") ? c.text : (c.type === "spell" ? "주문" : "");
+  let txt = (c.text && c.text !== "전설") ? c.text : (c.type === "spell" ? "주문" : "");
+  const skill = (c.atkSkill >= 2 && c.atkSkill <= 10) ? (c.atkSkill | 0) : 0;
+  if (skill && typeof ATK_SKILL_LABEL !== "undefined" && ATK_SKILL_LABEL[skill]) {
+    txt = ATK_SKILL_LABEL[skill];
+  }
   if (txt) {
     const tSize = Math.round(H*0.037) + 2;
+    const isSkill = skill >= 2;
     ctx.save();
-    ctx.fillStyle = "#2a2014";
-    ctx.font = "700 " + tSize + "px 'Noto Sans KR', sans-serif";
+    // Attack specials: bold + darker keyword (FA 판마-style)
+    ctx.fillStyle = isSkill ? "#140c04" : "#2a2014";
+    ctx.font = (isSkill ? "900 " : "700 ") + tSize + "px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const maxW = W * 0.62;
@@ -313,7 +319,15 @@ async function composeCardFace(c, opts={}) {
     if (line) lines.push(line);
     const lh = tSize * 1.28;
     const startY = H*0.743 - ((lines.length - 1) * lh) / 2;
-    lines.forEach((ln, i) => ctx.fillText(ln, W*0.50, startY + i * lh));
+    lines.forEach((ln, i) => {
+      if (isSkill) {
+        ctx.strokeStyle = "#140c04";
+        ctx.lineWidth = Math.max(1.5, tSize * 0.06);
+        ctx.lineJoin = "round";
+        ctx.strokeText(ln, W*0.50, startY + i * lh);
+      }
+      ctx.fillText(ln, W*0.50, startY + i * lh);
+    });
     ctx.restore();
   }
 
@@ -363,7 +377,7 @@ async function paintStatCoins(ctx, c, W, H) {
 
 const _faceWait = new Map();
 function faceSrc(c, opts, el) {
-  const key = ["v63coin", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name].join("|");
+  const key = ["v64atk", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.atkSkill || 1, c.text || ""].join("|");
   if (_faceWait.has(key)) {
     _faceWait.get(key).then(src => { if (el) el.src = src; });
     return _faceWait.get(key);

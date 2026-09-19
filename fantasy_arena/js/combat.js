@@ -1,3 +1,60 @@
+function atkSkillOf(m) {
+  const v = m && m.atkSkill;
+  return (v >= 2 && v <= 10) ? (v | 0) : 1;
+}
+
+/** Pre-hit foe mutators: weaken / petrify / confuse. Minion targets only. */
+function applyAtkSkillOnStart(attacker, def) {
+  if (!def) return;
+  const sk = atkSkillOf(attacker);
+  if (sk === 8) { // weaken
+    def.atk = Math.max(0, (def.atk || 0) - 1);
+    def.def = Math.max(0, (def.def || 0) - 1);
+    log(`${attacker.name} 약화공격 → ${def.name} 공·방 -1`);
+  } else if (sk === 9) { // petrify
+    def.atk = 0;
+    def.def = (def.def || 0) + 1;
+    log(`${attacker.name} 석화공격 → ${def.name} 공=0 방+1`);
+  } else if (sk === 10) { // confuse: swap ATK ↔ HP
+    const a = def.atk || 0;
+    const h = def.hp || 0;
+    def.atk = h;
+    def.hp = a;
+    if (def.maxHp != null) def.maxHp = Math.max(def.maxHp, def.hp);
+    log(`${attacker.name} 혼란공격 → ${def.name} 공↔체 교체`);
+  }
+}
+
+/**
+ * Resolve outbound HP damage for attacker specials 2–7 (and normal).
+ * Returns { hpDmg, absorbed } — counterattacks should NOT call this with attacker skill.
+ */
+function calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefVal, def) {
+  const sk = atkSkillOf(attacker);
+  let raw = Math.max(0, aAtk);
+  if (sk === 4) { // charge: + attacker DP
+    raw += Math.max(0, aDefVal || 0);
+  }
+  let hpDmg = 0;
+  let absorbed = 0;
+  if (sk === 2) { // pierce_armor: ignore DP
+    hpDmg = raw;
+  } else if (sk === 3) { // penetrate: DP first (consume), remainder to HP
+    const pool = Math.max(0, (def && def.def) || 0);
+    absorbed = Math.min(pool, raw);
+    if (def) def.def = pool - absorbed;
+    hpDmg = raw - absorbed;
+  } else {
+    // normal / charge / double / lethal / lifesteal / pre-only skills: block with rolled DP
+    absorbed = Math.min(Math.max(0, blocked || 0), raw);
+    hpDmg = Math.max(0, raw - Math.max(0, blocked || 0));
+  }
+  if (sk === 5) { // double
+    hpDmg *= 2;
+  }
+  return { hpDmg, absorbed, skill: sk, raw };
+}
+
 function doAttack(p, attacker, target, auto) {
   return new Promise(resolve => {
   if (!attacker || attacker.hp <= 0) { resolve(); return; }
@@ -7,6 +64,12 @@ function doAttack(p, attacker, target, auto) {
   if (!ok) { resolve(); return; }
   attacker.attacksLeft -= 1;
   attacker.canAttack = attacker.attacksLeft > 0;
+
+  // ON ATTACK START: weaken / petrify / confuse before rolls & damage
+  if (target.kind === "minion" && target.minion) {
+    applyAtkSkillOnStart(attacker, target.minion);
+  }
+
   const aRoll = rollCoins(attacker.atkC);
   const aAtk = Math.max(0, attacker.atk + aRoll.delta);
   const rows = [];
@@ -81,8 +144,25 @@ function doAttack(p, attacker, target, auto) {
     }
     window._pendingDef = defVal;
     window._pendingAtkDef = aDefVal;
-  } else { window._pendingDef = 0; window._pendingAtkDef = 0; }
-  log(`${attacker.name} 코인 공격 ${fmtC(attacker.atkC) || ""} → ${aAtk}`);
+  } else {
+    // hero target: still roll attacker DP (charge skill 4)
+    const aDefRoll = rollCoins(attacker.defC);
+    const aDefVal = Math.max(0, (attacker.def || 0) + aDefRoll.delta);
+    if (aDefRoll.flips && aDefRoll.flips.length) {
+      rows.push({
+        label: attacker.name + " 방어",
+        modLabel: fmtC(attacker.defC),
+        flips: aDefRoll.flips,
+        delta: aDefRoll.delta,
+        base: attacker.def || 0,
+        value: aDefVal
+      });
+    }
+    window._pendingDef = 0;
+    window._pendingAtkDef = aDefVal;
+  }
+  const skLabel = (typeof ATK_SKILL_LABEL !== "undefined" && ATK_SKILL_LABEL[atkSkillOf(attacker)]) || "";
+  log(`${attacker.name} 코인 공격 ${fmtC(attacker.atkC) || ""} → ${aAtk}` + (atkSkillOf(attacker) > 1 ? ` [${skLabel}]` : ""));
   showCoinResult("코인 배틀", rows, async () => {
     attacker._fxAtk = aAtk;
     if (target.kind === "minion" && def) def._fxAtk = dAtk;
@@ -92,33 +172,65 @@ function doAttack(p, attacker, target, auto) {
     if (target.kind === "hero") {
       const isMeHero = target.owner === meView().me;
       const defEl = Vfx.heroOf(isMeHero);
-      const crit = aAtk >= attacker.atk + 3;
-      await Vfx.attackSeq(atkEl, defEl, aAtk, crit);
-      dealHero(target.owner, aAtk);
+      const aDefVal = window._pendingAtkDef || 0;
+      const calc = calcAtkSkillHpDamage(attacker, aAtk, 0, aDefVal, null);
+      let hpDmg = calc.hpDmg;
+      const sk = calc.skill;
+      const crit = hpDmg >= attacker.atk + 3;
+      await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
+      if (sk === 6 && hpDmg >= 1) {
+        dealHero(target.owner, Math.max(hpDmg, target.owner.hp));
+      } else {
+        dealHero(target.owner, hpDmg);
+      }
+      if (sk === 7 && hpDmg > 0) {
+        const heal = Math.ceil(hpDmg / 2);
+        attacker.hp = Math.min(attacker.maxHp != null ? attacker.maxHp : attacker.hp + heal, attacker.hp + heal);
+        log(`${attacker.name} 흡혈 +${heal}`);
+      }
       render();
       await waitMs(420);
     } else {
       const blocked = window._pendingDef || 0;
       const backBlock = window._pendingAtkDef || 0;
-      const pierce = false; // pierce keyword disabled
-      const dmgIn = Math.max(0, aAtk - (pierce ? 0 : blocked));
-      const dmgBack = Math.max(0, dAtk - backBlock);
-      log(`${def.name} 방어 ${blocked} → 체력피해 ${dmgIn}`);
+      const aDefVal = window._pendingAtkDef || 0;
+      const calc = calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefVal, def);
+      let hpDmg = calc.hpDmg;
+      const sk = calc.skill;
+      log(`${def.name} 방어 ${blocked}` + (sk === 2 ? " (무시)" : sk === 3 ? ` (관통 흡수 ${calc.absorbed})` : "") + ` → 체력피해 ${hpDmg}`);
       const defEl = Vfx.elOf(def.uid);
-      const crit = dmgIn >= attacker.atk + 2;
-      await Vfx.attackSeq(atkEl, defEl, dmgIn, crit);
-      damageMinion(target.owner, def, dmgIn);
+      const crit = hpDmg >= attacker.atk + 2 || sk === 6;
+      await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
+
+      const hpBefore = def.hp;
+      if (sk === 6 && hpDmg >= 1) {
+        // lethal: any HP damage kills
+        damageMinion(target.owner, def, Math.max(hpDmg, def.hp));
+        log(`${attacker.name} 치명공격 → ${def.name} 즉사`);
+      } else {
+        damageMinion(target.owner, def, hpDmg);
+      }
+      const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
+      if (sk === 7 && hpDealt > 0 && attacker.hp > 0 && !attacker.dying) {
+        const heal = Math.ceil(hpDealt / 2);
+        attacker.hp = Math.min(attacker.maxHp != null ? attacker.maxHp : attacker.hp + heal, attacker.hp + heal);
+        log(`${attacker.name} 흡혈 +${heal}`);
+      }
       render();
       await waitMs(360);
       const survived = def && def.hp > 0 && !def.dying;
-      if (survived && dmgBack && attacker.hp > 0 && !attacker.dying) {
-        log(`${def.name} 반격`);
-        const atkNow = Vfx.elOf(attacker.uid);
-        const defNow = Vfx.elOf(def.uid);
-        await Vfx.parrySeq(defNow, atkNow, dmgBack);
-        damageMinion(p, attacker, dmgBack);
-        render();
-        await waitMs(360);
+      // Counterattack: normal formula only (no attacker specials on the reply)
+      if (survived && dAtk && attacker.hp > 0 && !attacker.dying) {
+        const dmgBack = Math.max(0, dAtk - backBlock);
+        if (dmgBack > 0) {
+          log(`${def.name} 반격`);
+          const atkNow = Vfx.elOf(attacker.uid);
+          const defNow = Vfx.elOf(def.uid);
+          await Vfx.parrySeq(defNow, atkNow, dmgBack);
+          damageMinion(p, attacker, dmgBack);
+          render();
+          await waitMs(360);
+        }
       } else if (!survived) {
         log(`${def.name} 격파 · 반격 없음`);
         const deadEl = Vfx.elOf(def.uid);
@@ -242,7 +354,7 @@ function aiTurn() {
     for (const card of plays) {
       let target = null;
       if (needsTarget(card)) {
-        const fx = card.type === "spell" ? card.spell : card.battlecry;
+        const fx = card.type === "spell" ? card.spell : null;
         const ts = validTargets(p, fx);
         if (!ts.length && fx.target) continue;
         target = pickAiTarget(p, fx, ts);
