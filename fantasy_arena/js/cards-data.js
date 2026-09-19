@@ -15,13 +15,13 @@ const TRIBES = [
 ];
 
 const TRIBE_ICONS = {
-  earth:"assets/img/icons/earth.jpg",
-  fire:"assets/img/icons/fire.jpg",
-  wind:"assets/img/icons/wind.jpg",
-  water:"assets/img/icons/water.jpg",
-  light:"assets/img/icons/light.jpg",
-  dark:"assets/img/icons/dark.jpg",
-  metal:"assets/img/frames/unit/metal.jpg"
+  earth:"assets/img/icons/earth.png",
+  fire:"assets/img/icons/fire.png",
+  wind:"assets/img/icons/wind.png",
+  water:"assets/img/icons/water.png",
+  light:"assets/img/icons/light.png",
+  dark:"assets/img/icons/dark.png",
+  metal:"assets/img/icons/metal.png"
 };
 const HUD_UI = {
   board:"assets/img/hud/board.jpg",
@@ -258,7 +258,7 @@ const ART_FOCUS = {
 
 
 const DECK_FRAMES = {
-  earth: "assets/img/frames/rarity/earth_minion_common.png",
+  earth: "assets/img/frames/unit/earth.png",
   fire: "assets/img/frames/unit/fire.jpg",
   wind: "assets/img/frames/unit/wind.jpg",
   water: "assets/img/frames/unit/water.jpg",
@@ -269,7 +269,7 @@ const DECK_FRAMES = {
 
 const SPELL_FRAMES = {
   earth: "assets/img/frames/rarity/earth_spell_common.png",
-  metal: "assets/img/frames/unit/metal.jpg",
+  metal: "assets/img/frames/spell/metal.webp",
   fire: "assets/img/frames/spell/fire.webp",
   wind: "assets/img/frames/spell/wind.webp",
   water: "assets/img/frames/spell/water.webp",

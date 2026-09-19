@@ -12,14 +12,15 @@
 
 # 전수
 | 파일 | 상태 |
-| unit/earth.jpg | 깨짐 8x12 → rarity PNG로 우회 |
+| unit/earth.png | rarity earth_minion_common 복사 (768x1152 RGBA) |
+| unit/earth.jpg | 구버전 검정매트 — DECK_FRAMES는 earth.png 사용 |
 | unit/* 나머지 | 900x1350 JPEG, 알파 없음 |
-| spell/earth | 없음 → earth_spell_common.png |
-| spell/metal | 없음 → metal unit 임시 |
+| spell/earth | earth_spell_common.png (rarity) |
+| spell/metal.webp | unit/metal → 768x1152, 흰매트/아트윈 펀치 |
 | rarity/earth_* | 768x1152 PNG OK |
-| icons/metal | 없음 → metal unit 임시 |
+| icons/*.png | 검정매트 펀치 PNG-24 (+ metal.png) |
 
 # 보강 계획 metal
 1. deck_metal_unit_{common,rare,heroic,legendary}.png 768x1152
 2. deck_metal_magic_* 동일
-3. icons/metal.png 정사각 엠블럼
+3. icons/metal.png ✅
