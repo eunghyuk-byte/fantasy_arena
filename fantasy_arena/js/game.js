@@ -109,23 +109,37 @@ function flyDrawCard() {
   ghost.className = "draw-ghost";
   const face = last && last.querySelector(".card-face");
   if (face && face.src) ghost.innerHTML = '<img src="'+face.src+'" alt="">';
-  const w = last ? b.width : 72;
-  const h = last ? b.height : 108;
-  ghost.style.cssText = "position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+w+"px;height:"+h+"px;z-index:120;pointer-events:none;transform-origin:center center;";
+  const endW = last ? b.width : 72;
+  const endH = last ? b.height : 108;
+  const startScale = Math.max(0.55, Math.min(a.width / endW, a.height / endH, 0.82));
+  const startLeft = a.left + a.width / 2 - endW / 2;
+  const startTop = a.top + a.height / 2 - endH / 2;
+  ghost.style.cssText = "position:fixed;left:"+startLeft+"px;top:"+startTop+"px;width:"+endW+"px;height:"+endH+"px;z-index:130;pointer-events:none;transform-origin:center center;will-change:transform;";
   document.body.appendChild(ghost);
-  const dx = (b.left + b.width/2) - (a.left + a.width/2);
-  const dy = (b.top + b.height/2) - (a.top + a.height/2);
+  const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
+  const dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+  const travel = Math.hypot(dx, dy);
+  const arcLift = Math.max(120, Math.min(200, travel * 0.28));
+  const peakY = dy * 0.22 - arcLift;
+  const midX = dx * 0.38;
+  const mid2X = dx * 0.78;
+  const mid2Y = dy * 0.7 - arcLift * 0.18;
   const anim = ghost.animate([
-    { transform: "translate(0,0) rotate(-18deg) scale(.72)", offset: 0 },
-    { transform: "translate("+(dx*0.45)+"px,"+(dy*0.35-90)+"px) rotate(12deg) scale(.92)", offset: 0.45 },
+    { transform: "translate(0,0) rotate(-24deg) scale("+startScale+")", offset: 0 },
+    { transform: "translate("+(midX)+"px,"+(peakY)+"px) rotate(10deg) scale("+Math.max(startScale, 0.9)+")", offset: 0.36 },
+    { transform: "translate("+(mid2X)+"px,"+(mid2Y)+"px) rotate(-8deg) scale(1.05)", offset: 0.7 },
+    { transform: "translate("+dx+"px,"+(dy - 8)+"px) rotate(4deg) scale(1.02)", offset: 0.9 },
     { transform: "translate("+dx+"px,"+dy+"px) rotate(0deg) scale(1)", offset: 1 }
-  ], { duration: 720, easing: "cubic-bezier(.2,.72,.12,1)", fill: "forwards" });
+  ], { duration: 1120, easing: "cubic-bezier(.18,.72,.1,1)", fill: "forwards" });
+  let finished = false;
   const done = () => {
+    if (finished) return;
+    finished = true;
     ghost.remove();
     if (last) last.style.opacity = "";
   };
   anim.onfinish = done;
-  setTimeout(done, 800);
+  setTimeout(done, 1250);
 }
 
 

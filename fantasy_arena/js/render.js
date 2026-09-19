@@ -455,7 +455,7 @@ function heroStrip(p, isMe, myTurn) {
   const icon = (typeof TRIBE_ICONS !== "undefined" && TRIBE_ICONS[p.hero.id]) || "";
   const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
   const nDeck = p.deck.length;
-  const layers = Math.min(6, Math.max(1, Math.ceil(nDeck / 5)));
+  const layers = Math.min(8, Math.max(1, nDeck ? Math.ceil(nDeck / 4) : 1));
   let stack = "";
   for (let i = 0; i < layers; i++) {
     stack += `<i class="pile-layer" style="--i:${i};background-image:url('${hud.deck || ""}')"></i>`;
