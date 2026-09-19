@@ -153,9 +153,7 @@ const CARDS = [
   { id:"a18", tribe:"water", name:"물의 지혜", cost:3, type:"spell", text:"카드 2장 뽑기", spell:{ type:"draw", value:2 } },
   { id:"a19", tribe:"water", name:"빙하수호", cost:5, type:"minion", atk:3, hp:7, text:"" },
   { id:"a20", tribe:"water", name:"조류술사", cost:4, type:"minion", atk:3, hp:5, text:"", atkC:-2, hpC:-3 , def:1, defC:0},
-
-
-  { id:"e21", tribe:"earth", name:"마초", cost:9, type:"minion", atk:9, hp:10, def:2, atkC:1, defC:2, hpC:1, rarity:"legendary", text:"" },
+  { id:"e21", tribe:"earth", name:"마초", cost:9, type:"minion", atk:8, hp:9, def:2, atkC:1, defC:1, hpC:2, rarity:"legendary", text:"" },
   { id:"e22", tribe:"earth", name:"김태인", cost:9, type:"minion", atk:8, hp:11, def:3, atkC:5, defC:5, hpC:-5, rarity:"heroic", text:"" },
   { id:"e23", tribe:"earth", name:"김아인", cost:8, type:"minion", atk:7, hp:8, def:3, atkC:1, defC:2, hpC:0, rarity:"heroic", text:"" },
   { id:"e24", tribe:"earth", name:"김규아", cost:7, type:"minion", atk:5, hp:8, def:2, atkC:0, defC:1, hpC:2, rarity:"heroic", text:"돌파공격", atkSkill:10 },
@@ -190,12 +188,11 @@ const CARDS = [
   { id:"e39", tribe:"earth", name:"석화", cost:3, type:"spell", rarity:"rare",
     text:"공 3 이하 적 하수인 공=0, 방+1", spell:{ type:"petrify" } },
   { id:"e40", tribe:"earth", name:"섬의파편", cost:1, type:"minion", token:true, atk:1, hp:2, def:0, atkC:0, defC:0, hpC:0, rarity:"common", text:"토큰" },
-
-  { id:"f21", tribe:"fire", name:"장비", cost:9, type:"minion", atk:12, hp:8, def:1, atkC:3, defC:0, hpC:-2, rarity:"legendary", text:"" },
-  { id:"n21", tribe:"wind", name:"조운", cost:9, type:"minion", atk:7, hp:9, def:4, atkC:0, defC:3, hpC:2, rarity:"legendary", text:"" },
-  { id:"a21", tribe:"water", name:"관우", cost:9, type:"minion", atk:8, hp:11, def:3, atkC:2, defC:1, hpC:0, rarity:"legendary", text:"" },
-  { id:"l21", tribe:"light", name:"황충", cost:9, type:"minion", atk:10, hp:7, def:0, atkC:-1, defC:-2, hpC:3, rarity:"legendary", text:"" },
-  { id:"d21", tribe:"dark", name:"여포", cost:9, type:"minion", atk:11, hp:6, def:5, atkC:4, defC:-1, hpC:-3, rarity:"legendary", text:"" },
+  { id:"f21", tribe:"fire", name:"장비", cost:9, type:"minion", atk:11, hp:6, def:1, atkC:-5, defC:0, hpC:-3, rarity:"legendary", text:"" },
+  { id:"n21", tribe:"wind", name:"조운", cost:9, type:"minion", atk:7, hp:7, def:5, atkC:1, defC:1, hpC:1, rarity:"legendary", text:"" },
+  { id:"a21", tribe:"water", name:"관우", cost:9, type:"minion", atk:7, hp:8, def:5, atkC:1, defC:2, hpC:1, rarity:"legendary", text:"" },
+  { id:"l21", tribe:"light", name:"황충", cost:9, type:"minion", atk:9, hp:6, def:1, atkC:2, defC:1, hpC:3, rarity:"legendary", text:"" },
+  { id:"d21", tribe:"dark", name:"여포", cost:9, type:"minion", atk:11, hp:9, def:4, atkC:5, defC:-4, hpC:-5, rarity:"legendary", text:"" },
 
 
   { id:"l1", tribe:"light", name:"빛나방", cost:1, type:"minion", atk:1, hp:2, def:0, atkC:1, defC:0, hpC:1, text:"" },
@@ -223,6 +220,32 @@ const CARDS = [
   { id:"d18", tribe:"dark", name:"파멸", cost:6, type:"spell", text:"적 전체 피해 2", spell:{ type:"aoe_all_enemy", value:2 } },
   { id:"d19", tribe:"dark", name:"리치", cost:8, type:"minion", atk:6, hp:8, def:2, atkC:2, defC:1, hpC:2, text:"" },
 
+
+  // --- Three Kingdoms 30 (SGZ30 v2) new minions ---
+  { id:"e41", tribe:"earth", name:"하후돈", cost:7, type:"minion", atk:4, hp:9, def:2, atkC:1, defC:0, hpC:2, rarity:"heroic", text:"" },
+  { id:"e42", tribe:"earth", name:"조조", cost:5, type:"minion", atk:3, hp:7, def:2, atkC:1, defC:1, hpC:2, rarity:"rare", text:"" },
+  { id:"e43", tribe:"earth", name:"순욱", cost:2, type:"minion", atk:1, hp:4, def:1, atkC:1, defC:0, hpC:2, rarity:"common", text:"" },
+  { id:"e44", tribe:"earth", name:"곽가", cost:4, type:"minion", atk:2, hp:5, def:1, atkC:0, defC:0, hpC:2, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"f22", tribe:"fire", name:"허저", cost:7, type:"minion", atk:7, hp:5, def:1, atkC:-3, defC:-2, hpC:-4, rarity:"heroic", text:"" },
+  { id:"f23", tribe:"fire", name:"문추", cost:5, type:"minion", atk:7, hp:3, def:0, atkC:-4, defC:-1, hpC:-2, rarity:"rare", text:"" },
+  { id:"f24", tribe:"fire", name:"가후", cost:4, type:"minion", atk:2, hp:2, def:0, atkC:-2, defC:0, hpC:-3, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"f25", tribe:"fire", name:"여몽", cost:3, type:"minion", atk:5, hp:2, def:0, atkC:-3, defC:-1, hpC:-2, rarity:"common", text:"" },
+  { id:"n22", tribe:"wind", name:"태사자", cost:6, type:"minion", atk:5, hp:5, def:4, atkC:1, defC:1, hpC:0, rarity:"heroic", text:"" },
+  { id:"n23", tribe:"wind", name:"안량", cost:5, type:"minion", atk:4, hp:4, def:3, atkC:1, defC:1, hpC:1, rarity:"rare", text:"" },
+  { id:"n24", tribe:"wind", name:"육손", cost:4, type:"minion", atk:2, hp:3, def:2, atkC:1, defC:1, hpC:0, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"n25", tribe:"wind", name:"손상향", cost:2, type:"minion", atk:2, hp:2, def:2, atkC:1, defC:0, hpC:1, rarity:"common", text:"" },
+  { id:"a22", tribe:"water", name:"손책", cost:7, type:"minion", atk:5, hp:5, def:4, atkC:1, defC:2, hpC:1, rarity:"heroic", text:"" },
+  { id:"a23", tribe:"water", name:"감녕", cost:5, type:"minion", atk:3, hp:3, def:4, atkC:1, defC:2, hpC:0, rarity:"rare", text:"" },
+  { id:"a24", tribe:"water", name:"주유", cost:4, type:"minion", atk:2, hp:3, def:3, atkC:0, defC:2, hpC:1, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"a25", tribe:"water", name:"손권", cost:3, type:"minion", atk:1, hp:3, def:3, atkC:0, defC:2, hpC:1, rarity:"common", text:"" },
+  { id:"l22", tribe:"light", name:"강유", cost:7, type:"minion", atk:5, hp:5, def:2, atkC:2, defC:1, hpC:2, rarity:"heroic", text:"" },
+  { id:"l23", tribe:"light", name:"유비", cost:4, type:"minion", atk:2, hp:3, def:1, atkC:1, defC:2, hpC:2, rarity:"rare", text:"" },
+  { id:"l24", tribe:"light", name:"제갈량", cost:5, type:"minion", atk:2, hp:3, def:1, atkC:1, defC:1, hpC:1, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"l25", tribe:"light", name:"법정", cost:2, type:"minion", atk:1, hp:2, def:0, atkC:1, defC:1, hpC:2, rarity:"common", text:"" },
+  { id:"d22", tribe:"dark", name:"장료", cost:6, type:"minion", atk:8, hp:7, def:3, atkC:5, defC:-2, hpC:-5, rarity:"heroic", text:"" },
+  { id:"d23", tribe:"dark", name:"초선", cost:2, type:"minion", atk:3, hp:4, def:2, atkC:5, defC:-3, hpC:-4, rarity:"common", text:"" },
+  { id:"d24", tribe:"dark", name:"원소", cost:4, type:"minion", atk:5, hp:5, def:3, atkC:-5, defC:4, hpC:3, rarity:"rare", text:"" },
+  { id:"d25", tribe:"dark", name:"사마의", cost:5, type:"minion", atk:2, hp:6, def:3, atkC:4, defC:-5, hpC:3, rarity:"rare", atkSkill:9, text:"전체공격" },
   { id:"coin", name:"동전", cost:0, type:"spell", text:"이번 턴 마나 +1", spell:{ type:"mana", value:1 }, token:true },
   { id:"recruit", name:"암석", cost:1, type:"minion", atk:1, hp:2, text:"영웅 능력", token:true, tribe:"earth", atkC:2, hpC:2 , def:0, defC:0},
 ];
@@ -245,7 +268,13 @@ const CARD_RACE = {
   a20:"기사", a21:"명장",
   l1:"벌레", l2:"짐승", l4:"기수", l7:"기사", l8:"기사", l10:"기사",
   l11:"짐승", l15:"거인", l17:"짐승", l21:"명장",
-  d1:"벌레", d2:"짐승", d6:"해골", d11:"짐승", d13:"기사", d19:"해골", d21:"명장"
+  d1:"벌레", d2:"짐승", d6:"해골", d11:"짐승", d13:"기사", d19:"해골", d21:"명장",
+  e41:"장수", e42:"명장", e43:"장수", e44:"장수",
+  f22:"장수", f23:"장수", f24:"장수", f25:"장수",
+  n22:"장수", n23:"장수", n24:"장수", n25:"장수",
+  a22:"장수", a23:"장수", a24:"장수", a25:"명장",
+  l22:"장수", l23:"명장", l24:"장수", l25:"장수",
+  d22:"장수", d23:"장수", d24:"명장", d25:"장수",
 };
 const RACE_LORE = [
   ["거인","바위·용암·심해처럼 큰 몸. 한 걸음이면 땅이 흔들린다."],
@@ -343,7 +372,7 @@ function pickFrameUrl(c, tribe) {
   if (c && c.type === "spell" && typeof SPELL_FRAMES !== "undefined") return SPELL_FRAMES[tribe.id] || SPELL_FRAMES.earth;
   return (typeof DECK_FRAMES !== "undefined" && (DECK_FRAMES[tribe.id] || DECK_FRAMES.earth)) || "";
 }
-const CARD_ART = {"coin":"assets/img/coins/plus.png","e25":"assets/img/art/e25.jpg","e26":"assets/img/art/e26.jpg","e27":"assets/img/art/e27.jpg","e28":"assets/img/art/e28.jpg","e29":"assets/img/art/e29.jpg","e30":"assets/img/art/e30.jpg","e31":"assets/img/art/e31.jpg","e32":"assets/img/art/e32.jpg","e33":"assets/img/art/e33.jpg","e34":"assets/img/art/e34.jpg","e35":"assets/img/art/e35.jpg","e36":"assets/img/art/e36.jpg","e37":"assets/img/art/e37.jpg","e38":"assets/img/art/e38.jpg","e39":"assets/img/art/e39.jpg","e40":"assets/img/art/e28.jpg","e24":"assets/img/art/e24.jpg","e23":"assets/img/art/e23.jpg","e22":"assets/img/art/e22.jpg","d18":"assets/img/art/d18.jpg","d14":"assets/img/art/d14.jpg","d8":"assets/img/art/d8.jpg","d3":"assets/img/art/d3.jpg","l12":"assets/img/art/l12.jpg","l18":"assets/img/art/l18.jpg","l9":"assets/img/art/l9.jpg","l5":"assets/img/art/l5.jpg","l3":"assets/img/art/l3.jpg","a18":"assets/img/art/a18.jpg","a14":"assets/img/art/a14.jpg","a12":"assets/img/art/a12.jpg","a11":"assets/img/art/a11.jpg","a8":"assets/img/art/a8.jpg","a5":"assets/img/art/a5.jpg","a3":"assets/img/art/a3.jpg","n18":"assets/img/art/n18.jpg","n14":"assets/img/art/n14.jpg","n12":"assets/img/art/n12.jpg","n10":"assets/img/art/n10.jpg","n8":"assets/img/art/n8.jpg","n6":"assets/img/art/n6.jpg","n3":"assets/img/art/n3.jpg","f18":"assets/img/art/f18.jpg","f16":"assets/img/art/f16.jpg","f13":"assets/img/art/f13.jpg","f12":"assets/img/art/f12.jpg","f9":"assets/img/art/f9.jpg","f6":"assets/img/art/f6.jpg","f3":"assets/img/art/f3.jpg","e21":"assets/img/art/e21.jpg","a21":"assets/img/art/a21.jpg","f21":"assets/img/art/f21.jpg","n21":"assets/img/art/n21.jpg","l21":"assets/img/art/l21.jpg","d21":"assets/img/art/d21.jpg","e17":"assets/img/art/e17.jpg","e5":"assets/img/art/e5.jpg","n2":"assets/img/art/n2.jpg","a2":"assets/img/art/a2.jpg","f14":"assets/img/art/f14.jpg","l1":"assets/img/art/l1.jpg","l2":"assets/img/art/l2.jpg","l4":"assets/img/art/l4.jpg","l7":"assets/img/art/l7.jpg","l10":"assets/img/art/l10.jpg","l11":"assets/img/art/l11.jpg","l15":"assets/img/art/l15.jpg","l17":"assets/img/art/l17.jpg","d1":"assets/img/art/d1.jpg","d2":"assets/img/art/d2.jpg","d6":"assets/img/art/d6.jpg","d11":"assets/img/art/d11.jpg","d13":"assets/img/art/d13.jpg","d19":"assets/img/art/d19.jpg","e1":"assets/img/art/e1.jpg","e2":"assets/img/art/e2.jpg","e3":"assets/img/art/e3.jpg","e4":"assets/img/art/e4.jpg","e6":"assets/img/art/e6.jpg","e7":"assets/img/art/e7.jpg","e8":"assets/img/art/e8.jpg","e9":"assets/img/art/e9.jpg","e10":"assets/img/art/e10.jpg","e11":"assets/img/art/e11.jpg","e12":"assets/img/art/e12.jpg","e13":"assets/img/art/e13.jpg","e14":"assets/img/art/e14.jpg","e15":"assets/img/art/e15.jpg","e16":"assets/img/art/e16.jpg","e18":"assets/img/art/e18.jpg","e19":"assets/img/art/e19.jpg","e20":"assets/img/art/e20.jpg","f1":"assets/img/art/f1.jpg","f2":"assets/img/art/f2.jpg","f4":"assets/img/art/f4.jpg","f7":"assets/img/art/f7.jpg","f10":"assets/img/art/f10.jpg","f11":"assets/img/art/f11.jpg","f19":"assets/img/art/f19.jpg","f20":"assets/img/art/f20.jpg","n1":"assets/img/art/n1.jpg","n19":"assets/img/art/n19.jpg","a1":"assets/img/art/a1.jpg","a15":"assets/img/art/a15.jpg","a17":"assets/img/art/a17.jpg",};
+const CARD_ART = {"e41":"assets/img/art/e21.jpg","e42":"assets/img/art/e21.jpg","e43":"assets/img/art/e21.jpg","e44":"assets/img/art/e21.jpg","f22":"assets/img/art/f21.jpg","f23":"assets/img/art/f21.jpg","f24":"assets/img/art/f21.jpg","f25":"assets/img/art/f21.jpg","n22":"assets/img/art/n21.jpg","n23":"assets/img/art/n21.jpg","n24":"assets/img/art/n21.jpg","n25":"assets/img/art/n21.jpg","a22":"assets/img/art/a21.jpg","a23":"assets/img/art/a21.jpg","a24":"assets/img/art/a21.jpg","a25":"assets/img/art/a21.jpg","l22":"assets/img/art/l21.jpg","l23":"assets/img/art/l21.jpg","l24":"assets/img/art/l21.jpg","l25":"assets/img/art/l21.jpg","d22":"assets/img/art/d21.jpg","d23":"assets/img/art/d21.jpg","d24":"assets/img/art/d21.jpg","d25":"assets/img/art/d21.jpg","coin":"assets/img/coins/plus.png","e25":"assets/img/art/e25.jpg","e26":"assets/img/art/e26.jpg","e27":"assets/img/art/e27.jpg","e28":"assets/img/art/e28.jpg","e29":"assets/img/art/e29.jpg","e30":"assets/img/art/e30.jpg","e31":"assets/img/art/e31.jpg","e32":"assets/img/art/e32.jpg","e33":"assets/img/art/e33.jpg","e34":"assets/img/art/e34.jpg","e35":"assets/img/art/e35.jpg","e36":"assets/img/art/e36.jpg","e37":"assets/img/art/e37.jpg","e38":"assets/img/art/e38.jpg","e39":"assets/img/art/e39.jpg","e40":"assets/img/art/e28.jpg","e24":"assets/img/art/e24.jpg","e23":"assets/img/art/e23.jpg","e22":"assets/img/art/e22.jpg","d18":"assets/img/art/d18.jpg","d14":"assets/img/art/d14.jpg","d8":"assets/img/art/d8.jpg","d3":"assets/img/art/d3.jpg","l12":"assets/img/art/l12.jpg","l18":"assets/img/art/l18.jpg","l9":"assets/img/art/l9.jpg","l5":"assets/img/art/l5.jpg","l3":"assets/img/art/l3.jpg","a18":"assets/img/art/a18.jpg","a14":"assets/img/art/a14.jpg","a12":"assets/img/art/a12.jpg","a11":"assets/img/art/a11.jpg","a8":"assets/img/art/a8.jpg","a5":"assets/img/art/a5.jpg","a3":"assets/img/art/a3.jpg","n18":"assets/img/art/n18.jpg","n14":"assets/img/art/n14.jpg","n12":"assets/img/art/n12.jpg","n10":"assets/img/art/n10.jpg","n8":"assets/img/art/n8.jpg","n6":"assets/img/art/n6.jpg","n3":"assets/img/art/n3.jpg","f18":"assets/img/art/f18.jpg","f16":"assets/img/art/f16.jpg","f13":"assets/img/art/f13.jpg","f12":"assets/img/art/f12.jpg","f9":"assets/img/art/f9.jpg","f6":"assets/img/art/f6.jpg","f3":"assets/img/art/f3.jpg","e21":"assets/img/art/e21.jpg","a21":"assets/img/art/a21.jpg","f21":"assets/img/art/f21.jpg","n21":"assets/img/art/n21.jpg","l21":"assets/img/art/l21.jpg","d21":"assets/img/art/d21.jpg","e17":"assets/img/art/e17.jpg","e5":"assets/img/art/e5.jpg","n2":"assets/img/art/n2.jpg","a2":"assets/img/art/a2.jpg","f14":"assets/img/art/f14.jpg","l1":"assets/img/art/l1.jpg","l2":"assets/img/art/l2.jpg","l4":"assets/img/art/l4.jpg","l7":"assets/img/art/l7.jpg","l10":"assets/img/art/l10.jpg","l11":"assets/img/art/l11.jpg","l15":"assets/img/art/l15.jpg","l17":"assets/img/art/l17.jpg","d1":"assets/img/art/d1.jpg","d2":"assets/img/art/d2.jpg","d6":"assets/img/art/d6.jpg","d11":"assets/img/art/d11.jpg","d13":"assets/img/art/d13.jpg","d19":"assets/img/art/d19.jpg","e1":"assets/img/art/e1.jpg","e2":"assets/img/art/e2.jpg","e3":"assets/img/art/e3.jpg","e4":"assets/img/art/e4.jpg","e6":"assets/img/art/e6.jpg","e7":"assets/img/art/e7.jpg","e8":"assets/img/art/e8.jpg","e9":"assets/img/art/e9.jpg","e10":"assets/img/art/e10.jpg","e11":"assets/img/art/e11.jpg","e12":"assets/img/art/e12.jpg","e13":"assets/img/art/e13.jpg","e14":"assets/img/art/e14.jpg","e15":"assets/img/art/e15.jpg","e16":"assets/img/art/e16.jpg","e18":"assets/img/art/e18.jpg","e19":"assets/img/art/e19.jpg","e20":"assets/img/art/e20.jpg","f1":"assets/img/art/f1.jpg","f2":"assets/img/art/f2.jpg","f4":"assets/img/art/f4.jpg","f7":"assets/img/art/f7.jpg","f10":"assets/img/art/f10.jpg","f11":"assets/img/art/f11.jpg","f19":"assets/img/art/f19.jpg","f20":"assets/img/art/f20.jpg","n1":"assets/img/art/n1.jpg","n19":"assets/img/art/n19.jpg","a1":"assets/img/art/a1.jpg","a15":"assets/img/art/a15.jpg","a17":"assets/img/art/a17.jpg",};
 
 let selectedHero = TRIBES.find(x => x.open);
 let state = null;
@@ -480,5 +509,29 @@ const CARD_LORE = {
   d14:"적의 숨결을 빨아 자기 맥으로 넣는 주문. 한쪽이 옅어지면 다른 쪽이 진해진다.",
   d18:"이름이 파멸인 밤. 하늘이 닫히고, 남은 것은 발소리뿐이다.",
   d19:"영혼을 촛불처럼 켜 두는 리치. 지팡이의 해골이 웃으면 전장에 겨울이 온다.",
-  d21:"방천화극을 든 채 맹세를 갈아탄 무신. 창과 갑옷은 최상이나 마음은 얇다. 암흑은 힘을 빌려주고 충성은 빌려주지 않는다."
+  d21:"방천화극을 든 채 맹세를 갈아탄 무신. 창과 갑옷은 최상이나 마음은 얇다. 암흑은 힘을 빌려주고 충성은 빌려주지 않는다.",
+  e41:"한쪽 눈을 잃은 뒤에도 창을 놓지 않은 맹장. 피가 땅에 떨어질수록 발걸음은 더 무거워지고, 적은 그 무게에 깔린다.",
+  e42:"난세를 바둑판으로 읽은 군주. 말 한마디가 성벽을 세우고, 침묵 하나가 적의 보급을 끊는다.",
+  e43:"붓으로 전장을 고르는 참모. 창보다 먼저 도착하는 것은 그의 편지다.",
+  e44:"독 같은 지략으로 전선을 지우는 책사. 한 번의 계책이 적진 전체를 흔든다.",
+  f22:"호분. 주먹이 불덩이고 갑옷은 장식에 가깝다. 맞으면 뼈가 먼저 탄다.",
+  f23:"창끝이 불꽃인 돌격장. 멈추는 법이 없어 적진이 재가 될 때까지 달린다.",
+  f24:"독과 불을 같은 붓으로 쓰는 모사. 계책이 터지면 아군도 뜨겁고 적도 타버린다.",
+  f25:"책을 태워 칼이 된 장수. 한때의 학문이 지금의 화염이다.",
+  n22:"동오의 창기. 균형 잡힌 창과 방패로 바람처럼 서되, 흔들리지는 않는다.",
+  n23:"하북의 호걸. 공·방·체가 한 줄로 선 창법. 과장 없는 한 수가 치명이다.",
+  n24:"젊은 대도독. 작은 불씨로 적진 전체를 태우는 전체의 바람.",
+  n25:"활시위에 바람을 매는 여장수. 화살보다 먼저 깃발이 기울어진다.",
+  a22:"소패왕. 물결처럼 밀고 들어가도 방패는 강물처럼 남는다.",
+  a23:"강동의 해적 장수. 갑옷보다 배짱이 두껍고, 창보다 물길이 길다.",
+  a24:"적벽을 설계한 도독. 한 번의 전체 공격이 강 위의 불길을 부른다.",
+  a25:"강동을 지키는 군주. 칼보다 방패를 먼저 고르는 물의 왕.",
+  l22:"촉의 후계 무인. 낮은 출발을 빛의 코인으로 끌어올린다.",
+  l23:"인자한 군주. 베이스는 약해도 플러스만 쌓이면 전장이 밝아진다.",
+  l24:"와룡. 부채 한 자락이 적진 전체를 가른다. 빛은 숨기지 않는다.",
+  l25:"법과 계책의 씨앗. 작은 빛이 나중에 큰 해가 된다.",
+  d22:"합비를 공포로 물들인 장수. 강한 몸으로 도박 판에 올라 창을 ±5로 흔든다.",
+  d23:"미모가 함정인 무희. 베이스는 두툼하나 코인이 운명을 가른다.",
+  d24:"사백만을 말한 군주. 강한 진영을 깔고도 한 번의 동전으로 무너질 수 있다.",
+  d25:"죽은 척하며 판을 뒤집는 책사. 전체 공격은 약해도 도박 코인이 전장을 기울인다.",
 };

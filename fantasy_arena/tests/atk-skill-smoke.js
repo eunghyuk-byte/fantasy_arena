@@ -40,11 +40,14 @@ for (const c of earth) {
   if (sk >= 2) (bySkill[sk] = bySkill[sk] || []).push(`${c.id}:${c.name}:atk${c.atk}`);
 }
 for (let i = 2; i <= 10; i++) assert(bySkill[i] && bySkill[i].length >= 1, `skill ${i} ≥1 earth (${ctx.ATK_SKILL_LABEL[i]})`);
-assert(ctx.CARDS.filter(c => c.tribe !== 'earth' && (c.atkSkill | 0) >= 2).length === 0, 'earth-only');
+// Skills 2–8,10 remain earth-only; skill 9(전체공격) allowed on SGZ strategists too
+assert(ctx.CARDS.filter(c => c.tribe !== 'earth' && (c.atkSkill | 0) >= 2 && (c.atkSkill | 0) !== 9).length === 0, 'earth-only (non-cleave)');
+const cleaveIds = new Set(['e20','e44','f24','n24','a24','l24','d25']);
+assert(ctx.CARDS.filter(c => c.atkSkill === 9).every(c => cleaveIds.has(c.id) || c.tribe === 'earth'), 'cleave allowlist');
 
-// 전체공격 hard ATK nerf gate
-for (const c of earth.filter(c => c.atkSkill === 9)) {
-  assert(c.atk >= 1 && c.atk <= 3, `cleave ${c.id} atk ${c.atk} in 1–3`);
+// 전체공격 hard ATK nerf gate (1–2)
+for (const c of ctx.CARDS.filter(c => c.atkSkill === 9)) {
+  assert(c.atk >= 1 && c.atk <= 2, `cleave ${c.id} atk ${c.atk} in 1–2`);
   console.log('CLEAVE:', c.id, c.name, 'atk=' + c.atk, 'cost=' + c.cost);
 }
 
