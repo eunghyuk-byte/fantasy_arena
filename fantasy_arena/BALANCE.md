@@ -1,6 +1,7 @@
 # Fantasy Arena · Attribute Balance
 
 > LOCKED identities — apply to fantasy core + SGZ30.
+> 방코인≤기본방 (방 최하0).
 
 | Attribute | Identity | Coins | Tradeoff |
 |-----------|----------|-------|----------|
