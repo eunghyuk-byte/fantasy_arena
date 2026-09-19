@@ -122,6 +122,11 @@ function doAttack(p, attacker, target, auto) {
   let dAtk = 0, dRoll = { flips: [], delta: 0 }, def = null;
   if (target.kind === "minion") {
     def = target.minion;
+    // 광역(9): counter coin / primary = board front (first living), not necessarily click target
+    if (sk0 === 9) {
+      const front = opponent(p).board.find(m => m.hp > 0 && !m.dying);
+      if (front) def = front;
+    }
     dRoll = rollCoins(def.atkC);
     dAtk = Math.max(0, def.atk + dRoll.delta);
     if (dRoll.flips && dRoll.flips.length) {
@@ -209,7 +214,7 @@ function doAttack(p, attacker, target, auto) {
     const sk = atkSkillOf(attacker);
     const foe = opponent(p);
 
-    // —— 9 광역공격: one shared roll → all enemy board minions (heroes excluded) ——
+    // —— 9 광역공격: one shared roll → all enemy board minions (heroes excluded); counter = front only ——
     if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
       const victims = foe.board.filter(m => m.hp > 0 && !m.dying).slice();
       log(`${attacker.name} 광역공격 → 적 하수인 ${victims.length}체`);
@@ -234,6 +239,23 @@ function doAttack(p, attacker, target, auto) {
       }
       if (totalDealt > 0 && attacker.hp > 0 && !attacker.dying && sk === 6) {
         /* cleave cards are skill 9 only; lifesteal N/A */
+      }
+      // Counter: only primary/front (first in board order hit). Other damaged minions do NOT counter.
+      const primary = victims[0];
+      const primarySurvived = primary && primary.hp > 0 && !primary.dying;
+      if (primarySurvived && dAtk && attacker.hp > 0 && !attacker.dying) {
+        const dmgBack = Math.max(0, dAtk - aDefVal);
+        if (dmgBack > 0) {
+          log(`${primary.name} 반격`);
+          const atkNow = Vfx.elOf(attacker.uid);
+          const defNow = Vfx.elOf(primary.uid);
+          await Vfx.parrySeq(defNow, atkNow, dmgBack);
+          damageMinion(p, attacker, dmgBack);
+          render();
+          await waitMs(360);
+        }
+      } else if (primary && !primarySurvived) {
+        log(`${primary.name} 격파 · 반격 없음`);
       }
       render();
       await waitMs(360);
