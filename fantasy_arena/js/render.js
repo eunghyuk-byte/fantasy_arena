@@ -42,7 +42,7 @@ function render() {
   const nHand = handEls.length;
   handEls.forEach((el, i) => {
     const t = nHand <= 1 ? 0 : (i - (nHand - 1) / 2);
-    el.style.transform = "rotate(" + (t * 4.2) + "deg) translateY(" + (Math.abs(t) * 8) + "px)";
+    el.style.transform = "rotate(" + (t * 3.2) + "deg) translateY(" + (Math.abs(t) * 6) + "px)";
     el.style.zIndex = String(10 + i);
     bindHandCard(el, me.hand[i]);
   });
@@ -398,9 +398,11 @@ function layoutHandFan() {
   const n = cards.length;
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
-    el.style.transform = `translateY(${Math.abs(t)*8}px) rotate(${t*4.2}deg)`;
-    el.style.zIndex = String(20 + i);
-    el.style.marginLeft = i ? "-42%" : "0";
+    el.style.transform = `translateY(${Math.abs(t)*6}px) rotate(${t*3.2}deg)`;
+    el.style.zIndex = String(10 + i);
+    // Spread fan: ~5% width overlap (CSS !important is source of truth; keep inline in sync)
+    const w = el.getBoundingClientRect().width || el.offsetWidth || 80;
+    el.style.setProperty("margin-left", i ? Math.round(-w * 0.05) + "px" : "0", "important");
   });
 }
 

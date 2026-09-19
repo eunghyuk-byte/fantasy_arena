@@ -1243,7 +1243,7 @@
     z-index: 2;
   }
   #game.active .my-hand .card {
-    margin-left: calc(min(98%, 34cqh) * -0.42) !important;
+    margin-left: calc(min(120%, 38cqh) * 0.66 * -0.05) !important;
   }
   #game.active .opp-hand .back {
     margin-left: -18px !important;
@@ -3416,8 +3416,8 @@ html, body {
   --frame-inset-x: max(44px, 15.5%);
   --hud-col: clamp(72px, 12%, 110px);
   --board-gap: clamp(3px, 0.55vw, 8px);
-  --line-gap: clamp(7px, 1.5%, 12px);
-  --slot-fill: 0.70;
+  --line-gap: clamp(18px, 3.8%, 32px);
+  --slot-fill: 0.88;
 }
 
 #game.active .col-hud {
@@ -3503,8 +3503,8 @@ html, body {
     --frame-inset-bottom: 19.5%;
     --frame-inset-x: max(40px, 15.5%);
     --hud-col: clamp(68px, 13%, 96px);
-    --slot-fill: 0.72;
-    --line-gap: clamp(6px, 1.4%, 10px);
+    --slot-fill: 0.90;
+    --line-gap: clamp(14px, 3.5%, 24px);
   }
 }
 
@@ -3597,4 +3597,101 @@ html, body {
 #game.active .my-hand .play-glow,
 #game.active #myHand .play-glow {
   display: none !important;
+}
+
+
+/* ===== FINAL polish: hand fan spread + line-gap + HUD End Turn above layers ===== */
+#game.active {
+  --line-gap: clamp(18px, 3.8%, 32px);
+  --slot-fill: 0.88;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  #game.active {
+    --line-gap: clamp(14px, 3.5%, 24px);
+    --slot-fill: 0.90;
+  }
+}
+
+/* Keep hand cards in their stacking context so they cannot cover HUD buttons */
+#game.active .col-main {
+  position: relative !important;
+  z-index: 1 !important;
+  isolation: isolate !important;
+}
+
+/* End Turn / Give Up must stay fully visible and clickable above board/hand */
+#game.active .col-hud {
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  z-index: 50 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+#game.active .col-hud .side,
+#game.active .col-hud .hero-strip,
+#game.active #myStrip,
+#game.active #oppStrip {
+  position: relative !important;
+  z-index: 51 !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+#game.active #myStrip {
+  margin-top: auto !important;
+  padding-bottom: 8px !important; /* was 96px — clipped End Turn under overflow */
+  justify-content: flex-end !important;
+}
+#game.active .col-hud .end-btn,
+#game.active .col-hud #endBtn,
+#game.active .col-hud .give-btn,
+#game.active .col-hud #giveBtn {
+  position: relative !important;
+  z-index: 52 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Hand fan: more horizontal spread, large cards, no yellow border boxes */
+#game.active .my-hand,
+#game.active #myHand {
+  z-index: 6 !important;
+  padding-right: calc(var(--hud-col, 96px) + 12px) !important;
+  padding-left: 4% !important;
+  justify-content: center !important;
+}
+#game.active .my-hand .card,
+#game.active #myHand .card,
+#game.active .my-hand .card.playable,
+#game.active #myHand .card.playable {
+  height: min(120%, 38cqh) !important;
+  max-height: 38cqh !important;
+  width: calc(min(120%, 38cqh) * 0.66) !important;
+  max-width: calc(min(120%, 38cqh) * 0.66) !important;
+  aspect-ratio: 0.66 / 1 !important;
+  margin-left: calc(min(120%, 38cqh) * 0.66 * -0.05) !important;
+  outline: none !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: 0 12px 20px rgba(0,0,0,.4) !important;
+  flex: 0 0 auto !important;
+}
+#game.active .my-hand .card:first-child,
+#game.active #myHand .card:first-child {
+  margin-left: 0 !important;
+}
+
+#game.active .board.opp,
+#game.active #oppBoard {
+  padding-bottom: var(--line-gap) !important;
+}
+#game.active #myBoard {
+  padding-top: var(--line-gap) !important;
 }
