@@ -1,0 +1,146 @@
+{
+  "results": {
+    "A_title": true,
+    "A_no_runestone_ui": true,
+    "E_help_10": true,
+    "E_help_missing": [],
+    "E_no_banned": true,
+    "heroes_count": 6,
+    "game_loaded": true,
+    "B_max_board": true,
+    "C_max_hand": true,
+    "D_end_btn": true,
+    "F_earth_skills": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "F_earth_2_10": true,
+    "G_sgz": [
+      "e21:마초:undefined",
+      "f21:장비:undefined",
+      "n21:조운:undefined",
+      "a21:관우:undefined",
+      "l21:황충:undefined",
+      "d21:여포:undefined",
+      "e44:곽가:9",
+      "f24:가후:9",
+      "n24:육손:9",
+      "a24:주유:9",
+      "l24:제갈량:9",
+      "d25:사마의:9"
+    ],
+    "G_sgz_ok": true,
+    "A_ingame_no_runestone": true,
+    "board_info": {
+      "maxBoard": 5,
+      "maxHand": 10,
+      "myBoardKids": 5,
+      "oppBoardKids": 5,
+      "mySlots": 5,
+      "endBtn": true,
+      "endVisible": true,
+      "endDisabled": false,
+      "handCount": 4,
+      "titleStill": "판타지 아레나",
+      "sgzInCards": [
+        "e21:마초:undefined",
+        "f21:장비:undefined",
+        "n21:조운:undefined",
+        "a21:관우:undefined",
+        "l21:황충:undefined",
+        "d21:여포:undefined",
+        "e44:곽가:9",
+        "f24:가후:9",
+        "n24:육손:9",
+        "a24:주유:9",
+        "l24:제갈량:9",
+        "d25:사마의:9"
+      ],
+      "earthSkills": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "runestoneInDom": false
+    },
+    "C_hand": {
+      "n": 4,
+      "styles": [
+        {
+          "ml": "0px",
+          "border": "0px none rgb(244, 234, 210)",
+          "outline": "rgb(244, 234, 210) none 3px",
+          "boxShadow": "rgba(0, 0, 0, 0.4) 0px 12px 20px 0px"
+        },
+        {
+          "ml": "-118px",
+          "border": "0px none rgb(244, 234, 210)",
+          "outline": "rgb(244, 234, 210) none 3px",
+          "boxShadow": "rgba(0, 0, 0, 0.4) 0px 12px 20px 0px"
+        },
+        {
+          "ml": "-118px",
+          "border": "0px none rgb(244, 234, 210)",
+          "outline": "rgb(244, 234, 210) none 3px",
+          "boxShadow": "rgba(0, 0, 0, 0.4) 0px 12px 20px 0px"
+        }
+      ],
+      "faceBorder": "0px none rgb(244, 234, 210)",
+      "faceOutline": "rgb(244, 234, 210) none 3px",
+      "boardInside": true,
+      "boardW": 1200,
+      "boardH": 274.5
+    },
+    "C_hand_ok": true,
+    "E_peek_text": "",
+    "E_peek": true,
+    "K_force": "e11:1",
+    "K_dbl_before_after": {
+      "hand": [
+        5,
+        4
+      ]
+    },
+    "K_dblclick": true,
+    "D_end_clicked": true,
+    "J_audio": {
+      "bgm": true,
+      "sfx": true,
+      "battle": true
+    },
+    "J_no_syntax": true,
+    "G_pool_has_곽가": false,
+    "G_pool_has_마초": false,
+    "G_pool_has_제갈": true,
+    "G_names": [
+      "마초:9:8:1",
+      "장비:9:11:1",
+      "조운:9:7:1",
+      "관우:9:7:1",
+      "황충:9:9:1",
+      "여포:9:11:1",
+      "곽가:4:2:9",
+      "가후:4:2:9",
+      "육손:4:2:9",
+      "주유:4:2:9",
+      "제갈량:5:2:9",
+      "사마의:5:2:9"
+    ],
+    "G_전체_low_atk": true
+  },
+  "page_errors": [],
+  "console_err": []
+}
