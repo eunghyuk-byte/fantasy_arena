@@ -2526,3 +2526,84 @@ html, body {
   display: block;
   pointer-events: none;
 }
+
+/* ===== FINAL: keep battlefield minions inside ornate board frame ===== */
+.board,
+#myBoard,
+#oppBoard {
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  /* Safe inset so first/last card clear gold/wood frame on mobile landscape */
+  padding-left: max(52px, 16%) !important;
+  padding-right: max(52px, 16%) !important;
+  padding-top: max(8px, 2%) !important;
+  padding-bottom: max(8px, 2%) !important;
+  /* Cap slot size so 6 cards + gaps fit INSIDE content box */
+  --slot-h: clamp(96px, 26cqh, 168px) !important;
+  --slot-w: min(
+    calc(var(--slot-h) * 0.66),
+    calc((100% - 24%) / 6.5)
+  ) !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: clamp(4px, 0.7cqi, 10px) !important;
+}
+
+.board .slot.empty,
+#myBoard .slot.empty,
+#oppBoard .slot.empty {
+  /* A3: reserve slot width (don't collapse to 0) so packed cards stay in parchment */
+  visibility: hidden !important;
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+.board .slot.filled,
+#myBoard .slot.filled,
+#oppBoard .slot.filled {
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.board .minion,
+#myBoard .minion,
+#oppBoard .minion,
+.board .slot .minion,
+.slot.filled .minion,
+.minion {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+
+.board .minion .card-face,
+#myBoard .minion .card-face,
+#oppBoard .minion .card-face,
+.minion .card-face {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  margin: 0 !important;
+  display: block !important;
+}
