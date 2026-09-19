@@ -2871,3 +2871,232 @@ html, body {
   border: none !important;
   box-shadow: none !important;
 }
+
+/* ===== FINAL OVERRIDE: center six-card rows; restore hand card size ===== */
+/* Parchment (#game / boardBg) is full-bleed; HUD was a grid column that
+   left-shifted col-main vs the art. Overlay HUD so col-main = parchment width. */
+#game.active {
+  --board-gap: clamp(4px, 0.7vw, 10px);
+  --frame-inset-x: max(40px, 6%);
+  --hud-col: clamp(76px, 10cqi, 120px);
+  --hand-card-h: min(120%, 38cqh);
+}
+#game.active .playfield {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+#game.active .col-main {
+  width: 100% !important;
+  max-width: 100% !important;
+  grid-column: 1 !important;
+  /* Equal opp/my boards fill parchment; hand cards may overflow row */
+  grid-template-rows: 5% 37% 37% 19% 2% !important;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  #game.active .col-main {
+    grid-template-rows: 4% 37% 37% 20% 2% !important;
+  }
+}
+#game.active .col-hud {
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: var(--hud-col) !important;
+  max-width: 22% !important;
+  z-index: 8 !important;
+  pointer-events: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* Six-across snap: center strip in VISIBLE parchment (left of HUD overlay).
+   Extra padding-right reserves HUD column so strip mid == visible mid. */
+.board,
+#myBoard,
+#oppBoard {
+  container-type: inline-size;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  /* Centered 6-slot strip (Hearthstone): empty slots keep width → L→R within strip */
+  justify-content: center !important;
+  gap: var(--board-gap, clamp(4px, 0.7vw, 10px)) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  --board-gap: clamp(4px, 0.7vw, 10px);
+  --frame-inset-x: max(40px, 6%);
+  --hud-col: clamp(76px, 10cqi, 120px);
+  padding-left: var(--frame-inset-x) !important;
+  padding-right: calc(var(--frame-inset-x) + var(--hud-col)) !important;
+  padding-top: max(4px, 1.2%) !important;
+  padding-bottom: max(4px, 1.2%) !important;
+  /* cqi = content box after padding → 6 slots fill visible band */
+  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-h: min(calc(var(--slot-w) / 0.66), calc(100% - 8px)) !important;
+}
+/* Propagate fitted size to HUD/hero (siblings of boards) */
+#game.active,
+#game.active .playfield,
+#game.active .col-main,
+#game.active .col-hud {
+  --board-gap: clamp(4px, 0.7vw, 10px);
+  --frame-inset-x: max(40px, 6%);
+  --hud-col: clamp(76px, 10cqi, 120px);
+  /* Visible content ≈ col-main - left inset - (right inset + hud) */
+  --slot-w: calc((100cqi - 2 * var(--frame-inset-x) - var(--hud-col) - 5 * var(--board-gap)) / 6) !important;
+  --slot-h: calc(var(--slot-w) / 0.66) !important;
+}
+.board.opp,
+#oppBoard {
+  /* Mirror around divider: opp sits on bottom of its half */
+  align-items: flex-end !important;
+}
+#myBoard {
+  /* Mirror around divider: mine sits on top of its half */
+  align-items: flex-start !important;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .board, #myBoard, #oppBoard {
+    padding-top: max(2px, 1%) !important;
+    padding-bottom: max(2px, 1%) !important;
+  }
+}
+
+.board .slot.empty,
+#myBoard .slot.empty,
+#oppBoard .slot.empty {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+.board .slot.filled,
+#myBoard .slot.filled,
+#oppBoard .slot.filled,
+.board .slot:not(.empty),
+#myBoard .slot:not(.empty),
+#oppBoard .slot:not(.empty) {
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+.board .minion,
+#myBoard .minion,
+#oppBoard .minion,
+.slot.filled .minion,
+.board .slot .minion {
+  width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-width: var(--slot-w) !important;
+  min-height: var(--slot-h) !important;
+  max-width: var(--slot-w) !important;
+  max-height: var(--slot-h) !important;
+  margin: 0 !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+  flex: 0 0 var(--slot-w) !important;
+}
+.board .minion .card-face,
+#myBoard .minion .card-face,
+#oppBoard .minion .card-face,
+.board .minion img.card-face,
+.minion .card-face {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+.hud-hero .hero-slot,
+.hud-hero .hero-portrait {
+  --hero-h: calc(var(--slot-h) * 0.5) !important;
+  width: calc(var(--hero-h) * 0.66) !important;
+  height: var(--hero-h) !important;
+}
+.deck-pile {
+  width: calc(var(--slot-h) * 0.5 * 0.66) !important;
+}
+.pile-stack {
+  height: calc(var(--slot-h) * 0.5 * 0.92) !important;
+}
+
+/* HAND: force LARGE cards — must NOT inherit shrunk --slot-h.
+   cqh must resolve against stage/#game (size container), NOT .my-hand. */
+#game.active {
+  container-type: size !important;
+  container-name: game !important;
+}
+#game.active .my-hand,
+#myHand,
+.my-hand {
+  container-type: normal !important; /* do not trap cqh */
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  overflow: visible !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+#game.active .my-hand .card.playable > .play-glow,
+#game.active .my-hand .card > .play-glow,
+.my-hand .play-glow,
+#myHand .play-glow {
+  display: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+#game.active .my-hand .card,
+#game.active .my-hand .card.playable,
+#myHand .card,
+#myHand .card.playable {
+  /* Large hand: up to 38cqh of #game; may overflow hand row (Hearthstone-like) */
+  height: min(120%, 38cqh) !important;
+  max-height: 38cqh !important;
+  min-height: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  aspect-ratio: 0.66 / 1 !important;
+  flex: 0 0 auto !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: 0 12px 20px rgba(0,0,0,.4) !important;
+  background: transparent !important;
+}
+#game.active .my-hand .card .card-face,
+#myHand .card .card-face {
+  width: 100% !important;
+  height: 100% !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  object-fit: contain !important;
+}
