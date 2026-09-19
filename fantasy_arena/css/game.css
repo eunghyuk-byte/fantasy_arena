@@ -2761,3 +2761,113 @@ html, body {
   border: none !important;
   box-shadow: none !important;
 }
+
+/* ===== FINAL OVERRIDE: six-across snap-fit to board content width ===== */
+/* board-gap uses vw (not cqi) so gap and slot calc share one resolved length everywhere.
+   --slot-w uses 100cqi on a board inline-size container so it tracks CONTENT width,
+   not re-resolving % against .slot/.minion. */
+.board, #myBoard, #oppBoard {
+  container-type: inline-size;
+  --board-gap: clamp(4px, 0.7vw, 10px);
+  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-h: calc(var(--slot-w) / 0.66) !important;
+  gap: var(--board-gap) !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+}
+/* Propagate fitted size to HUD/hero (siblings cannot see board cqi).
+   col-main width == board outer width; subtract the same horizontal padding. */
+.col-main {
+  container-type: inline-size;
+}
+#game.active, .playfield, .col-main, .col-hud {
+  --board-gap: clamp(4px, 0.7vw, 10px);
+  --slot-w: calc((100cqi - 2 * max(52px, 16cqi) - 5 * var(--board-gap)) / 6) !important;
+  --slot-h: calc(var(--slot-w) / 0.66) !important;
+}
+.board .slot.empty,
+#myBoard .slot.empty,
+#oppBoard .slot.empty {
+  visibility: hidden !important;
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+.board .slot.filled,
+#myBoard .slot.filled,
+#oppBoard .slot.filled,
+.board .slot:not(.empty),
+#myBoard .slot:not(.empty),
+#oppBoard .slot:not(.empty) {
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+.board .minion,
+#myBoard .minion,
+#oppBoard .minion,
+.slot.filled .minion,
+.board .slot .minion {
+  width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-width: var(--slot-w) !important;
+  min-height: var(--slot-h) !important;
+  max-width: var(--slot-w) !important;
+  max-height: var(--slot-h) !important;
+  margin: 0 !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+  flex: 0 0 var(--slot-w) !important;
+}
+.hud-hero .hero-slot, .hud-hero .hero-portrait {
+  --hero-h: calc(var(--slot-h) * 0.5) !important;
+  width: calc(var(--hero-h) * 0.66) !important;
+  height: var(--hero-h) !important;
+}
+.deck-pile {
+  width: calc(var(--slot-h) * 0.5 * 0.66) !important;
+}
+.pile-stack {
+  height: calc(var(--slot-h) * 0.5 * 0.92) !important;
+}
+#myHand, .my-hand, #game.active .my-hand {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+#game.active .my-hand .card.playable > .play-glow,
+#game.active .my-hand .card > .play-glow,
+.my-hand .play-glow,
+#myHand .play-glow {
+  display: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+#game.active .my-hand .card,
+#game.active .my-hand .card.playable,
+#game.active .my-hand .card .card-face,
+#myHand .card,
+#myHand .card.playable,
+#myHand .card .card-face {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
