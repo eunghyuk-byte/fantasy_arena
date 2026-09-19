@@ -1,10 +1,13 @@
 
+const MAX_BOARD = 5;
+const MAX_HAND = 10;
+
 function uid() { return Math.random().toString(36).slice(2, 9); }
 function cloneCard(id) {
   const b = CARD_MAP[id];
   return {
     ...b,
-    keywords: [...(b.keywords || [])],
+    keywords: [], // all keywords stripped for now
     uid: uid(),
     maxHp: b.hp || 0,
     canAttack: false,
@@ -36,11 +39,15 @@ function buildDeck(tribeId) {
 }
 
 function loadSavedDecks() {
-  try { return JSON.parse(localStorage.getItem("runestone-decks") || "{}"); }
-  catch (e) { return {}; }
+  try {
+    const raw = localStorage.getItem("fantasy-arena-decks")
+      || localStorage.getItem("runestone-decks")
+      || "{}";
+    return JSON.parse(raw);
+  } catch (e) { return {}; }
 }
 function persistDecks(map) {
-  localStorage.setItem("runestone-decks", JSON.stringify(map));
+  localStorage.setItem("fantasy-arena-decks", JSON.stringify(map));
 }
 function deckFor(hero, isAI) {
   if (!isAI) {
@@ -84,14 +91,37 @@ function draw(p, n = 1) {
       continue;
     }
     const id = p.deck.pop();
-    if (p.hand.length >= 10) {
-      log(`${p.name}의 손패가 가득 차 ${CARD_MAP[id].name}이(가) 불탔다`);
+    if (p.hand.length >= MAX_HAND) {
+      const nm = (CARD_MAP[id] && CARD_MAP[id].name) || id;
+      log(`${p.name}의 손패가 가득 차 ${nm}이(가) 불탔다`);
+      // Burn: card never enters hand
+      if (!p.isAI) {
+        p._burned = nm;
+        try { Sfx.playDeath && Sfx.playDeath(); } catch (e) {}
+      }
     } else {
       p.hand.push(cloneCard(id));
       if (!p.isAI) p._drew = true;
     }
   }
 }
+
+function addToHand(p, cardOrId) {
+  const card = typeof cardOrId === "string" ? cloneCard(cardOrId) : cardOrId;
+  if (p.hand.length >= MAX_HAND) {
+    const nm = card.name || (CARD_MAP[card.id] && CARD_MAP[card.id].name) || card.id;
+    log(`${p.name}의 손패가 가득 차 ${nm}이(가) 불탔다`);
+    if (!p.isAI) {
+      p._burned = nm;
+      try { Sfx.playDeath && Sfx.playDeath(); } catch (e) {}
+    }
+    return false;
+  }
+  p.hand.push(card);
+  return true;
+}
+
+
 
 
 
@@ -281,8 +311,8 @@ function passTurn() {
 
 function playCard(p, card, target) {
   if (p.mana < card.cost) return false;
-  if (card.type === "minion" && p.board.length >= 6) {
-    log("전장이 가득 찼습니다 (최대 6장)");
+  if (card.type === "minion" && p.board.length >= MAX_BOARD) {
+    log("전장이 가득 찼습니다 (최대 5장)");
     return false;
   }
   p.mana -= card.cost;
@@ -290,7 +320,7 @@ function playCard(p, card, target) {
   if (card.type === "minion") {
     try { Sfx.playSummon && Sfx.playSummon(); } catch (e) {}
     const m = card;
-    m.canAttack = (m.keywords || []).includes("charge");
+    m.canAttack = false; // keywords stripped; summoning sickness
     m.attacksLeft = m.canAttack ? 1 : 0;
     const at = Math.max(0, Math.min(p.board.length, (typeof window._dropSlot === "number") ? window._dropSlot : p.board.length));
     p.board.splice(at, 0, m);
@@ -356,6 +386,7 @@ function validTargets(p, fx) {
 function findOn(p, uid) { return p.board.find(m => m.uid === uid); }
 
 function resolveBattlecry(p, m, target) {
+  return; // battlecry/keywords stripped for now
   const fx = m.battlecry;
   if (!fx) return;
   if (fx.type === "self_buff") {
@@ -396,14 +427,14 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "face") {
     dealHero(e, fx.value);
   } else if (fx.type === "float_def") {
-    const n = Math.max(0, 6 - p.board.length) + Math.max(0, 6 - e.board.length);
+    const n = Math.max(0, MAX_BOARD - p.board.length) + Math.max(0, MAX_BOARD - e.board.length);
     [...p.board, ...e.board].forEach(m => { m.def = Math.max(0, (m.def || 0) - n); });
   } else if (fx.type === "seal_giant") {
     e.board.forEach(m => {
       if ((m.hp || 0) >= 6) { m.atk = 0; m.atkC = 0; }
     });
   } else if (fx.type === "summon_islands") {
-    const slots = Math.max(0, 6 - p.board.length);
+    const slots = Math.max(0, MAX_BOARD - p.board.length);
     for (let i = 0; i < slots; i++) {
       const tok = cloneCard("e40");
       tok.canAttack = false; tok.attacksLeft = 0;
@@ -417,7 +448,7 @@ function applyFx(p, fx, target) {
     const n = Math.floor((p.maxMana || 0) / 2);
     [...e.board].forEach(m => damageMinion(e, m, n));
   } else if (fx.type === "sandtrap") {
-    const n = Math.max(0, 6 - p.board.length);
+    const n = Math.max(0, MAX_BOARD - p.board.length);
     e.board.slice(0, n).forEach(m => damageMinion(e, m, 3));
   } else if (fx.type === "maze") {
     [...e.board].forEach(m => { if ((m.cost || 0) > (p.maxMana || 0)) m.dying = true; });
@@ -432,7 +463,7 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "smash") {
     p.board.forEach(m => {
       m.atk += 1;
-      m.keywords = Array.from(new Set([...(m.keywords || []), "pierce"]));
+      /* pierce keyword grant disabled */
     });
   } else if (fx.type === "giant_str") {
     p.board.forEach(m => { m.atk += 2; });
@@ -470,11 +501,7 @@ function dealHero(p, n) {
 
 function damageMinion(owner, m, n) {
   if (!m) return;
-  if ((m.keywords || []).includes("shield")) {
-    m.keywords = m.keywords.filter(k => k !== "shield");
-    log(`${m.name}의 보호막이 깨졌다`);
-    return;
-  }
+  // divine shield / keywords disabled — damage applies directly
   const from = m.hp;
   m.hp -= n;
   m.damaged = true;
@@ -486,7 +513,7 @@ function destroyMinion(owner, m) {
   if (!owner.board.some(x => x.uid === m.uid)) return;
   owner.board = owner.board.filter(x => x.uid !== m.uid);
   log(`${m.name} 사망`);
-  if (m.deathrattle) applyFx(owner, m.deathrattle, null);
+  /* deathrattle disabled */
 }
 
 function cleanupBoards() {
@@ -612,7 +639,7 @@ function canDropCard(card) {
   const me = meView().me;
   if (state.over || current() !== me || me.isAI) return false;
   if (me.mana < card.cost) return false;
-  if (card.type === "minion" && me.board.length >= 6) return false;
+  if (card.type === "minion" && me.board.length >= MAX_BOARD) return false;
   return true;
 }
 function overBoard(x, y) {
@@ -729,7 +756,7 @@ function onHandClick(card) {
   if (state.over || current() !== me || current().isAI) return;
   if (ui.targeting || ui.attacker) { ui.targeting = null; ui.attacker = null; render(); }
   if (me.mana < card.cost) return;
-  if (card.type === "minion" && me.board.length >= 6) return;
+  if (card.type === "minion" && me.board.length >= MAX_BOARD) return;
   if (needsTarget(card)) {
     const fx = card.type === "spell" ? card.spell : card.battlecry;
     const targets = validTargets(me, fx);

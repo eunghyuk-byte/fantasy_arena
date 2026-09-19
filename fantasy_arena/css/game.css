@@ -302,7 +302,7 @@
 
   .board {
     --slot-h: min(86%, 20cqh);
-    --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 12%) / 6.4));
+    --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 12%) / 5.4));
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1243,7 +1243,7 @@
     z-index: 2;
   }
   #game.active .my-hand .card {
-    margin-left: calc(min(120%, 38cqh) * 0.66 * -0.05) !important;
+    margin-left: calc(min(120%, 38cqh) * 0.66 * -0.42) !important;
   }
   #game.active .opp-hand .back {
     margin-left: -18px !important;
@@ -1270,7 +1270,7 @@
   }
   .board {
     --slot-h: min(96%, 38cqh);
-    --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 8%) / 6.2));
+    --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 8%) / 5.2));
     padding: 6px 8% !important;
     margin: 0 4% !important;
   }
@@ -2011,7 +2011,7 @@
 }
 .board {
   --slot-h: clamp(168px, 26cqh, 228px) !important;
-  --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 18%) / 6.2)) !important;
+  --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 18%) / 5.2)) !important;
   justify-content: flex-start !important;
   overflow: visible !important;
 }
@@ -2538,11 +2538,11 @@ html, body {
   padding-right: max(52px, 16%) !important;
   padding-top: max(8px, 2%) !important;
   padding-bottom: max(8px, 2%) !important;
-  /* Cap slot size so 6 cards + gaps fit INSIDE content box */
+  /* Cap slot size so 5 cards + gaps fit INSIDE content box */
   --slot-h: clamp(96px, 26cqh, 168px) !important;
   --slot-w: min(
     calc(var(--slot-h) * 0.66),
-    calc((100% - 24%) / 6.5)
+    calc((100% - 24%) / 5.5)
   ) !important;
   justify-content: center !important;
   align-items: center !important;
@@ -2612,7 +2612,7 @@ html, body {
 /* Promote --slot-h so .col-hud (sibling of .col-main) can inherit it */
 #game.active, .playfield, .board {
   --slot-h: clamp(96px, 26cqh, 168px) !important;
-  --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 24%) / 6.5)) !important;
+  --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 24%) / 5.5)) !important;
 }
 .hud-hero .hero-slot, .hud-hero .hero-portrait {
   --hero-h: calc(var(--slot-h) * 0.5) !important;
@@ -2762,14 +2762,14 @@ html, body {
   box-shadow: none !important;
 }
 
-/* ===== FINAL OVERRIDE: six-across snap-fit to board content width ===== */
+/* ===== FINAL OVERRIDE: five-across snap-fit to board content width ===== */
 /* board-gap uses vw (not cqi) so gap and slot calc share one resolved length everywhere.
    --slot-w uses 100cqi on a board inline-size container so it tracks CONTENT width,
    not re-resolving % against .slot/.minion. */
 .board, #myBoard, #oppBoard {
   container-type: inline-size;
   --board-gap: clamp(4px, 0.7vw, 10px);
-  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-w: calc((100cqi - 4 * var(--board-gap)) / 5) !important;
   --slot-h: calc(var(--slot-w) / 0.66) !important;
   gap: var(--board-gap) !important;
   justify-content: flex-start !important;
@@ -2782,7 +2782,7 @@ html, body {
 }
 #game.active, .playfield, .col-main, .col-hud {
   --board-gap: clamp(4px, 0.7vw, 10px);
-  --slot-w: calc((100cqi - 2 * max(52px, 16cqi) - 5 * var(--board-gap)) / 6) !important;
+  --slot-w: calc((100cqi - 2 * max(52px, 16cqi) - 4 * var(--board-gap)) / 5) !important;
   --slot-h: calc(var(--slot-w) / 0.66) !important;
 }
 .board .slot.empty,
@@ -2872,7 +2872,7 @@ html, body {
   box-shadow: none !important;
 }
 
-/* ===== FINAL OVERRIDE: center six-card rows; restore hand card size ===== */
+/* ===== FINAL OVERRIDE: center five-card rows; restore hand card size ===== */
 /* Parchment (#game / boardBg) is full-bleed; HUD was a grid column that
    left-shifted col-main vs the art. Overlay HUD so col-main = parchment width. */
 #game.active {
@@ -2923,7 +2923,7 @@ html, body {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
-  /* Centered 6-slot strip (Hearthstone): empty slots keep width → L→R within strip */
+  /* Centered 5-slot strip: empty slots keep width → L→R within strip */
   justify-content: center !important;
   gap: var(--board-gap, clamp(4px, 0.7vw, 10px)) !important;
   width: 100% !important;
@@ -2936,8 +2936,8 @@ html, body {
   padding-right: calc(var(--frame-inset-x) + var(--hud-col)) !important;
   padding-top: max(4px, 1.2%) !important;
   padding-bottom: max(4px, 1.2%) !important;
-  /* cqi = content box after padding → 6 slots fill visible band */
-  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  /* cqi = content box after padding → 5 slots fill visible band */
+  --slot-w: calc((100cqi - 4 * var(--board-gap)) / 5) !important;
   --slot-h: min(calc(var(--slot-w) / 0.66), calc(100% - 8px)) !important;
 }
 /* Propagate fitted size to HUD/hero (siblings of boards) */
@@ -2949,7 +2949,7 @@ html, body {
   --frame-inset-x: max(40px, 6%);
   --hud-col: clamp(76px, 10cqi, 120px);
   /* Visible content ≈ col-main - left inset - (right inset + hud) */
-  --slot-w: calc((100cqi - 2 * var(--frame-inset-x) - var(--hud-col) - 5 * var(--board-gap)) / 6) !important;
+  --slot-w: calc((100cqi - 2 * var(--frame-inset-x) - var(--hud-col) - 4 * var(--board-gap)) / 5) !important;
   --slot-h: calc(var(--slot-w) / 0.66) !important;
 }
 .board.opp,
@@ -3169,7 +3169,7 @@ html, body {
   padding-right: var(--frame-inset-x) !important;
   padding-top: 2px !important;
   padding-bottom: clamp(3px, 0.8%, 8px) !important;
-  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-w: calc((100cqi - 4 * var(--board-gap)) / 5) !important;
   --slot-h: min(calc(var(--slot-w) / 0.66), calc(100cqh - 4px)) !important;
 }
 
@@ -3199,7 +3199,7 @@ html, body {
   padding-right: var(--frame-inset-x) !important;
   padding-top: clamp(3px, 0.8%, 8px) !important;
   padding-bottom: 2px !important;
-  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-w: calc((100cqi - 4 * var(--board-gap)) / 5) !important;
   --slot-h: min(calc(var(--slot-w) / 0.66), calc(100cqh - 4px)) !important;
 }
 
@@ -3210,7 +3210,7 @@ html, body {
 #game.active .col-hud {
   --board-gap: clamp(3px, 0.55vw, 8px);
   --frame-inset-x: max(48px, 13.5%);
-  --slot-w: calc((100cqi - 2 * var(--frame-inset-x) - 5 * var(--board-gap)) / 6) !important;
+  --slot-w: calc((100cqi - 2 * var(--frame-inset-x) - 4 * var(--board-gap)) / 5) !important;
   --slot-h: calc(var(--slot-w) / 0.66) !important;
 }
 
@@ -3470,7 +3470,7 @@ html, body {
   --hud-col: clamp(72px, 12%, 110px) !important;
   padding-left: max(44px, 15.5%) !important;
   padding-right: max(max(44px, 15.5%), calc(var(--hud-col) + 10px)) !important;
-  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-w: calc((100cqi - 4 * var(--board-gap)) / 5) !important;
   --slot-h: min(
     calc(var(--slot-w) / 0.66),
     calc((100cqh - 2 * var(--line-gap)) * var(--slot-fill))
@@ -3600,7 +3600,7 @@ html, body {
 }
 
 
-/* ===== FINAL polish: hand fan spread + line-gap + HUD End Turn above layers ===== */
+/* ===== FINAL polish: hand fan tight + line-gap + HUD End Turn above layers ===== */
 #game.active {
   --line-gap: clamp(18px, 3.8%, 32px);
   --slot-fill: 0.88;
@@ -3659,7 +3659,7 @@ html, body {
   box-sizing: border-box !important;
 }
 
-/* Hand fan: more horizontal spread, large cards, no yellow border boxes */
+/* Hand fan: tight Hearthstone-like overlap (~42%), large cards, no yellow border boxes */
 #game.active .my-hand,
 #game.active #myHand {
   z-index: 6 !important;
@@ -3676,7 +3676,7 @@ html, body {
   width: calc(min(120%, 38cqh) * 0.66) !important;
   max-width: calc(min(120%, 38cqh) * 0.66) !important;
   aspect-ratio: 0.66 / 1 !important;
-  margin-left: calc(min(120%, 38cqh) * 0.66 * -0.05) !important;
+  margin-left: calc(min(120%, 38cqh) * 0.66 * -0.42) !important;
   outline: none !important;
   border: none !important;
   background: transparent !important;
@@ -3694,4 +3694,17 @@ html, body {
 }
 #game.active #myBoard {
   padding-top: var(--line-gap) !important;
+}
+
+
+/* Hand-burn feedback flash */
+#hint.burn-flash {
+  color: #ff6b4a !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 12px rgba(255,80,40,.55);
+  animation: burnFlash 1.4s ease-out;
+}
+@keyframes burnFlash {
+  0% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: .85; transform: scale(1); }
 }

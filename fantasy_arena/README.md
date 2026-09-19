@@ -1,6 +1,6 @@
-# fantasy_arena (판마스톤)
+# Fantasy Arena / 판타지 아레나
 
-단일 `runestone.html`을 모듈 트리로 분리한 패키지.
+`fantasy_arena` 패키지 — 카드 배틀 웹 게임.
 
 ## 실행
 이 폴더에서 `index.html`을 브라우저로 연다.

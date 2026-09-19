@@ -1,6 +1,6 @@
-# 분리 마이그레이션
+# 분리 마이그레이션 (Fantasy Arena / 판타지 아레나)
 
-1. `runestone.html`에서 `<style>` → `css/game.css`
+1. 레거시 단일 HTML에서 `<style>` → `css/game.css`
 2. data URI 바이트를 재인코딩 없이 `assets/img/**`로 덤프 (JPEG/PNG/WebP/SVG 원본)
 3. const 값은 경로 문자열로 치환 (`HUD_UI.board`, `CARD_FACE`, `CARD_ART`, 프레임 등)
 4. 로직 분할: `cards-data.js` → `vfx.js` → `sfx.js` → `combat.js` → `render.js` → `game.js`

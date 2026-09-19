@@ -15,7 +15,7 @@ function render() {
   document.getElementById("oppHand").innerHTML = opp.hand.map(() => `<div class="back"></div>`).join("");
   const mh = document.getElementById("myHand");
   mh.style.setProperty("--n", String(Math.max(me.hand.length, 1)));
-  mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.mana && (c.type !== "minion" || me.board.length < 6))).join("");
+  mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.mana && (c.type !== "minion" || me.board.length < MAX_BOARD))).join("");
   document.getElementById("oppBoard").innerHTML = renderLane(opp, "opp");
   document.getElementById("myBoard").innerHTML = renderLane(me, "me");
   document.getElementById("oppBoard").classList.toggle("empty", !opp.board.length);
@@ -37,13 +37,31 @@ function render() {
     me._drew = false;
     requestAnimationFrame(() => { try { flyDrawCard(); } catch (e) {} });
   }
+  if (me._burned) {
+    const burned = me._burned;
+    me._burned = null;
+    const hintEl = document.getElementById("hint");
+    if (hintEl) {
+      hintEl.textContent = `손패 가득 — ${burned} 파괴됨`;
+      hintEl.classList.add("burn-flash");
+      setTimeout(() => hintEl.classList.remove("burn-flash"), 1600);
+    }
+    try {
+      const pile = document.querySelector("#myStrip .pile-stack") || document.querySelector("#myStrip .deck-pile");
+      if (pile && typeof Vfx !== "undefined" && Vfx.spawn) {
+        const r = pile.getBoundingClientRect();
+        Vfx.spawn("death-flash", r.left + r.width/2, r.top + r.height/2);
+        Vfx.spawn("death-ember", r.left + r.width/2, r.top + r.height/2);
+      }
+    } catch (e) {}
+  }
 
   const handEls = document.querySelectorAll("#myHand .card");
   const nHand = handEls.length;
   handEls.forEach((el, i) => {
     const t = nHand <= 1 ? 0 : (i - (nHand - 1) / 2);
-    el.style.transform = "rotate(" + (t * 3.2) + "deg) translateY(" + (Math.abs(t) * 6) + "px)";
-    el.style.zIndex = String(10 + i);
+    el.style.transform = "rotate(" + (t * 4.2) + "deg) translateY(" + (Math.abs(t) * 8) + "px)";
+    el.style.zIndex = String(20 + i);
     bindHandCard(el, me.hand[i]);
   });
   document.querySelectorAll("#myBoard .minion").forEach(el => {
@@ -67,7 +85,7 @@ function render() {
 }
 
 function kwLabel(m) {
-  const k = m.keywords || [];
+  const k = []; // keywords stripped
   const parts = [];
   if (k.includes("charge")) parts.push("돌진");
   if (k.includes("shield")) parts.push("보호막");
@@ -398,17 +416,17 @@ function layoutHandFan() {
   const n = cards.length;
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
-    el.style.transform = `translateY(${Math.abs(t)*6}px) rotate(${t*3.2}deg)`;
-    el.style.zIndex = String(10 + i);
-    // Spread fan: ~5% width overlap (CSS !important is source of truth; keep inline in sync)
+    // Hearthstone-like tight arc: ~42% of card-width overlap (paper hand, not spread)
+    el.style.transform = `translateY(${Math.abs(t)*8}px) rotate(${t*4.2}deg)`;
+    el.style.zIndex = String(20 + i);
     const w = el.getBoundingClientRect().width || el.offsetWidth || 80;
-    el.style.setProperty("margin-left", i ? Math.round(-w * 0.05) + "px" : "0", "important");
+    el.style.setProperty("margin-left", i ? Math.round(-w * 0.42) + "px" : "0", "important");
   });
 }
 
 function renderLane(p, who) {
   const cells = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < MAX_BOARD; i++) {
     const inner = p.board[i] ? renderMinion(p.board[i], who) : "";
     cells.push(`<div class="slot ${p.board[i] ? "filled" : "empty"}" data-n="${i+1}">${inner}</div>`);
   }

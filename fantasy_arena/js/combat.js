@@ -100,7 +100,7 @@ function doAttack(p, attacker, target, auto) {
     } else {
       const blocked = window._pendingDef || 0;
       const backBlock = window._pendingAtkDef || 0;
-      const pierce = (attacker.keywords || []).includes("pierce");
+      const pierce = false; // pierce keyword disabled
       const dmgIn = Math.max(0, aAtk - (pierce ? 0 : blocked));
       const dmgBack = Math.max(0, dAtk - backBlock);
       log(`${def.name} 방어 ${blocked} → 체력피해 ${dmgIn}`);
@@ -151,7 +151,7 @@ function useHeroPower(p) {
   p.powerUsed = true;
   const fx = p.hero.power;
   if (fx.type === "summon") {
-    if (p.board.length >= 6) { log("전장이 가득 차 소환 실패"); return; }
+    if (p.board.length >= MAX_BOARD) { log("전장이 가득 차 소환 실패"); return; }
     const rec = cloneCard("recruit");
     rec.atk = fx.value[0]; rec.hp = fx.value[1]; rec.maxHp = fx.value[1];
     rec.canAttack = false; rec.attacksLeft = 0;
@@ -237,7 +237,7 @@ function aiTurn() {
   const tryPlay = () => {
     const plays = p.hand
       .filter(c => c.cost <= p.mana)
-      .filter(c => c.type !== "minion" || p.board.length < 6)
+      .filter(c => c.type !== "minion" || p.board.length < MAX_BOARD)
       .sort((a, b) => scorePlay(p, b) - scorePlay(p, a));
     for (const card of plays) {
       let target = null;
@@ -267,7 +267,7 @@ function aiTurn() {
 function scorePlay(p, card) {
   let s = card.cost * 2 + (card.atk || 0) + (card.hp || 0);
   // taunt deprecated: board-empty-hero rule in attackTargets (R4-A)
-  if ((card.keywords || []).includes("charge")) s += 3;
+  /* charge AI bias disabled */
   if (card.spell && card.spell.type === "dmg") {
     const e = opponent(p);
     if (e.hp <= card.spell.value) s += 50;
