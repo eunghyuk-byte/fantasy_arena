@@ -3408,11 +3408,193 @@ html, body {
   padding-right: max(40px, 14%) !important;
 }
 
-/* clearer breathing room from painted center stroke */
+/* ===== v4g: equal halves + board-local slot fit (restore v4d sizing) ===== */
+#game.active {
+  --paint-center: 50%;
+  --frame-inset-top: 19.5%;
+  --frame-inset-bottom: 19.5%;
+  --frame-inset-x: max(44px, 15.5%);
+  --hud-col: clamp(72px, 12%, 110px);
+  --board-gap: clamp(3px, 0.55vw, 8px);
+  --line-gap: clamp(7px, 1.5%, 12px);
+  --slot-fill: 0.70;
+}
+
+#game.active .col-hud {
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: var(--hud-col) !important;
+  max-width: 22% !important;
+  z-index: 8 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+#game.active .col-hud .end-btn,
+#game.active .col-hud #endBtn,
+#game.active .col-hud .give-btn,
+#game.active .col-hud #giveBtn {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  font-size: clamp(10px, 2.2cqh, 14px) !important;
+}
+
+#game.active .board.opp,
+#game.active #oppBoard,
+#game.active #myBoard {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: auto !important;
+  width: 100% !important;
+  margin: 0 !important;
+  grid-area: unset !important;
+  z-index: 4 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  gap: var(--board-gap) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  container-type: size !important;
+  --frame-inset-x: max(44px, 15.5%) !important;
+  --hud-col: clamp(72px, 12%, 110px) !important;
+  padding-left: max(44px, 15.5%) !important;
+  padding-right: max(max(44px, 15.5%), calc(var(--hud-col) + 10px)) !important;
+  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-h: min(
+    calc(var(--slot-w) / 0.66),
+    calc((100cqh - 2 * var(--line-gap)) * var(--slot-fill))
+  ) !important;
+}
+
 #game.active .board.opp,
 #game.active #oppBoard {
-  padding-bottom: clamp(6px, 1.2%, 12px) !important;
+  top: var(--frame-inset-top) !important;
+  bottom: calc(100% - var(--paint-center)) !important;
+  align-items: flex-end !important;
+  align-content: flex-end !important;
+  padding-top: 2px !important;
+  padding-bottom: var(--line-gap) !important;
 }
+
 #game.active #myBoard {
-  padding-top: clamp(6px, 1.2%, 12px) !important;
+  top: var(--paint-center) !important;
+  bottom: var(--frame-inset-bottom) !important;
+  align-items: flex-start !important;
+  align-content: flex-start !important;
+  padding-top: var(--line-gap) !important;
+  padding-bottom: 2px !important;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  #game.active {
+    --paint-center: 50%;
+    --frame-inset-top: 19.5%;
+    --frame-inset-bottom: 19.5%;
+    --frame-inset-x: max(40px, 15.5%);
+    --hud-col: clamp(68px, 13%, 96px);
+    --slot-fill: 0.72;
+    --line-gap: clamp(6px, 1.4%, 10px);
+  }
+}
+
+#game.active,
+#game.active .playfield,
+#game.active .col-main,
+#game.active .col-hud {
+  --board-gap: clamp(3px, 0.55vw, 8px);
+  --frame-inset-x: max(44px, 15.5%);
+  --hud-col: clamp(72px, 12%, 110px);
+}
+
+#game.active .board .slot.empty,
+#game.active #myBoard .slot.empty,
+#game.active #oppBoard .slot.empty {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+}
+#game.active .board .slot.filled,
+#game.active #myBoard .slot.filled,
+#game.active #oppBoard .slot.filled,
+#game.active .board .slot:not(.empty),
+#game.active #myBoard .slot:not(.empty),
+#game.active #oppBoard .slot:not(.empty),
+#game.active .board .minion,
+#game.active #myBoard .minion,
+#game.active #oppBoard .minion {
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+}
+
+#game.active .my-hand,
+#game.active #myHand {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 20% !important;
+  z-index: 6 !important;
+  grid-area: unset !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  overflow: visible !important;
+  container-type: normal !important;
+}
+#game.active .opp-hand,
+#game.active #oppHand {
+  position: absolute !important;
+  top: 1% !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 12% !important;
+  z-index: 6 !important;
+  grid-area: unset !important;
+}
+#game.active .my-hand .card,
+#game.active #myHand .card,
+#game.active .my-hand .card.playable,
+#game.active #myHand .card.playable {
+  outline: none !important;
+  border: none !important;
+  height: min(120%, 38cqh) !important;
+  max-height: 38cqh !important;
+  aspect-ratio: 0.66 / 1 !important;
+  background: transparent !important;
+  box-shadow: 0 12px 20px rgba(0,0,0,.4) !important;
+  flex: 0 0 auto !important;
+}
+#game.active .my-hand .play-glow,
+#game.active #myHand .play-glow {
+  display: none !important;
 }
