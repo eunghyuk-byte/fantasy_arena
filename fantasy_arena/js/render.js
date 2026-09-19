@@ -69,7 +69,6 @@ function render() {
 function kwLabel(m) {
   const k = m.keywords || [];
   const parts = [];
-  if (k.includes("taunt")) parts.push("도발");
   if (k.includes("charge")) parts.push("돌진");
   if (k.includes("shield")) parts.push("보호막");
   return parts.join(" · ");
@@ -427,7 +426,7 @@ function renderMinion(m, side) {
   }
   const cls = [
     "minion",
-    (m.keywords || []).includes("taunt") ? "taunt" : "",
+    "",
     "",
     targetable ? "can-target" : "",
   ].join(" ");

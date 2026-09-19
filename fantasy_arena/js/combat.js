@@ -1,14 +1,12 @@
 function doAttack(p, attacker, target, auto) {
   return new Promise(resolve => {
   if (!attacker || attacker.hp <= 0) { resolve(); return; }
-  if (!auto) {
-    if (!attacker.canAttack || attacker.attacksLeft <= 0) { resolve(); return; }
-    const legal = attackTargets(p, attacker);
-    const ok = legal.some(t => t.kind === target.kind && (t.kind === "hero" || t.minion.uid === target.minion.uid));
-    if (!ok) { resolve(); return; }
-    attacker.attacksLeft -= 1;
-    attacker.canAttack = attacker.attacksLeft > 0;
-  }
+  if (!attacker.canAttack || attacker.attacksLeft <= 0) { resolve(); return; }
+  const legal = attackTargets(p, attacker);
+  const ok = legal.some(t => t.kind === target.kind && (t.kind === "hero" || t.minion.uid === target.minion.uid));
+  if (!ok) { resolve(); return; }
+  attacker.attacksLeft -= 1;
+  attacker.canAttack = attacker.attacksLeft > 0;
   const aRoll = rollCoins(attacker.atkC);
   const aAtk = Math.max(0, attacker.atk + aRoll.delta);
   const rows = [];
@@ -51,6 +49,36 @@ function doAttack(p, attacker, target, auto) {
     }
     const aDefRoll = rollCoins(attacker.defC);
     const aDefVal = Math.max(0, (attacker.def || 0) + aDefRoll.delta);
+    if (def.hpC) {
+      const hRoll = rollCoins(def.hpC);
+      const hpBase = def.hp;
+      def.hp += hRoll.delta;
+      if (hRoll.flips && hRoll.flips.length) {
+        rows.push({
+          label: def.name + " 체력",
+          modLabel: fmtC(def.hpC),
+          flips: hRoll.flips,
+          delta: hRoll.delta,
+          base: hpBase,
+          value: def.hp
+        });
+      }
+    }
+    if (attacker.hpC) {
+      const ahRoll = rollCoins(attacker.hpC);
+      const ahpBase = attacker.hp;
+      attacker.hp += ahRoll.delta;
+      if (ahRoll.flips && ahRoll.flips.length) {
+        rows.push({
+          label: attacker.name + " 체력",
+          modLabel: fmtC(attacker.hpC),
+          flips: ahRoll.flips,
+          delta: ahRoll.delta,
+          base: ahpBase,
+          value: attacker.hp
+        });
+      }
+    }
     window._pendingDef = defVal;
     window._pendingAtkDef = aDefVal;
   } else { window._pendingDef = 0; window._pendingAtkDef = 0; }
@@ -238,7 +266,7 @@ function aiTurn() {
 
 function scorePlay(p, card) {
   let s = card.cost * 2 + (card.atk || 0) + (card.hp || 0);
-  if ((card.keywords || []).includes("taunt")) s += 2;
+  // taunt deprecated: board-empty-hero rule in attackTargets (R4-A)
   if ((card.keywords || []).includes("charge")) s += 3;
   if (card.spell && card.spell.type === "dmg") {
     const e = opponent(p);

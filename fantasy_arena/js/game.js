@@ -190,8 +190,13 @@ async function runAutoCombat(p) {
   for (const m of wave) {
     if (state.over) break;
     if (!p.board.includes(m) || m.hp <= 0) continue;
+    if (!m.canAttack || m.attacksLeft <= 0 || m.atk <= 0) continue;
+    const legal = attackTargets(p, m);
+    if (!legal.length) continue;
     const foe = e.board.find(x => x.hp > 0);
     const target = foe ? { kind: "minion", owner: e, minion: foe } : { kind: "hero", owner: e };
+    const ok = legal.some(t => t.kind === target.kind && (t.kind === "hero" || t.minion.uid === target.minion.uid));
+    if (!ok) continue;
     await doAttack(p, m, target, true);
     render();
     await waitMs(480);
@@ -419,6 +424,7 @@ function damageMinion(owner, m, n) {
 }
 
 function destroyMinion(owner, m) {
+  if (!owner.board.some(x => x.uid === m.uid)) return;
   owner.board = owner.board.filter(x => x.uid !== m.uid);
   log(`${m.name} 사망`);
   if (m.deathrattle) applyFx(owner, m.deathrattle, null);
@@ -426,7 +432,9 @@ function destroyMinion(owner, m) {
 
 function cleanupBoards() {
   [state.p1, state.p2].forEach(p => {
-    p.board = p.board.filter(m => m.hp > 0);
+    const dead = p.board.filter(m => m.hp <= 0 || m.dying);
+    dead.forEach(m => destroyMinion(p, m));
+    p.board = p.board.filter(m => m.hp > 0 && !m.dying);
   });
 }
 

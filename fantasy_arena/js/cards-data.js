@@ -35,7 +35,7 @@ const CARDS = [
   { id:"e2", tribe:"earth", name:"샌드웜", cost:8, type:"minion", atk:8, hp:8, atkC:2, hpC:1, text:"" , def:1, defC:1},
   { id:"e3", tribe:"earth", name:"코카트리스", cost:4, type:"minion", atk:5, hp:5, atkC:1, hpC:0, text:"석화공격" , def:0, defC:0},
   { id:"e4", tribe:"earth", name:"아르고스", cost:4, type:"minion", atk:6, hp:5, atkC:2, hpC:1, text:"" , def:0, defC:1},
-  { id:"e5", tribe:"earth", name:"만티코어", cost:4, type:"minion", atk:3, hp:5, atkC:2, hpC:0, text:"관통공격" , def:0, defC:0},
+  { id:"e5", tribe:"earth", name:"만티코어", cost:4, type:"minion", atk:3, hp:5, atkC:2, hpC:0, keywords:["pierce"], text:"관통공격" , def:0, defC:0},
   { id:"e6", tribe:"earth", name:"골든미믹", cost:3, type:"minion", atk:2, hp:2, atkC:3, hpC:0, text:"" , def:3, defC:0},
   { id:"e7", tribe:"earth", name:"프리클리맨", cost:2, type:"minion", atk:1, hp:4, atkC:2, hpC:0, text:"치명공격" , def:0, defC:0},
   { id:"e8", tribe:"earth", name:"오크", cost:2, type:"minion", atk:3, hp:3, atkC:2, hpC:2, text:"" , def:0, defC:0},
@@ -50,7 +50,7 @@ const CARDS = [
   { id:"e17", tribe:"earth", name:"고르곤", cost:5, type:"minion", atk:3, hp:5, atkC:3, hpC:0, keywords:["charge"], text:"돌진공격" , def:2, defC:0},
   { id:"e18", tribe:"earth", name:"에틴", cost:4, type:"minion", atk:5, hp:5, atkC:3, hpC:3, text:"" , def:0, defC:0},
   { id:"e19", tribe:"earth", name:"샌드맨", cost:3, type:"minion", atk:2, hp:6, atkC:5, hpC:-5, text:"" , def:0, defC:0},
-  { id:"e20", tribe:"earth", name:"스핑크스", cost:5, type:"minion", atk:3, hp:5, atkC:2, hpC:0, text:"방어무시" , def:1, defC:0},
+  { id:"e20", tribe:"earth", name:"스핑크스", cost:5, type:"minion", atk:3, hp:5, atkC:2, hpC:0, keywords:["pierce"], text:"방어무시" , def:1, defC:0},
 
   { id:"f1", tribe:"fire", name:"불씨임프", cost:1, type:"minion", atk:2, hp:1, keywords:["charge"], text:"돌진", atkC:-2, hpC:0 , def:0, defC:0},
   { id:"f2", tribe:"fire", name:"잿더미쥐", cost:1, type:"minion", atk:1, hp:2, text:"", atkC:-2, hpC:-2 , def:0, defC:0},
