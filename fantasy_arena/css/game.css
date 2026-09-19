@@ -3417,7 +3417,7 @@ html, body {
   --hud-col: clamp(72px, 12%, 110px);
   --board-gap: clamp(3px, 0.55vw, 8px);
   --line-gap: clamp(18px, 3.8%, 32px);
-  --slot-fill: 0.88;
+  --slot-fill: 0.97;
 }
 
 #game.active .col-hud {
@@ -3503,7 +3503,7 @@ html, body {
     --frame-inset-bottom: 19.5%;
     --frame-inset-x: max(40px, 15.5%);
     --hud-col: clamp(68px, 13%, 96px);
-    --slot-fill: 0.90;
+    --slot-fill: 0.99;
     --line-gap: clamp(14px, 3.5%, 24px);
   }
 }
@@ -3603,12 +3603,12 @@ html, body {
 /* ===== FINAL polish: hand fan tight + line-gap + HUD End Turn above layers ===== */
 #game.active {
   --line-gap: clamp(18px, 3.8%, 32px);
-  --slot-fill: 0.88;
+  --slot-fill: 0.97;
 }
 @media (orientation: landscape) and (max-height: 500px) {
   #game.active {
     --line-gap: clamp(14px, 3.5%, 24px);
-    --slot-fill: 0.90;
+    --slot-fill: 0.99;
   }
 }
 
