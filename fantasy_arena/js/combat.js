@@ -3,6 +3,18 @@ function atkSkillOf(m) {
   return (v >= 2 && v <= 10) ? (v | 0) : 1;
 }
 
+function applyLifesteal(attacker, hpDealt) {
+  if (!attacker || hpDealt <= 0 || attacker.hp <= 0 || attacker.dying) return 0;
+  const heal = Math.ceil(hpDealt / 2);
+  const cap = (attacker.maxHp != null && attacker.maxHp > 0) ? attacker.maxHp : attacker.hp;
+  const before = attacker.hp;
+  attacker.hp = Math.min(cap, before + heal);
+  const got = attacker.hp - before;
+  if (got > 0) log(`${attacker.name} 흡혈 +${got}`);
+  else log(`${attacker.name} 흡혈 0 (풀피)`);
+  return got;
+}
+
 /** Pre-hit foe mutators: weaken(7) / petrify(8). Minion targets only. */
 function applyAtkSkillOnStart(attacker, def) {
   if (!def) return;
@@ -73,11 +85,7 @@ async function resolveMinionHit(p, attacker, owner, def, aAtk, aDefVal, opts) {
     damageMinion(owner, def, hpDmg);
   }
   const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
-  if (sk === 6 && hpDealt > 0 && attacker.hp > 0 && !attacker.dying) {
-    const heal = Math.ceil(hpDealt / 2);
-    attacker.hp = Math.min(attacker.maxHp != null ? attacker.maxHp : attacker.hp + heal, attacker.hp + heal);
-    log(`${attacker.name} 흡혈 +${heal}`);
-  }
+  if (sk === 6) applyLifesteal(attacker, hpDealt);
   const killed = !(def.hp > 0 && !def.dying);
   return { hpDealt, killed, hpDmg, calc };
 }
@@ -242,11 +250,7 @@ function doAttack(p, attacker, target, auto) {
       } else {
         dealHero(target.owner, hpDmg);
       }
-      if (sk === 6 && hpDmg > 0) {
-        const heal = Math.ceil(hpDmg / 2);
-        attacker.hp = Math.min(attacker.maxHp != null ? attacker.maxHp : attacker.hp + heal, attacker.hp + heal);
-        log(`${attacker.name} 흡혈 +${heal}`);
-      }
+      if (sk === 6) applyLifesteal(attacker, hpDmg);
       render();
       await waitMs(420);
     } else {
@@ -268,11 +272,7 @@ function doAttack(p, attacker, target, auto) {
         damageMinion(target.owner, def, hpDmg);
       }
       const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
-      if (sk === 6 && hpDealt > 0 && attacker.hp > 0 && !attacker.dying) {
-        const heal = Math.ceil(hpDealt / 2);
-        attacker.hp = Math.min(attacker.maxHp != null ? attacker.maxHp : attacker.hp + heal, attacker.hp + heal);
-        log(`${attacker.name} 흡혈 +${heal}`);
-      }
+      if (sk === 6) applyLifesteal(attacker, hpDealt);
       render();
       await waitMs(360);
       const survived = def && def.hp > 0 && !def.dying;

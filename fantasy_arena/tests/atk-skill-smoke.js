@@ -16,7 +16,7 @@ const combat = fs.readFileSync(path.join(root, 'js/combat.js'), 'utf8');
 const end = combat.indexOf('function doAttack');
 vm.runInContext(
   combat.slice(0, end) +
-  '\nthis.atkSkillOf=atkSkillOf; this.applyAtkSkillOnStart=applyAtkSkillOnStart; this.calcAtkSkillHpDamage=calcAtkSkillHpDamage;',
+  '\nthis.atkSkillOf=atkSkillOf; this.applyAtkSkillOnStart=applyAtkSkillOnStart; this.calcAtkSkillHpDamage=calcAtkSkillHpDamage; this.applyLifesteal=applyLifesteal;',
   ctx
 );
 
@@ -79,6 +79,12 @@ assert(pen.hpDmg === 3 && d.def === 0, 'penetrate staged consume');
 assert(ctx.calcAtkSkillHpDamage({ atkSkill: 3 }, 5, 2, 3, { def: 2 }).hpDmg === 6, 'charge +DP');
 assert(ctx.calcAtkSkillHpDamage({ atkSkill: 4 }, 5, 2, 0, { def: 2 }).hpDmg === 6, 'double');
 assert(Math.ceil(5 / 2) === 3, 'lifesteal ceil');
+const woundedLifesteal = { name: 'W', hp: 3, maxHp: 6 };
+assert(ctx.applyLifesteal(woundedLifesteal, 5) === 3 && woundedLifesteal.hp === 6, 'lifesteal caps at maxHp');
+const fullLifesteal = { name: 'F', hp: 6, maxHp: 6 };
+assert(ctx.applyLifesteal(fullLifesteal, 5) === 0 && fullLifesteal.hp === 6, 'lifesteal full HP gives zero');
+const legacyLifesteal = { name: 'L', hp: 3 };
+assert(ctx.applyLifesteal(legacyLifesteal, 5) === 0 && legacyLifesteal.hp === 3, 'lifesteal without maxHp stays capped');
 // no pierce-ignore
 assert(ctx.calcAtkSkillHpDamage({ atkSkill: 1 }, 7, 4, 0, { def: 4 }).hpDmg === 3, 'normal blocks');
 
