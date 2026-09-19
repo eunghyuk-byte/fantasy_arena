@@ -359,7 +359,7 @@ const SpellFx = (() => {
         if (low) cssFallback(stage, elem);
         else handle = burst(elem, kind, false);
         if (kind === "earthquake" && game) game.classList.add("quake");
-        try { Sfx.spell && Sfx.spell(kind); } catch (e) {}
+        try { Sfx.spell && Sfx.spell(elem || kind); } catch (e) {}
       }, T.vfxAt);
       setTimeout(() => {
         if (handle) handle.stop();

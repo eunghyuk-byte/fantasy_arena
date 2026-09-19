@@ -114,7 +114,7 @@ const Vfx = (() => {
     lunge(atkEl);
     await waitMs(190);
     slash(atkEl, defEl, crit);
-    try { Sfx.playSlash(); } catch(e) {}
+    try { Sfx.playSlash(!!crit); } catch(e) {}
     shake(crit ? 360 : 240, !!crit);
     recoil(defEl);
     dmgPop(defEl, dmg);
