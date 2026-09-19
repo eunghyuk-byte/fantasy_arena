@@ -105,41 +105,86 @@ function flyDrawCard() {
   const a = pile.getBoundingClientRect();
   const b = last ? last.getBoundingClientRect() : hand.getBoundingClientRect();
   if (last) last.style.opacity = "0";
-  const ghost = document.createElement("div");
-  ghost.className = "draw-ghost";
   const face = last && last.querySelector(".card-face");
-  if (face && face.src) ghost.innerHTML = '<img src="'+face.src+'" alt="">';
-  const endW = last ? b.width : 72;
-  const endH = last ? b.height : 108;
-  const startScale = Math.max(0.55, Math.min(a.width / endW, a.height / endH, 0.82));
-  const startLeft = a.left + a.width / 2 - endW / 2;
-  const startTop = a.top + a.height / 2 - endH / 2;
-  ghost.style.cssText = "position:fixed;left:"+startLeft+"px;top:"+startTop+"px;width:"+endW+"px;height:"+endH+"px;z-index:130;pointer-events:none;transform-origin:center center;will-change:transform;";
-  document.body.appendChild(ghost);
-  const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
-  const dy = (b.top + b.height / 2) - (a.top + a.height / 2);
-  const travel = Math.hypot(dx, dy);
-  const arcLift = Math.max(120, Math.min(200, travel * 0.28));
-  const peakY = dy * 0.22 - arcLift;
-  const midX = dx * 0.38;
-  const mid2X = dx * 0.78;
-  const mid2Y = dy * 0.7 - arcLift * 0.18;
-  const anim = ghost.animate([
-    { transform: "translate(0,0) rotate(-24deg) scale("+startScale+")", offset: 0 },
-    { transform: "translate("+(midX)+"px,"+(peakY)+"px) rotate(10deg) scale("+Math.max(startScale, 0.9)+")", offset: 0.36 },
-    { transform: "translate("+(mid2X)+"px,"+(mid2Y)+"px) rotate(-8deg) scale(1.05)", offset: 0.7 },
-    { transform: "translate("+dx+"px,"+(dy - 8)+"px) rotate(4deg) scale(1.02)", offset: 0.9 },
-    { transform: "translate("+dx+"px,"+dy+"px) rotate(0deg) scale(1)", offset: 1 }
-  ], { duration: 1120, easing: "cubic-bezier(.18,.72,.1,1)", fill: "forwards" });
-  let finished = false;
-  const done = () => {
-    if (finished) return;
-    finished = true;
-    ghost.remove();
-    if (last) last.style.opacity = "";
+  const pileFaceUrl = () => {
+    const layer = pile.querySelector(".pile-layer") || pile;
+    const bg = (typeof getComputedStyle === "function" ? getComputedStyle(layer).backgroundImage : "") || "";
+    const m = /url\((['"]?)(.*?)\1\)/.exec(bg);
+    return (m && m[2]) ? m[2] : "";
   };
-  anim.onfinish = done;
-  setTimeout(done, 1250);
+  const startFlight = (src) => {
+    const ghost = document.createElement("div");
+    ghost.className = "draw-ghost";
+    if (src) ghost.innerHTML = '<img src="'+src+'" alt="">';
+    const endW = last ? b.width : 72;
+    const endH = last ? b.height : 108;
+    const startScale = Math.max(0.55, Math.min(a.width / endW, a.height / endH, 0.82));
+    const startLeft = a.left + a.width / 2 - endW / 2;
+    const startTop = a.top + a.height / 2 - endH / 2;
+    ghost.style.cssText = "position:fixed;left:"+startLeft+"px;top:"+startTop+"px;width:"+endW+"px;height:"+endH+"px;z-index:130;pointer-events:none;transform-origin:center center;will-change:transform;";
+    document.body.appendChild(ghost);
+    const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
+    const dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+    const travel = Math.hypot(dx, dy);
+    const arcLift = Math.max(120, Math.min(200, travel * 0.28));
+    const peakY = dy * 0.22 - arcLift;
+    const midX = dx * 0.38;
+    const mid2X = dx * 0.78;
+    const mid2Y = dy * 0.7 - arcLift * 0.18;
+    const anim = ghost.animate([
+      { transform: "translate(0,0) rotate(-24deg) scale("+startScale+")", offset: 0 },
+      { transform: "translate("+(midX)+"px,"+(peakY)+"px) rotate(10deg) scale("+Math.max(startScale, 0.9)+")", offset: 0.36 },
+      { transform: "translate("+(mid2X)+"px,"+(mid2Y)+"px) rotate(-8deg) scale(1.05)", offset: 0.7 },
+      { transform: "translate("+dx+"px,"+(dy - 8)+"px) rotate(4deg) scale(1.02)", offset: 0.9 },
+      { transform: "translate("+dx+"px,"+dy+"px) rotate(0deg) scale(1)", offset: 1 }
+    ], { duration: 1120, easing: "cubic-bezier(.18,.72,.1,1)", fill: "forwards" });
+    let finished = false;
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      ghost.remove();
+      if (last) last.style.opacity = "";
+    };
+    anim.onfinish = done;
+    setTimeout(done, 1250);
+  };
+  const faceSrc = () => (face && (face.currentSrc || face.src)) || "";
+  let started = false;
+  const beginOnce = (s) => {
+    if (started) return;
+    started = true;
+    startFlight(s);
+  };
+  let src = faceSrc();
+  if (src) {
+    beginOnce(src);
+    return;
+  }
+  const t0 = performance.now();
+  const waitMs = 400;
+  const tick = () => {
+    if (started) return;
+    src = faceSrc();
+    if (src) {
+      const go = () => beginOnce(src);
+      if (face && typeof face.decode === "function") {
+        const remain = Math.max(0, waitMs - (performance.now() - t0));
+        Promise.race([
+          face.decode().catch(() => {}),
+          new Promise(r => setTimeout(r, remain))
+        ]).then(go);
+      } else {
+        go();
+      }
+      return;
+    }
+    if (performance.now() - t0 >= waitMs) {
+      beginOnce(pileFaceUrl());
+      return;
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
 
