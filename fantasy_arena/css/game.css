@@ -3100,3 +3100,319 @@ html, body {
   box-shadow: none !important;
   object-fit: contain !important;
 }
+
+/* ===== FINAL OVERRIDE: contain in parchment; mirror about painted center line =====
+   Board art (board.jpg) is object-fit:fill on #game; painted divider ≈ 50%.
+   Inner tan ≈ 15%–82% vertically, ≈ 14%–86% horizontally.
+   Hands overlay — must NOT take grid rows that shift the board seam off 50%. */
+#game.active {
+  --paint-center: 50%;
+  --frame-inset-top: 15%;
+  --frame-inset-bottom: 18%;
+  --frame-inset-x: max(48px, 13.5%);
+  --board-gap: clamp(3px, 0.55vw, 8px);
+  --hud-col: clamp(76px, 10cqi, 120px);
+}
+#game.active .playfield {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+#game.active .col-main {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  grid-column: 1 !important;
+  /* Single cell — boards/hands are absolutely placed against painted geometry */
+  grid-template-rows: 1fr !important;
+  grid-template-areas: none !important;
+}
+#game.active .col-hud {
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: var(--hud-col) !important;
+  max-width: 22% !important;
+  z-index: 8 !important;
+  pointer-events: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* Opp half: top of tan → painted center. Cards sit on bottom of half (just above line). */
+#game.active .board.opp,
+#game.active #oppBoard {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: var(--frame-inset-top) !important;
+  bottom: var(--paint-center) !important;
+  height: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  grid-area: unset !important;
+  z-index: 4 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: flex-end !important;
+  gap: var(--board-gap) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  container-type: size !important;
+  padding-left: var(--frame-inset-x) !important;
+  padding-right: var(--frame-inset-x) !important;
+  padding-top: 2px !important;
+  padding-bottom: clamp(3px, 0.8%, 8px) !important;
+  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-h: min(calc(var(--slot-w) / 0.66), calc(100cqh - 4px)) !important;
+}
+
+/* My half: painted center → bottom of tan. Cards sit on top of half (just below line). */
+#game.active #myBoard {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: var(--paint-center) !important;
+  bottom: var(--frame-inset-bottom) !important;
+  height: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  grid-area: unset !important;
+  z-index: 4 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: var(--board-gap) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  container-type: size !important;
+  padding-left: var(--frame-inset-x) !important;
+  padding-right: var(--frame-inset-x) !important;
+  padding-top: clamp(3px, 0.8%, 8px) !important;
+  padding-bottom: 2px !important;
+  --slot-w: calc((100cqi - 5 * var(--board-gap)) / 6) !important;
+  --slot-h: min(calc(var(--slot-w) / 0.66), calc(100cqh - 4px)) !important;
+}
+
+/* Propagate board slot size to HUD (approx from game width + frame) */
+#game.active,
+#game.active .playfield,
+#game.active .col-main,
+#game.active .col-hud {
+  --board-gap: clamp(3px, 0.55vw, 8px);
+  --frame-inset-x: max(48px, 13.5%);
+  --slot-w: calc((100cqi - 2 * var(--frame-inset-x) - 5 * var(--board-gap)) / 6) !important;
+  --slot-h: calc(var(--slot-w) / 0.66) !important;
+}
+
+#game.active .board .slot.empty,
+#game.active #myBoard .slot.empty,
+#game.active #oppBoard .slot.empty {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+#game.active .board .slot.filled,
+#game.active #myBoard .slot.filled,
+#game.active #oppBoard .slot.filled,
+#game.active .board .slot:not(.empty),
+#game.active #myBoard .slot:not(.empty),
+#game.active #oppBoard .slot:not(.empty) {
+  flex: 0 0 var(--slot-w) !important;
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-height: var(--slot-h) !important;
+  max-height: var(--slot-h) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+#game.active .board .minion,
+#game.active #myBoard .minion,
+#game.active #oppBoard .minion,
+#game.active .slot.filled .minion {
+  width: var(--slot-w) !important;
+  height: var(--slot-h) !important;
+  min-width: var(--slot-w) !important;
+  min-height: var(--slot-h) !important;
+  max-width: var(--slot-w) !important;
+  max-height: var(--slot-h) !important;
+  margin: 0 !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+  flex: 0 0 var(--slot-w) !important;
+}
+#game.active .board .minion .card-face,
+#game.active #myBoard .minion .card-face,
+#game.active #oppBoard .minion .card-face {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+/* Hands overlay — do not steal vertical space from board halves */
+#game.active .opp-hand,
+#game.active #oppHand {
+  position: absolute !important;
+  top: 1% !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 12% !important;
+  z-index: 6 !important;
+  grid-area: unset !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+}
+#game.active .my-hand,
+#game.active #myHand {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 20% !important;
+  z-index: 6 !important;
+  grid-area: unset !important;
+  container-type: normal !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  overflow: visible !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  min-height: 0 !important;
+}
+#game.active .hint,
+#game.active #hint {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: auto !important;
+  z-index: 7 !important;
+  grid-area: unset !important;
+  pointer-events: none !important;
+}
+
+/* HAND: large cards independent of board slot size; no yellow borders */
+#game.active {
+  container-type: size !important;
+  container-name: game !important;
+}
+#game.active .my-hand .card.playable > .play-glow,
+#game.active .my-hand .card > .play-glow,
+#game.active #myHand .play-glow {
+  display: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+#game.active .my-hand .card,
+#game.active .my-hand .card.playable,
+#game.active #myHand .card,
+#game.active #myHand .card.playable {
+  height: min(120%, 38cqh) !important;
+  max-height: 38cqh !important;
+  min-height: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  aspect-ratio: 0.66 / 1 !important;
+  flex: 0 0 auto !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: 0 12px 20px rgba(0,0,0,.4) !important;
+  background: transparent !important;
+}
+#game.active .my-hand .card .card-face,
+#game.active #myHand .card .card-face {
+  width: 100% !important;
+  height: 100% !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  object-fit: contain !important;
+}
+
+.hud-hero .hero-slot,
+.hud-hero .hero-portrait {
+  --hero-h: calc(var(--slot-h) * 0.5) !important;
+  width: calc(var(--hero-h) * 0.66) !important;
+  height: var(--hero-h) !important;
+}
+.deck-pile {
+  width: calc(var(--slot-h) * 0.5 * 0.66) !important;
+}
+.pile-stack {
+  height: calc(var(--slot-h) * 0.5 * 0.92) !important;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  #game.active {
+    --frame-inset-top: 14%;
+    --frame-inset-bottom: 16%;
+    --frame-inset-x: max(36px, 12.5%);
+  }
+  #game.active .my-hand,
+  #game.active #myHand {
+    height: 22% !important;
+  }
+}
+
+/* ===== fix: force parchment X inset on boards (override prior 6% var) ===== */
+#game.active .board.opp,
+#game.active #oppBoard,
+#game.active #myBoard {
+  --frame-inset-x: max(48px, 13.5%) !important;
+  padding-left: max(48px, 13.5%) !important;
+  padding-right: max(48px, 13.5%) !important;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  #game.active .board.opp,
+  #game.active #oppBoard,
+  #game.active #myBoard {
+    --frame-inset-x: max(36px, 12.5%) !important;
+    padding-left: max(36px, 12.5%) !important;
+    padding-right: max(36px, 12.5%) !important;
+  }
+}
+
+/* unify X inset — always parchment-safe */
+#game.active .board.opp,
+#game.active #oppBoard,
+#game.active #myBoard {
+  --frame-inset-x: max(40px, 14%) !important;
+  padding-left: max(40px, 14%) !important;
+  padding-right: max(40px, 14%) !important;
+}
+
+/* clearer breathing room from painted center stroke */
+#game.active .board.opp,
+#game.active #oppBoard {
+  padding-bottom: clamp(6px, 1.2%, 12px) !important;
+}
+#game.active #myBoard {
+  padding-top: clamp(6px, 1.2%, 12px) !important;
+}
