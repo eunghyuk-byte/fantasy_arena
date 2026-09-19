@@ -40,7 +40,7 @@ const HUD_UI = {
  * 바람안정: Wind = atk≈def≈hp 균형 · 코인 저분산(±0~1)
  * 빛+코인: Light = 성장형 · 전원 플러스 코인만 · 베이스 스탯 낮게
  * 암도박베이스↑: Dark = 도박 · ±5급 코인 · 리스크 보상으로 베이스 스탯 강함
- * 전체공격(9): ATK 1–2 only · 대상별 DEF · atk≤def → HP피해 0
+ * 광역공격(9): ATK 1–2 only · 대상별 DEF · atk≤def → HP피해 0
  * =============================================================================
  */
 const ATK_SKILL_LABEL = {
@@ -52,7 +52,7 @@ const ATK_SKILL_LABEL = {
   6: "흡혈공격",
   7: "약화공격",
   8: "석화공격",
-  9: "전체공격",
+  9: "광역공격",
   10: "돌파공격"
 };
 const ATK_SKILL_DESC = {
@@ -64,7 +64,7 @@ const ATK_SKILL_DESC = {
   6: "준 체력 데미지 절반(올림) 회복",
   7: "공격 시 먼저 공/방 −1 후 타격",
   8: "공격 시 먼저 공=0·방+1 후 타격",
-  9: "적 진영 전체 한 번에 공격(대상별 방어, 막히면 HP 0)",
+  9: "적 하수인 모두에게 광역공격(대상별 방어, 막히면 HP 0)",
   10: "죽여면 다음 적에게 이어서 공격"
 };
 const ATK_SKILL_ID = {
@@ -101,7 +101,7 @@ const CARDS = [
   { id:"e17", tribe:"earth", name:"고르곤", cost:5, type:"minion", atk:3, hp:5, atkC:3, hpC:0, text:"" , def:2, defC:0},
   { id:"e18", tribe:"earth", name:"에틴", cost:4, type:"minion", atk:3, hp:7, atkC:1, hpC:3, text:"", def:1, defC:0 },
   { id:"e19", tribe:"earth", name:"샌드맨", cost:3, type:"minion", atk:2, hp:6, atkC:5, hpC:-5, text:"" , def:0, defC:0},
-  { id:"e20", tribe:"earth", name:"스핑크스", cost:5, type:"minion", atk:1, hp:5, atkC:2, hpC:0, text:"전체공격", def:1, defC:0, atkSkill:9 },
+  { id:"e20", tribe:"earth", name:"스핑크스", cost:5, type:"minion", atk:1, hp:5, atkC:2, hpC:0, text:"광역공격", def:1, defC:0, atkSkill:9 },
 
   { id:"f1", tribe:"fire", name:"불씨임프", cost:1, type:"minion", atk:3, hp:1, text:"", atkC:-3, hpC:-1 , def:0, defC:0},
   { id:"f2", tribe:"fire", name:"잿더미쥐", cost:1, type:"minion", atk:3, hp:1, text:"", atkC:-3, hpC:-2 , def:0, defC:0},
@@ -237,27 +237,27 @@ const CARDS = [
   { id:"e41", tribe:"earth", name:"하후돈", cost:7, type:"minion", atk:4, hp:9, def:2, atkC:1, defC:0, hpC:2, rarity:"heroic", text:"" },
   { id:"e42", tribe:"earth", name:"조조", cost:5, type:"minion", atk:3, hp:7, def:2, atkC:1, defC:1, hpC:2, rarity:"rare", text:"" },
   { id:"e43", tribe:"earth", name:"순욱", cost:2, type:"minion", atk:1, hp:4, def:1, atkC:1, defC:0, hpC:2, rarity:"common", text:"" },
-  { id:"e44", tribe:"earth", name:"곽가", cost:4, type:"minion", atk:2, hp:5, def:1, atkC:0, defC:0, hpC:2, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"e44", tribe:"earth", name:"곽가", cost:4, type:"minion", atk:2, hp:5, def:1, atkC:0, defC:0, hpC:2, rarity:"rare", atkSkill:9, text:"광역공격" },
   { id:"f22", tribe:"fire", name:"허저", cost:7, type:"minion", atk:7, hp:5, def:1, atkC:-3, defC:-1, hpC:-4, rarity:"heroic", text:"" },
   { id:"f23", tribe:"fire", name:"문추", cost:5, type:"minion", atk:7, hp:3, def:0, atkC:-4, defC:0, hpC:-2, rarity:"rare", text:"" },
-  { id:"f24", tribe:"fire", name:"가후", cost:4, type:"minion", atk:2, hp:2, def:0, atkC:-2, defC:0, hpC:-3, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"f24", tribe:"fire", name:"가후", cost:4, type:"minion", atk:2, hp:2, def:0, atkC:-2, defC:0, hpC:-3, rarity:"rare", atkSkill:9, text:"광역공격" },
   { id:"f25", tribe:"fire", name:"여몽", cost:3, type:"minion", atk:5, hp:2, def:0, atkC:-3, defC:0, hpC:-2, rarity:"common", text:"" },
   { id:"n22", tribe:"wind", name:"태사자", cost:6, type:"minion", atk:5, hp:5, def:4, atkC:1, defC:1, hpC:0, rarity:"heroic", text:"" },
   { id:"n23", tribe:"wind", name:"안량", cost:5, type:"minion", atk:4, hp:4, def:3, atkC:1, defC:1, hpC:1, rarity:"rare", text:"" },
-  { id:"n24", tribe:"wind", name:"육손", cost:4, type:"minion", atk:2, hp:3, def:2, atkC:1, defC:1, hpC:0, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"n24", tribe:"wind", name:"육손", cost:4, type:"minion", atk:2, hp:3, def:2, atkC:1, defC:1, hpC:0, rarity:"rare", atkSkill:9, text:"광역공격" },
   { id:"n25", tribe:"wind", name:"손상향", cost:2, type:"minion", atk:2, hp:2, def:2, atkC:1, defC:0, hpC:1, rarity:"common", text:"" },
   { id:"a22", tribe:"water", name:"손책", cost:7, type:"minion", atk:5, hp:5, def:4, atkC:1, defC:2, hpC:1, rarity:"heroic", text:"" },
   { id:"a23", tribe:"water", name:"감녕", cost:5, type:"minion", atk:3, hp:3, def:4, atkC:1, defC:2, hpC:0, rarity:"rare", text:"" },
-  { id:"a24", tribe:"water", name:"주유", cost:4, type:"minion", atk:2, hp:3, def:3, atkC:0, defC:2, hpC:1, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"a24", tribe:"water", name:"주유", cost:4, type:"minion", atk:2, hp:3, def:3, atkC:0, defC:2, hpC:1, rarity:"rare", atkSkill:9, text:"광역공격" },
   { id:"a25", tribe:"water", name:"손권", cost:3, type:"minion", atk:1, hp:3, def:3, atkC:0, defC:2, hpC:1, rarity:"common", text:"" },
   { id:"l22", tribe:"light", name:"강유", cost:7, type:"minion", atk:5, hp:5, def:2, atkC:2, defC:1, hpC:2, rarity:"heroic", text:"" },
   { id:"l23", tribe:"light", name:"유비", cost:4, type:"minion", atk:2, hp:3, def:1, atkC:1, defC:1, hpC:2, rarity:"rare", text:"" },
-  { id:"l24", tribe:"light", name:"제갈량", cost:5, type:"minion", atk:2, hp:3, def:1, atkC:1, defC:1, hpC:1, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"l24", tribe:"light", name:"제갈량", cost:5, type:"minion", atk:2, hp:3, def:1, atkC:1, defC:1, hpC:1, rarity:"rare", atkSkill:9, text:"광역공격" },
   { id:"l25", tribe:"light", name:"법정", cost:2, type:"minion", atk:1, hp:2, def:0, atkC:1, defC:0, hpC:2, rarity:"common", text:"" },
   { id:"d22", tribe:"dark", name:"장료", cost:6, type:"minion", atk:8, hp:7, def:3, atkC:5, defC:-2, hpC:-5, rarity:"heroic", text:"" },
   { id:"d23", tribe:"dark", name:"초선", cost:2, type:"minion", atk:3, hp:4, def:2, atkC:5, defC:-2, hpC:-4, rarity:"common", text:"" },
   { id:"d24", tribe:"dark", name:"원소", cost:4, type:"minion", atk:5, hp:5, def:3, atkC:-5, defC:3, hpC:3, rarity:"rare", text:"" },
-  { id:"d25", tribe:"dark", name:"사마의", cost:5, type:"minion", atk:2, hp:6, def:3, atkC:4, defC:-3, hpC:3, rarity:"rare", atkSkill:9, text:"전체공격" },
+  { id:"d25", tribe:"dark", name:"사마의", cost:5, type:"minion", atk:2, hp:6, def:3, atkC:4, defC:-3, hpC:3, rarity:"rare", atkSkill:9, text:"광역공격" },
   { id:"coin", name:"동전", cost:0, type:"spell", text:"이번 턴 마나 +1", spell:{ type:"mana", value:1 }, token:true },
   { id:"recruit", name:"암석", cost:1, type:"minion", atk:1, hp:2, text:"영웅 능력", token:true, tribe:"earth", atkC:2, hpC:2 , def:0, defC:0},
 ];
@@ -536,7 +536,7 @@ const CARD_LORE = {
   n25:"활시위에 바람을 매는 여장수. 화살보다 먼저 깃발이 기울어진다.",
   a22:"소패왕. 물결처럼 밀고 들어가도 방패는 강물처럼 남는다.",
   a23:"강동의 해적 장수. 갑옷보다 배짱이 두껍고, 창보다 물길이 길다.",
-  a24:"적벽을 설계한 도독. 한 번의 전체 공격이 강 위의 불길을 부른다.",
+  a24:"적벽을 설계한 도독. 한 번의 광역공격이 강 위의 불길을 부른다.",
   a25:"강동을 지키는 군주. 칼보다 방패를 먼저 고르는 물의 왕.",
   l22:"촉의 후계 무인. 낮은 출발을 빛의 코인으로 끌어올린다.",
   l23:"인자한 군주. 베이스는 약해도 플러스만 쌓이면 전장이 밝아진다.",
@@ -545,5 +545,5 @@ const CARD_LORE = {
   d22:"합비를 공포로 물들인 장수. 강한 몸으로 도박 판에 올라 창을 ±5로 흔든다.",
   d23:"미모가 함정인 무희. 베이스는 두툼하나 코인이 운명을 가른다.",
   d24:"사백만을 말한 군주. 강한 진영을 깔고도 한 번의 동전으로 무너질 수 있다.",
-  d25:"죽은 척하며 판을 뒤집는 책사. 전체 공격은 약해도 도박 코인이 전장을 기울인다.",
+  d25:"죽은 척하며 판을 뒤집는 책사. 광역공격은 약해도 도박 코인이 전장을 기울인다.",
 };

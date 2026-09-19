@@ -201,10 +201,10 @@ function doAttack(p, attacker, target, auto) {
     const sk = atkSkillOf(attacker);
     const foe = opponent(p);
 
-    // —— 9 전체공격: one shared roll → all enemy board minions (heroes excluded) ——
+    // —— 9 광역공격: one shared roll → all enemy board minions (heroes excluded) ——
     if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
       const victims = foe.board.filter(m => m.hp > 0 && !m.dying).slice();
-      log(`${attacker.name} 전체공격 → 적 하수인 ${victims.length}체`);
+      log(`${attacker.name} 광역공격 → 적 하수인 ${victims.length}체`);
       let totalDealt = 0;
       for (const vic of victims) {
         if (attacker.hp <= 0 || attacker.dying) break;

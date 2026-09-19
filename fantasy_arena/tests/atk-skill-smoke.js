@@ -25,7 +25,7 @@ let failed = 0;
 const assert = (cond, msg) => { if (!cond) { console.error('FAIL:', msg); failed++; } else console.log('OK:', msg); };
 
 assert(ctx.ATK_SKILL_LABEL[2] === '관통공격', 'label 2 penetrate');
-assert(ctx.ATK_SKILL_LABEL[9] === '전체공격', 'label 9 cleave');
+assert(ctx.ATK_SKILL_LABEL[9] === '광역공격', 'label 9 cleave');
 assert(ctx.ATK_SKILL_LABEL[10] === '돌파공격', 'label 10 trample');
 assert(!Object.values(ctx.ATK_SKILL_LABEL).some(s => /방어무시|혼란/.test(s)), 'no old skills in labels');
 assert(ctx.ATK_SKILL_ID.penetrate === 2 && ctx.ATK_SKILL_ID.cleave === 9 && ctx.ATK_SKILL_ID.trample === 10, 'ATK_SKILL_ID map');
@@ -40,12 +40,12 @@ for (const c of earth) {
   if (sk >= 2) (bySkill[sk] = bySkill[sk] || []).push(`${c.id}:${c.name}:atk${c.atk}`);
 }
 for (let i = 2; i <= 10; i++) assert(bySkill[i] && bySkill[i].length >= 1, `skill ${i} ≥1 earth (${ctx.ATK_SKILL_LABEL[i]})`);
-// Skills 2–8,10 remain earth-only; skill 9(전체공격) allowed on SGZ strategists too
+// Skills 2–8,10 remain earth-only; skill 9(광역공격) allowed on SGZ strategists too
 assert(ctx.CARDS.filter(c => c.tribe !== 'earth' && (c.atkSkill | 0) >= 2 && (c.atkSkill | 0) !== 9).length === 0, 'earth-only (non-cleave)');
 const cleaveIds = new Set(['e20','e44','f24','n24','a24','l24','d25']);
 assert(ctx.CARDS.filter(c => c.atkSkill === 9).every(c => cleaveIds.has(c.id) || c.tribe === 'earth'), 'cleave allowlist');
 
-// 전체공격 hard ATK nerf gate (1–2)
+// 광역공격 hard ATK nerf gate (1–2)
 for (const c of ctx.CARDS.filter(c => c.atkSkill === 9)) {
   assert(c.atk >= 1 && c.atk <= 2, `cleave ${c.id} atk ${c.atk} in 1–2`);
   console.log('CLEAVE:', c.id, c.name, 'atk=' + c.atk, 'cost=' + c.cost);

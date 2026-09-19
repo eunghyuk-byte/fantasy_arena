@@ -14,14 +14,14 @@
 
 ## Attack specials (1–10)
 
-일반 · 관통 · 돌진 · 연속 · 치명 · 흡혈 · 약화 · 석화 · 전체 · 돌파  
+일반 · 관통 · 돌진 · 연속 · 치명 · 흡혈 · 약화 · 석화 · 광역 · 돌파  
 (NO 방어무시 / 혼란)
 
-- **전체공격**: all enemy minions; per-target DEF; `atk ≤ def → 0 HP dmg`. Cards keep ATK 1–2.
+- **광역공격**: all enemy minions; per-target DEF; `atk ≤ def → 0 HP dmg`. Cards keep ATK 1–2.
 - **돌파공격**: chain to next after kill (cap = board size).
 
 ## SGZ30
 
-See `qa_sgz30/BALANCE_DRAFT.md` (or this doc + `cards-data.js`). Legends martial cost 9: 마초/장비/조운/관우/황충/여포. 전체 on 곽가/가후/육손/주유/제갈량/사마의.
+See `qa_sgz30/BALANCE_DRAFT.md` (or this doc + `cards-data.js`). Legends martial cost 9: 마초/장비/조운/관우/황충/여포. 광역 on 곽가/가후/육손/주유/제갈량/사마의.
 
 IMAGE follow-up: new SGZ non-legend cards currently reuse tribe-legend art placeholders.

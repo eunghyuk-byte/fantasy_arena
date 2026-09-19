@@ -37,7 +37,7 @@ with sync_playwright() as p:
     page.click('#btnHelp')
     time.sleep(0.4)
     help_txt = page.locator('#helpPop').inner_text()
-    skills = ['일반공격','관통공격','돌진공격','연속공격','치명공격','흡혈공격','약화공격','석화공격','전체공격','돌파공격']
+    skills = ['일반공격','관통공격','돌진공격','연속공격','치명공격','흡혈공격','약화공격','석화공격','광역공격','돌파공격']
     missing = [s for s in skills if s not in help_txt]
     results['E_help_10'] = len(missing) == 0
     results['E_help_missing'] = missing
