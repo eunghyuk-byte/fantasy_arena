@@ -191,7 +191,7 @@ async function composeCardFace(c, opts={}) {
 
   let art = null;
   if (typeof CARD_ART !== "undefined" && CARD_ART[c.id]) art = await loadImg(CARD_ART[c.id]);
-  if (!art && c.type !== "spell" && typeof CARD_FACE !== "undefined" && CARD_FACE[c.id]) art = await loadImg(CARD_FACE[c.id]);
+  if (!art && typeof CARD_FACE !== "undefined" && CARD_FACE[c.id]) art = await loadImg(CARD_FACE[c.id]);
   if (art) {
     if (tribe.id === "dark") ctx.filter = "brightness(1.48) contrast(1.10) saturate(1.12)";
     const isFull = !!(typeof CARD_ART !== "undefined" && CARD_ART[c.id]);
@@ -345,7 +345,7 @@ async function paintStatCoins(ctx, c, W, H) {
 
 const _faceWait = new Map();
 function faceSrc(c, opts, el) {
-  const key = ["v62mid", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name].join("|");
+  const key = ["v63coin", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name].join("|");
   if (_faceWait.has(key)) {
     _faceWait.get(key).then(src => { if (el) el.src = src; });
     return _faceWait.get(key);
