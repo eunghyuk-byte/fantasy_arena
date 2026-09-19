@@ -153,7 +153,7 @@ W(0)=0, W(1)=2.0, W(2)=4.5, W(3)=7.5
 | **물 방어** |
 | **바람 안정** |
 | **빛 코인** |
-| **암 도박** |
+| **암 승부** |
 
 > Specialties are biases inside the cost-band / weighted-score budget; the curve handles fairness.
 
