@@ -415,7 +415,7 @@ function resolvePlayAbility(p, m) {
     log(`${m.name} 활력 → 다른 아군 현재·최대 체력 +1`);
   } else if (ab === "결속") {
     if (!allies.length) { log(`${m.name} 결속 · 대상 아군 없음`); return; }
-    allies.forEach(a => { a.def = (a.def || 0) + 1; });
+    allies.forEach(a => { a.def = Math.min(5, Math.max(0, (a.def || 0) + 1)); });
     log(`${m.name} 결속 → 다른 아군 방어 +1`);
   } else if (ab === "위압") {
     const e = opponent(p);

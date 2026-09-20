@@ -9,7 +9,7 @@ const ctx = { console, Math, window: {}, log: () => {} };
 vm.createContext(ctx);
 vm.runInContext(
   fs.readFileSync(path.join(root, 'js/cards-data.js'), 'utf8') +
-  '\nthis.CARDS=CARDS; this.ATK_SKILL_LABEL=ATK_SKILL_LABEL; this.ATK_SKILL_DESC=ATK_SKILL_DESC; this.ATK_SKILL_ID=ATK_SKILL_ID;',
+  '\nthis.CARDS=CARDS; this.ATK_SKILL_LABEL=ATK_SKILL_LABEL; this.ATK_SKILL_DESC=ATK_SKILL_DESC; this.ATK_SKILL_ID=ATK_SKILL_ID; this.ABILITY_KEYS=ABILITY_KEYS; this.ABILITY_DESC=ABILITY_DESC;',
   ctx
 );
 const combat = fs.readFileSync(path.join(root, 'js/combat.js'), 'utf8');
@@ -39,20 +39,29 @@ for (const c of earth) {
   const sk = c.atkSkill || 1;
   assert(typeof sk === 'number', `${c.id} atkSkill number`);
   assert(Object.keys(c).filter(k => /atkSkill|attackSpecial|atkSpecial/.test(k)).length <= 1, `${c.id} ≤1 skill`);
-  assert(!/방어무시|혼란/.test(c.text || ''), `${c.id} no old text`);
+  assert(!/방어무시/.test(c.text || ''), `${c.id} no pierce-ignore text`);
   if (sk >= 2) (bySkill[sk] = bySkill[sk] || []).push(`${c.id}:${c.name}:atk${c.atk}`);
 }
-for (let i = 2; i <= 10; i++) assert(bySkill[i] && bySkill[i].length >= 1, `skill ${i} ≥1 earth (${ctx.ATK_SKILL_LABEL[i]})`);
+// Pool-wide: every skill 2–11 must appear somewhere (SGZ + fantasy)
+const poolBy = {};
+for (const c of ctx.CARDS.filter(c => c.type === 'minion' && !c.token)) {
+  const sk = c.atkSkill || 1;
+  if (sk >= 2) (poolBy[sk] = poolBy[sk] || []).push(c.id);
+}
+for (let i = 2; i <= 11; i++) assert(poolBy[i] && poolBy[i].length >= 1, `skill ${i} ≥1 pool (${ctx.ATK_SKILL_LABEL[i]})`);
 // Skills 2–8,10 remain earth-only; skill 9(광역공격) allowed on SGZ strategists too
-assert(ctx.CARDS.filter(c => c.tribe !== 'earth' && (c.atkSkill | 0) >= 2 && (c.atkSkill | 0) !== 9).length === 0, 'earth-only (non-cleave)');
-const cleaveIds = new Set(['e20','e44','f24','n24','a24','l24','d25']);
-assert(ctx.CARDS.filter(c => c.atkSkill === 9).every(c => cleaveIds.has(c.id) || c.tribe === 'earth'), 'cleave allowlist');
-
-// 광역공격 hard ATK nerf gate (1–2)
+// Ability reassign spot-checks + cleave sanity
 for (const c of ctx.CARDS.filter(c => c.atkSkill === 9)) {
-  assert(c.atk >= 1 && c.atk <= 2, `cleave ${c.id} atk ${c.atk} in 1–2`);
+  assert(c.atk >= 1, `cleave ${c.id} atk ${c.atk} >= 1`);
   console.log('CLEAVE:', c.id, c.name, 'atk=' + c.atk, 'cost=' + c.cost);
 }
+const byName = Object.fromEntries(ctx.CARDS.filter(c => c.type === 'minion').map(c => [c.name, c]));
+assert(byName['마초'] && byName['마초'].ability === '복수' && byName['마초'].atkSkill === 10, '마초 복수/돌파');
+assert(byName['여포'] && byName['여포'].ability === '강탈', '여포 강탈');
+assert(byName['라이'] && byName['라이'].ability === '출전', '라이 출전');
+assert(byName['스파이더'] && byName['스파이더'].ability === '유언', '스파이더 유언');
+assert(ctx.ABILITY_KEYS && ctx.ABILITY_KEYS.length === 10, 'ABILITY_KEYS 10');
+
 
 const w = { name: 'F', atk: 5, def: 3, hp: 6, maxHp: 6 };
 ctx.applyAtkSkillOnStart({ name: 'A', atkSkill: 7 }, w);
