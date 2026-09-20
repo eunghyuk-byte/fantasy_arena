@@ -77,10 +77,10 @@ async function resolveMinionHit(p, attacker, owner, def, aAtk, aDefVal, opts) {
   }
   const hpBefore = def.hp;
   if (sk === 5 && hpDmg >= 1) {
-    damageMinion(owner, def, Math.max(hpDmg, def.hp));
+    damageMinion(owner, def, Math.max(hpDmg, def.hp), { killer: attacker, killerOwner: p });
     log(`${attacker.name} 치명공격 → ${def.name} 즉사`);
   } else {
-    damageMinion(owner, def, hpDmg);
+    damageMinion(owner, def, hpDmg, { killer: attacker, killerOwner: p });
   }
   const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
   if (sk === 6) applyLifesteal(attacker, hpDealt);
@@ -183,7 +183,7 @@ function doAttack(p, attacker, target, auto) {
         const defEl = Vfx.elOf(vic.uid);
         await Vfx.attackSeq(atkEl, defEl, hpDmg, hpDmg >= attacker.atk + 2);
         const hpBefore = vic.hp;
-        damageMinion(foe, vic, hpDmg);
+        damageMinion(foe, vic, hpDmg, { killer: attacker, killerOwner: p });
         totalDealt += Math.max(0, hpBefore - Math.max(0, vic.hp));
         if (!(vic.hp > 0 && !vic.dying)) {
           Vfx.death(Vfx.elOf(vic.uid));
@@ -205,7 +205,7 @@ function doAttack(p, attacker, target, auto) {
           const atkNow = Vfx.elOf(attacker.uid);
           const defNow = Vfx.elOf(primary.uid);
           await Vfx.parrySeq(defNow, atkNow, dmgBack);
-          damageMinion(p, attacker, dmgBack);
+          damageMinion(p, attacker, dmgBack, { killer: primary, killerOwner: foe });
           render();
           await waitMs(360);
         }
@@ -260,10 +260,10 @@ function doAttack(p, attacker, target, auto) {
 
         const hpBefore = def.hp;
         if (sk === 5 && hpDmg >= 1) {
-          damageMinion(target.owner, def, Math.max(hpDmg, def.hp));
+          damageMinion(target.owner, def, Math.max(hpDmg, def.hp), { killer: attacker, killerOwner: p });
           log(`${attacker.name} 치명공격 → ${def.name} 즉사`);
         } else {
-          damageMinion(target.owner, def, hpDmg);
+          damageMinion(target.owner, def, hpDmg, { killer: attacker, killerOwner: p });
         }
         const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
         if (sk === 6) applyLifesteal(attacker, hpDealt);
@@ -281,7 +281,7 @@ function doAttack(p, attacker, target, auto) {
             const atkNow = Vfx.elOf(attacker.uid);
             const defNow = Vfx.elOf(def.uid);
             await Vfx.parrySeq(defNow, atkNow, dmgBack);
-            damageMinion(p, attacker, dmgBack);
+            damageMinion(p, attacker, dmgBack, { killer: def, killerOwner: target.owner });
             render();
             await waitMs(360);
           }
@@ -336,7 +336,7 @@ function doAttack(p, attacker, target, auto) {
             log(`${next.name} 방어 ${nBlocked} → 체력피해 ${nDmg}`);
             await Vfx.attackSeq(Vfx.elOf(attacker.uid), Vfx.elOf(next.uid), nDmg, false);
             const nb = next.hp;
-            damageMinion(foe, next, nDmg);
+            damageMinion(foe, next, nDmg, { killer: attacker, killerOwner: p });
             render();
             await waitMs(280);
             if (next.hp > 0 && !next.dying) {
@@ -356,7 +356,7 @@ function doAttack(p, attacker, target, auto) {
       pl.board.filter(mm => mm.dying).forEach(mm => {
         const el = Vfx.elOf(mm.uid);
         if (el && !el.classList.contains("fx-dissolve")) Vfx.death(el);
-        destroyMinion(pl, mm);
+        destroyMinion(pl, mm, { fromSpell: false });
       });
       pl._hurt = null;
       pl.board.forEach(mm => { mm._hurt = null; mm._fxAtk = null; });

@@ -297,41 +297,54 @@ async function composeCardFace(c, opts={}) {
     ctx.restore();
   }
 
-  let txt = (c.text && c.text !== "전설") ? c.text : (c.type === "spell" ? "주문" : "");
   const skill = (c.atkSkill >= 2 && c.atkSkill <= 11) ? (c.atkSkill | 0) : 0;
+  const abil = (c.ability && typeof c.ability === "string") ? c.ability : null;
+  const parts = [];
   if (skill && typeof ATK_SKILL_LABEL !== "undefined" && ATK_SKILL_LABEL[skill]) {
-    txt = ATK_SKILL_LABEL[skill];
+    parts.push({ t: ATK_SKILL_LABEL[skill], bold: true });
   }
-  if (txt) {
-    const tSize = Math.round(H*0.037) + 2;
-    const isSkill = skill >= 2;
+  if (abil) {
+    parts.push({ t: abil, bold: true });
+  }
+  if (!parts.length) {
+    const fallback = (c.text && c.text !== "전설") ? c.text : (c.type === "spell" ? "주문" : "");
+    if (fallback) parts.push({ t: fallback, bold: false });
+  }
+  if (parts.length) {
+    const dual = parts.length >= 2;
+    const tSize = Math.round(H * (dual ? 0.032 : 0.037)) + 2;
+    const lh = tSize * 1.22;
+    const blockH = parts.length * lh;
+    let y0 = H * 0.743 - (blockH - lh) / 2;
     ctx.save();
-    // Attack specials: bold + darker keyword (FA 판마-style)
-    ctx.fillStyle = isSkill ? "#140c04" : "#2a2014";
-    ctx.font = (isSkill ? "900 " : "700 ") + tSize + "px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const maxW = W * 0.62;
-    const lines = [];
-    let line = "";
-    for (const ch of txt) {
-      const test = line + ch;
-      if (ctx.measureText(test).width > maxW && line) {
-        lines.push(line);
-        line = ch;
-      } else line = test;
-    }
-    if (line) lines.push(line);
-    const lh = tSize * 1.28;
-    const startY = H*0.743 - ((lines.length - 1) * lh) / 2;
-    lines.forEach((ln, i) => {
-      if (isSkill) {
-        ctx.strokeStyle = "#140c04";
-        ctx.lineWidth = Math.max(1.5, tSize * 0.06);
-        ctx.lineJoin = "round";
-        ctx.strokeText(ln, W*0.50, startY + i * lh);
+    parts.forEach((part, pi) => {
+      ctx.fillStyle = part.bold ? "#140c04" : "#2a2014";
+      ctx.font = (part.bold ? "900 " : "700 ") + tSize + "px 'Noto Sans KR', sans-serif";
+      // wrap single part if needed
+      const lines = [];
+      let line = "";
+      for (const ch of part.t) {
+        const test = line + ch;
+        if (ctx.measureText(test).width > maxW && line) {
+          lines.push(line);
+          line = ch;
+        } else line = test;
       }
-      ctx.fillText(ln, W*0.50, startY + i * lh);
+      if (line) lines.push(line);
+      lines.forEach((ln, i) => {
+        const y = y0 + i * lh;
+        if (part.bold) {
+          ctx.strokeStyle = "#140c04";
+          ctx.lineWidth = Math.max(1.5, tSize * 0.06);
+          ctx.lineJoin = "round";
+          ctx.strokeText(ln, W * 0.50, y);
+        }
+        ctx.fillText(ln, W * 0.50, y);
+      });
+      y0 += Math.max(1, lines.length) * lh;
     });
     ctx.restore();
   }
@@ -382,7 +395,7 @@ async function paintStatCoins(ctx, c, W, H) {
 
 const _faceWait = new Map();
 function faceSrc(c, opts, el) {
-  const key = ["v65atk", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.atkSkill || 1, c.text || ""].join("|");
+  const key = ["v66abil", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.atkSkill || 1, c.ability || "", c.text || ""].join("|");
   if (_faceWait.has(key)) {
     _faceWait.get(key).then(src => { if (el) el.src = src; });
     return _faceWait.get(key);

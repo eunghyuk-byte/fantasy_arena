@@ -386,15 +386,44 @@ function validTargets(p, fx) {
 
 function findOn(p, uid) { return p.board.find(m => m.uid === uid); }
 
+function abilityOf(m) {
+  return (m && m.ability) || null;
+}
+
 function resolveBattlecry(p, m, target) {
-  return; // battlecry/keywords stripped for now
-  const fx = m.battlecry;
-  if (!fx) return;
-  if (fx.type === "self_buff") {
-    m.atk += fx.atk; m.hp += fx.hp; m.maxHp += fx.hp;
-  } else {
-    applyFx(p, fx, target);
+  resolvePlayAbility(p, m);
+}
+
+/** Play-time special abilities (낼 때). Heroes never targeted. */
+function resolvePlayAbility(p, m) {
+  const ab = abilityOf(m);
+  if (!ab) return;
+  const allies = p.board.filter(x => x.uid !== m.uid && x.hp > 0 && !x.dying);
+  if (ab === "출전") {
+    log(`${m.name} 출전 → 카드 1장 뽑기`);
+    draw(p, 1);
+  } else if (ab === "고무") {
+    if (!allies.length) { log(`${m.name} 고무 · 대상 아군 없음`); return; }
+    allies.forEach(a => { a.atk = (a.atk || 0) + 1; });
+    log(`${m.name} 고무 → 다른 아군 공격 +1`);
+  } else if (ab === "활력") {
+    if (!allies.length) { log(`${m.name} 활력 · 대상 아군 없음`); return; }
+    allies.forEach(a => {
+      a.hp = (a.hp || 0) + 1;
+      a.maxHp = (a.maxHp || a.hp) + 1;
+    });
+    log(`${m.name} 활력 → 다른 아군 현재·최대 체력 +1`);
+  } else if (ab === "결속") {
+    if (!allies.length) { log(`${m.name} 결속 · 대상 아군 없음`); return; }
+    allies.forEach(a => { a.def = (a.def || 0) + 1; });
+    log(`${m.name} 결속 → 다른 아군 방어 +1`);
+  } else if (ab === "위압") {
+    const e = opponent(p);
+    const foes = e.board.filter(x => x.hp > 0 && !x.dying);
+    foes.forEach(x => { x.atk = Math.max(0, (x.atk || 0) - 1); });
+    log(`${m.name} 위압 → 적 유닛 공격 −1 (${foes.length}체, 영웅 제외)`);
   }
+  // 보호·유언·강탈·환생·복수 are passive / death-time
 }
 
 function resolveSpell(p, card, target) {
@@ -411,10 +440,10 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "draw") {
     draw(p, fx.value);
   } else if (fx.type === "aoe_enemy") {
-    [...e.board].forEach(m => damageMinion(e, m, fx.value));
+    [...e.board].forEach(m => damageMinion(e, m, fx.value, { fromSpell: true }));
   } else if (fx.type === "aoe_all_enemy") {
     dealHero(e, fx.value);
-    [...e.board].forEach(m => damageMinion(e, m, fx.value));
+    [...e.board].forEach(m => damageMinion(e, m, fx.value, { fromSpell: true }));
   } else if (fx.type === "kill") {
     if (target && target.kind === "minion") destroyMinion(target.owner, target.minion);
   } else if (fx.type === "buff") {
@@ -447,10 +476,10 @@ function applyFx(p, fx, target) {
     });
   } else if (fx.type === "earthquake") {
     const n = Math.floor((p.maxMana || 0) / 2);
-    [...e.board].forEach(m => damageMinion(e, m, n));
+    [...e.board].forEach(m => damageMinion(e, m, n, { fromSpell: true }));
   } else if (fx.type === "sandtrap") {
     const n = Math.max(0, MAX_BOARD - p.board.length);
-    e.board.slice(0, n).forEach(m => damageMinion(e, m, 3));
+    e.board.slice(0, n).forEach(m => damageMinion(e, m, 3, { fromSpell: true }));
   } else if (fx.type === "maze") {
     [...e.board].forEach(m => { if ((m.cost || 0) > (p.maxMana || 0)) m.dying = true; });
     e.board.filter(m => m.dying).forEach(m => destroyMinion(e, m));
@@ -472,7 +501,7 @@ function applyFx(p, fx, target) {
     [...e.board].forEach(m => {
       m.atk = Math.max(0, m.atk - 1);
       m.def = Math.max(0, (m.def || 0) - 1);
-      damageMinion(e, m, 1);
+      damageMinion(e, m, 1, { fromSpell: true });
     });
   } else if (fx.type === "petrify") {
     e.board.forEach(m => {
@@ -482,13 +511,14 @@ function applyFx(p, fx, target) {
   cleanupBoards();
 }
 
-function dealToTarget(srcOwner, target, n) {
+function dealToTarget(srcOwner, target, n, ctx) {
+  ctx = ctx || { fromSpell: true };
   if (!target) {
     dealHero(opponent(srcOwner), n);
     return;
   }
   if (target.kind === "hero") dealHero(target.owner, n);
-  else damageMinion(target.owner, target.minion, n);
+  else damageMinion(target.owner, target.minion, n, ctx);
 }
 
 function dealHero(p, n) {
@@ -500,29 +530,126 @@ function dealHero(p, n) {
   log(`${p.name} 영웅이 ${n} 피해 (남은 체력 ${p.hp})`);
 }
 
-function damageMinion(owner, m, n) {
-  if (!m) return;
-  // divine shield / keywords disabled — damage applies directly
+function damageMinion(owner, m, n, ctx) {
+  if (!m || m.dying) return;
+  ctx = ctx || {};
+  n = Math.max(0, n | 0);
+  // 보호: absorb only real HP loss (n>0). Blocked 0-damage does not consume.
+  if (n > 0 && abilityOf(m) === "보호") {
+    m.ability = null;
+    log(`${m.name} 보호 → 피해 ${n} 무시`);
+    m._hurt = { from: m.hp, to: m.hp, dmg: 0, shielded: true };
+    return;
+  }
+  if (!n) return;
   const from = m.hp;
   m.hp -= n;
   m.damaged = true;
   m._hurt = { from, to: m.hp, dmg: n };
-  if (m.hp <= 0) m.dying = true;
+  if (m.hp <= 0) {
+    m.dying = true;
+    m._deathCtx = Object.assign({}, m._deathCtx || {}, ctx);
+  }
 }
 
-function destroyMinion(owner, m) {
-  if (!owner.board.some(x => x.uid === m.uid)) return;
+/**
+ * Resolve one lethal death. Order (locked):
+ * 1) fire death abilities (유언/강탈/복수)
+ * 2) if 환생 → revive at 1 HP, clear 환생, stay on board
+ * 3) else remove from board (강탈 uses freed slot when board was full)
+ */
+function resolveDeath(owner, m) {
+  if (!m || !owner || !owner.board.some(x => x.uid === m.uid)) return;
+  const ctx = m._deathCtx || {};
+  const ab = abilityOf(m);
+  const fromSpell = !!ctx.fromSpell;
+
+  // --- death abilities fire first ---
+  if (ab === "유언") {
+    log(`${m.name} 유언 → 카드 1장 뽑기`);
+    draw(owner, 1);
+  } else if (ab === "복수") {
+    if (fromSpell) {
+      log(`${m.name} 복수 · 마법 사망이라 미발동`);
+    } else if (ctx.killer && ctx.killerOwner && ctx.killer.hp > 0 && !ctx.killer.dying) {
+      log(`${m.name} 복수 → ${ctx.killer.name} 사망`);
+      ctx.killer.hp = 0;
+      ctx.killer.dying = true;
+      ctx.killer._deathCtx = Object.assign({}, ctx.killer._deathCtx || {}, {
+        killer: m, killerOwner: owner, fromSpell: false, fromRevenge: true
+      });
+    } else {
+      log(`${m.name} 복수 · 죽인 유닛 없음`);
+    }
+  }
+
+  // --- 환생 after death abilities ---
+  if (ab === "환생") {
+    m.hp = 1;
+    m.dying = false;
+    m.damaged = true;
+    m.ability = null; // 환생 consumed
+    m._deathCtx = null;
+    log(`${m.name} 환생 → 체력 1로 부활 (환생 소멸)`);
+    return;
+  }
+
+  // Remove from board (frees slot for 강탈)
+  const deadSlot = owner.board.findIndex(x => x.uid === m.uid);
   owner.board = owner.board.filter(x => x.uid !== m.uid);
   log(`${m.name} 사망`);
-  /* deathrattle disabled */
+
+  if (ab === "강탈") {
+    const e = opponent(owner);
+    const candidates = e.board.filter(x => x.hp > 0 && !x.dying);
+    if (!candidates.length) {
+      log(`${m.name} 강탈 · 훔칠 적 유닛 없음`);
+    } else if (owner.board.length >= MAX_BOARD) {
+      log(`${m.name} 강탈 · 전장 가득 참`);
+    } else {
+      const steal = candidates[Math.floor(Math.random() * candidates.length)];
+      e.board = e.board.filter(x => x.uid !== steal.uid);
+      // keep state; summoning sickness as if just taken — canAttack stays as-was (상태 유지)
+      const at = (deadSlot >= 0 && deadSlot <= owner.board.length) ? deadSlot : owner.board.length;
+      owner.board.splice(at, 0, steal);
+      log(`${m.name} 강탈 → ${steal.name}을(를) 내 전장으로`);
+    }
+  }
+}
+
+function destroyMinion(owner, m, opts) {
+  if (!m || !owner) return;
+  if (!owner.board.some(x => x.uid === m.uid)) return;
+  opts = opts || {};
+  m.hp = Math.min(m.hp, 0);
+  m.dying = true;
+  // Default: treat as spell/effect destroy (복수 미발동) unless combat already set _deathCtx
+  // or caller passes fromSpell:false.
+  if (opts.fromSpell === false) {
+    // keep existing _deathCtx from damageMinion
+  } else if (opts.fromSpell === true || !m._deathCtx) {
+    m._deathCtx = Object.assign({}, m._deathCtx || {}, { fromSpell: true });
+  }
+  resolveDeath(owner, m);
 }
 
 function cleanupBoards() {
-  [state.p1, state.p2].forEach(p => {
-    const dead = p.board.filter(m => m.hp <= 0 || m.dying);
-    dead.forEach(m => destroyMinion(p, m));
-    p.board = p.board.filter(m => m.hp > 0 && !m.dying);
-  });
+  // Process deaths iteratively (복수 chains, etc.). Cap to avoid runaway.
+  for (let guard = 0; guard < 32; guard++) {
+    let progressed = false;
+    for (const p of [state.p1, state.p2]) {
+      const dead = p.board.filter(m => m.hp <= 0 || m.dying);
+      for (const m of dead) {
+        if (!p.board.some(x => x.uid === m.uid)) continue;
+        // skip if already revived mid-loop
+        if (m.hp > 0 && !m.dying) continue;
+        resolveDeath(p, m);
+        progressed = true;
+      }
+      p.board = p.board.filter(m => m.hp > 0 && !m.dying);
+    }
+    if (!progressed) break;
+  }
 }
 
 function attackTargets(p, attacker) {
@@ -1052,6 +1179,14 @@ function openHelp() {
     }
     skBox.innerHTML = html;
     skBox.dataset.ready = "1";
+  }
+  const abBox = document.getElementById("abilityHelpList");
+  if (abBox && !abBox.dataset.ready && typeof ABILITY_KEYS !== "undefined") {
+    const desc = (typeof ABILITY_DESC !== "undefined") ? ABILITY_DESC : {};
+    abBox.innerHTML = ABILITY_KEYS.map(k =>
+      '<div class="atk-skill-item"><b>' + k + '</b><span>' + (desc[k] || "") + '</span></div>'
+    ).join("");
+    abBox.dataset.ready = "1";
   }
   const box = document.getElementById("raceHelpList");
   if (box && !box.dataset.ready) {

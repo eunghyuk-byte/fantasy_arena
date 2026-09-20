@@ -86,6 +86,33 @@ const ATK_SKILL_ID = {
   chaos: 11
 };
 
+/** Special abilities (특수능력) — separate from atkSkill (특수공격). Korean keys. */
+const ABILITY_KEYS = ["보호","출전","고무","활력","결속","위압","유언","강탈","환생","복수"];
+const ABILITY_DESC = {
+  "보호": "항상. 체력이 실제로 깎일 뻔한 피해 1회만 무시하고 사라짐. 방어로 막힌 0뎀은 안 사라짐.",
+  "출전": "낼 때 카드 1장 뽑기(손10이면 번).",
+  "고무": "낼 때 이미 있는 다른 아군 공격 +1(영구).",
+  "활력": "낼 때 다른 아군 현재·최대 체력 +1(영구).",
+  "결속": "낼 때 다른 아군 방어 +1(영구).",
+  "위압": "낼 때 적 유닛 전원 공격 −1(영구, 최저 0). 영웅 제외.",
+  "유언": "죽을 때 카드 1장 뽑기.",
+  "강탈": "죽을 때 적 유닛 무작위 1장을 내 전장으로(상태 유지). 보드 풀이어도 사망 슬롯으로 발동.",
+  "환생": "죽을 때 체력 1로 1회 부활하며 환생은 사라짐. 사망 능력은 그때도 발동. 다시 죽으면 사망 능력 또 발동.",
+  "복수": "죽을 때 죽인 유닛도 사망(광역 포함). 마법으로 죽으면 미발동."
+};
+const ABILITY_COST = {
+  "유언": 1.25,
+  "출전": 1.5,
+  "고무": 1.5,
+  "활력": 1.75,
+  "위압": 1.75,
+  "보호": 2.0,
+  "복수": 2.0,
+  "결속": 2.25,
+  "환생": 2.5,
+  "강탈": 3.0
+};
+
 const CARDS = [
   { id:"e1", tribe:"earth", name:"록마운틴킹", cost:7, type:"minion", atk:6, hp:10, atkC:0, hpC:-2, text:"", def:1, defC:2 },
   { id:"e2", tribe:"earth", name:"샌드웜", cost:8, type:"minion", atk:6, hp:11, atkC:-4, hpC:4, text:"" , def:2, defC:0},
@@ -170,7 +197,7 @@ const CARDS = [
   { id:"a18", tribe:"water", name:"물의 지혜", cost:3, type:"spell", text:"카드 2장 뽑기", spell:{ type:"draw", value:2 } },
   { id:"a19", tribe:"water", name:"빙하수호", cost:5, type:"minion", atk:2, hp:4, def:3, atkC:0, defC:2, hpC:-2, text:"" },
   { id:"a20", tribe:"water", name:"조류술사", cost:4, type:"minion", atk:2, hp:4, text:"", atkC:2, hpC:-2 , def:2, defC:2},
-  { id:"e21", tribe:"earth", name:"마초", cost:9, type:"minion", atk:10, hp:7, def:2, atkC:2, defC:0, hpC:2, rarity:"legendary", atkSkill:10, text:"돌파공격" },
+  { id:"e21", tribe:"earth", name:"마초", cost:9, type:"minion", atk:10, hp:7, def:2, atkC:0, defC:2, hpC:-2, rarity:"legendary", atkSkill:10, text:"돌파공격", ability:null },
   { id:"e22", tribe:"earth", name:"김태인", cost:9, type:"minion", atk:8, hp:11, def:3, atkC:5, defC:3, hpC:-5, rarity:"heroic", text:"" },
   { id:"e23", tribe:"earth", name:"김아인", cost:8, type:"minion", atk:7, hp:8, def:3, atkC:1, defC:2, hpC:0, rarity:"heroic", text:"" },
   { id:"e24", tribe:"earth", name:"김규아", cost:7, type:"minion", atk:5, hp:8, def:2, atkC:0, defC:1, hpC:2, rarity:"heroic", text:"돌파공격", atkSkill:10 },
@@ -205,11 +232,11 @@ const CARDS = [
   { id:"e39", tribe:"earth", name:"석화", cost:3, type:"spell", rarity:"rare",
     text:"공 3 이하 적 하수인 공=0, 방+1", spell:{ type:"petrify" } },
   { id:"e40", tribe:"earth", name:"섬의파편", cost:1, type:"minion", token:true, atk:1, hp:2, def:0, atkC:0, defC:0, hpC:0, rarity:"common", text:"토큰" },
-  { id:"f21", tribe:"fire", name:"장비", cost:9, type:"minion", atk:14, hp:9, def:1, atkC:-4, defC:0, hpC:-4, rarity:"legendary", atkSkill:10, text:"돌파공격" },
-  { id:"n21", tribe:"wind", name:"조운", cost:9, type:"minion", atk:10, hp:7, def:1, atkC:2, defC:0, hpC:2, rarity:"legendary", atkSkill:4, text:"연속공격" },
-  { id:"a21", tribe:"water", name:"관우", cost:9, type:"minion", atk:6, hp:6, def:3, atkC:-2, defC:2, hpC:0, rarity:"legendary", atkSkill:3, text:"돌진공격" },
-  { id:"l21", tribe:"light", name:"황충", cost:9, type:"minion", atk:3, hp:12, def:1, atkC:2, defC:2, hpC:2, rarity:"legendary", atkSkill:5, text:"치명공격" },
-  { id:"d21", tribe:"dark", name:"여포", cost:9, type:"minion", atk:11, hp:8, def:2, atkC:-5, defC:0, hpC:5, rarity:"legendary", atkSkill:10, text:"돌파공격" },
+  { id:"f21", tribe:"fire", name:"장비", cost:9, type:"minion", atk:14, hp:8, def:1, atkC:-5, defC:0, hpC:-5, rarity:"legendary", atkSkill:10, text:"돌파공격", ability:"고무" },
+  { id:"n21", tribe:"wind", name:"조운", cost:9, type:"minion", atk:10, hp:6, def:1, atkC:2, defC:0, hpC:0, rarity:"legendary", atkSkill:4, text:"연속공격", ability:"출전" },
+  { id:"a21", tribe:"water", name:"관우", cost:9, type:"minion", atk:6, hp:6, def:2, atkC:0, defC:3, hpC:-3, rarity:"legendary", atkSkill:3, text:"돌진공격", ability:"결속" },
+  { id:"l21", tribe:"light", name:"황충", cost:9, type:"minion", atk:3, hp:12, def:1, atkC:0, defC:0, hpC:2, rarity:"legendary", atkSkill:5, text:"치명공격", ability:"고무" },
+  { id:"d21", tribe:"dark", name:"여포", cost:9, type:"minion", atk:10, hp:8, def:1, atkC:-5, defC:0, hpC:5, rarity:"legendary", atkSkill:10, text:"돌파공격", ability:"강탈" },
 
 
   { id:"l1", tribe:"light", name:"빛나방", cost:1, type:"minion", atk:1, hp:1, def:0, atkC:3, defC:0, hpC:0, text:"관통공격", atkSkill:2 },
@@ -239,30 +266,30 @@ const CARDS = [
 
 
   // --- Three Kingdoms 30 (SGZ30 v2) new minions ---
-  { id:"e41", tribe:"earth", name:"하후돈", cost:7, type:"minion", atk:8, hp:5, def:1, atkC:2, defC:0, hpC:2, rarity:"heroic", atkSkill:4, text:"연속공격" },
-  { id:"e42", tribe:"earth", name:"조조", cost:5, type:"minion", atk:3, hp:6, def:1, atkC:2, defC:2, hpC:2, rarity:"rare", atkSkill:7, text:"약화공격" },
-  { id:"e43", tribe:"earth", name:"순욱", cost:3, type:"minion", atk:2, hp:3, def:1, atkC:2, defC:0, hpC:2, rarity:"common", atkSkill:2, text:"관통공격" },
-  { id:"e44", tribe:"earth", name:"곽가", cost:8, type:"minion", atk:4, hp:9, def:1, atkC:2, defC:0, hpC:2, rarity:"heroic", atkSkill:9, text:"광역공격" },
-  { id:"f22", tribe:"fire", name:"허저", cost:7, type:"minion", atk:10, hp:4, def:2, atkC:-3, defC:0, hpC:-3, rarity:"heroic", atkSkill:3, text:"돌진공격" },
-  { id:"f23", tribe:"fire", name:"문추", cost:5, type:"minion", atk:9, hp:4, def:0, atkC:-3, defC:0, hpC:-3, rarity:"rare", atkSkill:4, text:"연속공격" },
-  { id:"f24", tribe:"fire", name:"가후", cost:8, type:"minion", atk:4, hp:11, def:0, atkC:4, defC:0, hpC:-4, rarity:"heroic", atkSkill:9, text:"광역공격" },
-  { id:"f25", tribe:"fire", name:"여몽", cost:3, type:"minion", atk:5, hp:3, def:0, atkC:2, defC:0, hpC:-2, rarity:"common", atkSkill:2, text:"관통공격" },
-  { id:"n22", tribe:"wind", name:"태사자", cost:6, type:"minion", atk:5, hp:4, def:2, atkC:2, defC:0, hpC:2, rarity:"heroic", atkSkill:3, text:"돌진공격" },
-  { id:"n23", tribe:"wind", name:"안량", cost:5, type:"minion", atk:5, hp:5, def:1, atkC:0, defC:2, hpC:2, rarity:"rare", atkSkill:2, text:"관통공격" },
-  { id:"n24", tribe:"wind", name:"육손", cost:8, type:"minion", atk:4, hp:9, def:1, atkC:2, defC:0, hpC:2, rarity:"heroic", atkSkill:9, text:"광역공격" },
-  { id:"n25", tribe:"wind", name:"손상향", cost:2, type:"minion", atk:3, hp:2, def:0, atkC:2, defC:0, hpC:0, rarity:"common", atkSkill:7, text:"약화공격" },
-  { id:"a22", tribe:"water", name:"손책", cost:7, type:"minion", atk:9, hp:4, def:1, atkC:0, defC:2, hpC:0, rarity:"heroic", atkSkill:4, text:"연속공격" },
-  { id:"a23", tribe:"water", name:"감녕", cost:5, type:"minion", atk:3, hp:4, def:2, atkC:2, defC:2, hpC:2, rarity:"rare", atkSkill:2, text:"관통공격" },
-  { id:"a24", tribe:"water", name:"주유", cost:8, type:"minion", atk:4, hp:7, def:2, atkC:0, defC:2, hpC:0, rarity:"heroic", atkSkill:9, text:"광역공격" },
-  { id:"a25", tribe:"water", name:"손권", cost:3, type:"minion", atk:1, hp:3, def:1, atkC:2, defC:2, hpC:2, rarity:"common", atkSkill:7, text:"약화공격" },
-  { id:"l22", tribe:"light", name:"강유", cost:7, type:"minion", atk:8, hp:4, def:1, atkC:0, defC:3, hpC:3, rarity:"heroic", atkSkill:4, text:"연속공격" },
-  { id:"l23", tribe:"light", name:"유비", cost:4, type:"minion", atk:2, hp:7, def:0, atkC:3, defC:0, hpC:0, rarity:"rare", atkSkill:6, text:"흡혈공격" },
-  { id:"l24", tribe:"light", name:"제갈량", cost:9, type:"minion", atk:4, hp:10, def:1, atkC:2, defC:2, hpC:2, rarity:"heroic", atkSkill:9, text:"광역공격" },
-  { id:"l25", tribe:"light", name:"법정", cost:2, type:"minion", atk:2, hp:2, def:0, atkC:0, defC:2, hpC:2, rarity:"common", atkSkill:11, text:"혼란공격" },
-  { id:"d22", tribe:"dark", name:"장료", cost:6, type:"minion", atk:6, hp:5, def:1, atkC:4, defC:0, hpC:-4, rarity:"heroic", atkSkill:4, text:"연속공격" },
-  { id:"d23", tribe:"dark", name:"초선", cost:2, type:"minion", atk:0, hp:5, def:0, atkC:4, defC:0, hpC:-4, rarity:"common", atkSkill:11, text:"혼란공격" },
-  { id:"d24", tribe:"dark", name:"원소", cost:4, type:"minion", atk:4, hp:5, def:0, atkC:-4, defC:0, hpC:4, rarity:"rare", atkSkill:8, text:"석화공격" },
-  { id:"d25", tribe:"dark", name:"사마의", cost:9, type:"minion", atk:3, hp:14, def:0, atkC:0, defC:5, hpC:-5, rarity:"heroic", atkSkill:9, text:"광역공격" },
+  { id:"e41", tribe:"earth", name:"하후돈", cost:7, type:"minion", atk:8, hp:5, def:1, atkC:-2, defC:0, hpC:2, rarity:"heroic", atkSkill:4, text:"연속공격", ability:"유언" },
+  { id:"e42", tribe:"earth", name:"조조", cost:5, type:"minion", atk:3, hp:6, def:1, atkC:0, defC:2, hpC:-2, rarity:"rare", atkSkill:7, text:"약화공격", ability:"활력" },
+  { id:"e43", tribe:"earth", name:"순욱", cost:3, type:"minion", atk:1, hp:3, def:1, atkC:2, defC:0, hpC:-2, rarity:"common", atkSkill:2, text:"관통공격", ability:"보호" },
+  { id:"e44", tribe:"earth", name:"곽가", cost:8, type:"minion", atk:4, hp:9, def:1, atkC:2, defC:0, hpC:2, rarity:"heroic", atkSkill:9, text:"광역공격", ability:null },
+  { id:"f22", tribe:"fire", name:"허저", cost:7, type:"minion", atk:10, hp:4, def:2, atkC:-3, defC:0, hpC:-3, rarity:"heroic", atkSkill:3, text:"돌진공격", ability:null },
+  { id:"f23", tribe:"fire", name:"문추", cost:5, type:"minion", atk:9, hp:2, def:0, atkC:-4, defC:0, hpC:0, rarity:"rare", atkSkill:4, text:"연속공격", ability:"복수" },
+  { id:"f24", tribe:"fire", name:"가후", cost:8, type:"minion", atk:4, hp:10, def:0, atkC:2, defC:0, hpC:-2, rarity:"heroic", atkSkill:9, text:"광역공격", ability:"위압" },
+  { id:"f25", tribe:"fire", name:"여몽", cost:3, type:"minion", atk:5, hp:3, def:0, atkC:2, defC:0, hpC:-2, rarity:"common", atkSkill:2, text:"관통공격", ability:null },
+  { id:"n22", tribe:"wind", name:"태사자", cost:6, type:"minion", atk:5, hp:4, def:2, atkC:2, defC:0, hpC:2, rarity:"heroic", atkSkill:3, text:"돌진공격", ability:null },
+  { id:"n23", tribe:"wind", name:"안량", cost:5, type:"minion", atk:5, hp:5, def:1, atkC:0, defC:2, hpC:2, rarity:"rare", atkSkill:2, text:"관통공격", ability:null },
+  { id:"n24", tribe:"wind", name:"육손", cost:8, type:"minion", atk:4, hp:9, def:1, atkC:0, defC:0, hpC:2, rarity:"heroic", atkSkill:9, text:"광역공격", ability:"유언" },
+  { id:"n25", tribe:"wind", name:"손상향", cost:2, type:"minion", atk:1, hp:2, def:0, atkC:0, defC:0, hpC:2, rarity:"common", atkSkill:7, text:"약화공격", ability:"보호" },
+  { id:"a22", tribe:"water", name:"손책", cost:7, type:"minion", atk:9, hp:4, def:1, atkC:0, defC:2, hpC:0, rarity:"heroic", atkSkill:4, text:"연속공격", ability:null },
+  { id:"a23", tribe:"water", name:"감녕", cost:5, type:"minion", atk:3, hp:4, def:2, atkC:2, defC:2, hpC:2, rarity:"rare", atkSkill:2, text:"관통공격", ability:null },
+  { id:"a24", tribe:"water", name:"주유", cost:8, type:"minion", atk:4, hp:6, def:2, atkC:0, defC:2, hpC:-2, rarity:"heroic", atkSkill:9, text:"광역공격", ability:"위압" },
+  { id:"a25", tribe:"water", name:"손권", cost:3, type:"minion", atk:1, hp:3, def:1, atkC:0, defC:2, hpC:-2, rarity:"common", atkSkill:7, text:"약화공격", ability:"보호" },
+  { id:"l22", tribe:"light", name:"강유", cost:7, type:"minion", atk:8, hp:4, def:1, atkC:2, defC:2, hpC:2, rarity:"heroic", atkSkill:4, text:"연속공격", ability:null },
+  { id:"l23", tribe:"light", name:"유비", cost:4, type:"minion", atk:2, hp:6, def:0, atkC:2, defC:0, hpC:0, rarity:"rare", atkSkill:6, text:"흡혈공격", ability:"출전" },
+  { id:"l24", tribe:"light", name:"제갈량", cost:9, type:"minion", atk:4, hp:10, def:1, atkC:0, defC:0, hpC:4, rarity:"heroic", atkSkill:9, text:"광역공격", ability:"활력" },
+  { id:"l25", tribe:"light", name:"법정", cost:2, type:"minion", atk:2, hp:2, def:0, atkC:0, defC:2, hpC:2, rarity:"common", atkSkill:11, text:"혼란공격", ability:null },
+  { id:"d22", tribe:"dark", name:"장료", cost:6, type:"minion", atk:6, hp:5, def:1, atkC:-5, defC:0, hpC:5, rarity:"heroic", atkSkill:4, text:"연속공격", ability:"복수" },
+  { id:"d23", tribe:"dark", name:"초선", cost:2, type:"minion", atk:0, hp:3, def:0, atkC:0, defC:0, hpC:-2, rarity:"common", atkSkill:11, text:"혼란공격", ability:"환생" },
+  { id:"d24", tribe:"dark", name:"원소", cost:4, type:"minion", atk:4, hp:5, def:0, atkC:-4, defC:0, hpC:4, rarity:"rare", atkSkill:8, text:"석화공격", ability:null },
+  { id:"d25", tribe:"dark", name:"사마의", cost:9, type:"minion", atk:3, hp:14, def:0, atkC:0, defC:5, hpC:-5, rarity:"heroic", atkSkill:9, text:"광역공격", ability:null },
   { id:"coin", name:"동전", cost:0, type:"spell", text:"이번 턴 마나 +1", spell:{ type:"mana", value:1 }, token:true },
   { id:"recruit", name:"암석", cost:1, type:"minion", atk:0, hp:2, text:"영웅 능력", token:true, tribe:"earth", atkC:2, hpC:2 , def:0, defC:2},
 ];
