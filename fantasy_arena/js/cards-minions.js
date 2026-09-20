@@ -1,6 +1,6 @@
 // Fantasy Arena — minion-only overlay (conversation source)
 // 마법/아이템 없음. atkSkill/ability 없음. cost=확정. 공방체·코인=임시.
-const CARDS = [
+const MINIONS = [
   { id:"e1", tribe:"earth", name:"놀", cost:1, type:"minion", atk:1, def:0, hp:2, atkC:1, defC:0, hpC:0, text:"" },
   { id:"e2", tribe:"earth", name:"대지술사", cost:4, type:"minion", atk:3, def:0, hp:4, atkC:1, defC:0, hpC:0, text:"" },
   { id:"e3", tribe:"earth", name:"그린드래곤", cost:9, type:"minion", atk:9, def:3, hp:10, atkC:0, defC:0, hpC:1, text:"" },
@@ -170,3 +170,10 @@ const CARDS = [
   { id:"d19", tribe:"dark", name:"그림자요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"l17", tribe:"light", name:"황월영", cost:3, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, text:"" },
 ];
+// cards-data.js 의 CARDS에서 옛 유닛만 빼고, 확정 유닛 168장 + 주문/아이템 유지
+(function overlayMinions() {
+  if (typeof CARDS === "undefined") return;
+  const keep = CARDS.filter(c => c && c.type !== "minion");
+  CARDS.splice(0, CARDS.length, ...MINIONS, ...keep);
+})();
+
