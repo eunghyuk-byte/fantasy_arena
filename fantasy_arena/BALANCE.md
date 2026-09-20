@@ -30,4 +30,4 @@ See `qa_sgz30/BALANCE_DRAFT.md` (or this doc + `cards-data.js`). Legends martial
 
 IMAGE follow-up: new SGZ non-legend cards currently reuse tribe-legend art placeholders.
 
-카드 밸런스 수치안은 **`BALANCE_CURVE.md` 승인 전 적용하지 않음.**
+비SGZ 유닛 75장 락 리밸런스 적용됨 → 상세·유일성·암 1~2코 N 예외는 **`BALANCE_CURVE.md`**.
