@@ -298,7 +298,7 @@ async function composeCardFace(c, opts={}) {
   }
 
   let txt = (c.text && c.text !== "전설") ? c.text : (c.type === "spell" ? "주문" : "");
-  const skill = (c.atkSkill >= 2 && c.atkSkill <= 10) ? (c.atkSkill | 0) : 0;
+  const skill = (c.atkSkill >= 2 && c.atkSkill <= 11) ? (c.atkSkill | 0) : 0;
   if (skill && typeof ATK_SKILL_LABEL !== "undefined" && ATK_SKILL_LABEL[skill]) {
     txt = ATK_SKILL_LABEL[skill];
   }

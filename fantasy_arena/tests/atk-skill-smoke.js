@@ -27,9 +27,12 @@ const assert = (cond, msg) => { if (!cond) { console.error('FAIL:', msg); failed
 assert(ctx.ATK_SKILL_LABEL[2] === '관통공격', 'label 2 penetrate');
 assert(ctx.ATK_SKILL_LABEL[9] === '광역공격', 'label 9 cleave');
 assert(ctx.ATK_SKILL_LABEL[10] === '돌파공격', 'label 10 trample');
-assert(!Object.values(ctx.ATK_SKILL_LABEL).some(s => /방어무시|혼란/.test(s)), 'no old skills in labels');
+assert(!Object.values(ctx.ATK_SKILL_LABEL).some(s => /방어무시/.test(s)), 'no pierce-ignore label');
 assert(ctx.ATK_SKILL_ID.penetrate === 2 && ctx.ATK_SKILL_ID.cleave === 9 && ctx.ATK_SKILL_ID.trample === 10, 'ATK_SKILL_ID map');
-assert(Object.keys(ctx.ATK_SKILL_DESC).length === 10, 'DESC 1–10');
+assert(Object.keys(ctx.ATK_SKILL_DESC).length === 11, 'DESC 1–11');
+assert(ctx.ATK_SKILL_LABEL[11] === '혼란공격', 'label 11 confuse');
+assert(/반격 없음/.test(ctx.ATK_SKILL_DESC[11]), 'DESC 11 no counter');
+assert(/두 번|타격 2회/.test(ctx.ATK_SKILL_DESC[4]), 'DESC 4 two hits');
 
 const bySkill = {};
 for (const c of earth) {
@@ -77,7 +80,7 @@ const d = { def: 4 };
 const pen = ctx.calcAtkSkillHpDamage({ atkSkill: 2 }, 7, 4, 0, d);
 assert(pen.hpDmg === 3 && d.def === 0, 'penetrate staged consume');
 assert(ctx.calcAtkSkillHpDamage({ atkSkill: 3 }, 5, 2, 3, { def: 2 }).hpDmg === 6, 'charge +DP');
-assert(ctx.calcAtkSkillHpDamage({ atkSkill: 4 }, 5, 2, 0, { def: 2 }).hpDmg === 6, 'double');
+assert(ctx.calcAtkSkillHpDamage({ atkSkill: 4 }, 5, 2, 0, { def: 2 }).hpDmg === 3, 'continuous single-hit (not ×2)');
 assert(Math.ceil(5 / 2) === 3, 'lifesteal ceil');
 const woundedLifesteal = { name: 'W', hp: 3, maxHp: 6 };
 assert(ctx.applyLifesteal(woundedLifesteal, 5) === 3 && woundedLifesteal.hp === 6, 'lifesteal caps at maxHp');

@@ -537,6 +537,35 @@ function fmtC(n) {
   if (!n) return "";
   return (n > 0 ? "+" : "-") + "C" + Math.abs(n);
 }
+function coinSign(v) {
+  return v > 0 ? 1 : v < 0 ? -1 : 0;
+}
+/** Shared-coin pool size N = max(|atkC|,|defC|,|hpC|). */
+function coinPoolN(m) {
+  if (!m) return 0;
+  return Math.max(Math.abs(m.atkC || 0), Math.abs(m.defC || 0), Math.abs(m.hpC || 0));
+}
+/**
+ * Flip N coins once. Heads H applies ±H to every linked stat (sign of atkC/defC/hpC).
+ * Returns flips + per-stat deltas (0 if that stat is unlinked).
+ */
+function rollSharedCoins(m) {
+  const n = coinPoolN(m);
+  const flips = Array.from({ length: n }, () => Math.random() < 0.5);
+  const heads = flips.filter(Boolean).length;
+  return {
+    flips,
+    heads,
+    n,
+    dAtk: coinSign(m && m.atkC) * heads,
+    dDef: coinSign(m && m.defC) * heads,
+    dHp: coinSign(m && m.hpC) * heads
+  };
+}
+function clampAtk(v) { return Math.max(0, v | 0); }
+function clampDef(v) { return Math.max(0, Math.min(5, v | 0)); }
+function clampHp(v) { return Math.max(1, v | 0); }
+/** Legacy alias: single-mod roll (avoid using for combat — shared pool is canonical). */
 function rollCoins(mod) {
   const n = Math.abs(mod || 0);
   const flips = Array.from({ length: n }, () => Math.random() < 0.5);
@@ -554,13 +583,16 @@ function showCoinResult(title, rows, done) {
   let flipsN = 0;
   box.innerHTML = `<h3>${title}</h3>` + rows.map(r => {
     if (!r.flips.length) return "";
-    const coins = r.flips.map((h, i) => {
+    const coins = r.flips.map((h) => {
       flipsN++;
       const delay = (flipsN - 1) * 0.28;
       return `<div class="flip-coin" data-h="${h?1:0}"><img class="coin-flat flip-inner" src="${plus}" alt="" style="animation-delay:${delay}s"></div>`;
     }).join("");
-    const sign = r.delta >= 0 ? "+" + r.delta : String(r.delta);
-    return `<div>${r.label} ${r.modLabel || ""}</div><div class="coins">${coins}</div><div>${r.base} → <b>${r.value}</b> (${sign})</div>`;
+    const detail = r.detail || (() => {
+      const sign = r.delta >= 0 ? "+" + r.delta : String(r.delta);
+      return `${r.base} → <b>${r.value}</b> (${sign})`;
+    })();
+    return `<div>${r.label} ${r.modLabel || ""}</div><div class="coins">${coins}</div><div>${detail}</div>`;
   }).join("<hr style='border-color:#4a3a20'>");
   box.innerHTML += `<button class="menu-btn" id="coinOk" style="margin-top:14px;min-width:120px">OK</button>`;
   layer.classList.add("show");
@@ -620,7 +652,7 @@ function showPeek(el, cardHint) {
   if (!img || !img.src) return;
   hidePeek();
   const card = resolvePeekCard(el, cardHint);
-  const sk = card ? ((card.atkSkill >= 2 && card.atkSkill <= 10) ? (card.atkSkill | 0) : 0) : 0;
+  const sk = card ? ((card.atkSkill >= 2 && card.atkSkill <= 11) ? (card.atkSkill | 0) : 0) : 0;
   const label = (sk && typeof ATK_SKILL_LABEL !== "undefined") ? ATK_SKILL_LABEL[sk] : "";
   const desc = (sk && typeof ATK_SKILL_DESC !== "undefined") ? ATK_SKILL_DESC[sk] : "";
   const peek = document.createElement("div");
@@ -1014,7 +1046,7 @@ function openHelp() {
   if (skBox && !skBox.dataset.ready && typeof ATK_SKILL_LABEL !== "undefined") {
     const desc = (typeof ATK_SKILL_DESC !== "undefined") ? ATK_SKILL_DESC : {};
     let html = "";
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 11; i++) {
       html += '<div class="atk-skill-item"><b>' + i + '. ' + (ATK_SKILL_LABEL[i] || "") +
         '</b><span>' + (desc[i] || "") + '</span></div>';
     }
