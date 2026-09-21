@@ -1,0 +1,23 @@
+{
+  "id": "item_break",
+  "fps": 12,
+  "loop": false,
+  "layout": "horizontal",
+  "cast": {
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 10,
+    "w": 720,
+    "h": 720
+  },
+  "durationMs": 1833,
+  "anchor": "target",
+  "concept": "아이템 파괴 파쇄"
+}

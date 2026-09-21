@@ -1,0 +1,23 @@
+{
+  "id": "item_replace",
+  "fps": 12,
+  "loop": false,
+  "layout": "horizontal",
+  "cast": {
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 10,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 8,
+    "w": 720,
+    "h": 720
+  },
+  "durationMs": 1500,
+  "anchor": "target",
+  "concept": "기존 아이템 교체 플래시"
+}
