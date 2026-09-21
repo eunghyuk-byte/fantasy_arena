@@ -243,7 +243,7 @@ const CARDS = [
   { id:"ni4", tribe:"wind", name:"도둑바람", cost:2, type:"item", rarity:"uncommon", atk:0, def:0, hp:0, text:"코인=0" },
   { id:"ni5", tribe:"wind", name:"하피의손톱", cost:5, type:"item", rarity:"common", atk:3, def:0, hp:2, atkSkill:5, text:"치명공격 부여" },
   { id:"ni6", tribe:"wind", name:"폭풍의구슬", cost:7, type:"item", rarity:"rare", atk:4, def:0, hp:2, atkSkill:9, text:"광역공격 부여" },
-  { id:"ai1", tribe:"water", name:"조개방패", cost:1, type:"item", rarity:"common", atk:0, def:2, hp:0, text:"" },
+  { id:"ai1", tribe:"water", name:"조개방패", cost:2, type:"item", rarity:"common", atk:0, def:2, hp:0, text:"" },
   { id:"ai2", tribe:"water", name:"얼음창", cost:2, type:"item", rarity:"common", atk:2, def:1, hp:0, text:"" },
   { id:"ai3", tribe:"water", name:"상어의턱뼈", cost:3, type:"item", rarity:"common", atk:2, def:0, hp:1, atkSkill:6, text:"흡혈공격 부여" },
   { id:"ai4", tribe:"water", name:"진주방패", cost:3, type:"item", rarity:"common", atk:0, def:1, hp:0, text:"이 유닛 코인 수만큼 방+" },
