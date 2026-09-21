@@ -133,7 +133,15 @@ function render() {
   else if (myTurn) hint = "유닛·스펠 모두 전장으로 드래그. 스펠은 전장에 놓는 순간 시전됩니다.";
   else if (current().isAI) hint = "상대가 생각 중…";
   else hint = "상대 턴입니다. (핫시트: 화면을 넘겨 주세요)";
-  document.getElementById("hint").textContent = hint;
+  const hintEl = document.getElementById("hint");
+  if (hintEl) {
+    hintEl.textContent = hint;
+    const logEl = document.getElementById("log");
+    if (logEl) {
+      const top = Math.round(logEl.offsetTop + logEl.offsetHeight + 6);
+      hintEl.style.setProperty("--hint-top", top + "px");
+    }
+  }
 }
 
 function kwLabel(m) {

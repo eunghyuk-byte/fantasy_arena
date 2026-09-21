@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.137";
+const GAME_VERSION = "0.138";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -95,7 +95,7 @@ function log(msg) {
   const line = document.createElement("div");
   line.textContent = msg;
   el.prepend(line);
-  while (el.children.length > 3) el.lastChild.remove();
+  while (el.children.length > 6) el.lastChild.remove();
 }
 
 function opponent(p) { return p === state.p1 ? state.p2 : state.p1; }
