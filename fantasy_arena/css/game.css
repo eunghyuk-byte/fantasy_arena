@@ -2447,3 +2447,17 @@ html.is-desktop, html.is-desktop body {
   right: 12px !important;
   z-index: 6 !important;
 }
+
+/* ===== P0 hand may overhang board bottom (HS) ===== */
+#game.active .col-main {
+  /* default rows; JS layoutBoardAlign overrides to parchment center line */
+  grid-template-rows: 7% 40% 28% 21% 4% !important;
+}
+#game.active .my-hand {
+  /* Hearthstone-like: hand can hang slightly past board bottom edge */
+  overflow: visible !important;
+  z-index: 4 !important;
+}
+#game.active .col-main {
+  overflow: hidden !important; /* stage still clips; hand can sit on board edge */
+}

@@ -1,4 +1,34 @@
 
+
+function layoutBoardAlign() {
+  const bg = document.getElementById("boardBgLayer");
+  const main = document.querySelector("#game.active .col-main");
+  if (!bg || !main || !bg.naturalWidth) return;
+  const br = bg.getBoundingClientRect();
+  const mr = main.getBoundingClientRect();
+  if (br.width < 8 || br.height < 8 || mr.height < 8) return;
+  // object-fit:contain content box inside the img element
+  const nw = bg.naturalWidth, nh = bg.naturalHeight;
+  const scale = Math.min(br.width / nw, br.height / nh);
+  const contentH = nh * scale;
+  const contentTop = br.top + (br.height - contentH) / 2;
+  const midY = contentTop + contentH / 2; // parchment center line ≈ image mid
+  // Fraction of col-main where opp/my boundary should sit
+  let midFrac = (midY - mr.top) / mr.height;
+  midFrac = Math.max(0.38, Math.min(0.58, midFrac));
+  // Rows: oppHand | oppBoard | myBoard | myHand | hint
+  // Keep hand sizable; split remaining around midFrac
+  const hand = 0.22, hint = 0.035, oppHand = 0.07;
+  const rest = 1 - hand - hint - oppHand; // boards total
+  // Boundary after oppHand+oppBoard == midFrac
+  let oppBoard = midFrac - oppHand;
+  let myBoard = rest - oppBoard;
+  if (oppBoard < 0.18) { oppBoard = 0.18; myBoard = rest - oppBoard; }
+  if (myBoard < 0.16) { myBoard = 0.16; oppBoard = rest - myBoard; }
+  const pct = (x) => (x * 100).toFixed(2) + "%";
+  main.style.gridTemplateRows = [oppHand, oppBoard, myBoard, hand, hint].map(pct).join(" ");
+}
+
 function layoutBoardSlots() {
   ["myBoard", "oppBoard"].forEach(id => {
     const board = document.getElementById(id);
