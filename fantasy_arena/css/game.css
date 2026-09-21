@@ -2678,3 +2678,27 @@ html.is-desktop, html.is-desktop body {
   from { transform: translateX(0); }
   to { transform: translateX(calc(-100% * (var(--frames) - 1) / var(--frames))); }
 }
+
+/* ===== P0 spellFx always on top ===== */
+#spellFx {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+#spellFx.on { display: block !important; }
+#spellFx .fx-stage {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 5 !important;
+}
+#spellFx .fx-stage .fx-asset,
+#spellFx .fx-stage .fx-strip {
+  z-index: 6 !important;
+  width: min(70vmin, 520px) !important;
+}
+#game.active > #spellFx {
+  position: fixed !important;
+  z-index: 9999 !important;
+}

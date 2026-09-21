@@ -108,11 +108,11 @@ const SpellFx = (() => {
     const fxCard = document.getElementById("fxCard");
     if (fxCard) { fxCard.classList.add("out"); fxCard.style.opacity = "0"; }
 
-    if (await probeUrl(castWebp)) await playWebp(stage, castWebp, castMs);
-    else await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+    if (await probeUrl(castStrip)) await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+    else if (await probeUrl(castWebp)) await playWebp(stage, castWebp, castMs);
 
-    if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, hitMs);
-    else await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+    if (await probeUrl(hitStrip)) await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+    else if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, hitMs);
 
     if (fxCard) { fxCard.style.opacity = ""; }
     return true;
@@ -148,7 +148,9 @@ const SpellFx = (() => {
       layer = document.createElement("div");
       layer.id = "spellFx";
       layer.innerHTML = '<div class="fx-veil"></div><div class="fx-card" id="fxCard"></div><canvas id="fxCanvas"></canvas><div class="fx-stage" id="fxStage"></div><div class="fx-name" id="fxName"></div>';
-      (document.getElementById("game") || document.body).appendChild(layer);
+      document.body.appendChild(layer);
+    } else if (layer.parentElement !== document.body) {
+      document.body.appendChild(layer);
     }
     if (!document.getElementById("fxCanvas")) {
       const c = document.createElement("canvas");
