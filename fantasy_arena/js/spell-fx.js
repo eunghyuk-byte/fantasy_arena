@@ -61,27 +61,59 @@ const SpellFx = (() => {
       setTimeout(() => { try { wrap.remove(); } catch (e) {} resolve(); }, ms + 40);
     });
   }
+  function assetUrl(base, file) {
+    return base + file + "?v=" + (window.GAME_VERSION || "0");
+  }
+  function probeUrl(url) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  }
+  function playWebp(stage, url, ms) {
+    return new Promise(resolve => {
+      if (!stage || !url) { resolve(); return; }
+      const img = document.createElement("img");
+      img.className = "fx-asset";
+      img.alt = "";
+      img.src = url;
+      stage.innerHTML = "";
+      stage.appendChild(img);
+      const t = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, Math.max(250, ms || 900));
+      img.onerror = () => { clearTimeout(t); resolve(); };
+    });
+  }
   async function playAssetPack(card, layer, stage) {
     const meta = await loadSpellMeta(card && card.id);
     if (!meta) return false;
     const base = ASSET_BASE + meta.id + "/";
     const fps = meta.fps || 12;
     const cast = meta.cast || {};
-    const impact = meta.impact || {};
+    const hit = meta.impact || meta.aoe || {};
     const castFrames = cast.frames || 12;
-    const impactFrames = impact.frames || 8;
+    const hitFrames = hit.frames || 8;
     const castW = cast.w || 720, castH = cast.h || 720;
-    const impactW = impact.w || 560, impactH = impact.h || 560;
-    // Prefer horizontal strip PNG (reliable). Fall back to webp file name.
-    const castUrl = base + "cast_strip.png?v=" + (window.GAME_VERSION || "0");
-    const impactUrl = base + "impact_strip.png?v=" + (window.GAME_VERSION || "0");
+    const hitW = hit.w || 560, hitH = hit.h || 560;
+    const castMs = Math.round(castFrames / fps * 1000);
+    const hitMs = Math.round(hitFrames / fps * 1000);
+    const castWebp = assetUrl(base, cast.file || "cast.webp");
+    const hitWebp = assetUrl(base, hit.file || (meta.aoe ? "aoe.webp" : "impact.webp"));
+    const castStrip = assetUrl(base, "cast_strip.png");
+    const hitStrip = assetUrl(base, meta.aoe ? "aoe_strip.png" : "impact_strip.png");
+
     try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (e) {}
     if (meta.sfxHint === "coin_flip") { try { Sfx.playCoin && Sfx.playCoin(); } catch (e) {} }
-    // Hide card showcase so it does not cover VFX
     const fxCard = document.getElementById("fxCard");
     if (fxCard) { fxCard.classList.add("out"); fxCard.style.opacity = "0"; }
-    await playStrip(stage, castUrl, castW, castH, castFrames, fps);
-    await playStrip(stage, impactUrl, impactW, impactH, impactFrames, fps);
+
+    if (await probeUrl(castWebp)) await playWebp(stage, castWebp, castMs);
+    else await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+
+    if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, hitMs);
+    else await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+
     if (fxCard) { fxCard.style.opacity = ""; }
     return true;
   }
