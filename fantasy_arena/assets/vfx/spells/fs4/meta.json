@@ -6,7 +6,7 @@
   "loop": false,
   "layout": "horizontal",
   "targetMode": "unit",
-  "flight": false,
+  "flight": true,
   "cast": {
     "file": "cast_strip.png",
     "frames": 18,

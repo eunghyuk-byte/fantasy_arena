@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.080";
+const GAME_VERSION = "0.081";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -461,7 +461,7 @@ function playCard(p, card, target) {
 async function runSpellCast(p, card, target) {
   state.busy = true;
   try {
-    await playSpellFx(card);
+    await playSpellFx(card, target);
     resolveSpell(p, card, target);
   } finally {
     state.busy = false;
@@ -470,8 +470,8 @@ async function runSpellCast(p, card, target) {
   render();
 }
 
-function playSpellFx(card) {
-  if (typeof SpellFx !== "undefined" && SpellFx.play) return SpellFx.play(card);
+function playSpellFx(card, target) {
+  if (typeof SpellFx !== "undefined" && SpellFx.play) return SpellFx.play(card, { target });
   return Promise.resolve();
 }
 function buildSpellFx(stage, kind, card) {
