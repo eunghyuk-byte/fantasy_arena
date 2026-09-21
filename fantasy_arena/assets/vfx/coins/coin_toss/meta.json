@@ -1,0 +1,22 @@
+{
+  "id": "coin_toss",
+  "fps": 12,
+  "loop": false,
+  "cast": {
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 10,
+    "w": 720,
+    "h": 720
+  },
+  "durationMs": 1833,
+  "anchor": "board-center",
+  "concept": "골드/블랙 코인 공중 회전 낙하"
+}

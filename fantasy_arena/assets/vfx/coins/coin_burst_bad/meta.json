@@ -1,0 +1,22 @@
+{
+  "id": "coin_burst_bad",
+  "fps": 12,
+  "loop": false,
+  "cast": {
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 10,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 8,
+    "w": 720,
+    "h": 720
+  },
+  "durationMs": 1500,
+  "anchor": "board-center",
+  "concept": "대다수 뒷면 암전 균열"
+}
