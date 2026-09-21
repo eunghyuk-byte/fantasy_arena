@@ -11,6 +11,7 @@ function doAttack(p, attacker, target, auto) {
   const aRoll = rollCoins(attacker.atkC, attacker);
   // fi5: 공격 코인 전부 뒷면이면 장착 아이템만 파괴
   if (attacker.equippedItem && attacker.equippedItem.id === "fi5" && aRoll.flips && aRoll.flips.length && aRoll.heads === 0) {
+    try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_break"); } catch (e) {}
     if (typeof unequipItem === "function") unequipItem(attacker);
     if (typeof log === "function") log(attacker.name + "의 재의계약이 파괴되었다");
   }
@@ -110,6 +111,7 @@ function doAttack(p, attacker, target, auto) {
       const isMeHero = target.owner === meView().me;
       const defEl = Vfx.heroOf(isMeHero);
       const crit = aAtk >= attacker.atk + 3;
+      try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
       await Vfx.attackSeq(atkEl, defEl, aAtk, crit);
       dealHero(target.owner, aAtk);
       render();
@@ -123,6 +125,12 @@ function doAttack(p, attacker, target, auto) {
       log(`${def.name} 방어 ${blocked} → 체력피해 ${dmgIn}`);
       const defEl = Vfx.elOf(def.uid);
       const crit = dmgIn >= attacker.atk + 2;
+      try {
+        if (typeof SpellFx !== "undefined" && SpellFx.playCombat) {
+          SpellFx.playCombat("attack");
+          SpellFx.playCombat("defend");
+        }
+      } catch (e) {}
       await Vfx.attackSeq(atkEl, defEl, dmgIn, crit);
       damageMinion(target.owner, def, dmgIn);
       render();
@@ -132,6 +140,7 @@ function doAttack(p, attacker, target, auto) {
         log(`${def.name} 반격`);
         const atkNow = Vfx.elOf(attacker.uid);
         const defNow = Vfx.elOf(def.uid);
+        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter"); } catch (e) {}
         await Vfx.parrySeq(defNow, atkNow, dmgBack);
         damageMinion(p, attacker, dmgBack);
         render();
@@ -139,6 +148,7 @@ function doAttack(p, attacker, target, auto) {
       } else if (!survived) {
         log(`${def.name} 격파 · 반격 없음`);
         const deadEl = Vfx.elOf(def.uid);
+        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
         Vfx.death(deadEl);
         await waitMs(520);
       }
@@ -147,7 +157,10 @@ function doAttack(p, attacker, target, auto) {
     [state.p1, state.p2].forEach(pl => {
       pl.board.filter(mm => mm.dying).forEach(mm => {
         const el = Vfx.elOf(mm.uid);
-        if (el && !el.classList.contains("fx-dissolve")) Vfx.death(el);
+        if (el && !el.classList.contains("fx-dissolve")) {
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
+          Vfx.death(el);
+        }
         destroyMinion(pl, mm);
       });
       pl._hurt = null;
@@ -195,6 +208,13 @@ function finish(winner) {
     if (winner === "무승부") Sfx.playLose && Sfx.playLose();
     else if (winner === "나") Sfx.playWin && Sfx.playWin();
     else Sfx.playLose && Sfx.playLose();
+  } catch (e) {}
+  try {
+    if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
+      if (winner === "나") SpellFx.playMatch("victory");
+      else if (winner !== "무승부") SpellFx.playMatch("defeat");
+      else SpellFx.playMatch("defeat");
+    }
   } catch (e) {}
   render();
   const meWin = winner === "나";

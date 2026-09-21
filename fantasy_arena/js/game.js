@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.031";
+const GAME_VERSION = "0.032";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -124,6 +124,7 @@ function draw(p, n = 1) {
 
 function flyDrawCard() {
   try { Sfx.playDraw && Sfx.playDraw(); } catch (e) {}
+  try { if (typeof SpellFx !== "undefined" && SpellFx.playUi) SpellFx.playUi("deck_draw"); } catch (e) {}
   const pile = document.querySelector("#myStrip .pile-stack") || document.querySelector("#myStrip .deck-pile");
   const hand = document.getElementById("myHand");
   if (!pile || !hand) return;
@@ -180,6 +181,21 @@ function startGame(vsAI) {
   beginTurn(state.p1);
   showGame();
   render();
+  try {
+    (async () => {
+      try {
+        if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
+          await Promise.race([
+            SpellFx.playMatch("match_start"),
+            new Promise(r => setTimeout(r, 2200))
+          ]);
+        }
+      } catch (e) {}
+      try {
+        if (typeof SpellFx !== "undefined" && SpellFx.playUi) SpellFx.playUi("hero_intro");
+      } catch (e) {}
+    })();
+  } catch (e) {}
   if (state.p1.isAI) aiTurn();
 }
 
@@ -199,6 +215,16 @@ function beginTurn(p) {
   });
   draw(p, 1);
   log(`${p.name}의 턴 · 마나 ${p.mana}`);
+  try {
+    if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
+      let isMe = !p.isAI;
+      try {
+        if (typeof meView === "function") isMe = (p === meView().me);
+      } catch (e) {}
+      // Fire-and-forget — do not delay AI
+      SpellFx.playMatch(isMe ? "turn_start_me" : "turn_start_enemy");
+    }
+  } catch (e) {}
 }
 
 function renderHeroSlot(p, isMe) {
@@ -301,6 +327,12 @@ function unequipItem(m) {
 }
 function equipItemOnUnit(p, card, unit) {
   if (!unit || !p || !p.board.includes(unit)) return false;
+  const replacing = !!(unit.equippedItem);
+  if (replacing) {
+    try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_replace"); } catch (e) {}
+  } else {
+    try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_equip"); } catch (e) {}
+  }
   unequipItem(unit);
   let dAtk = Number(card.atk) || 0;
   let dDef = Number(card.def) || 0;
@@ -830,6 +862,21 @@ function showCoinResult(title, rows, done) {
   if (flipsN && window.Sfx && Sfx.playCoin) {
     for (let i = 0; i < flipsN; i++) setTimeout(() => Sfx.playCoin(), 80 + i * 280);
   }
+  try {
+    if (flipsN && typeof SpellFx !== "undefined" && SpellFx.playCoin) {
+      const all = [];
+      rows.forEach(r => { (r.flips || []).forEach(h => all.push(!!h)); });
+      const heads = all.filter(Boolean).length;
+      const tails = all.length - heads;
+      SpellFx.playCoin("coin_toss").then(async () => {
+        try {
+          await SpellFx.playCoin(heads >= tails ? "coin_land_gold" : "coin_land_black");
+          if (heads > tails) SpellFx.playCoin("coin_burst_good");
+          else if (tails > heads) SpellFx.playCoin("coin_burst_bad");
+        } catch (e) {}
+      }).catch(() => {});
+    }
+  } catch (e) {}
   box.querySelectorAll(".flip-coin").forEach((el, idx) => {
     const h = el.getAttribute("data-h") === "1";
     const img = el.querySelector("img");
@@ -970,19 +1017,29 @@ function spellTargetFromPoint(x, y, allowed) {
   }
   return null;
 }
+let _equipHoverUid = null;
 function clearEquipHover() {
   document.querySelectorAll(".minion.equip-glow, .minion.spell-glow, .hero-slot.spell-glow, .hero-portrait.spell-glow").forEach(el => {
     el.classList.remove("equip-glow");
     el.classList.remove("spell-glow");
   });
+  _equipHoverUid = null;
 }
 function highlightEquipHover(x, y, allowed) {
-  clearEquipHover();
-  if (!allowed) return;
+  // Clear glow classes only — keep _equipHoverUid so we do not re-fire item_hover every move
+  document.querySelectorAll(".minion.equip-glow, .minion.spell-glow, .hero-slot.spell-glow, .hero-portrait.spell-glow").forEach(el => {
+    el.classList.remove("equip-glow");
+    el.classList.remove("spell-glow");
+  });
+  if (!allowed) { _equipHoverUid = null; return; }
   const hit = unitFromPoint(x, y);
-  if (!hit) return;
+  if (!hit) { _equipHoverUid = null; return; }
   const el = document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
   if (el) el.classList.add("equip-glow");
+  if (hit.minion.uid !== _equipHoverUid) {
+    _equipHoverUid = hit.minion.uid;
+    try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_hover"); } catch (e) {}
+  }
 }
 function highlightSpellHover(x, y, targets) {
   clearEquipHover();
