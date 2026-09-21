@@ -363,17 +363,29 @@ async function composeCardFace(c, opts={}) {
 
   const headerTxt = (c.type === "minion")
     ? (c.race || (typeof CARD_RACE !== "undefined" && CARD_RACE[c.id]) || "")
-    : (c.type === "item" ? "아이템" : ((typeof SPELL_SCHOOL !== "undefined" && SPELL_SCHOOL[c.tribe]) || "주문"));
+    : (c.type === "item" ? "아이템" : "마법");
   if (headerTxt) {
     ctx.save();
-    const hs = Math.round(H*0.026) + 2;
+    // Same size as card title
+    const hs = Math.round(H*0.042);
     ctx.font = "800 " + hs + "px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.lineJoin = "round";
-    ctx.lineWidth = Math.max(4, hs*0.22);
-    ctx.strokeStyle = "#120800";
-    ctx.fillStyle = "#f3e2b0";
+    ctx.lineWidth = Math.max(6, H*0.008);
+    if (c.type === "item") {
+      // sapphire gem blue
+      ctx.strokeStyle = "#061428";
+      ctx.fillStyle = "#6ec0ff";
+    } else if (c.type === "spell") {
+      // arcane violet
+      ctx.strokeStyle = "#1a0628";
+      ctx.fillStyle = "#e4b4ff";
+    } else {
+      // unit race — warm title cream
+      ctx.strokeStyle = "#120800";
+      ctx.fillStyle = "#fff8e8";
+    }
     ctx.strokeText(headerTxt, W*0.50, H*0.074);
     ctx.fillText(headerTxt, W*0.50, H*0.074);
     ctx.restore();

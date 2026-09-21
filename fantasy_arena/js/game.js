@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.053";
+const GAME_VERSION = "0.054";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1590,7 +1590,7 @@ async function openCardLore(id) {
   const img = slot.querySelector("img.card-face");
   if (img && face) img.src = face;
   document.getElementById("loreName").textContent = c.name;
-  const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : ((SPELL_SCHOOL && SPELL_SCHOOL[c.tribe]) || "스펠"));
+  const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : "마법");
   const RARITY_KO = { common:"커먼", rare:"언커먼", heroic:"레어", legendary:"레전드" };
   const rareKo = RARITY_KO[c.rarity || "common"] || "커먼";
   const cap = (c.rarity === "legendary" || c.rarity === "heroic") ? "덱당 1장" : "최대 2장";
