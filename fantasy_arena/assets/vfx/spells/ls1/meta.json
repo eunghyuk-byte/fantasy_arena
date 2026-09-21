@@ -1,0 +1,22 @@
+{
+  "id": "ls1",
+  "name": "치유의빛",
+  "kind": "aoe",
+  "durationMs": 1700,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "aoe": {
+    "file": "aoe.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "self-board",
+  "sfxHint": "light_heal",
+  "concept": "치유의 금백 광휘가 아군을 적심"
+}

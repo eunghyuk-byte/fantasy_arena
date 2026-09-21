@@ -1,0 +1,22 @@
+{
+  "id": "ls5",
+  "name": "수호의빛",
+  "kind": "aoe",
+  "durationMs": 1700,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "aoe": {
+    "file": "aoe.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "self-board",
+  "sfxHint": "light_guard",
+  "concept": "수호 돔이 아군 전체에 펼쳐짐"
+}

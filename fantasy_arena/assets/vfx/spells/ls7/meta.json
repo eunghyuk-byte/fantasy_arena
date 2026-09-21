@@ -1,0 +1,22 @@
+{
+  "id": "ls7",
+  "name": "빛의환영",
+  "kind": "single",
+  "durationMs": 1600,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "light_phantom",
+  "concept": "빛의 환영이 베고 치유 구슬을 되돌림"
+}

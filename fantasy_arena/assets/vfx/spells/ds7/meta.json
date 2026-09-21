@@ -1,0 +1,22 @@
+{
+  "id": "ds7",
+  "name": "전염병",
+  "kind": "aoe",
+  "durationMs": 1900,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "aoe": {
+    "file": "aoe.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "board-center",
+  "sfxHint": "dark_plague",
+  "concept": "전염 독무가 전장을 병들게 함"
+}

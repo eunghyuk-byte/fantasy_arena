@@ -1,0 +1,22 @@
+{
+  "id": "ds8",
+  "name": "13시의저주",
+  "kind": "special",
+  "durationMs": 2000,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "dark_thirteen",
+  "concept": "13시 시계가 소유권을 강탈"
+}

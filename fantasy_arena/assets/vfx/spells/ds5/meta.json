@@ -1,0 +1,22 @@
+{
+  "id": "ds5",
+  "name": "블랙홀",
+  "kind": "aoe",
+  "durationMs": 2200,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "aoe": {
+    "file": "aoe.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "board-center",
+  "sfxHint": "dark_blackhole",
+  "concept": "블랙홀이 모든 유닛을 붕괴"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "ls4",
+  "name": "성역축복",
+  "kind": "special",
+  "durationMs": 1800,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "board-center",
+  "sfxHint": "light_sanctuary",
+  "concept": "성역 기둥이 금화를 앞면으로"
+}

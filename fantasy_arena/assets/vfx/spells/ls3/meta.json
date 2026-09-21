@@ -1,0 +1,22 @@
+{
+  "id": "ls3",
+  "name": "정화",
+  "kind": "single",
+  "durationMs": 1700,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "light_purify",
+  "concept": "정화 문양이 불순물을 씻어냄"
+}

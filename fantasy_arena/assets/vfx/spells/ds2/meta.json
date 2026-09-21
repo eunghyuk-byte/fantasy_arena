@@ -1,0 +1,22 @@
+{
+  "id": "ds2",
+  "name": "굶주림",
+  "kind": "special",
+  "durationMs": 1800,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "self-board",
+  "sfxHint": "dark_hunger",
+  "concept": "굶주림의 아가리가 아군을 삼키고 드로우"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "ls8",
+  "name": "헌금",
+  "kind": "draw",
+  "durationMs": 1700,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "hand",
+  "sfxHint": "light_offering",
+  "concept": "헌금 제단에 카드가 바쳐짐"
+}

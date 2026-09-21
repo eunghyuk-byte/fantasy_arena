@@ -1,0 +1,22 @@
+{
+  "id": "ls2",
+  "name": "축복",
+  "kind": "buff",
+  "durationMs": 1900,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "light_bless",
+  "concept": "축복 헤일로가 연속으로 감쌈"
+}
