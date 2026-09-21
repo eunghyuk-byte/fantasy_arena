@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.010";
+const GAME_VERSION = "0.014";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -903,6 +903,7 @@ function placeDropGlow(on, x, y) {
 let _drag = null;
 
 function unitFromPoint(x, y) {
+  // Ally board only (item equip)
   const me = meView().me;
   const board = document.getElementById("myBoard");
   if (!board || !me) return null;
@@ -915,7 +916,6 @@ function unitFromPoint(x, y) {
       if (m) return { kind: "minion", owner: me, minion: m };
     }
   }
-  // nearest filled slot by center
   let best = null, bestD = 1e9;
   board.querySelectorAll(".slot.filled").forEach(sl => {
     const r = sl.getBoundingClientRect();
@@ -933,8 +933,51 @@ function unitFromPoint(x, y) {
   });
   return best;
 }
+function spellTargetFromPoint(x, y, allowed) {
+  if (!allowed || !allowed.length) return null;
+  const allowMinion = new Map();
+  const allowHero = [];
+  allowed.forEach(t => {
+    if (t.kind === "minion" && t.minion) allowMinion.set(t.minion.uid, t);
+    if (t.kind === "hero") allowHero.push(t);
+  });
+  const els = [...document.querySelectorAll("#myBoard .minion, #oppBoard .minion")];
+  for (const el of els) {
+    const r = el.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+      const uid = el.getAttribute("data-uid");
+      if (allowMinion.has(uid)) return allowMinion.get(uid);
+    }
+  }
+  let best = null, bestD = 1e9;
+  els.forEach(el => {
+    const uid = el.getAttribute("data-uid");
+    if (!allowMinion.has(uid)) return;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const d = Math.hypot(x - cx, y - cy);
+    if (d < bestD && d < Math.max(r.width, r.height) * 0.85) {
+      bestD = d; best = allowMinion.get(uid);
+    }
+  });
+  if (best) return best;
+  for (const t of allowHero) {
+    const side = (t.owner === meView().me) ? "me" : "opp";
+    const el = document.querySelector('.hero-slot[data-hero="' + (side === "me" ? "me" : "opp") + '"], .hero-portrait.' + (side === "me" ? "mine" : "opp"));
+    // try hero rows
+    const row = document.getElementById(side === "me" ? "myHeroRow" : "oppHeroRow");
+    const hitEl = row || el;
+    if (!hitEl) continue;
+    const r = hitEl.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return t;
+  }
+  return null;
+}
 function clearEquipHover() {
-  document.querySelectorAll(".minion.equip-glow").forEach(el => el.classList.remove("equip-glow"));
+  document.querySelectorAll(".minion.equip-glow, .minion.spell-glow, .hero-slot.spell-glow, .hero-portrait.spell-glow").forEach(el => {
+    el.classList.remove("equip-glow");
+    el.classList.remove("spell-glow");
+  });
 }
 function highlightEquipHover(x, y, allowed) {
   clearEquipHover();
@@ -943,6 +986,33 @@ function highlightEquipHover(x, y, allowed) {
   if (!hit) return;
   const el = document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
   if (el) el.classList.add("equip-glow");
+}
+function highlightSpellHover(x, y, targets) {
+  clearEquipHover();
+  const hit = spellTargetFromPoint(x, y, targets);
+  if (!hit) return;
+  if (hit.kind === "minion" && hit.minion) {
+    const el = document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
+    if (el) el.classList.add("spell-glow");
+  } else if (hit.kind === "hero") {
+    const side = (hit.owner === meView().me) ? "me" : "opp";
+    document.querySelectorAll('.hero-slot[data-hero="' + side + '"], .hero-portrait.' + (side === "me" ? "mine" : "opp")).forEach(el => el.classList.add("spell-glow"));
+  }
+}
+function overPlayfield(x, y) {
+  // Any battlefield drop (own or enemy lane) for untargeted spells
+  if (overBoard(x, y)) return true;
+  const opp = document.getElementById("oppBoard");
+  if (!opp) return false;
+  const r = opp.getBoundingClientRect();
+  const padX = Math.max(12, r.width * 0.04);
+  const padY = Math.max(16, r.height * 0.08);
+  return x >= r.left - padX && x <= r.right + padX && y >= r.top - padY && y <= r.bottom + padY;
+}
+function spellDragTargets(card) {
+  if (!card || card.type !== "spell" || !needsTarget(card)) return null;
+  const me = meView().me;
+  return validTargets(me, card.spell);
 }
 
 function canDropCard(card) {
@@ -1020,6 +1090,13 @@ function bindHandCard(el, card) {
       if (cardRef && cardRef.type === "item" && isEquipItem(cardRef)) {
         placeDropGlow(false);
         highlightEquipHover(e.clientX, e.clientY, canDropCard(cardRef));
+      } else if (cardRef && cardRef.type === "spell" && needsTarget(cardRef)) {
+        placeDropGlow(false);
+        const targets = spellDragTargets(cardRef) || [];
+        highlightSpellHover(e.clientX, e.clientY, targets);
+      } else if (cardRef && cardRef.type === "spell") {
+        clearEquipHover();
+        placeDropGlow(overPlayfield(e.clientX, e.clientY) && canDropCard(cardRef), e.clientX, e.clientY);
       } else {
         clearEquipHover();
         placeDropGlow(overBoard(e.clientX, e.clientY) && canDropCard(cardRef), e.clientX, e.clientY);
@@ -1042,6 +1119,31 @@ function bindHandCard(el, card) {
         if (hit && canDropCard(cardRef)) {
           try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
           playCard(meView().me, cardRef, hit);
+          render();
+        }
+        return;
+      }
+      if (cardRef && cardRef.type === "spell" && needsTarget(cardRef)) {
+        const targets = spellDragTargets(cardRef) || [];
+        const hit = spellTargetFromPoint(e.clientX, e.clientY, targets);
+        clearEquipHover();
+        clearDrag();
+        if (hit && canDropCard(cardRef)) {
+          try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
+          playCard(meView().me, cardRef, hit);
+          render();
+        } else if (!targets.length) {
+          log("마땅한 대상이 없습니다");
+        }
+        return;
+      }
+      if (cardRef && cardRef.type === "spell") {
+        ok = overPlayfield(e.clientX, e.clientY) && canDropCard(cardRef);
+        clearEquipHover();
+        clearDrag();
+        if (ok) {
+          try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
+          playCard(meView().me, cardRef, null);
           render();
         }
         return;
@@ -1293,14 +1395,14 @@ function renderHeroPicks() {
       if (!h.open) return;
       selectedHero = h;
       renderHeroPicks();
-
-(function paintBuildVer() {
-  const el = document.getElementById("buildVer");
-  if (el) el.textContent = "v" + GAME_VERSION;
-})();
     };
   });
 }
+function paintBuildVer() {
+  const el = document.getElementById("buildVer");
+  if (el) el.textContent = "v" + GAME_VERSION;
+}
+paintBuildVer();
 renderHeroPicks();
 document.getElementById("btnAi").onclick = () => startGame(true);
 document.getElementById("btnPvp").onclick = () => startGame(false);

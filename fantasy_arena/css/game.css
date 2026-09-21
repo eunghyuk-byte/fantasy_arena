@@ -2628,23 +2628,26 @@ html.is-desktop, html.is-desktop body {
   #title .title-body { grid-template-columns: 1fr; }
 }
 
-/* ===== P0 build version badge ===== */
-#title .build-ver,
-.build-ver {
-  position: absolute;
-  top: 10px;
-  right: 14px;
-  z-index: 5;
-  color: #cbb58a;
-  font-size: 13px;
-  letter-spacing: .06em;
-  opacity: .9;
-  pointer-events: none;
-  text-shadow: 0 1px 2px #000;
-  font-variant-numeric: tabular-nums;
-}
-#title.screen.active { position: relative; }
 
+/* ===== P0 build version badge ===== */
+#buildVer.build-ver,
+.build-ver {
+  position: fixed !important;
+  top: 12px !important;
+  right: 16px !important;
+  z-index: 10000 !important;
+  color: #ffe7a8 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  text-shadow: 0 2px 6px #000 !important;
+  background: rgba(0,0,0,.45);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(228,195,106,.45);
+}
 
 /* ===== spell asset VFX ===== */
 #spellFx .fx-stage .fx-asset {
@@ -2677,4 +2680,38 @@ html.is-desktop, html.is-desktop body {
 @keyframes fxStripRun {
   from { transform: translateX(0); }
   to { transform: translateX(calc(-100% * (var(--frames) - 1) / var(--frames))); }
+}
+
+/* ===== P0 spellFx always on top ===== */
+#spellFx {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+#spellFx.on { display: block !important; }
+#spellFx .fx-stage {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 5 !important;
+}
+#spellFx .fx-stage .fx-asset,
+#spellFx .fx-stage .fx-strip {
+  z-index: 6 !important;
+  width: min(70vmin, 520px) !important;
+}
+#game.active > #spellFx {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* ===== P0 spell target glow ===== */
+#game.active .minion.spell-glow,
+#game.active .hero-slot.spell-glow,
+#game.active .hero-portrait.spell-glow {
+  outline: 3px solid #ffe08a !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 18px rgba(255, 200, 80, .85), 0 0 36px rgba(255, 140, 40, .45) !important;
+  filter: brightness(1.12) saturate(1.15);
 }
