@@ -81,7 +81,8 @@ const Sfx = (() => {
     if (!stem) return false;
     const buf = await load(stem);
     if (!buf) return false;
-    duck(opts && opts.duckMs);
+    opts = opts || {};
+    if (!opts.noDuck && opts.duckMs !== 0) duck(opts.duckMs);
     return playBuf(buf, opts);
   }
   function synthTone(freqs, peak, dur) {
@@ -153,8 +154,15 @@ const Sfx = (() => {
   function playLose() {
     playKey("lose", { duckMs: 600 }).then(ok => { if (!ok) synthTone([392, 311, 247], 0.06, 0.32); });
   }
+  let _clickAt = 0;
   function playClick() {
-    playKey("click", { duckMs: 80 }).then(ok => { if (!ok) synthTone([880], 0.03, 0.06); });
+    const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    if (now - _clickAt < 45) return;
+    _clickAt = now;
+    // UI click must NOT duck BGM — rapid ducking sounds like crackle/static
+    playKey("click", { noDuck: true, gain: 0.32 }).then(ok => {
+      if (!ok) synthTone([880], 0.025, 0.05);
+    });
   }
   function playCast() {
     playKey("cast", { duckMs: 200 }).then(ok => { if (!ok) synthTone([300, 480], 0.05, 0.25); });
