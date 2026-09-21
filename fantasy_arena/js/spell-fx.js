@@ -86,6 +86,68 @@ const SpellFx = (() => {
     return boardCenterPoint();
   }
 
+  function rectCenter(el) {
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width * 0.5, y: r.top + r.height * 0.5 };
+  }
+
+  function heroElForSide(side) {
+    const isMe = side === "me" || side === true;
+    if (typeof Vfx !== "undefined" && Vfx.heroOf) {
+      const el = Vfx.heroOf(!!isMe);
+      if (el) return el;
+    }
+    if (isMe) {
+      return document.querySelector(".hero-row.me .hero-slot, .hero-portrait.mine, #myHeroRow .hero-slot, #myHeroRow")
+        || document.getElementById("myHeroRow");
+    }
+    return document.querySelector(".hero-row.opp .hero-slot, .hero-portrait.opp, #oppHeroRow .hero-slot, #oppHeroRow")
+      || document.getElementById("oppHeroRow");
+  }
+
+  /** Resolve a screen point from playPack / playCombat opts (uid / hero / el / target). */
+  function pointFromOpts(opts) {
+    opts = opts || {};
+    if (opts.el) {
+      const pt = rectCenter(opts.el);
+      if (pt) return pt;
+    }
+    if (opts.uid != null && opts.uid !== "") {
+      const el = document.querySelector('.minion[data-uid="' + opts.uid + '"]');
+      const pt = rectCenter(el);
+      if (pt) return pt;
+    }
+    if (opts.hero === "me" || opts.hero === "opp") {
+      const pt = rectCenter(heroElForSide(opts.hero));
+      if (pt) return pt;
+    }
+    if (opts.target) {
+      const t = opts.target;
+      if (t.minion && t.minion.uid != null) {
+        const el = document.querySelector('.minion[data-uid="' + t.minion.uid + '"]');
+        const pt = rectCenter(el);
+        if (pt) return pt;
+      }
+      if (t.kind === "hero") {
+        let side = null;
+        if (t.owner != null && typeof meView === "function") {
+          try { side = (t.owner === meView().me) ? "me" : "opp"; } catch (e) {}
+        }
+        if (side == null && (t.side === "me" || t.side === "opp")) side = t.side;
+        if (side == null && (t.hero === "me" || t.hero === "opp")) side = t.hero;
+        const heroEl = side
+          ? heroElForSide(side)
+          : (document.querySelector(".hero-row.opp .hero-slot, .hero-portrait.opp, #oppHeroRow")
+            || document.querySelector(".hero-row.me .hero-slot, .hero-portrait.mine, #myHeroRow"));
+        const pt = rectCenter(heroEl);
+        if (pt) return pt;
+      }
+      return resolveFxAnchor({ targetMode: "unit", anchor: "target" }, t);
+    }
+    return null;
+  }
+
   function resolveFlightStart() {
     const hero = document.getElementById("myHeroRow") || document.querySelector(".hero-row.me");
     const hand = document.getElementById("myHand") || document.querySelector(".my-hand");
@@ -119,6 +181,8 @@ const SpellFx = (() => {
       const img = document.createElement("img");
       img.alt = "";
       img.draggable = false;
+      // JS drives frames — kill any CSS steps() animation that double-plays
+      img.style.animation = "none";
       wrap.appendChild(img);
 
       const flight = opts.flight || null;
@@ -127,12 +191,21 @@ const SpellFx = (() => {
       let host = wrap;
       let flightEl = null;
 
-      stage.innerHTML = "";
+      // Avoid blank flash: keep prior strip until this one mounts
+      const mount = () => {
+        const olds = stage.querySelectorAll(":scope > .fx-strip, :scope > .fx-flight");
+        olds.forEach(el => { if (el !== host) try { el.remove(); } catch (e) {} });
+        if (flight && flight.from && flight.to) {
+          if (!flightEl.parentNode) stage.appendChild(flightEl);
+        } else if (!wrap.parentNode) {
+          stage.appendChild(wrap);
+        }
+      };
+
       if (flight && flight.from && flight.to) {
         flightEl = document.createElement("div");
         flightEl.className = "fx-flight";
         flightEl.appendChild(wrap);
-        stage.appendChild(flightEl);
         host = flightEl;
         const box = boxSize || 300;
         const ang = flightAngleDeg(flight.from, flight.to);
@@ -142,14 +215,11 @@ const SpellFx = (() => {
         wrap.style.setProperty("--fx-x", anchor.x + "px");
         wrap.style.setProperty("--fx-y", anchor.y + "px");
         if (boxSize) {
-          wrap.style.width = boxSize + "px";
-          wrap.style.height = boxSize + "px";
-          wrap.style.maxWidth = boxSize + "px";
-          wrap.style.maxHeight = boxSize + "px";
+          wrap.style.setProperty("width", boxSize + "px", "important");
+          wrap.style.setProperty("height", boxSize + "px", "important");
+          wrap.style.setProperty("max-width", boxSize + "px", "important");
+          wrap.style.setProperty("max-height", boxSize + "px", "important");
         }
-        stage.appendChild(wrap);
-      } else {
-        stage.appendChild(wrap);
       }
 
       const finish = () => {
@@ -160,6 +230,7 @@ const SpellFx = (() => {
       const begin = () => {
         if (started) return;
         started = true;
+        mount();
         void wrap.offsetWidth;
         const box = Math.max(1, boxSize || wrap.clientWidth || (flightEl && flightEl.clientWidth) || 560);
         const natH = img.naturalHeight || frameH || 720;
@@ -171,6 +242,7 @@ const SpellFx = (() => {
           ? opts.frameMs
           : Math.max(28, Math.round(1000 / Math.max(1, fps || 12)));
         const fadeMs = 280;
+        const softEnd = !!opts.softEnd; // skip end-fade when chaining cast→impact
         let i = 0;
         if (vertical) {
           img.style.width = box + "px";
@@ -183,6 +255,7 @@ const SpellFx = (() => {
         img.style.maxHeight = "none";
         img.style.display = "block";
         img.style.willChange = "transform";
+        img.style.animation = "none";
 
         if (flightEl && flight && flight.from && flight.to) {
           const flightMs = Math.max(450, Math.min(650, flight.durationMs || 550));
@@ -199,24 +272,39 @@ const SpellFx = (() => {
           wrap.classList.add("show");
           wrap.style.opacity = "1";
         });
-        const tick = () => {
+
+        // rAF + timestamp frame advance (smoother than nested setTimeout)
+        let lastTs = 0;
+        let acc = 0;
+        const paint = () => {
           img.style.transform = vertical
             ? ("translateY(" + (-i * box) + "px)")
             : ("translateX(" + (-i * box) + "px)");
-          i += 1;
-          if (i >= n) {
-            wrap.classList.remove("show");
-            wrap.classList.add("hide");
-            setTimeout(finish, fadeMs);
-          } else {
-            if (i >= n - 2) {
+        };
+        paint();
+        const step = (ts) => {
+          if (!lastTs) lastTs = ts;
+          acc += (ts - lastTs);
+          lastTs = ts;
+          while (acc >= frameMs && i < n - 1) {
+            acc -= frameMs;
+            i += 1;
+            paint();
+          }
+          if (i >= n - 1) {
+            // Hold last frame; fade only after playback (never early-hide at n-2)
+            if (softEnd) {
+              finish();
+            } else {
               wrap.classList.remove("show");
               wrap.classList.add("hide");
+              setTimeout(finish, fadeMs);
             }
-            setTimeout(tick, frameMs);
+            return;
           }
+          requestAnimationFrame(step);
         };
-        tick();
+        requestAnimationFrame(step);
       };
       img.onerror = finish;
       img.onload = begin;
@@ -224,7 +312,6 @@ const SpellFx = (() => {
       if (img.complete && img.naturalWidth) begin();
     });
   }
-
 
   function assetUrl(base, file) {
     return base + file + "?v=" + (window.GAME_VERSION || "0");
@@ -290,21 +377,28 @@ const SpellFx = (() => {
     const impactBox = 320;
     const flightBox = 300;
 
+    const hasHitStrip = await probeUrl(hitStrip);
+    const hasAoeStrip = !!(meta.aoe && await probeUrl(assetUrl(base, "aoe_strip.png")));
+    const hasHit = hasHitStrip || hasAoeStrip;
     if (await probeUrl(castStrip)) {
       if (canFly) {
         const startPt = resolveFlightStart();
         await playStrip(stage, castStrip, castW, castH, castFrames, fps, layoutHint, {
           flight: { from: startPt, to: endPt, durationMs: 550 },
-          boxSize: flightBox
+          boxSize: flightBox,
+          softEnd: !!hasHit
         });
       } else if (anchorAtTarget) {
         await playStrip(stage, castStrip, castW, castH, castFrames, fps, layoutHint, {
           anchor: endPt,
-          boxSize: impactBox
+          boxSize: impactBox,
+          softEnd: !!hasHit
         });
       } else {
         // AOE / board-centered — keep full-stage strip playback
-        await playStrip(stage, castStrip, castW, castH, castFrames, fps, layoutHint, null);
+        await playStrip(stage, castStrip, castW, castH, castFrames, fps, layoutHint, {
+          softEnd: !!hasHit
+        });
       }
       played = true;
     }
@@ -312,10 +406,10 @@ const SpellFx = (() => {
     const hitOpts = (canFly || anchorAtTarget)
       ? { anchor: endPt, boxSize: impactBox }
       : null;
-    if (await probeUrl(hitStrip)) {
+    if (hasHitStrip) {
       await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps, layoutHint, hitOpts);
       played = true;
-    } else if (meta.aoe && await probeUrl(assetUrl(base, "aoe_strip.png"))) {
+    } else if (hasAoeStrip) {
       await playStrip(stage, assetUrl(base, "aoe_strip.png"), hitW, hitH, hitFrames, fps, layoutHint, null);
       played = true;
     }
@@ -786,25 +880,36 @@ const SpellFx = (() => {
       }
       const lab = document.getElementById("fxName");
       if (lab) {
-        lab.textContent = opts.label || (meta && (meta.name || meta.concept)) || "";
+        // Combat packs: hide concept labels (opts.label only)
+        const fxLabel = (kind === "combat")
+          ? (opts.label || "")
+          : (opts.label || (meta && (meta.name || meta.concept)) || "");
+        lab.textContent = fxLabel;
         lab.style.opacity = lab.textContent ? "1" : "0";
       }
       layer.classList.add("on", "pack-play");
       layer.style.display = "";
       const veil = layer.querySelector(".fx-veil");
       if (veil) veil.style.setProperty("background", "transparent", "important");
-      if (stage) stage.innerHTML = "";
+      // Keep stage until first strip mounts (avoid mid-spell blank flash)
+
+      const anchorPt = pointFromOpts(opts);
+      const stripOptsBase = anchorPt
+        ? { anchor: anchorPt, boxSize: opts.boxSize || 220 }
+        : {};
 
       let played = false;
       // Strip-first only — never fall back to empty/chroma webp.
       // Pack VFX at 2× speed (half duration); size via CSS .pack-play
       const packFps = Math.max(1, fps) * 2;
+      const hasHit = await probeUrl(hitStrip);
       if (await probeUrl(castStrip)) {
-        await playStrip(stage, castStrip, castW, castH, castFrames, packFps, layoutHint);
+        const castOpts = Object.assign({}, stripOptsBase, { softEnd: !!hasHit });
+        await playStrip(stage, castStrip, castW, castH, castFrames, packFps, layoutHint, castOpts);
         played = true;
       }
-      if (await probeUrl(hitStrip)) {
-        await playStrip(stage, hitStrip, hitW, hitH, hitFrames, packFps, layoutHint);
+      if (hasHit) {
+        await playStrip(stage, hitStrip, hitW, hitH, hitFrames, packFps, layoutHint, stripOptsBase);
         played = true;
       }
       return played;
@@ -865,6 +970,6 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor };
+  return { play, clear, T, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts };
 })();
 window.SpellFx = SpellFx;

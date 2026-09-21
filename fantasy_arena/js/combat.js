@@ -156,11 +156,11 @@ function doAttack(p, attacker, target, auto) {
         const hpDmg = calc.hpDmg;
         log(`${vic.name} 방어 ${blocked} → 체력피해 ${hpDmg}`);
         const defEl = Vfx.elOf(vic.uid);
-        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
+        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { uid: vic.uid }); } catch (e) {}
         await Vfx.attackSeq(atkEl, defEl, hpDmg, hpDmg >= attacker.atk + 2);
         damageMinion(foe, vic, hpDmg, combatKillCtx(attacker, p));
         if (!(vic.hp > 0 && !vic.dying)) {
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: vic.uid }); } catch (e) {}
           Vfx.death(Vfx.elOf(vic.uid));
         }
         render();
@@ -174,7 +174,7 @@ function doAttack(p, attacker, target, auto) {
           log(`${primary.name} 반격`);
           const atkNow = Vfx.elOf(attacker.uid);
           const defNow = Vfx.elOf(primary.uid);
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter"); } catch (e) {}
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter", { uid: attacker.uid }); } catch (e) {}
           await Vfx.parrySeq(defNow, atkNow, dmgBack);
           damageMinion(p, attacker, dmgBack, combatKillCtx(primary, foe));
           render();
@@ -196,7 +196,7 @@ function doAttack(p, attacker, target, auto) {
         let hpDmg = calc.hpDmg;
         if (hits > 1) log(`${attacker.name} 연속 ${hit}/${hits}`);
         const crit = hpDmg >= attacker.atk + 3 || sk === 5;
-        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
+        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { hero: isMeHero ? "me" : "opp" }); } catch (e) {}
         await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
         if (sk === 5 && hpDmg >= 1) {
           dealHero(target.owner, Math.max(hpDmg, target.owner.hp));
@@ -227,8 +227,8 @@ function doAttack(p, attacker, target, auto) {
         const crit = hpDmg >= attacker.atk + 2 || sk === 5;
         try {
           if (typeof SpellFx !== "undefined" && SpellFx.playCombat) {
-            SpellFx.playCombat("attack");
-            SpellFx.playCombat("defend");
+            SpellFx.playCombat("attack", { uid: def.uid });
+            SpellFx.playCombat("defend", { uid: def.uid });
           }
         } catch (e) {}
         await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
@@ -254,7 +254,7 @@ function doAttack(p, attacker, target, auto) {
             log(`${def.name} 반격`);
             const atkNow = Vfx.elOf(attacker.uid);
             const defNow = Vfx.elOf(def.uid);
-            try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter"); } catch (e) {}
+            try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter", { uid: attacker.uid }); } catch (e) {}
             await Vfx.parrySeq(defNow, atkNow, dmgBack);
             damageMinion(p, attacker, dmgBack, combatKillCtx(def, target.owner));
             render();
@@ -265,7 +265,7 @@ function doAttack(p, attacker, target, auto) {
         } else if (!survived) {
           log(`${def.name} 격파 · 반격 없음`);
           const deadEl = Vfx.elOf(def.uid);
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: def.uid }); } catch (e) {}
           Vfx.death(deadEl);
           await waitMs(520);
           break;
@@ -294,7 +294,7 @@ function doAttack(p, attacker, target, auto) {
               log(`${attacker.name} 돌파 → 영웅 (잔여 ${leftover})`);
               const isMeHero = foe === meView().me;
               const hEl = Vfx.heroOf(isMeHero);
-              try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
+              try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { hero: isMeHero ? "me" : "opp" }); } catch (e) {}
               await Vfx.attackSeq(Vfx.elOf(attacker.uid), hEl, leftover, false);
               dealHero(foe, leftover);
               render();
@@ -311,7 +311,7 @@ function doAttack(p, attacker, target, auto) {
           const nDmg = Math.max(0, leftover - nBlocked);
           log(`${attacker.name} 돌파 → ${next.name} (${hops}) 잔여ATK ${leftover}`);
           log(`${next.name} 방어 ${nBlocked} → 체력피해 ${nDmg}`);
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { uid: next.uid }); } catch (e) {}
           await Vfx.attackSeq(Vfx.elOf(attacker.uid), Vfx.elOf(next.uid), nDmg, false);
           const nb = next.hp;
           damageMinion(foe, next, nDmg, combatKillCtx(attacker, p));
@@ -322,7 +322,7 @@ function doAttack(p, attacker, target, auto) {
             break;
           }
           log(`${next.name} 격파`);
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: next.uid }); } catch (e) {}
           Vfx.death(Vfx.elOf(next.uid));
           await waitMs(400);
           leftover = Math.max(0, nDmg - nb);
@@ -335,7 +335,7 @@ function doAttack(p, attacker, target, auto) {
       pl.board.filter(mm => mm.dying).forEach(mm => {
         const el = Vfx.elOf(mm.uid);
         if (el && !el.classList.contains("fx-dissolve")) {
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: mm.uid }); } catch (e) {}
           Vfx.death(el);
         }
         destroyMinion(pl, mm, { fromSpell: false });
