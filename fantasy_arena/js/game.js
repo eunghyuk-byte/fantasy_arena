@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.051";
+const GAME_VERSION = "0.052";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1594,8 +1594,10 @@ async function openCardLore(id) {
   const tribeNm = (TRIBES.find(t => t.id === c.tribe) || {}).name || "";
   const stats = c.type === "minion" ? (c.atk + "/" + (c.def||0) + "/" + c.hp) : (c.type === "item" ? ((c.atk||0) + "/" + (c.def||0) + "/" + (c.hp||0)) : "-");
   const coin = (c.type === "minion") ? fmtCoinLinks(c) : "";
-  const bits = [c.cost + "마나", tribeNm, raceNm, stats, coin ? ("코인 " + coin) : "", rareKo, cap];
-  document.getElementById("loreMeta").textContent = bits.filter(Boolean).join(" · ");
+  const top = [c.cost + "마나", tribeNm, raceNm, stats, coin ? ("코인 " + coin) : ""].filter(Boolean).join(" · ");
+  const bot = [rareKo, cap].filter(Boolean).join(" · ");
+  const metaEl = document.getElementById("loreMeta");
+  metaEl.innerHTML = top + (bot ? "<br><br>" + bot : "");
   const skEl = document.getElementById("loreSkills");
   if (skEl) skEl.innerHTML = buildLoreSkillsHtml(c);
   document.getElementById("loreText").textContent = loreOf(id);
