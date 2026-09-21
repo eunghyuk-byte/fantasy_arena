@@ -258,7 +258,7 @@ const CARDS = [
   { id:"di1", tribe:"dark", name:"저주의인형", cost:1, type:"item", rarity:"common", atk:1, def:0, hp:0, atkSkill:7, text:"약화공격 부여" },
   { id:"di2", tribe:"dark", name:"피의망토", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:6, text:"흡혈공격 부여" },
   { id:"di3", tribe:"dark", name:"흑마법서", cost:3, type:"item", rarity:"common", atk:2, def:0, hp:2, ability:"강탈", text:"강탈 부여" },
-  { id:"di4", tribe:"dark", name:"조작된주화", cost:3, type:"item", rarity:"uncommon", atk:0, def:0, hp:0, text:"코인을 골드코인으로" },
+  { id:"di4", tribe:"dark", name:"조작된주화", cost:3, type:"item", rarity:"uncommon", atk:0, def:0, hp:0, text:"코인을 골드코인으로 변경" },
   { id:"di5", tribe:"dark", name:"사신의낫", cost:5, type:"item", rarity:"common", atk:5, def:0, hp:2, text:"" },
   { id:"di6", tribe:"dark", name:"다크아머", cost:7, type:"item", rarity:"rare", atk:1, def:3, hp:2, ability:"보호", text:"보호 부여" },
   { id:"ns6", tribe:"wind", name:"바람방패", cost:2, type:"spell", rarity:"common", text:"아군 하나 공·방·체+1", spell:{ type:"buff", target:"own_minion", atk:1, def:1, hp:1 } },
