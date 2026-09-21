@@ -2702,3 +2702,13 @@ html.is-desktop, html.is-desktop body {
   position: fixed !important;
   z-index: 9999 !important;
 }
+
+/* ===== P0 spell target glow ===== */
+#game.active .minion.spell-glow,
+#game.active .hero-slot.spell-glow,
+#game.active .hero-portrait.spell-glow {
+  outline: 3px solid #ffe08a !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 18px rgba(255, 200, 80, .85), 0 0 36px rgba(255, 140, 40, .45) !important;
+  filter: brightness(1.12) saturate(1.15);
+}
