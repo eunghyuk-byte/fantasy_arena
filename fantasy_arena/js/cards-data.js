@@ -271,7 +271,7 @@ const CARDS = [
   { id:"ls6", tribe:"light", name:"성벽가호", cost:5, type:"spell", rarity:"uncommon", text:"유닛 하나 방+2 체+8", spell:{ type:"buff", target:"any_minion", def:2, hp:8 } },
   { id:"as6", tribe:"water", name:"눈보라", cost:5, type:"spell", rarity:"uncommon", text:"적 전체 체-2, 다음 턴 공격 불가", spell:{ type:"aoe_pack", enemy:2, skipAttack:true } },
   { id:"ns7", tribe:"wind", name:"한줄기바람", cost:1, type:"spell", rarity:"common", text:"적 하나 체-1, 드로우1", spell:{ type:"draw_ex", enemyDmg:1, draw:1 } },
-  { id:"as7", tribe:"water", name:"인어의노래", cost:2, type:"spell", rarity:"common", text:"유닛 하나 공1, 코인 제거", spell:{ type:"set_one", atk:1, coinZero:true, target:"any_minion" } },
+  { id:"as7", tribe:"water", name:"인어의노래", cost:2, type:"spell", rarity:"common", text:"유닛 하나 공1, 코인=0", spell:{ type:"set_one", atk:1, coinZero:true, target:"any_minion" } },
   { id:"ls7", tribe:"light", name:"빛의환영", cost:2, type:"spell", rarity:"common", text:"적 전체 체-1, 아군 전체 체+1", spell:{ type:"aoe_pack", enemy:1, ownHp:1 } },
   { id:"as8", tribe:"water", name:"개구리변신", cost:4, type:"spell", rarity:"uncommon", text:"적 하나 공1 체1", spell:{ type:"set_one", atk:1, hp:1, target:"enemy_minion" } },
   { id:"ns8", tribe:"wind", name:"폭풍우", cost:4, type:"spell", rarity:"common", text:"적 전체 체-2, 코인-1", spell:{ type:"aoe_pack", enemy:2, coin:-1 } },
@@ -283,7 +283,7 @@ const CARDS = [
   { id:"ds5", tribe:"dark", name:"블랙홀", cost:7, type:"spell", rarity:"rare", text:"유닛 전체 파괴, 아군 최대마나-3", spell:{ type:"wipe_all", maxMana:-3 } },
   { id:"ds6", tribe:"dark", name:"해골던지기", cost:3, type:"spell", rarity:"common", text:"공4 이하 적 하나 파괴", spell:{ type:"kill_if", maxAtk:4 } },
   { id:"ds7", tribe:"dark", name:"전염병", cost:4, type:"spell", rarity:"common", text:"4코 이상 유닛 전체 공1 체1", spell:{ type:"plague", minCost:4 } },
-  { id:"ds8", tribe:"dark", name:"13시의저주", cost:1, type:"spell", rarity:"uncommon", text:"유닛 하나 코인 전부 제거", spell:{ type:"set_one", coinZero:true, target:"any_minion" } },
+  { id:"ds8", tribe:"dark", name:"13시의저주", cost:1, type:"spell", rarity:"uncommon", text:"유닛 하나 코인=0", spell:{ type:"set_one", coinZero:true, target:"any_minion" } },
   { id:"fs8", tribe:"fire", name:"메테오", cost:7, type:"spell", rarity:"rare", text:"적 전체 체-4, 코인-1", spell:{ type:"aoe_pack", enemy:4, coin:-1 } }
 ];
 const SPELL_SCHOOL = { fire:"염술", wind:"풍술", water:"물술", light:"성술", dark:"암술", earth:"지술" };
