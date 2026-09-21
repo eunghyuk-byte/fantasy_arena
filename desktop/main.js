@@ -8,7 +8,10 @@ const PRESETS = {
   "1920x1440": { w: 1920, h: 1440 }
 };
 
-const GAME_DIR = path.join(__dirname, "..", "fantasy_arena");
+const GAME_DIR = app.isPackaged
+  ? path.join(process.resourcesPath, "fantasy_arena")
+  : path.join(__dirname, "..", "fantasy_arena");
+
 let mainWindow = null;
 
 function clampToDisplay(w, h) {
