@@ -495,8 +495,8 @@ const SpellFx = (() => {
       layer.dataset.kind = kind;
       const veil = layer.querySelector(".fx-veil");
       if (veil) {
-        const pal = ELEM[elem] || ELEM.earth;
-        veil.style.background = pal.veil;
+        // No colored plate behind strip VFX
+        veil.style.setProperty("background", "transparent", "important");
       }
       const src = await resolveFace(card);
       paintCard(src, card.name || "");

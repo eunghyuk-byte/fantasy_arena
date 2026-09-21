@@ -2761,3 +2761,24 @@ html.is-desktop, html.is-desktop body {
   box-shadow: 0 0 18px rgba(255, 200, 80, .85), 0 0 36px rgba(255, 140, 40, .45) !important;
   filter: brightness(1.12) saturate(1.15);
 }
+
+
+/* ===== v0.021: spellFx veil never tints; strip viewport clean ===== */
+#spellFx .fx-veil,
+#spellFx.pack-play .fx-veil,
+#spellFx[data-elem] .fx-veil,
+#spellFx[data-elem="fire"] .fx-veil,
+#spellFx[data-elem="water"] .fx-veil,
+#spellFx[data-elem="wind"] .fx-veil,
+#spellFx[data-elem="earth"] .fx-veil,
+#spellFx[data-elem="light"] .fx-veil,
+#spellFx[data-elem="dark"] .fx-veil {
+  background: transparent !important;
+  opacity: 0 !important;
+}
+#spellFx .fx-stage .fx-strip {
+  background: transparent !important;
+  overflow: hidden !important;
+  /* one-frame square viewport */
+  aspect-ratio: 1 / 1 !important;
+}
