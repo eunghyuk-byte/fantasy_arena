@@ -44,8 +44,8 @@ function shuffle(a) {
   return x;
 }
 function buildDeck(tribeId) {
-  // Items/artifacts deferred — keep only minions + spells in normal tribe decks
-  const pool = CARDS.filter(c => !c.token && c.tribe === tribeId && c.type !== "item" && !/^it\d+$/.test(c.id)).map(c => c.id);
+  // Items included (max 2 via copies)
+  const pool = CARDS.filter(c => !c.token && c.tribe === tribeId).map(c => c.id);
   const d = [];
   while (d.length < 30) {
     const id = pool[d.length % pool.length];
@@ -252,6 +252,120 @@ function passTurn() {
   if (current().isAI) setTimeout(aiTurn, 350);
 }
 
+
+function isEquipItem(card) {
+  return !!(card && card.type === "item" && String(card.text || "").startsWith("장착:"));
+}
+function isInstantItem(card) {
+  return !!(card && card.type === "item" && !isEquipItem(card));
+}
+function unitCoinTotal(m) {
+  if (!m) return 0;
+  return Math.abs(m.atkC || 0) + Math.abs(m.defC || 0) + Math.abs(m.hpC || 0);
+}
+function unequipItem(m) {
+  if (!m || !m.equippedItem) return;
+  const b = m._itemBonuses || {};
+  m.atk = Math.max(0, (Number(m.atk) || 0) - (b.atk || 0));
+  m.def = (Number(m.def) || 0) - (b.def || 0);
+  m.hp = Math.max(1, (Number(m.hp) || 0) - (b.hp || 0));
+  m.maxHp = Math.max(m.hp, (Number(m.maxHp) || 0) - (b.hp || 0));
+  if (b.atkSkill != null) {
+    if (b.prevAtkSkill == null) delete m.atkSkill;
+    else m.atkSkill = b.prevAtkSkill;
+  }
+  if (b.ability != null) {
+    if (b.prevAbility == null) delete m.ability;
+    else m.ability = b.prevAbility;
+  }
+  if (b.grantedCharge) {
+    m.keywords = (m.keywords || []).filter(k => k !== "charge");
+  }
+  if (b.grantedKw) {
+    m.keywords = (m.keywords || []).filter(k => k !== b.grantedKw);
+  }
+  delete m.equippedItem;
+  delete m._itemBonuses;
+  m.itemWorn = false;
+  if (m._baseText != null) { m.text = m._baseText; delete m._baseText; }
+}
+function equipItemOnUnit(p, card, unit) {
+  if (!unit || !p || !p.board.includes(unit)) return false;
+  unequipItem(unit);
+  let dAtk = Number(card.atk) || 0;
+  let dDef = Number(card.def) || 0;
+  let dHp = Number(card.hp) || 0;
+  if (card.id === "ei4") {
+    const n = unitCoinTotal(unit);
+    dAtk = n; dHp = n; dDef = 0;
+  } else if (card.id === "ai4") {
+    dDef = unitCoinTotal(unit); dAtk = 0; dHp = 0;
+  }
+  const prevAtkSkill = unit.atkSkill;
+  const prevAbility = unit.ability;
+  let grantedCharge = false;
+  let grantedKw = null;
+  unit.atk = Math.max(0, (Number(unit.atk) || 0) + dAtk);
+  unit.def = (Number(unit.def) || 0) + dDef;
+  unit.hp = Math.max(1, (Number(unit.hp) || 0) + dHp);
+  unit.maxHp = Math.max(unit.hp, (Number(unit.maxHp) || unit.hp) + dHp);
+  if (card.atkSkill != null) {
+    unit.atkSkill = card.atkSkill;
+    if (card.atkSkill === 3) {
+      unit.keywords = [...(unit.keywords || [])];
+      if (!unit.keywords.includes("charge")) {
+        unit.keywords.push("charge");
+        grantedCharge = true;
+        unit.canAttack = true;
+        unit.attacksLeft = Math.max(unit.attacksLeft || 0, 1);
+      }
+    }
+  }
+  if (card.ability) {
+    unit.ability = card.ability;
+    const kwMap = { "보호": "shield", "활력": "vital", "환생": "rebirth", "강탈": "steal", "위압": "awe", "혼란": "confuse" };
+    const kw = kwMap[card.ability];
+    if (kw) {
+      unit.keywords = [...(unit.keywords || [])];
+      if (!unit.keywords.includes(kw)) { unit.keywords.push(kw); grantedKw = kw; }
+    }
+  }
+  unit.equippedItem = { id: card.id, name: card.name, uid: card.uid };
+  unit._itemBonuses = {
+    atk: dAtk, def: dDef, hp: dHp,
+    atkSkill: card.atkSkill, prevAtkSkill,
+    ability: card.ability, prevAbility,
+    grantedCharge, grantedKw
+  };
+  unit.itemWorn = true;
+  if (unit._baseText == null) unit._baseText = unit.text || "";
+  unit.text = "아이템착용중" + (unit._baseText ? " · " + unit._baseText : "");
+  if (card.id === "ni1") draw(p, 1);
+  log(`${p.name}이(가) ${unit.name}에게 ${card.name} 장착`);
+  return true;
+}
+function resolveInstantItem(p, card) {
+  const e = opponent(p);
+  if (card.id === "ni4") {
+    [...p.board, ...e.board].forEach(m => { m.atkC = 0; m.defC = 0; m.hpC = 0; });
+    log("무풍: 모든 유닛 코인 0");
+  } else if (card.id === "li3") {
+    const base = (p.coinP != null) ? p.coinP : 0.5;
+    p.coinP = Math.min(1, base + 0.2);
+    log("행운의빛: 이번 턴 앞면 확률 +20%p");
+  } else if (card.id === "di4") {
+    const mark = (m) => {
+      if (!m) return;
+      if ((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0)) m.coinGold = true;
+    };
+    [...p.board, ...e.board].forEach(mark);
+    [...p.hand, ...e.hand].forEach(mark);
+    log("황금저주: 코인이 금화로(앞면 고정)");
+  } else {
+    log(`${card.name} 효과`);
+  }
+}
+
 function playCard(p, card, target) {
   if (p.mana < card.cost) return false;
   if (card.type === "minion" && p.noPlayMinion) {
@@ -261,6 +375,13 @@ function playCard(p, card, target) {
   if (card.type === "minion" && p.board.length >= 5) {
     log("전장이 가득 찼습니다 (최대 5장)");
     return false;
+  }
+  if (card.type === "item" && isEquipItem(card)) {
+    const unit = target && target.kind === "minion" && target.owner === p ? target.minion : null;
+    if (!unit || !p.board.includes(unit)) {
+      log("장착할 아군 유닛이 없습니다");
+      return false;
+    }
   }
   p.mana -= card.cost;
   p.hand = p.hand.filter(c => c.uid !== card.uid);
@@ -274,6 +395,14 @@ function playCard(p, card, target) {
     window._dropSlot = null;
     log(`${p.name}이(가) ${m.name}을(를) 소환`);
     resolveBattlecry(p, m, target);
+  } else if (card.type === "item") {
+    if (isEquipItem(card)) {
+      const unit = target.minion;
+      equipItemOnUnit(p, card, unit);
+    } else {
+      log(`${p.name}이(가) ${card.name} 사용`);
+      resolveInstantItem(p, card);
+    }
   } else {
     log(`${p.name}이(가) ${card.name} 사용`);
     runSpellCast(p, card, target);
@@ -308,6 +437,8 @@ function buildSpellFx(stage, kind, card) {
 
 
 function needsTarget(card) {
+  if (card && card.type === "item" && isEquipItem(card)) return true;
+  if (card && card.type === "item") return false;
   const fx = card.type === "spell" ? card.spell : card.battlecry;
   if (!fx) return false;
   if (fx.type === "draw_ex" && (fx.sacOwn || fx.bounceOwn || fx.enemyDmg)) return true;
@@ -318,6 +449,10 @@ function needsTarget(card) {
 function validTargets(p, fx) {
   const e = opponent(p);
   const list = [];
+  if (fx && fx._itemEquip) {
+    p.board.forEach(m => list.push({ kind: "minion", owner: p, minion: m }));
+    return list;
+  }
   if (!fx) return list;
   if (fx.type === "draw_ex" && (fx.sacOwn || fx.bounceOwn)) {
     p.board.forEach(m => list.push({ kind: "minion", owner: p, minion: m }));
@@ -617,6 +752,7 @@ function damageMinion(owner, m, n) {
 function destroyMinion(owner, m) {
   if (!owner || !m) return;
   if (!owner.board.some(x => x.uid === m.uid)) return;
+  if (typeof unequipItem === "function") unequipItem(m);
   const rebirth = (m.ability && String(m.ability).includes("환생")) || (m.keywords || []).includes("rebirth");
   if (rebirth) {
     m.keywords = (m.keywords || []).filter(k => k !== "rebirth");
@@ -652,9 +788,10 @@ function fmtC(n) {
   if (!n) return "";
   return (n > 0 ? "+" : "-") + "C" + Math.abs(n);
 }
-function rollCoins(mod) {
+function rollCoins(mod, unit) {
   const n = Math.abs(mod || 0);
-  const luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
+  let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
+  if (unit && unit.coinGold) luck = 1;
   const flips = Array.from({ length: n }, () => Math.random() < luck);
   const heads = flips.filter(Boolean).length;
   const delta = n ? ((mod > 0 ? 1 : -1) * heads) : 0;
@@ -762,6 +899,50 @@ function placeDropGlow(on, x, y) {
 }
 
 let _drag = null;
+
+function unitFromPoint(x, y) {
+  const me = meView().me;
+  const board = document.getElementById("myBoard");
+  if (!board || !me) return null;
+  const slots = [...board.querySelectorAll(".slot.filled .minion, .slot .minion")];
+  for (const el of slots) {
+    const r = el.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+      const uid = el.getAttribute("data-uid");
+      const m = me.board.find(u => u.uid === uid);
+      if (m) return { kind: "minion", owner: me, minion: m };
+    }
+  }
+  // nearest filled slot by center
+  let best = null, bestD = 1e9;
+  board.querySelectorAll(".slot.filled").forEach(sl => {
+    const r = sl.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const d = Math.hypot(x - cx, y - cy);
+    if (d < bestD && d < Math.max(r.width, r.height) * 0.75) {
+      bestD = d;
+      const minion = sl.querySelector(".minion");
+      if (minion) {
+        const uid = minion.getAttribute("data-uid");
+        const m = me.board.find(u => u.uid === uid);
+        if (m) best = { kind: "minion", owner: me, minion: m };
+      }
+    }
+  });
+  return best;
+}
+function clearEquipHover() {
+  document.querySelectorAll(".minion.equip-glow").forEach(el => el.classList.remove("equip-glow"));
+}
+function highlightEquipHover(x, y, allowed) {
+  clearEquipHover();
+  if (!allowed) return;
+  const hit = unitFromPoint(x, y);
+  if (!hit) return;
+  const el = document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
+  if (el) el.classList.add("equip-glow");
+}
+
 function canDropCard(card) {
   if (!state || !card) return false;
   if (state.busy) return false;
@@ -769,6 +950,7 @@ function canDropCard(card) {
   if (state.over || current() !== me || me.isAI) return false;
   if (me.mana < card.cost) return false;
   if (card.type === "minion" && me.board.length >= 5) return false;
+  if (card.type === "item" && isEquipItem(card) && !me.board.length) return false;
   return true;
 }
 function overBoard(x, y) {
@@ -832,7 +1014,14 @@ function bindHandCard(el, card) {
       if (!_drag) return;
       _drag.ghost.style.left = e.clientX + "px";
       _drag.ghost.style.top = e.clientY + "px";
-      placeDropGlow(overBoard(e.clientX, e.clientY) && canDropCard(_drag.card), e.clientX, e.clientY);
+      const cardRef = _drag.card;
+      if (cardRef && cardRef.type === "item" && isEquipItem(cardRef)) {
+        placeDropGlow(false);
+        highlightEquipHover(e.clientX, e.clientY, canDropCard(cardRef));
+      } else {
+        clearEquipHover();
+        placeDropGlow(overBoard(e.clientX, e.clientY) && canDropCard(cardRef), e.clientX, e.clientY);
+      }
     };
     const up = (e) => {
       window.removeEventListener("pointermove", move, true);
@@ -843,7 +1032,19 @@ function bindHandCard(el, card) {
       try { if (ev.pointerId != null && el.releasePointerCapture) el.releasePointerCapture(ev.pointerId); } catch (err) {}
       if (!_drag) return;
       const cardRef = _drag.card;
-      const ok = overBoard(e.clientX, e.clientY) && canDropCard(cardRef);
+      let ok = false;
+      if (cardRef && cardRef.type === "item" && isEquipItem(cardRef)) {
+        const hit = unitFromPoint(e.clientX, e.clientY);
+        clearEquipHover();
+        clearDrag();
+        if (hit && canDropCard(cardRef)) {
+          try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
+          playCard(meView().me, cardRef, hit);
+          render();
+        }
+        return;
+      }
+      ok = overBoard(e.clientX, e.clientY) && canDropCard(cardRef);
       if (ok) window._dropSlot = slotIndexFromPoint(e.clientX, e.clientY);
       else window._dropSlot = null;
       clearDrag();
@@ -869,11 +1070,13 @@ function onHandClick(card) {
   if (me.mana < card.cost) return;
   if (card.type === "minion" && me.board.length >= 5) return;
   if (needsTarget(card)) {
-    const fx = card.type === "spell" ? card.spell : card.battlecry;
+    const fx = (card.type === "item" && isEquipItem(card))
+      ? { _itemEquip: true }
+      : (card.type === "spell" ? card.spell : card.battlecry);
     const targets = validTargets(me, fx);
     if (!targets.length) {
       if (card.type === "minion") { playCard(me, card, null); render(); }
-      else log("마땅한 대상이 없습니다");
+      else log(card.type === "item" ? "장착할 아군 유닛이 없습니다" : "마땅한 대상이 없습니다");
       return;
     }
     ui.targeting = { card, targets };
@@ -938,8 +1141,8 @@ document.addEventListener("keydown", e => {
 let draftDeck = [];
 
 function tribeCards() {
-  // Items/artifacts deferred — deck builder shows units + spells only
-  return CARDS.filter(c => !c.token && c.tribe === selectedHero.id && c.type !== "item" && !/^it\d+$/.test(c.id))
+  // Deck builder: units + spells + items
+  return CARDS.filter(c => !c.token && c.tribe === selectedHero.id)
     .filter(c => {
       if (!ui.rarityFilter || ui.rarityFilter === "all") return true;
       return (c.rarity || "common") === ui.rarityFilter;
@@ -1016,7 +1219,7 @@ async function openCardLore(id) {
   const img = slot.querySelector("img.card-face");
   if (img && face) img.src = face;
   document.getElementById("loreName").textContent = c.name;
-  const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : ((SPELL_SCHOOL && SPELL_SCHOOL[c.tribe]) || "주문");
+  const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : ((SPELL_SCHOOL && SPELL_SCHOOL[c.tribe]) || "주문"));
   const RARITY_KO = { common:"일반", rare:"희귀", heroic:"영웅", legendary:"전설" };
   const rareKo = RARITY_KO[c.rarity || "common"] || "일반";
   const cap = (c.rarity === "legendary" || c.rarity === "heroic") ? "덱당 1장" : "최대 2장";

@@ -8,7 +8,12 @@ function doAttack(p, attacker, target, auto) {
   if (!ok) { resolve(); return; }
   attacker.attacksLeft -= 1;
   attacker.canAttack = attacker.attacksLeft > 0;
-  const aRoll = rollCoins(attacker.atkC);
+  const aRoll = rollCoins(attacker.atkC, attacker);
+  // fi5: 공격 코인 전부 뒷면이면 장착 아이템만 파괴
+  if (attacker.equippedItem && attacker.equippedItem.id === "fi5" && aRoll.flips && aRoll.flips.length && aRoll.heads === 0) {
+    if (typeof unequipItem === "function") unequipItem(attacker);
+    if (typeof log === "function") log(attacker.name + "의 재의계약이 파괴되었다");
+  }
   const aAtk = Math.max(0, (Number(attacker.atk) || 0) + aRoll.delta);
   const rows = [];
   if (aRoll.flips && aRoll.flips.length) {
@@ -24,7 +29,7 @@ function doAttack(p, attacker, target, auto) {
   let dAtk = 0, dRoll = { flips: [], delta: 0 }, def = null;
   if (target.kind === "minion") {
     def = target.minion;
-    dRoll = rollCoins(def.atkC);
+    dRoll = rollCoins(def.atkC, def);
     dAtk = Math.max(0, (Number(def.atk) || 0) + dRoll.delta);
     if (dRoll.flips && dRoll.flips.length) {
       rows.push({
@@ -36,7 +41,7 @@ function doAttack(p, attacker, target, auto) {
         value: dAtk
       });
     }
-    const defRoll = rollCoins(def.defC);
+    const defRoll = rollCoins(def.defC, def);
     const defVal = Math.max(0, (Number(def.def) || 0) + defRoll.delta);
     if (defRoll.flips && defRoll.flips.length) {
       rows.push({
@@ -48,7 +53,7 @@ function doAttack(p, attacker, target, auto) {
         value: defVal
       });
     }
-    const aDefRoll = rollCoins(attacker.defC);
+    const aDefRoll = rollCoins(attacker.defC, attacker);
     const aDefVal = Math.max(0, (Number(attacker.def) || 0) + aDefRoll.delta);
     if (aDefRoll.flips && aDefRoll.flips.length) {
       rows.push({
@@ -62,7 +67,7 @@ function doAttack(p, attacker, target, auto) {
     }
     // R5: hpC coin rolls apply in combat (symmetric with atkC/defC)
     if (def.hpC) {
-      const hRoll = rollCoins(def.hpC);
+      const hRoll = rollCoins(def.hpC, def);
       const hpBase = def.hp;
       def.hp = Math.max(0, (Number(def.hp) || 0) + hRoll.delta);
       if (hRoll.flips && hRoll.flips.length) {
@@ -77,7 +82,7 @@ function doAttack(p, attacker, target, auto) {
       }
     }
     if (attacker.hpC) {
-      const ahRoll = rollCoins(attacker.hpC);
+      const ahRoll = rollCoins(attacker.hpC, attacker);
       const ahpBase = attacker.hp;
       attacker.hp = Math.max(0, (Number(attacker.hp) || 0) + ahRoll.delta);
       if (ahRoll.flips && ahRoll.flips.length) {
@@ -210,6 +215,7 @@ function clearDrag() {
     _drag = null;
   }
   if (typeof placeDropGlow === "function") placeDropGlow(false);
+  if (typeof clearEquipHover === "function") clearEquipHover();
 }
 function hideScreens() {
   clearDrag();
@@ -254,11 +260,17 @@ function aiTurn() {
     for (const card of plays) {
       let target = null;
       if (needsTarget(card)) {
-        const fx = card.type === "spell" ? card.spell : card.battlecry;
+        const fx = (card.type === "item" && typeof isEquipItem === "function" && isEquipItem(card))
+          ? { _itemEquip: true }
+          : (card.type === "spell" ? card.spell : card.battlecry);
         const ts = validTargets(p, fx);
-        if (!ts.length && fx.target) continue;
-        target = pickAiTarget(p, fx, ts);
-        if (!target && fx.target) continue;
+        if (!ts.length) {
+          if (card.type === "item") continue;
+          if (fx && fx.target) continue;
+        }
+        if (fx && fx._itemEquip) target = ts[0] || null;
+        else target = pickAiTarget(p, fx, ts);
+        if (!target && ((fx && fx.target) || (fx && fx._itemEquip))) continue;
       }
       playCard(p, card, target);
       render();
@@ -283,6 +295,12 @@ function scorePlay(p, card) {
   if (card.spell && card.spell.type === "dmg") {
     const e = opponent(p);
     if (e.hp <= card.spell.value) s += 50;
+  }
+  if (card.type === "item") {
+    if (typeof isEquipItem === "function" && isEquipItem(card)) {
+      if (!p.board.length) s -= 100;
+      else s += 4 + (card.atk || 0) + (card.def || 0) + (card.hp || 0);
+    } else s += 5;
   }
   return s;
 }

@@ -2529,3 +2529,30 @@ html.is-desktop, html.is-desktop body {
 #game.active .my-hand .card.playable:first-child {
   margin-left: 0 !important;
 }
+
+
+/* Item equip hover glow (do not touch board/hand layout) */
+#game.active .minion.equip-glow {
+  position: relative;
+  z-index: 6;
+  filter: drop-shadow(0 0 10px rgba(255, 230, 120, 0.95)) drop-shadow(0 0 22px rgba(255, 200, 60, 0.75));
+  animation: equipSparkle 0.7s ease-in-out infinite alternate;
+}
+#game.active .minion.equip-glow::after {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  border-radius: 18px;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px rgba(255, 236, 150, 0.9), 0 0 28px 8px rgba(255, 210, 80, 0.45);
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,220,0.35), transparent 55%);
+  animation: equipPulse 0.7s ease-in-out infinite alternate;
+}
+@keyframes equipSparkle {
+  from { filter: drop-shadow(0 0 6px rgba(255, 230, 120, 0.7)) drop-shadow(0 0 14px rgba(255, 200, 60, 0.45)); }
+  to   { filter: drop-shadow(0 0 14px rgba(255, 245, 180, 1)) drop-shadow(0 0 28px rgba(255, 210, 80, 0.9)); }
+}
+@keyframes equipPulse {
+  from { opacity: 0.55; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1.03); }
+}
