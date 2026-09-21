@@ -305,7 +305,7 @@
 
   .board {
     --slot-h: min(86%, 20cqh);
-    --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 12%) / 6.4));
+    --slot-w: calc(var(--slot-h) * 2 / 3);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1267,7 +1267,7 @@
   }
   .board {
     --slot-h: min(96%, 38cqh);
-    --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 8%) / 6.2));
+    --slot-w: calc(var(--slot-h) * 2 / 3);
     padding: 6px 8% !important;
     margin: 0 4% !important;
   }
@@ -1910,7 +1910,7 @@
 }
 .board {
   --slot-h: clamp(168px, 26cqh, 228px) !important;
-  --slot-w: min(calc(var(--slot-h) * 0.66), calc((100% - 18%) / 6.2)) !important;
+  --slot-w: calc(var(--slot-h) * 2 / 3) !important;
   justify-content: flex-start !important;
   overflow: visible !important;
 }
@@ -2223,7 +2223,7 @@ html.is-desktop, html.is-desktop body {
   max-width: none !important;
   max-height: none !important;
   padding: 0 !important;
-  margin-left: -36px !important;
+  margin-left: -24px !important;
   overflow: hidden !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -2281,3 +2281,26 @@ html.is-desktop, html.is-desktop body {
 }
 
 /* Keep non-board/hand art rule from stretching elsewhere, but hand+board use cover above */
+
+
+/* ===== P0 HARD: minion fills slot; never re-resolve --slot-w % ===== */
+#game.active .board {
+  /* --slot-w must be length only (px or calc from --slot-h). Never use 100% here. */
+  --slot-w: calc(var(--slot-h) * 2 / 3);
+}
+#game.active .board > .slot {
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  flex: 0 0 var(--slot-w) !important;
+  height: var(--slot-h) !important;
+}
+#game.active .board > .slot > .minion,
+#game.active .board .slot .minion {
+  /* Fill the slot box — do NOT set width to var(--slot-w) (100% inside would shrink) */
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: none !important;
+}

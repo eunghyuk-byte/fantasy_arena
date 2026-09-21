@@ -495,7 +495,7 @@ function layoutHandFan() {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
     el.style.transform = `translateY(${Math.abs(t)*8}px) rotate(${t*4.2}deg)`;
     el.style.zIndex = String(20 + i);
-    el.style.marginLeft = i ? "-36px" : "0";
+    el.style.marginLeft = i ? "-24px" : "0";
   });
 }
 
