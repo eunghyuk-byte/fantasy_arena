@@ -1,0 +1,23 @@
+{
+  "id": "defeat",
+  "fps": 12,
+  "loop": false,
+  "layout": "horizontal",
+  "cast": {
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 14,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "durationMs": 2167,
+  "anchor": "board-center",
+  "concept": "패배 금 간 문장"
+}

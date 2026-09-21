@@ -1,0 +1,23 @@
+{
+  "id": "turn_start_enemy",
+  "fps": 12,
+  "loop": false,
+  "layout": "horizontal",
+  "cast": {
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 10,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 8,
+    "w": 720,
+    "h": 720
+  },
+  "durationMs": 1500,
+  "anchor": "board-center",
+  "concept": "상대 턴 시작 냉기 알림"
+}
