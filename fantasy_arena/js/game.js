@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.052";
+const GAME_VERSION = "0.053";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -27,9 +27,12 @@ function cloneCard(id) {
       token: true,
     };
   }
+  const kws = [...(b.keywords || [])];
+  const hasPierceText = String(b.text || "").includes("관통");
+  if ((b.atkSkill === 2 || hasPierceText) && !kws.includes("pierce")) kws.push("pierce");
   return {
     ...b,
-    keywords: [...(b.keywords || [])],
+    keywords: kws,
     uid: uid(),
     maxHp: b.hp || 0,
     canAttack: false,

@@ -119,7 +119,7 @@ function doAttack(p, attacker, target, auto) {
     } else {
       const blocked = window._pendingDef || 0;
       const backBlock = window._pendingAtkDef || 0;
-      const pierce = (attacker.keywords || []).includes("pierce");
+      const pierce = (attacker.keywords || []).includes("pierce") || attacker.atkSkill === 2 || String(attacker.text || "").includes("관통");
       const dmgIn = Math.max(0, aAtk - (pierce ? 0 : blocked));
       const dmgBack = Math.max(0, dAtk - backBlock);
       log(`${def.name} 방어 ${blocked} → 체력피해 ${dmgIn}`);
