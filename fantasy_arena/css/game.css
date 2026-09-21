@@ -2745,7 +2745,7 @@ html.is-desktop, html.is-desktop body {
   width: auto !important;
   max-width: none !important;
   display: block !important;
-  animation: fxStripRun var(--ms) steps(var(--frames)) forwards !important;
+  /* animation set in JS with concrete steps(N) — Safari rejects steps(var(--frames)) */
 }
 @keyframes fxStripRun {
   from { transform: translateX(0); }
@@ -2781,4 +2781,25 @@ html.is-desktop, html.is-desktop body {
   overflow: hidden !important;
   /* one-frame square viewport */
   aspect-ratio: 1 / 1 !important;
+}
+
+
+/* P0 visible cssFallback */
+#spellFx .fx-stage .fx-spark,
+#spellFx .fx-stage .shockwave,
+#spellFx .fx-stage .shock,
+#spellFx .fx-stage .aura {
+  display: block !important;
+  opacity: 1 !important;
+  z-index: 15 !important;
+}
+#spellFx .fx-stage .fx-spark.fx-fire {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, #fff6c8 0%, #ff8a20 45%, #ff3a00 75%, transparent 100%) !important;
+  box-shadow: 0 0 16px #ff6a18 !important;
+}
+#spellFx .fx-name {
+  opacity: 1 !important;
 }

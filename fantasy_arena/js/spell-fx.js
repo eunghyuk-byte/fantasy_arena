@@ -40,28 +40,42 @@ const SpellFx = (() => {
   function playStrip(stage, url, frameW, frameH, frames, fps) {
     return new Promise(resolve => {
       if (!stage || !url) { resolve(); return; }
-      const n = Math.max(1, frames || 1);
-      const ms = Math.max(600, Math.round(n / Math.max(1, fps || 12) * 1000));
       const wrap = document.createElement("div");
       wrap.className = "fx-strip run";
-      wrap.style.setProperty("--frames", String(n));
-      wrap.style.setProperty("--ms", ms + "ms");
       const img = document.createElement("img");
       img.alt = "";
-      const finish = () => { try { wrap.remove(); } catch (e) {} resolve(); };
-      const start = () => {
-        void wrap.offsetWidth;
-        setTimeout(finish, ms + 80);
-      };
-      img.onload = start;
-      img.onerror = finish;
-      img.src = url;
+      img.draggable = false;
       wrap.appendChild(img);
       stage.innerHTML = "";
       stage.appendChild(wrap);
-      if (img.complete && img.naturalWidth) start();
+      const finish = () => { try { wrap.remove(); } catch (e) {} resolve(); };
+      img.onerror = finish;
+      img.onload = () => {
+        const box = Math.max(1, wrap.clientWidth || 560);
+        const natH = img.naturalHeight || frameH || 720;
+        const natW = img.naturalWidth || frameW || 720;
+        const n = Math.max(1, frames || Math.round(natW / natH) || 1);
+        const frameMs = Math.max(50, Math.round(1000 / Math.max(1, fps || 12)));
+        // JS frame stepper — works on Safari/iOS (CSS steps(var()) does not)
+        let i = 0;
+        const tick = () => {
+          img.style.transform = "translateX(" + (-i * box) + "px)";
+          i += 1;
+          if (i >= n) setTimeout(finish, frameMs);
+          else setTimeout(tick, frameMs);
+        };
+        img.style.height = box + "px";
+        img.style.width = "auto";
+        img.style.maxWidth = "none";
+        img.style.display = "block";
+        img.style.willChange = "transform";
+        tick();
+      };
+      img.src = url;
+      if (img.complete && img.naturalWidth) img.onload();
     });
   }
+
   function assetUrl(base, file) {
     return base + file + "?v=" + (window.GAME_VERSION || "0");
   }
@@ -112,13 +126,24 @@ const SpellFx = (() => {
     if (lab) { lab.textContent = (card && card.name) || meta.name || ""; lab.style.opacity = "1"; }
     layer.classList.add("pack-play");
 
-    // Strips first: chroma-keyed webp can be fully transparent (opaque=0).
-    if (await probeUrl(castStrip)) await playStrip(stage, castStrip, castW, castH, castFrames, fps);
-    else if (await probeUrl(castWebp)) await playWebp(stage, castWebp, Math.max(800, castMs));
-
-    if (await probeUrl(hitStrip)) await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
-    else if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, Math.max(700, hitMs));
-
+    // Strips only. Chroma-keyed webp is often fully transparent — never fall back to it.
+    let played = false;
+    if (await probeUrl(castStrip)) {
+      await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+      played = true;
+    }
+    if (await probeUrl(hitStrip)) {
+      await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+      played = true;
+    } else if (meta.aoe && await probeUrl(assetUrl(base, "aoe_strip.png"))) {
+      await playStrip(stage, assetUrl(base, "aoe_strip.png"), hitW, hitH, hitFrames, fps);
+      played = true;
+    }
+    if (!played) {
+      // Guaranteed visible burst if strips fail to load (mobile/network)
+      cssFallback(stage, elemOf(card), spellKind(card));
+      await new Promise(r => setTimeout(r, 900));
+    }
     if (fxCard) { fxCard.style.opacity = ""; }
     return true;
   }
@@ -127,7 +152,6 @@ const SpellFx = (() => {
   function lowSpec() {
     try {
       if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
-      if (navigator.deviceMemory && navigator.deviceMemory < 4) return true;
     } catch (e) {}
     return false;
   }
@@ -495,11 +519,11 @@ const SpellFx = (() => {
       layer.dataset.kind = kind;
       const veil = layer.querySelector(".fx-veil");
       if (veil) {
-        // No colored plate behind strip VFX
         veil.style.setProperty("background", "transparent", "important");
       }
-      const src = await resolveFace(card);
-      paintCard(src, card.name || "");
+      // Never block VFX on card-face compose (hand queue can stall on mobile).
+      paintCard("", card.name || "");
+      resolveFace(card).then(src => { if (src) paintCard(src, card.name || ""); }).catch(() => {});
 
       const usedPack = await playAssetPack(card, layer, stage);
       if (usedPack) {
