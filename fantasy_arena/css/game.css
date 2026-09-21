@@ -2660,15 +2660,16 @@ html.is-desktop, html.is-desktop body {
   pointer-events: none;
 }
 #spellFx .fx-stage .fx-strip {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: min(52vmin, 420px);
-  aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%);
-  overflow: hidden;
-  pointer-events: none;
-  filter: drop-shadow(0 0 18px rgba(255, 220, 120, .45));
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: min(72vmin, 560px) !important;
+  height: min(72vmin, 560px) !important;
+  transform: translate(-50%, -50%) !important;
+  overflow: hidden !important;
+  z-index: 12 !important;
+  background: transparent !important;
+  filter: drop-shadow(0 0 18px rgba(255,100,20,.55)) !important;
 }
 #spellFx .fx-stage .fx-strip img {
   height: 100%;
