@@ -21,6 +21,104 @@ const SpellFx = (() => {
   ELEM["불"] = ELEM.fire; ELEM["물"] = ELEM.water; ELEM["바람"] = ELEM.wind;
   ELEM["땅"] = ELEM.earth; ELEM["빛"] = ELEM.light; ELEM["암흑"] = ELEM.dark;
 
+  const ASSET_BASE = "assets/vfx/spells/";
+  const _metaCache = {};
+  async function loadSpellMeta(id) {
+    if (!id) return null;
+    if (_metaCache[id] !== undefined) return _metaCache[id];
+    try {
+      const res = await fetch(ASSET_BASE + id + "/meta.json", { cache: "no-store" });
+      if (!res.ok) { _metaCache[id] = null; return null; }
+      const meta = await res.json();
+      _metaCache[id] = meta;
+      return meta;
+    } catch (e) {
+      _metaCache[id] = null;
+      return null;
+    }
+  }
+  function playStrip(stage, url, frameW, frameH, frames, fps) {
+    return new Promise(resolve => {
+      if (!stage || !url) { resolve(); return; }
+      const ms = Math.max(200, Math.round((frames || 1) / Math.max(1, fps || 12) * 1000));
+      const wrap = document.createElement("div");
+      wrap.className = "fx-strip";
+      wrap.style.setProperty("--fw", frameW + "px");
+      wrap.style.setProperty("--fh", frameH + "px");
+      wrap.style.setProperty("--frames", String(Math.max(1, frames || 1)));
+      wrap.style.setProperty("--ms", ms + "ms");
+      const img = document.createElement("img");
+      img.alt = "";
+      img.src = url;
+      wrap.appendChild(img);
+      stage.innerHTML = "";
+      stage.appendChild(wrap);
+      img.onload = () => {
+        // ensure layout
+        wrap.classList.add("run");
+      };
+      img.onerror = () => { resolve(); };
+      setTimeout(() => { try { wrap.remove(); } catch (e) {} resolve(); }, ms + 40);
+    });
+  }
+  function assetUrl(base, file) {
+    return base + file + "?v=" + (window.GAME_VERSION || "0");
+  }
+  function probeUrl(url) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  }
+  function playWebp(stage, url, ms) {
+    return new Promise(resolve => {
+      if (!stage || !url) { resolve(); return; }
+      const img = document.createElement("img");
+      img.className = "fx-asset";
+      img.alt = "";
+      img.src = url;
+      stage.innerHTML = "";
+      stage.appendChild(img);
+      const t = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, Math.max(250, ms || 900));
+      img.onerror = () => { clearTimeout(t); resolve(); };
+    });
+  }
+  async function playAssetPack(card, layer, stage) {
+    const meta = await loadSpellMeta(card && card.id);
+    if (!meta) return false;
+    const base = ASSET_BASE + meta.id + "/";
+    const fps = meta.fps || 12;
+    const cast = meta.cast || {};
+    const hit = meta.impact || meta.aoe || {};
+    const castFrames = cast.frames || 12;
+    const hitFrames = hit.frames || 8;
+    const castW = cast.w || 720, castH = cast.h || 720;
+    const hitW = hit.w || 560, hitH = hit.h || 560;
+    const castMs = Math.round(castFrames / fps * 1000);
+    const hitMs = Math.round(hitFrames / fps * 1000);
+    const castWebp = assetUrl(base, cast.file || "cast.webp");
+    const hitWebp = assetUrl(base, hit.file || (meta.aoe ? "aoe.webp" : "impact.webp"));
+    const castStrip = assetUrl(base, "cast_strip.png");
+    const hitStrip = assetUrl(base, meta.aoe ? "aoe_strip.png" : "impact_strip.png");
+
+    try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (e) {}
+    if (meta.sfxHint === "coin_flip") { try { Sfx.playCoin && Sfx.playCoin(); } catch (e) {} }
+    const fxCard = document.getElementById("fxCard");
+    if (fxCard) { fxCard.classList.add("out"); fxCard.style.opacity = "0"; }
+
+    if (await probeUrl(castWebp)) await playWebp(stage, castWebp, castMs);
+    else await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+
+    if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, hitMs);
+    else await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+
+    if (fxCard) { fxCard.style.opacity = ""; }
+    return true;
+  }
+
+
   function lowSpec() {
     try {
       if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
@@ -393,10 +491,22 @@ const SpellFx = (() => {
         const pal = ELEM[elem] || ELEM.earth;
         veil.style.background = pal.veil;
       }
-      try { Sfx.playCardDrop(); } catch (e) {}
-
       const src = await resolveFace(card);
       paintCard(src, card.name || "");
+
+      const usedPack = await playAssetPack(card, layer, stage);
+      if (usedPack) {
+        if (fxCard) fxCard.classList.add("out");
+        layer.classList.remove("on");
+        if (stage) stage.innerHTML = "";
+        if (fxCard) { fxCard.innerHTML = ""; fxCard.classList.remove("in", "out"); }
+        const lab = document.getElementById("fxName");
+        if (lab) lab.textContent = "";
+        resolve();
+        return;
+      }
+
+      try { Sfx.playCardDrop(); } catch (e) {}
 
       setTimeout(() => { if (fxCard) fxCard.classList.add("out"); }, T.show);
       let handle = null;
@@ -404,7 +514,6 @@ const SpellFx = (() => {
         if (low) cssFallback(stage, elem, kind);
         else {
           handle = burst(elem, kind, false);
-          // Layer a light CSS accent for heavy spells
           if (kind === "aoe" || kind === "kill" || kind === "earthquake") {
             cssFallback(stage, elem, kind);
           }

@@ -111,26 +111,42 @@ const CARDS = [{ id:"e1", tribe:"earth", name:"록마운틴킹", cost:5, type:"m
 { id:"e49", tribe:"earth", name:"키메라", cost:5, type:"minion", atk:5, def:1, hp:7, atkC:2, defC:0, hpC:0, rarity:"rare", text:"일반공격" },
 { id:"e50", tribe:"earth", name:"스톤골렘", cost:3, type:"minion", atk:1, def:4, hp:1, atkC:1, defC:0, hpC:0, rarity:"rare", atkSkill:8, text:"석화공격" },
 { id:"e52", tribe:"earth", name:"미믹", cost:1, type:"minion", atk:1, def:3, hp:1, atkC:1, defC:0, hpC:0, rarity:"common", text:"일반공격" },
-{ id:"it1", tribe:"earth", name:"대지의팔찌", cost:4, type:"item", rarity:"common", atk:2, def:1, hp:0, atkC:0, defC:0, hpC:0, atkSkill:3, text:"장착: 공+2 방+1. 돌진공격" },
-{ id:"it2", tribe:"earth", name:"사자갑옷", cost:3, type:"item", rarity:"common", atk:2, def:2, hp:0, text:"장착: 공+2 방+2" },
-{ id:"it3", tribe:"earth", name:"거인의귀", cost:2, type:"item", rarity:"common", atk:0, def:0, hp:3, text:"장착: 체+3" },
-{ id:"it4", tribe:"earth", name:"선인장", cost:2, type:"item", rarity:"common", atk:3, def:-2, hp:2, atkSkill:5, text:"장착: 공+3 방-2 체+2. 치명공격" },
-{ id:"it5", tribe:"earth", name:"모래시계", cost:4, type:"item", rarity:"common", atk:2, def:1, hp:2, text:"장착: 공+2 방+1 체+2. 노화(공격 시 대상 체-1, 스킬 미등록)" },
-{ id:"it6", tribe:"earth", name:"바실리스크눈", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:2, atkSkill:8, text:"장착: 공+2 체+2. 석화공격" },
-{ id:"it7", tribe:"earth", name:"도마뱀꼬리", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, text:"장착: 체+2. 야수에게만 장착" },
-{ id:"it8", tribe:"earth", name:"황소의뿔", cost:2, type:"item", rarity:"common", atk:1, def:1, hp:0, atkSkill:3, text:"장착: 공+1 방+1. 돌진공격" },
-{ id:"it9", tribe:"earth", name:"대지의뿌리", cost:1, type:"item", rarity:"common", atk:1, def:0, hp:1, text:"장착: 공+1 체+1. 턴 종료 시 이 하수인 체+1(최대체 한)" },
-{ id:"it10", tribe:"earth", name:"야수의채찍", cost:2, type:"item", rarity:"common", atk:3, def:-1, hp:0, text:"장착: 공+3 방-1. 야수에게만 장착" },
-{ id:"it11", tribe:"earth", name:"뿔피리", cost:2, type:"item", rarity:"common", atk:3, def:1, hp:0, text:"장착: 공+3 방+1" },
-{ id:"it12", tribe:"earth", name:"황소뿔투구", cost:2, type:"item", rarity:"common", atk:0, def:1, hp:0, atkSkill:3, text:"장착: 방+1. 돌진공격" },
-{ id:"it13", tribe:"earth", name:"스콜피온꼬리", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:1, atkSkill:5, text:"장착: 체+1. 치명공격" },
-{ id:"it14", tribe:"earth", name:"친휴거인상", cost:2, type:"item", rarity:"common", atk:1, def:0, hp:1, text:"장착: 공+1 체+1. 턴 종료 시 이 하수인 체+1(최대체 한)" },
-{ id:"it15", tribe:"earth", name:"돌도끼", cost:2, type:"item", rarity:"common", atk:5, def:-1, hp:0, atkSkill:2, text:"장착: 공+5 방-1. 관통공격" },
-{ id:"it16", tribe:"earth", name:"사자가죽", cost:2, type:"item", rarity:"common", atk:6, def:-1, hp:4, text:"장착: 공을 6, 체를 4로 고정하고 방-1" },
-{ id:"it17", tribe:"earth", name:"골렘의심장", cost:2, type:"item", rarity:"common", atk:0, def:0, hp:3, text:"장착: 체+3" },
-{ id:"it18", tribe:"earth", name:"거인의팔찌", cost:1, type:"item", rarity:"common", atk:1, def:1, hp:0, text:"장착: 공+1 방+1" },
-{ id:"it19", tribe:"earth", name:"거인의곤봉", cost:1, type:"item", rarity:"common", atk:4, def:-1, hp:0, text:"장착: 공+4 방-1" },
-{ id:"it20", tribe:"earth", name:"축구공", cost:3, type:"item", rarity:"rare", atk:0, def:0, hp:0, text:"장착: 이 하수인을 내는 비용 3 감소(최소 1)" },
+{ id:"ei1", tribe:"earth", name:"골렘의심장", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, ability:"보호", text:"장착: 체+2. 보호" },
+{ id:"ei2", tribe:"earth", name:"돌도끼", cost:2, type:"item", rarity:"common", atk:3, def:-1, hp:0, atkSkill:2, text:"장착: 공+3 방-1. 관통공격" },
+{ id:"ei3", tribe:"earth", name:"바실리스크눈", cost:3, type:"item", rarity:"common", atk:1, def:0, hp:1, atkSkill:8, text:"장착: 공+1 체+1. 석화공격" },
+{ id:"ei4", tribe:"earth", name:"노름바위", cost:4, type:"item", rarity:"rare", atk:0, def:0, hp:0, text:"장착: 이 유닛 코인 수만큼 공+ · 체+" },
+{ id:"ei5", tribe:"earth", name:"모래시계", cost:5, type:"item", rarity:"rare", atk:1, def:0, hp:1, ability:"위압", text:"장착: 공+1 체+1. 위압" },
+{ id:"ei6", tribe:"earth", name:"대지의팔찌", cost:7, type:"item", rarity:"heroic", atk:2, def:2, hp:0, atkSkill:3, text:"장착: 공+2 방+2. 돌진공격" },
+{ id:"fi1", tribe:"fire", name:"불꽃검", cost:1, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:7, text:"장착: 공+2. 약화공격" },
+{ id:"fi2", tribe:"fire", name:"불꽃도끼", cost:2, type:"item", rarity:"common", atk:3, def:0, hp:0, atkSkill:2, text:"장착: 공+3. 관통공격" },
+{ id:"fi3", tribe:"fire", name:"불붙은건틀렛", cost:3, type:"item", rarity:"common", atk:1, def:2, hp:0, text:"장착: 공+1 방+2" },
+{ id:"fi4", tribe:"fire", name:"피닉스깃털", cost:5, type:"item", rarity:"rare", atk:0, def:0, hp:2, ability:"환생", text:"장착: 체+2. 환생" },
+{ id:"fi5", tribe:"fire", name:"도박불꽃반지", cost:6, type:"item", rarity:"heroic", atk:10, def:0, hp:0, atkSkill:4, text:"장착: 공+10. 연속공격. 코인이 전부 뒷면이면 이 아이템 파괴" },
+{ id:"fi6", tribe:"fire", name:"분노의해머", cost:7, type:"item", rarity:"heroic", atk:4, def:0, hp:0, atkSkill:9, text:"장착: 공+4. 광역공격" },
+{ id:"ni1", tribe:"wind", name:"요정의부츠", cost:1, type:"item", rarity:"common", atk:0, def:1, hp:1, text:"장착: 방+1 체+1. 출전(카드 1장)" },
+{ id:"ni2", tribe:"wind", name:"올빼미의눈", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:2, text:"장착: 공+2. 관통공격" },
+{ id:"ni3", tribe:"wind", name:"페어리소드", cost:3, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:7, text:"장착: 공+2. 약화공격" },
+{ id:"ni4", tribe:"wind", name:"도둑바람", cost:3, type:"item", rarity:"rare", atk:0, def:0, hp:0, text:"전장 모든 유닛의 코인을 삭제한다" },
+{ id:"ni5", tribe:"wind", name:"하피의손톱", cost:5, type:"item", rarity:"rare", atk:3, def:0, hp:0, atkSkill:5, text:"장착: 공+3. 치명공격" },
+{ id:"ni6", tribe:"wind", name:"폭풍의구슬", cost:7, type:"item", rarity:"heroic", atk:2, def:0, hp:0, atkSkill:9, text:"장착: 공+2. 광역공격" },
+{ id:"ai1", tribe:"water", name:"조개방패", cost:1, type:"item", rarity:"common", atk:0, def:2, hp:0, text:"장착: 방+2" },
+{ id:"ai2", tribe:"water", name:"얼음창", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:2, text:"장착: 공+2. 관통공격" },
+{ id:"ai3", tribe:"water", name:"상어의턱뼈", cost:3, type:"item", rarity:"common", atk:3, def:0, hp:0, atkSkill:6, text:"장착: 공+3. 흡혈공격" },
+{ id:"ai4", tribe:"water", name:"진주방패", cost:3, type:"item", rarity:"rare", atk:0, def:0, hp:0, text:"장착: 이 유닛 코인 수만큼 방+" },
+{ id:"ai5", tribe:"water", name:"산호검", cost:5, type:"item", rarity:"rare", atk:3, def:1, hp:0, atkSkill:1, text:"장착: 공+3 방+1. 돌파공격" },
+{ id:"ai6", tribe:"water", name:"인어의하프", cost:7, type:"item", rarity:"heroic", atk:1, def:0, hp:2, atkSkill:11, text:"장착: 공+1 체+2. 혼란공격" },
+{ id:"li1", tribe:"light", name:"소생초", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, text:"장착: 체+2" },
+{ id:"li2", tribe:"light", name:"별목걸이", cost:2, type:"item", rarity:"common", atk:0, def:0, hp:2, ability:"활력", text:"장착: 체+2. 활력" },
+{ id:"li3", tribe:"light", name:"성스러운주화", cost:2, type:"item", rarity:"rare", atk:0, def:0, hp:0, text:"이번 턴 앞면 확률 +20%" },
+{ id:"li4", tribe:"light", name:"환상의거울", cost:3, type:"item", rarity:"common", atk:0, def:0, hp:0, ability:"보호", text:"장착: 보호" },
+{ id:"li5", tribe:"light", name:"아이언실드", cost:5, type:"item", rarity:"rare", atk:0, def:2, hp:0, ability:"결속", text:"장착: 방+2. 결속" },
+{ id:"li6", tribe:"light", name:"블레스트아머", cost:7, type:"item", rarity:"heroic", atk:0, def:2, hp:2, ability:"환생", text:"장착: 방+2 체+2. 환생" },
+{ id:"di1", tribe:"dark", name:"저주의인형", cost:1, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:7, text:"장착: 공+2. 약화공격" },
+{ id:"di2", tribe:"dark", name:"피의망토", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:6, text:"장착: 공+2. 흡혈공격" },
+{ id:"di3", tribe:"dark", name:"흑마법서", cost:3, type:"item", rarity:"common", atk:1, def:0, hp:1, ability:"위압", text:"장착: 공+1 체+1. 위압" },
+{ id:"di4", tribe:"dark", name:"조작된주화", cost:4, type:"item", rarity:"rare", atk:0, def:0, hp:0, text:"모든 코인을 골드코인으로 바꾼다" },
+{ id:"di5", tribe:"dark", name:"사신의낫", cost:5, type:"item", rarity:"rare", atk:4, def:0, hp:0, atkSkill:2, text:"장착: 공+4. 관통공격" },
+{ id:"di6", tribe:"dark", name:"다크아머", cost:7, type:"item", rarity:"heroic", atk:0, def:3, hp:0, ability:"보호", text:"장착: 방+3. 보호" },
 { id:"e63", tribe:"earth", name:"시프", cost:1, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:1, rarity:"common", text:"타격 시 대상 아이템 1개 무효(엔진 후)" },
 { id:"e69", tribe:"earth", name:"사형집행인", cost:2, type:"minion", atk:3, def:0, hp:4, atkC:1, defC:0, hpC:0, rarity:"common", atkSkill:7, text:"약화공격" },
 { id:"e70", tribe:"earth", name:"전투멧돼지", cost:3, type:"minion", atk:3, def:0, hp:3, atkC:1, defC:0, hpC:1, rarity:"common", atkSkill:3, text:"돌진공격" },
@@ -139,17 +155,6 @@ const CARDS = [{ id:"e1", tribe:"earth", name:"록마운틴킹", cost:5, type:"m
 { id:"e75", tribe:"earth", name:"바바리안", cost:3, type:"minion", atk:4, def:0, hp:5, atkC:1, defC:0, hpC:0, rarity:"common", atkSkill:2, text:"관통공격" },
 { id:"e80", tribe:"earth", name:"드래곤나이트", cost:6, type:"minion", atk:7, def:2, hp:6, atkC:1, defC:0, hpC:0, rarity:"heroic", text:"일반공격" },
 { id:"ns6", tribe:"wind", name:"바람방패", cost:2, type:"spell", rarity:"common", text:"아군 하나 공+1 방+1 체+1", spell:{ type:"buff", target:"own_minion", atk:1, def:1, hp:1 } },
-{ id:"it21", tribe:"earth", name:"말발굽", cost:1, type:"item", rarity:"common", atk:1, def:1, hp:0, text:"장착: 공+1 방+1" },
-{ id:"it22", tribe:"earth", name:"병사투구", cost:1, type:"item", rarity:"common", atk:-1, def:2, hp:0, text:"장착: 공-1 방+2" },
-{ id:"it23", tribe:"earth", name:"아이언실드", cost:3, type:"item", rarity:"common", atk:-1, def:3, hp:0, text:"장착: 공-1 방+3" },
-{ id:"it24", tribe:"earth", name:"모닝스타", cost:3, type:"item", rarity:"common", atk:6, def:0, hp:0, atkSkill:2, text:"장착: 공+6 방=0. 관통공격" },
-{ id:"it25", tribe:"earth", name:"아너메달", cost:3, type:"item", rarity:"common", atk:1, def:1, hp:2, text:"장착: 공+1 방+1 체+2" },
-{ id:"it26", tribe:"earth", name:"블레스트아머", cost:4, type:"item", rarity:"common", atk:-1, def:4, hp:-1, text:"장착: 공-1 방+4 체-1" },
-{ id:"it27", tribe:"earth", name:"마법사반지", cost:2, type:"item", rarity:"common", atk:3, def:1, hp:0, text:"장착: 공+3 방+1" },
-{ id:"it28", tribe:"earth", name:"야수고삐", cost:2, type:"item", rarity:"common", atk:3, def:0, hp:1, atkSkill:7, text:"장착: 공+3 체+1. 약화공격" },
-{ id:"it29", tribe:"earth", name:"핼버드", cost:3, type:"item", rarity:"common", atk:7, def:-1, hp:0, text:"장착: 공+7 방-1" },
-{ id:"it30", tribe:"earth", name:"헤비엑스", cost:2, type:"item", rarity:"common", atk:5, def:-2, hp:0, atkSkill:2, text:"장착: 공+5 방-2. 관통공격" },
-{ id:"it31", tribe:"earth", name:"롱소드", cost:2, type:"item", rarity:"common", atk:5, def:-1, hp:0, text:"장착: 공+5 방-1" },
 { id:"e90", tribe:"earth", name:"픽시", cost:1, type:"minion", atk:2, def:0, hp:1, atkC:1, defC:0, hpC:1, rarity:"common", atkSkill:2, text:"관통공격" },
 { id:"e93", tribe:"earth", name:"피라냐", cost:1, type:"minion", atk:2, def:0, hp:2, atkC:1, defC:0, hpC:1, rarity:"common", text:"일반공격" },
 { id:"e94", tribe:"earth", name:"슬라임", cost:1, type:"minion", atk:2, def:2, hp:2, atkC:2, defC:2, hpC:2, rarity:"common", text:"턴종료 체+1" },
@@ -185,43 +190,6 @@ const CARDS = [{ id:"e1", tribe:"earth", name:"록마운틴킹", cost:5, type:"m
 { id:"ls7", tribe:"light", name:"빛의환영", cost:2, type:"spell", rarity:"common", text:"적 전체 피해 1, 아군 전체 체+1", spell:{ type:"aoe_pack", enemy:1, ownHp:1 } },
 { id:"as8", tribe:"water", name:"개구리변신", cost:4, type:"spell", rarity:"common", text:"적 전체 공=1 체=1", spell:{ type:"set_stats", atk:1, hp:1, target:"all_enemy" } },
 { id:"ns8", tribe:"wind", name:"폭풍우", cost:4, type:"spell", rarity:"common", text:"적 전체 피해 2, 코인-1", spell:{ type:"aoe_pack", enemy:2, coin:-1 } },
-{ id:"it32", tribe:"earth", name:"허수아비", cost:1, type:"item", rarity:"common", atk:-1, def:-1, hp:3, text:"장착: 공-1 방-1 체+3" },
-{ id:"it33", tribe:"earth", name:"늑대가면", cost:1, type:"item", rarity:"common", atk:4, def:0, hp:4, text:"장착: 공=4 체=4" },
-{ id:"it34", tribe:"earth", name:"힘의열매", cost:1, type:"item", rarity:"common", atk:3, def:0, hp:0, text:"장착: 공+3" },
-{ id:"it35", tribe:"earth", name:"체력의사과", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, text:"장착: 체+2" },
-{ id:"it36", tribe:"earth", name:"거미줄", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:1, text:"장착: 체+1. 약화공격" },
-{ id:"it37", tribe:"earth", name:"독수리의발톱", cost:1, type:"item", rarity:"common", atk:4, def:-1, hp:0, text:"장착: 공+4 방-1. 치명공격" },
-{ id:"it38", tribe:"earth", name:"소생초", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, text:"장착: 체+2. 턴종료 체+1" },
-{ id:"it39", tribe:"earth", name:"요정의부츠", cost:1, type:"item", rarity:"common", atk:-1, def:1, hp:1, text:"장착: 공-1 방+1 체+1. 석화공격" },
-{ id:"it40", tribe:"earth", name:"가시곤봉", cost:1, type:"item", rarity:"common", atk:2, def:1, hp:0, text:"장착: 공+2 방+1. 치명공격" },
-{ id:"it41", tribe:"earth", name:"독버섯", cost:1, type:"item", rarity:"common", atk:3, def:1, hp:-1, text:"장착: 공+3 방+1 체-1. 치명공격" },
-{ id:"it42", tribe:"earth", name:"얼음창", cost:1, type:"item", rarity:"common", atk:2, def:0, hp:0, text:"장착: 공+2. 관통공격" },
-{ id:"it43", tribe:"earth", name:"거북이등껍질", cost:1, type:"item", rarity:"common", atk:-1, def:2, hp:0, text:"장착: 공-1 방+2" },
-{ id:"it44", tribe:"earth", name:"아이스큐브", cost:1, type:"item", rarity:"common", atk:-1, def:0, hp:3, text:"장착: 공-1 체+3" },
-{ id:"it45", tribe:"earth", name:"조개갑옷", cost:1, type:"item", rarity:"common", atk:0, def:2, hp:0, text:"장착: 방+2" },
-{ id:"it46", tribe:"earth", name:"조개방패", cost:1, type:"item", rarity:"common", atk:0, def:2, hp:2, text:"장착: 방+2 체+2" },
-{ id:"it47", tribe:"earth", name:"늑대이빨", cost:2, type:"item", rarity:"common", atk:4, def:0, hp:0, text:"장착: 공+4" },
-{ id:"it48", tribe:"earth", name:"곰발바닥", cost:2, type:"item", rarity:"common", atk:5, def:0, hp:4, text:"장착: 공=5 체=4. 관통공격" },
-{ id:"it49", tribe:"earth", name:"페어리소드", cost:2, type:"item", rarity:"common", atk:3, def:1, hp:0, text:"장착: 공+3 방+1. 약화공격" },
-{ id:"it50", tribe:"earth", name:"벌통집", cost:2, type:"item", rarity:"common", atk:2, def:1, hp:0, text:"장착: 공+2 방+1. 치명공격" },
-{ id:"it51", tribe:"earth", name:"거대새의알", cost:2, type:"item", rarity:"common", atk:2, def:2, hp:0, text:"장착: 공+2 방+2" },
-{ id:"it52", tribe:"earth", name:"올빼미의눈", cost:2, type:"item", rarity:"common", atk:4, def:0, hp:0, text:"장착: 공+4. 관통공격" },
-{ id:"it53", tribe:"earth", name:"인어의비늘", cost:2, type:"item", rarity:"common", atk:0, def:0, hp:2, text:"장착: 체+2" },
-{ id:"it54", tribe:"earth", name:"상어의턱뼈", cost:2, type:"item", rarity:"common", atk:5, def:0, hp:0, text:"장착: 공+5" },
-{ id:"it55", tribe:"earth", name:"폭풍의구슬", cost:2, type:"item", rarity:"common", atk:4, def:-1, hp:0, text:"장착: 공+4 방-1. 약화공격" },
-{ id:"it56", tribe:"earth", name:"수해항아리", cost:2, type:"item", rarity:"common", atk:0, def:1, hp:1, text:"장착: 방+1 체+1. 약화공격" },
-{ id:"it57", tribe:"earth", name:"아이스로드", cost:2, type:"item", rarity:"common", atk:4, def:-1, hp:0, text:"장착: 공+4 방-1. 관통공격" },
-{ id:"it58", tribe:"earth", name:"거대문어발", cost:2, type:"item", rarity:"common", atk:7, def:-1, hp:0, text:"장착: 공=7 방-1. 관통공격" },
-{ id:"it59", tribe:"earth", name:"별목걸이", cost:2, type:"item", rarity:"common", atk:-1, def:0, hp:3, text:"장착: 공-1 체=3" },
-{ id:"it60", tribe:"earth", name:"상어지느러미", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:2, text:"장착: 공+2 체+2" },
-{ id:"it61", tribe:"earth", name:"환상의거울", cost:2, type:"item", rarity:"common", atk:1, def:0, hp:2, text:"장착: 공+1 체+2" },
-{ id:"it62", tribe:"earth", name:"고래꼬리", cost:2, type:"item", rarity:"common", atk:1, def:0, hp:6, text:"장착: 공+1 체=6" },
-{ id:"it63", tribe:"earth", name:"소라투구", cost:2, type:"item", rarity:"common", atk:0, def:2, hp:1, text:"장착: 방=2 체+1" },
-{ id:"it64", tribe:"earth", name:"얼음조각상", cost:2, type:"item", rarity:"common", atk:0, def:1, hp:2, text:"장착: 방+1 체+2" },
-{ id:"it65", tribe:"earth", name:"수정귀걸이", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:2, text:"장착: 공+2 체=2" },
-{ id:"it66", tribe:"earth", name:"산호검", cost:3, type:"item", rarity:"common", atk:5, def:1, hp:0, text:"장착: 공+5 방+1. 관통공격" },
-{ id:"it67", tribe:"earth", name:"물고기잔", cost:3, type:"item", rarity:"common", atk:0, def:1, hp:3, text:"장착: 방=1 체+3. 약화공격" },
-{ id:"it68", tribe:"earth", name:"인어의하프", cost:4, type:"item", rarity:"common", atk:1, def:1, hp:3, text:"장착: 공+1 방+1 체+3" },
 { id:"e183", tribe:"earth", name:"해골나방", cost:1, type:"minion", atk:2, def:0, hp:1, atkC:1, defC:0, hpC:0, rarity:"common", atkSkill:7, text:"약화공격" },
 { id:"e184", tribe:"earth", name:"그렘린", cost:1, type:"minion", atk:4, def:0, hp:2, atkC:1, defC:0, hpC:0, rarity:"common", text:"일반공격" },
 { id:"e188", tribe:"earth", name:"구울", cost:2, type:"minion", atk:4, def:0, hp:3, atkC:1, defC:0, hpC:-1, rarity:"common", text:"일반공격" },
@@ -259,46 +227,6 @@ const CARDS = [{ id:"e1", tribe:"earth", name:"록마운틴킹", cost:5, type:"m
 { id:"ds7", tribe:"dark", name:"전염병", cost:4, type:"spell", rarity:"common", text:"4코 이상 모든 유닛 공=1 체=1", spell:{ type:"plague", minCost:4 } },
 { id:"ds8", tribe:"dark", name:"13시의저주", cost:1, type:"spell", rarity:"common", text:"아군 유닛 강탈 부여", spell:{ type:"grant_kw", ability:"강탈", kw:"steal" } },
 { id:"fs8", tribe:"fire", name:"메테오", cost:7, type:"spell", rarity:"common", text:"적 전체 피해 4, 코인-1", spell:{ type:"aoe_pack", enemy:4, coin:-1 } },
-{ id:"it69", tribe:"earth", name:"블러드로즈", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:1, text:"장착: 체+1. 흡혈공격" },
-{ id:"it70", tribe:"earth", name:"불꽃검", cost:1, type:"item", rarity:"common", atk:3, def:0, hp:0, text:"장착: 공+3. 약화공격" },
-{ id:"it71", tribe:"earth", name:"악마의뿔", cost:1, type:"item", rarity:"common", atk:6, def:0, hp:0, text:"장착: 공=6" },
-{ id:"it72", tribe:"earth", name:"악마의손톱", cost:1, type:"item", rarity:"common", atk:1, def:0, hp:2, text:"장착: 공+1 체+2. 치명공격" },
-{ id:"it73", tribe:"earth", name:"불의봉인구", cost:1, type:"item", rarity:"common", atk:3, def:0, hp:1, text:"장착: 공+3 체+1" },
-{ id:"it74", tribe:"earth", name:"화염초", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, text:"장착: 체+2" },
-{ id:"it75", tribe:"earth", name:"파이어로드", cost:1, type:"item", rarity:"common", atk:3, def:0, hp:0, text:"장착: 공+3" },
-{ id:"it76", tribe:"earth", name:"불꽃도끼", cost:1, type:"item", rarity:"common", atk:3, def:0, hp:0, text:"장착: 공+3. 관통공격" },
-{ id:"it77", tribe:"earth", name:"화염투구", cost:1, type:"item", rarity:"common", atk:-1, def:1, hp:1, text:"장착: 공-1 방+1 체+1" },
-{ id:"it78", tribe:"earth", name:"불꽃방패", cost:1, type:"item", rarity:"common", atk:-1, def:2, hp:0, text:"장착: 공-1 방+2" },
-{ id:"it79", tribe:"earth", name:"할로윈", cost:1, type:"item", rarity:"common", atk:-1, def:0, hp:3, text:"장착: 공-1 체+3" },
-{ id:"it80", tribe:"earth", name:"스컬실드", cost:1, type:"item", rarity:"common", atk:0, def:3, hp:0, text:"장착: 방+3" },
-{ id:"it81", tribe:"earth", name:"박쥐날개", cost:1, type:"item", rarity:"common", atk:-1, def:0, hp:3, text:"장착: 공-1 체+3" },
-{ id:"it82", tribe:"earth", name:"본소드", cost:1, type:"item", rarity:"common", atk:6, def:-1, hp:0, text:"장착: 공=6 방-1" },
-{ id:"it83", tribe:"earth", name:"해골투구", cost:1, type:"item", rarity:"common", atk:1, def:2, hp:-1, text:"장착: 공+1 방+2 체-1" },
-{ id:"it84", tribe:"earth", name:"죽은야수이빨", cost:1, type:"item", rarity:"common", atk:3, def:0, hp:0, text:"장착: 공+3. 약화공격" },
-{ id:"it85", tribe:"earth", name:"마녀의모자", cost:1, type:"item", rarity:"common", atk:0, def:1, hp:1, text:"장착: 방=1 체+1" },
-{ id:"it86", tribe:"earth", name:"까마귀깃털", cost:1, type:"item", rarity:"common", atk:-1, def:0, hp:2, text:"장착: 공-1 체+2" },
-{ id:"it87", tribe:"earth", name:"악마의석상", cost:2, type:"item", rarity:"common", atk:2, def:1, hp:0, text:"장착: 공+2 방+1. 약화공격" },
-{ id:"it88", tribe:"earth", name:"분노의해머", cost:2, type:"item", rarity:"common", atk:5, def:0, hp:0, text:"장착: 공+5. 관통공격" },
-{ id:"it89", tribe:"earth", name:"데몬의눈", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:1, text:"장착: 공=2 체+1. 약화공격" },
-{ id:"it90", tribe:"earth", name:"피닉스깃털", cost:2, type:"item", rarity:"common", atk:1, def:0, hp:2, text:"장착: 공+1 체+2. 턴종료 체+1" },
-{ id:"it91", tribe:"earth", name:"살라만더꼬리", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:2, text:"장착: 공+2 체+2" },
-{ id:"it92", tribe:"earth", name:"불붙은건틀렛", cost:2, type:"item", rarity:"common", atk:2, def:3, hp:-1, text:"장착: 공+2 방=3 체-1" },
-{ id:"it93", tribe:"earth", name:"피의망토", cost:2, type:"item", rarity:"common", atk:3, def:-1, hp:1, text:"장착: 공+3 방-1 체+1. 흡혈공격" },
-{ id:"it94", tribe:"earth", name:"광분의잔", cost:2, type:"item", rarity:"common", atk:-1, def:0, hp:2, text:"장착: 공-1 체+2" },
-{ id:"it95", tribe:"earth", name:"하피의손톱", cost:2, type:"item", rarity:"common", atk:5, def:-1, hp:0, text:"장착: 공+5 방-1. 약화공격" },
-{ id:"it96", tribe:"earth", name:"루비목걸이", cost:2, type:"item", rarity:"common", atk:0, def:1, hp:1, text:"장착: 방+1 체+1" },
-{ id:"it97", tribe:"earth", name:"카오스아뮬렛", cost:2, type:"item", rarity:"common", atk:2, def:3, hp:-1, text:"장착: 공+2 방=3 체-1" },
-{ id:"it98", tribe:"earth", name:"오닉스", cost:2, type:"item", rarity:"common", atk:1, def:1, hp:2, text:"장착: 공+1 방+1 체+2" },
-{ id:"it99", tribe:"earth", name:"해골반지", cost:2, type:"item", rarity:"common", atk:3, def:0, hp:2, text:"장착: 공+3 체+2" },
-{ id:"it100", tribe:"earth", name:"해골철퇴", cost:2, type:"item", rarity:"common", atk:6, def:-1, hp:-1, text:"장착: 공+6 방-1 체-1. 관통공격" },
-{ id:"it101", tribe:"earth", name:"저주의인형", cost:2, type:"item", rarity:"common", atk:3, def:-2, hp:2, text:"장착: 공+3 방-2 체+2" },
-{ id:"it102", tribe:"earth", name:"만월석", cost:2, type:"item", rarity:"common", atk:5, def:1, hp:1, text:"장착: 공=5 방=1 체+1" },
-{ id:"it103", tribe:"earth", name:"사신의낫", cost:2, type:"item", rarity:"common", atk:6, def:1, hp:0, text:"장착: 공=6 방=1. 관통공격" },
-{ id:"it104", tribe:"earth", name:"좀비의손", cost:2, type:"item", rarity:"common", atk:5, def:-1, hp:0, text:"장착: 공+5 방-1" },
-{ id:"it105", tribe:"earth", name:"히드라의혀", cost:3, type:"item", rarity:"common", atk:3, def:0, hp:2, text:"장착: 공+3 체+2" },
-{ id:"it106", tribe:"earth", name:"흑마법서", cost:3, type:"item", rarity:"common", atk:2, def:0, hp:2, text:"장착: 공+2 체+2. 관통공격" },
-{ id:"it107", tribe:"earth", name:"악마의화로", cost:4, type:"item", rarity:"common", atk:1, def:-3, hp:6, text:"장착: 공+1 방-3 체+6" },
-{ id:"it108", tribe:"earth", name:"다크아머", cost:4, type:"item", rarity:"common", atk:3, def:3, hp:0, text:"장착: 공+3 방=3" },
 { id:"e260", tribe:"earth", name:"창병", cost:1, type:"minion", atk:2, def:1, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", text:"일반공격" },
 { id:"e262", tribe:"earth", name:"태양궁수", cost:1, type:"minion", atk:2, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", text:"일반공격" },
 { id:"e264", tribe:"earth", name:"그리핀", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:0, rarity:"common", text:"일반공격" },
@@ -462,12 +390,12 @@ const RARITY_FRAMES = {
 };
 function frameOf(c) {
   const tribe = (typeof TRIBES !== "undefined" && TRIBES.find(x => x.id === (c && c.tribe))) || { id: "earth" };
-  if (c && c.type === "spell" && typeof SPELL_FRAMES !== "undefined") return SPELL_FRAMES[tribe.id] || SPELL_FRAMES.earth;
+  if (c && (c.type === "spell" || c.type === "item") && typeof SPELL_FRAMES !== "undefined") return SPELL_FRAMES[tribe.id] || SPELL_FRAMES.earth;
   return (typeof DECK_FRAMES !== "undefined" && (DECK_FRAMES[tribe.id] || DECK_FRAMES.earth)) || "";
 }
 function pickFrameUrl(c, tribe) {
   const t = tribe || (typeof TRIBES !== "undefined" && TRIBES.find(x => x.id === (c && c.tribe))) || { id: "earth" };
-  const kind = (c && c.type === "spell") ? "spell" : "minion";
+  const kind = (c && (c.type === "spell" || c.type === "item")) ? "spell" : "minion";
   const rarity = (c && c.rarity) || "common";
   const key = (t.id || "earth") + "|" + kind + "|" + rarity;
   if (typeof RARITY_FRAMES !== "undefined" && RARITY_FRAMES[key]) return RARITY_FRAMES[key];
@@ -479,13 +407,22 @@ function pickFrameUrl(c, tribe) {
   return frameOf(c);
 }
 const CARD_ART = {"a1":"assets/img/art/a1.jpg","a2":"assets/img/art/a2.jpg","a3":"assets/img/art/a3.jpg","a4":"assets/img/art/a4.jpg","a5":"assets/img/art/a5.jpg","a6":"assets/img/art/a6.jpg","a7":"assets/img/art/a7.jpg","a8":"assets/img/art/a8.jpg","a9":"assets/img/art/a9.jpg","a10":"assets/img/art/a10.jpg","a11":"assets/img/art/a11.jpg","a12":"assets/img/art/a12.jpg","a13":"assets/img/art/a13.jpg","a14":"assets/img/art/a14.jpg","a15":"assets/img/art/a15.jpg","a16":"assets/img/art/a16.jpg","a17":"assets/img/art/a17.jpg","a18":"assets/img/art/a18.jpg","a19":"assets/img/art/a19.jpg","a20":"assets/img/art/a20.jpg","a21":"assets/img/art/a21.jpg","a22":"assets/img/art/a22.jpg","a23":"assets/img/art/a23.jpg","a24":"assets/img/art/a24.jpg","a25":"assets/img/art/a25.jpg","a26":"assets/img/art/a26.jpg","a27":"assets/img/art/a27.jpg","a28":"assets/img/art/a28.jpg","as1":"assets/img/art/as1.jpg","as2":"assets/img/art/as2.jpg","as3":"assets/img/art/as3.jpg","as4":"assets/img/art/as4.jpg","as5":"assets/img/art/as5.jpg","as6":"assets/img/art/as6.jpg","as7":"assets/img/art/as7.jpg","as8":"assets/img/art/as8.jpg","d1":"assets/img/art/d1.jpg","d2":"assets/img/art/d2.jpg","d3":"assets/img/art/d3.jpg","d4":"assets/img/art/d4.jpg","d5":"assets/img/art/d5.jpg","d6":"assets/img/art/d6.jpg","d7":"assets/img/art/d7.jpg","d8":"assets/img/art/d8.jpg","d9":"assets/img/art/d9.jpg","d10":"assets/img/art/d10.jpg","d11":"assets/img/art/d11.jpg","d12":"assets/img/art/d12.jpg","d13":"assets/img/art/d13.jpg","d14":"assets/img/art/d14.jpg","d15":"assets/img/art/d15.jpg","d16":"assets/img/art/d16.jpg","d17":"assets/img/art/d17.jpg","d18":"assets/img/art/d18.jpg","d19":"assets/img/art/d19.jpg","d20":"assets/img/art/d20.jpg","d21":"assets/img/art/d21.jpg","d22":"assets/img/art/d22.jpg","d23":"assets/img/art/d23.jpg","d24":"assets/img/art/d24.jpg","d25":"assets/img/art/d25.jpg","d26":"assets/img/art/d26.jpg","d27":"assets/img/art/d27.jpg","d28":"assets/img/art/d28.jpg","ds1":"assets/img/art/ds1.jpg","ds2":"assets/img/art/ds2.jpg","ds3":"assets/img/art/ds3.jpg","ds4":"assets/img/art/ds4.jpg","ds5":"assets/img/art/ds5.jpg","ds6":"assets/img/art/ds6.jpg","ds7":"assets/img/art/ds7.jpg","ds8":"assets/img/art/ds8.jpg","e1":"assets/img/art/e1.jpg","e2":"assets/img/art/e2.jpg","e3":"assets/img/art/e3.jpg","e4":"assets/img/art/e4.jpg","e5":"assets/img/art/e5.jpg","e6":"assets/img/art/e6.jpg","e7":"assets/img/art/e7.jpg","e8":"assets/img/art/e8.jpg","e9":"assets/img/art/e9.jpg","e10":"assets/img/art/e10.jpg","e11":"assets/img/art/e11.jpg","e12":"assets/img/art/e12.jpg","e13":"assets/img/art/e13.jpg","e14":"assets/img/art/e14.jpg","e15":"assets/img/art/e15.jpg","e16":"assets/img/art/e16.jpg","e17":"assets/img/art/e17.jpg","e18":"assets/img/art/e18.jpg","e19":"assets/img/art/e19.jpg","e20":"assets/img/art/e20.jpg","e21":"assets/img/art/e21.jpg","e22":"assets/img/art/e22.jpg","e23":"assets/img/art/e23.jpg","e24":"assets/img/art/e24.jpg","e25":"assets/img/art/e25.jpg","e26":"assets/img/art/e26.jpg","e27":"assets/img/art/e27.jpg","e28":"assets/img/art/e28.jpg","es1":"assets/img/art/es1.jpg","es2":"assets/img/art/es2.jpg","es3":"assets/img/art/es3.jpg","es4":"assets/img/art/es4.jpg","es5":"assets/img/art/es5.jpg","es6":"assets/img/art/es6.jpg","es7":"assets/img/art/es7.jpg","es8":"assets/img/art/es8.jpg","f1":"assets/img/art/f1.jpg","f2":"assets/img/art/f2.jpg","f3":"assets/img/art/f3.jpg","f4":"assets/img/art/f4.jpg","f5":"assets/img/art/f5.jpg","f6":"assets/img/art/f6.jpg","f7":"assets/img/art/f7.jpg","f8":"assets/img/art/f8.jpg","f9":"assets/img/art/f9.jpg","f10":"assets/img/art/f10.jpg","f11":"assets/img/art/f11.jpg","f12":"assets/img/art/f12.jpg","f13":"assets/img/art/f13.jpg","f14":"assets/img/art/f14.jpg","f15":"assets/img/art/f15.jpg","f16":"assets/img/art/f16.jpg","f17":"assets/img/art/f17.jpg","f18":"assets/img/art/f18.jpg","f19":"assets/img/art/f19.jpg","f20":"assets/img/art/f20.jpg","f21":"assets/img/art/f21.jpg","f22":"assets/img/art/f22.jpg","f23":"assets/img/art/f23.jpg","f24":"assets/img/art/f24.jpg","f25":"assets/img/art/f25.jpg","f26":"assets/img/art/f26.jpg","f27":"assets/img/art/f27.jpg","f28":"assets/img/art/f28.jpg","fs1":"assets/img/art/fs1.jpg","fs2":"assets/img/art/fs2.jpg","fs3":"assets/img/art/fs3.jpg","fs4":"assets/img/art/fs4.jpg","fs5":"assets/img/art/fs5.jpg","fs6":"assets/img/art/fs6.jpg","fs7":"assets/img/art/fs7.jpg","fs8":"assets/img/art/fs8.jpg","l1":"assets/img/art/l1.jpg","l2":"assets/img/art/l2.jpg","l3":"assets/img/art/l3.jpg","l4":"assets/img/art/l4.jpg","l5":"assets/img/art/l5.jpg","l6":"assets/img/art/l6.jpg","l7":"assets/img/art/l7.jpg","l8":"assets/img/art/l8.jpg","l9":"assets/img/art/l9.jpg","l10":"assets/img/art/l10.jpg","l11":"assets/img/art/l11.jpg","l12":"assets/img/art/l12.jpg","l13":"assets/img/art/l13.jpg","l14":"assets/img/art/l14.jpg","l15":"assets/img/art/l15.jpg","l16":"assets/img/art/l16.jpg","l17":"assets/img/art/l17.jpg","l18":"assets/img/art/l18.jpg","l19":"assets/img/art/l19.jpg","l20":"assets/img/art/l20.jpg","l21":"assets/img/art/l21.jpg","l22":"assets/img/art/l22.jpg","l23":"assets/img/art/l23.jpg","l24":"assets/img/art/l24.jpg","l25":"assets/img/art/l25.jpg","l26":"assets/img/art/l26.jpg","l27":"assets/img/art/l27.jpg","l28":"assets/img/art/l28.jpg","ls1":"assets/img/art/ls1.jpg","ls2":"assets/img/art/ls2.jpg","ls3":"assets/img/art/ls3.jpg","ls4":"assets/img/art/ls4.jpg","ls5":"assets/img/art/ls5.jpg","ls6":"assets/img/art/ls6.jpg","ls7":"assets/img/art/ls7.jpg","ls8":"assets/img/art/ls8.jpg","n1":"assets/img/art/n1.jpg","n2":"assets/img/art/n2.jpg","n3":"assets/img/art/n3.jpg","n4":"assets/img/art/n4.jpg","n5":"assets/img/art/n5.jpg","n6":"assets/img/art/n6.jpg","n7":"assets/img/art/n7.jpg","n8":"assets/img/art/n8.jpg","n9":"assets/img/art/n9.jpg","n10":"assets/img/art/n10.jpg","n11":"assets/img/art/n11.jpg","n12":"assets/img/art/n12.jpg","n13":"assets/img/art/n13.jpg","n14":"assets/img/art/n14.jpg","n15":"assets/img/art/n15.jpg","n16":"assets/img/art/n16.jpg","n17":"assets/img/art/n17.jpg","n18":"assets/img/art/n18.jpg","n19":"assets/img/art/n19.jpg","n20":"assets/img/art/n20.jpg","n21":"assets/img/art/n21.jpg","n22":"assets/img/art/n22.jpg","n23":"assets/img/art/n23.jpg","n24":"assets/img/art/n24.jpg","n25":"assets/img/art/n25.jpg","n26":"assets/img/art/n26.jpg","n27":"assets/img/art/n27.jpg","n28":"assets/img/art/n28.jpg","ns1":"assets/img/art/ns1.jpg","ns2":"assets/img/art/ns2.jpg","ns3":"assets/img/art/ns3.jpg","ns4":"assets/img/art/ns4.jpg","ns5":"assets/img/art/ns5.jpg","ns6":"assets/img/art/ns6.jpg","ns7":"assets/img/art/ns7.jpg","ns8":"assets/img/art/ns8.jpg"};
+
+(function bootstrapCardArt() {
+  if (typeof CARD_ART === "undefined" || typeof CARDS === "undefined") return;
+  (CARDS || []).forEach(c => {
+    if (!c || !c.id) return;
+    if (c.type === "item") CARD_ART[c.id] = "assets/img/art/" + c.id + ".jpg";
+  });
+})();
+
 // CARD_MAP rebuilt again at end of cards-minions.js after minion overlay
 const CARD_MAP = Object.fromEntries((CARDS || []).filter(c => c && c.id).map(c => [c.id, c]));
 
 
 let selectedHero = TRIBES.find(x => x.open);
 let state = null;
-let ui = { targeting: null, attacker: null, battling: false, rarityFilter: "all" };
+let ui = { targeting: null, attacker: null, battling: false, rarityFilter: "all", typeFilter: "all" };
 
 
 const CARD_LORE = {

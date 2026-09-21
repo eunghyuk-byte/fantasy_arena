@@ -103,7 +103,7 @@ function render() {
     const nHand = handEls.length;
     handEls.forEach((el, i) => {
       const t = nHand <= 1 ? 0 : (i - (nHand - 1) / 2);
-      el.style.transform = "rotate(" + (t * 3.2) + "deg) translateY(" + (Math.abs(t) * 5) + "px)";
+      el.style.transform = "rotate(" + (t * 1.8) + "deg) translateY(" + (Math.abs(t) * 3) + "px)";
       el.style.zIndex = String(10 + i);
       bindHandCard(el, me.hand[i]);
     });
@@ -327,7 +327,7 @@ async function composeCardFace(c, opts={}) {
 
   const headerTxt = (c.type === "minion")
     ? (c.race || (typeof CARD_RACE !== "undefined" && CARD_RACE[c.id]) || "")
-    : ((typeof SPELL_SCHOOL !== "undefined" && SPELL_SCHOOL[c.tribe]) || "주문");
+    : (c.type === "item" ? "아이템" : ((typeof SPELL_SCHOOL !== "undefined" && SPELL_SCHOOL[c.tribe]) || "주문"));
   if (headerTxt) {
     ctx.save();
     const hs = Math.round(H*0.026) + 2;
@@ -434,7 +434,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceSrc(c, opts, el) {
-  const key = ["v63art", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name].join("|");
+  const key = ["v64item", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", c.equippedItem && c.equippedItem.id || ""].join("|");
   if (_faceDone.has(key)) {
     const src = _faceDone.get(key);
     if (el && src) {
@@ -484,7 +484,7 @@ function faceSrc(c, opts, el) {
 
 function renderCard(c, playable) {
   const uid = "face_" + Math.random().toString(36).slice(2,8);
-  const cacheKey = ["v63art", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, c.hp, c.name].join("|");
+  const cacheKey = ["v64item", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, c.hp, c.name, c.type || ""].join("|");
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
   setTimeout(() => {
     const el = document.getElementById(uid);
@@ -513,7 +513,7 @@ function layoutOppFan() {
   const n = cards.length;
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
-    el.style.transform = `translateY(${Math.abs(t)*4}px) rotate(${t*6}deg)`;
+    el.style.transform = `translateY(${Math.abs(t)*2}px) rotate(${t*6}deg)`;
     el.style.marginLeft = i ? "-16px" : "0";
     el.style.zIndex = String(5 + i);
   });
@@ -525,9 +525,9 @@ function layoutHandFan() {
   const n = cards.length;
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
-    el.style.transform = `translateY(${Math.abs(t)*5}px) rotate(${t*3.2}deg)`;
+    el.style.transform = `translateY(${Math.abs(t)*7}px) rotate(${t*2.4}deg)`;
     el.style.zIndex = String(20 + i);
-    el.style.marginLeft = i ? "-18px" : "0";
+    el.style.setProperty("margin-left", i ? "-72px" : "0", "important");
   });
 }
 
@@ -558,7 +558,7 @@ function renderMinion(m, side) {
     targetable ? "can-target" : "",
   ].join(" ");
   const uid = "mface_" + m.uid;
-  const cacheKey = ["v63art", m.id, m.cost, m.atk, m.def, m.atkC, m.defC, m.hpC, m.hp, m.name].join("|");
+  const cacheKey = ["v64item", m.id, m.cost, m.atk, m.def, m.atkC, m.defC, m.hpC, m.hp, m.name, m.itemWorn ? "eq" : "", (m.equippedItem && m.equippedItem.id) || ""].join("|");
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
   setTimeout(() => {
     const el = document.getElementById(uid);
