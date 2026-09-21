@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.039";
+const GAME_VERSION = "0.040";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1507,7 +1507,7 @@ function loreOf(id) {
   if (CARD_LORE[id]) return CARD_LORE[id];
   const c = CARD_MAP[id];
   if (!c) return "";
-  return (c.text ? c.text + " — " : "") + (c.rarity === "legendary" ? "전설 카드." : "종족의 힘을 담은 카드.");
+  return (c.text ? c.text + " — " : "") + (c.rarity === "legendary" ? "레전드 카드." : "속성의 힘을 담은 카드.");
 }
 
 let _popCardId = null;
@@ -1535,8 +1535,8 @@ async function openCardLore(id) {
   if (img && face) img.src = face;
   document.getElementById("loreName").textContent = c.name;
   const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : ((SPELL_SCHOOL && SPELL_SCHOOL[c.tribe]) || "주문"));
-  const RARITY_KO = { common:"일반", rare:"희귀", heroic:"영웅", legendary:"전설" };
-  const rareKo = RARITY_KO[c.rarity || "common"] || "일반";
+  const RARITY_KO = { common:"커먼", rare:"언커먼", heroic:"레어", legendary:"레전드" };
+  const rareKo = RARITY_KO[c.rarity || "common"] || "커먼";
   const cap = (c.rarity === "legendary" || c.rarity === "heroic") ? "덱당 1장" : "최대 2장";
   const bits = [c.cost + "마나", (TRIBES.find(t => t.id === c.tribe) || {}).name || "", raceNm, c.type === "minion" ? (c.atk + "/" + (c.def||0) + "/" + c.hp) : "주문", rareKo, cap];
   document.getElementById("loreMeta").textContent = bits.filter(Boolean).join(" · ");
@@ -1551,7 +1551,7 @@ function renderBuilder() {
   const _typeKo = { all:"전체", minion:"유닛", spell:"스펠", item:"아이템" }[ui.typeFilter || "all"] || "전체";
   document.getElementById("poolTitle").textContent = selectedHero.name + " · " + _typeKo + " (" + _pool.length + "장" + (ui.typeFilter==="all" ? " · 아이템 "+_ic : "") + ")";
   const meta = document.getElementById("deckMeta");
-  meta.textContent = draftDeck.length + " / 30  ·  일반·희귀 2장, 영웅·전설 1장";
+  meta.textContent = draftDeck.length + " / 30  ·  커먼·언커먼 2장, 레어·레전드 1장";
   meta.className = "deck-meta " + (draftDeck.length === 30 ? "ok" : "bad");
   const pool = document.getElementById("cardPool");
   pool.innerHTML = tribeCards().map(c => {

@@ -50,12 +50,15 @@
     <h2>도움말</h2>
     <h3>기본 규칙</h3>
     <p>영웅 체력 40. 덱 30장. 영웅 능력은 없습니다. 전투는 공/방/체 순이며 피해는 max(0, 공−방)입니다. 공과 방은 0이 최하(마이너스 없음). 체력이 0 이하면 사망합니다. 전장 왼쪽부터 유닛이 놓이고, 유닛은 최대 5장입니다. 턴을 종료하면 내 유닛이 왼쪽부터 자동으로 공격합니다. 상대 유닛이 없으면 영웅이 피해를 받습니다. 공격으로 상대 유닛이 죽으면 반격하지 않고, 살아남은 유닛만 반격합니다(혼란공격 제외).</p>
+    <h3>코인</h3>
+    <p>코인은 N개를 <b>한 번</b>만 돌립니다. <b>골드 코인</b>(앞면)은 +링크 스탯을 올리고, <b>블랙 코인</b>(뒷면)은 −링크 스탯을 내립니다. 공·방은 0이 최하입니다.</p>
+    <p class="help-note">블랙 코인으로 체력이 깎여도 <b>보호는 발동·소모되지 않습니다</b>. 보호는 전투 타격으로 체가 깎일 때만 막습니다.</p>
     <h3>카드 등급</h3>
     <ul class="help-list">
-      <li><b>일반</b> — 기본 등급. 같은 카드 최대 2장.</li>
-      <li><b>희귀</b> — 일반보다 희소. 같은 카드 최대 2장.</li>
-      <li><b>영웅</b> — 고등급. 덱에 1장만.</li>
-      <li><b>전설</b> — 최고 등급. 덱에 1장만.</li>
+      <li><b>커먼</b> — 기본 등급. 같은 카드 최대 2장.</li>
+      <li><b>언커먼</b> — 커먼보다 희소. 같은 카드 최대 2장.</li>
+      <li><b>레어</b> — 고등급. 덱에 1장만.</li>
+      <li><b>레전드</b> — 최고 등급. 덱에 1장만.</li>
     </ul>
     <h3>특수공격</h3>
     <ul class="help-list">
@@ -74,7 +77,7 @@
     <p class="help-note">혼란을 제외한 공격은 대상이 살아 있으면 반격합니다. 연속은 타마다 반격합니다.</p>
     <h3>특수능력</h3>
     <ul class="help-list">
-      <li><b>보호</b> — 체력이 1 이상 깎일 뻔한 타격 1회만 무시하고 소모됩니다. 0 데미지는 소모되지 않습니다.</li>
+      <li><b>보호</b> — 전투 타격으로 체력이 1 이상 깎일 뻔한 경우 1회만 무시하고 소모됩니다. 0 데미지·블랙 코인으로 인한 체 감소에는 발동하지 않습니다.</li>
       <li><b>복수</b> — 죽을 때, 이 유닛을 죽인 적 유닛도 함께 사망합니다. 스펠로 죽으면 발동하지 않습니다.</li>
       <li><b>환생</b> — 처음 죽을 때 체력 1로 부활하고, 환생은 사라집니다(1회).</li>
       <li><b>강탈</b> — 이 유닛이 적 유닛을 처치하면, 그 유닛을 내 전장으로 가져옵니다.</li>
@@ -104,10 +107,10 @@
             </div>
             <div class="rarity-bar" id="rarityBar">
               <button data-r="all" class="on">전체</button>
-              <button data-r="common">일반</button>
-              <button data-r="rare">희귀</button>
-              <button data-r="heroic">영웅</button>
-              <button data-r="legendary">전설</button>
+              <button data-r="common">커먼</button>
+              <button data-r="rare">언커먼</button>
+              <button data-r="heroic">레어</button>
+              <button data-r="legendary">레전드</button>
             </div>
             <button class="menu-btn ghost" id="btnAutoFill" style="min-width:auto;margin:0 6px 0 0;padding:8px 12px">남은 칸 자동</button>
             <button class="menu-btn ghost" id="btnClearDeck" style="min-width:auto;margin:0;padding:8px 12px">비우기</button>
