@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.118";
+const GAME_VERSION = "0.119";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -719,6 +719,22 @@ function applyFx(p, fx, target) {
     if (fx.maxMana) p.maxMana = Math.max(0, (p.maxMana || 0) + fx.maxMana);
   } else if (fx.type === "coin_luck") {
     p.coinP = fx.value;
+  } else if (fx.type === "own_black_buff") {
+    const mark = (m) => {
+      if (!m) return;
+      if ((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0)) {
+        m.coinGold = false;
+        m.coinBlack = true;
+      }
+    };
+    p.board.forEach(mark);
+    p.hand.forEach(mark);
+    p.board.forEach(m => {
+      if (fx.atk) m.atk += fx.atk;
+      if (fx.def) m.def = (m.def || 0) + fx.def;
+      if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
+    });
+    if (typeof log === "function") log("불길한예감: 아군 코인 블랙, 아군 전체 공방체+" + (fx.atk || 0));
   } else if (fx.type === "buff_all") {
     p.board.forEach(m => {
       if (fx.atk) m.atk += fx.atk;
@@ -1010,6 +1026,7 @@ function rollSharedCoins(m) {
   const n = coinPoolN(m);
   let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
   if (m && m.coinGold) luck = 1;
+  if (m && m.coinBlack) luck = 0;
   const flips = Array.from({ length: n }, () => Math.random() < luck);
   const heads = flips.filter(Boolean).length;
   return {
@@ -1030,6 +1047,7 @@ function rollCoins(mod, unit) {
   const n = Math.abs(mod || 0);
   let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
   if (unit && unit.coinGold) luck = 1;
+  if (unit && unit.coinBlack) luck = 0;
   const flips = Array.from({ length: n }, () => Math.random() < luck);
   const heads = flips.filter(Boolean).length;
   const delta = n ? ((mod > 0 ? 1 : -1) * heads) : 0;
