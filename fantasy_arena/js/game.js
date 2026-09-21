@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.001";
+const GAME_VERSION = "0.002";
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 function cloneCard(id) {
