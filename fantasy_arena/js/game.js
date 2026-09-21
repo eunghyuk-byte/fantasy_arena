@@ -665,8 +665,8 @@ function showCoinResult(title, rows, done) {
   if (!rows.length) { if (done) done(); return; }
   const layer = document.getElementById("coinLayer");
   const box = document.getElementById("coinBox");
-  const plus = (typeof COIN_PLUS !== "undefined") ? COIN_PLUS : "";
-  const minus = (typeof COIN_MINUS !== "undefined") ? COIN_MINUS : "";
+  const plus = (typeof COIN_PLUS !== "undefined" && COIN_PLUS) ? COIN_PLUS : "assets/img/coins/plus.png";
+  const minus = (typeof COIN_MINUS !== "undefined" && COIN_MINUS) ? COIN_MINUS : "assets/img/coins/minus.png";
   let flipsN = 0;
   box.innerHTML = `<h3>${title}</h3>` + rows.map(r => {
     if (!r.flips.length) return "";

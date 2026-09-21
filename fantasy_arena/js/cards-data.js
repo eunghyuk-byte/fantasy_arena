@@ -29,6 +29,8 @@ const HUD_UI = {
   mana:"assets/img/hud/mana.jpg",
   deck:"assets/img/hud/deck.jpg"
 };
+const COIN_PLUS = "assets/img/coins/plus.png";
+const COIN_MINUS = "assets/img/coins/minus.png";
 
 const CARDS = [{ id:"e1", tribe:"earth", name:"록마운틴킹", cost:5, type:"minion", atk:9, hp:8, atkC:-3, hpC:-2, text:"스톤드로잉" , def:2, defC:0},
 { id:"e2", tribe:"earth", name:"샌드웜", cost:6, type:"minion", atk:8, hp:8, atkC:2, hpC:1, text:"" , def:1, defC:1},

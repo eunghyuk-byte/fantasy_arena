@@ -354,8 +354,8 @@ async function composeCardFace(c, opts={}) {
   }
 }
 async function paintStatCoins(ctx, c, W, H) {
-  const plus = await loadImg(typeof COIN_PLUS !== "undefined" ? COIN_PLUS : "");
-  const minus = await loadImg(typeof COIN_MINUS !== "undefined" ? COIN_MINUS : "");
+  const plus = await loadImg((typeof COIN_PLUS !== "undefined" && COIN_PLUS) ? COIN_PLUS : "assets/img/coins/plus.png");
+  const minus = await loadImg((typeof COIN_MINUS !== "undefined" && COIN_MINUS) ? COIN_MINUS : "assets/img/coins/minus.png");
   if (!plus && !minus) return;
   const size = Math.round(W * 0.03872);
   const gap = Math.round(size * 0.06);
