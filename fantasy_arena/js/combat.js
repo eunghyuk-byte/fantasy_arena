@@ -1,3 +1,62 @@
+function atkSkillOf(m) {
+  const v = m && m.atkSkill;
+  return (v >= 2 && v <= 11) ? (v | 0) : 1;
+}
+
+function applyLifesteal(attacker, hpDealt) {
+  if (!attacker || hpDealt <= 0 || attacker.hp <= 0 || attacker.dying) return 0;
+  const heal = Math.ceil(hpDealt / 2);
+  const cap = (attacker.maxHp != null && attacker.maxHp > 0) ? attacker.maxHp : attacker.hp;
+  const before = attacker.hp;
+  attacker.hp = Math.min(cap, before + heal);
+  const got = attacker.hp - before;
+  if (got > 0) log(`${attacker.name} 흡혈 +${got}`);
+  else log(`${attacker.name} 흡혈 0 (풀피)`);
+  return got;
+}
+
+/** Pre-hit foe mutators: weaken(7) / petrify(8). Minion targets only. */
+function applyAtkSkillOnStart(attacker, def) {
+  if (!def) return;
+  const sk = atkSkillOf(attacker);
+  if (sk === 7) {
+    def.atk = Math.max(0, (def.atk || 0) - 1);
+    def.def = Math.max(0, (def.def || 0) - 1);
+    log(`${attacker.name} 약화공격 → ${def.name} 공·방 -1`);
+  } else if (sk === 8) {
+    def.atk = 0;
+    def.def = Math.max(0, Math.min(5, (def.def || 0) + 1));
+    log(`${attacker.name} 석화공격 → ${def.name} 공=0 방+1`);
+  }
+}
+
+/**
+ * Resolve outbound HP damage for attacker specials.
+ * 2 penetrate · 3 charge · else normal block with rolled/current DP.
+ * Continuous(4) is two separate hits in doAttack — not ×2 here.
+ */
+function calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefVal, def) {
+  const sk = atkSkillOf(attacker);
+  let raw = Math.max(0, aAtk);
+  if (sk === 3) raw += Math.max(0, aDefVal || 0); // charge: + attacker DP
+  let hpDmg = 0;
+  let absorbed = 0;
+  if (sk === 2) { // pierce: consume permanent DEF pool, remainder to HP
+    const pool = Math.max(0, (def && def.def) || 0);
+    absorbed = Math.min(pool, raw);
+    if (def) def.def = pool - absorbed;
+    hpDmg = raw - absorbed;
+  } else {
+    absorbed = Math.min(Math.max(0, blocked || 0), raw);
+    hpDmg = Math.max(0, raw - Math.max(0, blocked || 0));
+  }
+  return { hpDmg, absorbed, skill: sk, raw };
+}
+
+function combatKillCtx(attacker, owner) {
+  return { killer: attacker, killerOwner: owner, fromSpell: false };
+}
+
 function doAttack(p, attacker, target, auto) {
   return new Promise(resolve => {
   if (!attacker || attacker.hp <= 0) { resolve(); return; }
@@ -8,149 +67,267 @@ function doAttack(p, attacker, target, auto) {
   if (!ok) { resolve(); return; }
   attacker.attacksLeft -= 1;
   attacker.canAttack = attacker.attacksLeft > 0;
-  const aRoll = rollCoins(attacker.atkC, attacker);
-  // fi5: 공격 코인 전부 뒷면이면 장착 아이템만 파괴
-  if (attacker.equippedItem && attacker.equippedItem.id === "fi5" && aRoll.flips && aRoll.flips.length && aRoll.heads === 0) {
+
+  const sk0 = atkSkillOf(attacker);
+  // ON ATTACK START: weaken / petrify before rolls (primary only; aoe applies per-target without 7/8)
+  if (target.kind === "minion" && target.minion && sk0 !== 9) {
+    applyAtkSkillOnStart(attacker, target.minion);
+  }
+
+  function sharedDetail(unit, roll, atkVal, defVal, hpVal) {
+    const bits = [];
+    if (unit.atkC) bits.push(`공 ${unit.atk}→<b>${atkVal}</b> (${roll.dAtk >= 0 ? "+" : ""}${roll.dAtk})`);
+    if (unit.defC) bits.push(`방 ${unit.def || 0}→<b>${defVal}</b> (${roll.dDef >= 0 ? "+" : ""}${roll.dDef})`);
+    if (unit.hpC) bits.push(`체 ${hpVal - roll.dHp}→<b>${hpVal}</b> (${roll.dHp >= 0 ? "+" : ""}${roll.dHp})`);
+    return bits.join(" · ") || `앞면 ${roll.heads}/${roll.n}`;
+  }
+
+  const aShared = rollSharedCoins(attacker);
+  // fi5: 공유 코인 전부 뒷면이면 장착 아이템만 파괴
+  if (attacker.equippedItem && attacker.equippedItem.id === "fi5" && aShared.flips && aShared.flips.length && aShared.heads === 0) {
     try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_break"); } catch (e) {}
     if (typeof unequipItem === "function") unequipItem(attacker);
     if (typeof log === "function") log(attacker.name + "의 재의계약이 파괴되었다");
   }
-  const aAtk = Math.max(0, (Number(attacker.atk) || 0) + aRoll.delta);
+  const aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
+  const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef);
+  if (aShared.dHp) attacker.hp = clampHp((Number(attacker.hp) || 0) + aShared.dHp);
   const rows = [];
-  if (aRoll.flips && aRoll.flips.length) {
+  if (aShared.flips.length) {
     rows.push({
-      label: attacker.name + " 공격",
-      modLabel: fmtC(attacker.atkC),
-      flips: aRoll.flips,
-      delta: aRoll.delta,
-      base: attacker.atk,
-      value: aAtk
+      label: attacker.name + " 공유코인",
+      modLabel: `N=${aShared.n}`,
+      flips: aShared.flips,
+      delta: aShared.heads,
+      detail: sharedDetail(attacker, aShared, aAtk, aDefVal, attacker.hp)
     });
   }
-  let dAtk = 0, dRoll = { flips: [], delta: 0 }, def = null;
+
+  let dAtk = 0, def = null;
   if (target.kind === "minion") {
     def = target.minion;
-    dRoll = rollCoins(def.atkC, def);
-    dAtk = Math.max(0, (Number(def.atk) || 0) + dRoll.delta);
-    if (dRoll.flips && dRoll.flips.length) {
+    // 광역(9): counter primary = board front (first living)
+    if (sk0 === 9) {
+      const front = opponent(p).board.find(m => m.hp > 0 && !m.dying);
+      if (front) def = front;
+    }
+    const dShared = rollSharedCoins(def);
+    dAtk = clampAtk((Number(def.atk) || 0) + dShared.dAtk);
+    const defVal = clampDef((Number(def.def) || 0) + dShared.dDef);
+    if (dShared.dHp) def.hp = clampHp((Number(def.hp) || 0) + dShared.dHp);
+    if (dShared.flips.length) {
       rows.push({
-        label: def.name + " 반격",
-        modLabel: fmtC(def.atkC),
-        flips: dRoll.flips,
-        delta: dRoll.delta,
-        base: def.atk,
-        value: dAtk
+        label: def.name + " 공유코인",
+        modLabel: `N=${dShared.n}`,
+        flips: dShared.flips,
+        delta: dShared.heads,
+        detail: sharedDetail(def, dShared, dAtk, defVal, def.hp)
       });
-    }
-    const defRoll = rollCoins(def.defC, def);
-    const defVal = Math.max(0, (Number(def.def) || 0) + defRoll.delta);
-    if (defRoll.flips && defRoll.flips.length) {
-      rows.push({
-        label: def.name + " 방어",
-        modLabel: fmtC(def.defC),
-        flips: defRoll.flips,
-        delta: defRoll.delta,
-        base: def.def || 0,
-        value: defVal
-      });
-    }
-    const aDefRoll = rollCoins(attacker.defC, attacker);
-    const aDefVal = Math.max(0, (Number(attacker.def) || 0) + aDefRoll.delta);
-    if (aDefRoll.flips && aDefRoll.flips.length) {
-      rows.push({
-        label: attacker.name + " 방어",
-        modLabel: fmtC(attacker.defC),
-        flips: aDefRoll.flips,
-        delta: aDefRoll.delta,
-        base: attacker.def || 0,
-        value: aDefVal
-      });
-    }
-    // R5: hpC coin rolls apply in combat (symmetric with atkC/defC)
-    if (def.hpC) {
-      const hRoll = rollCoins(def.hpC, def);
-      const hpBase = def.hp;
-      def.hp = Math.max(0, (Number(def.hp) || 0) + hRoll.delta);
-      if (hRoll.flips && hRoll.flips.length) {
-        rows.push({
-          label: def.name + " 체력",
-          modLabel: fmtC(def.hpC),
-          flips: hRoll.flips,
-          delta: hRoll.delta,
-          base: hpBase,
-          value: def.hp
-        });
-      }
-    }
-    if (attacker.hpC) {
-      const ahRoll = rollCoins(attacker.hpC, attacker);
-      const ahpBase = attacker.hp;
-      attacker.hp = Math.max(0, (Number(attacker.hp) || 0) + ahRoll.delta);
-      if (ahRoll.flips && ahRoll.flips.length) {
-        rows.push({
-          label: attacker.name + " 체력",
-          modLabel: fmtC(attacker.hpC),
-          flips: ahRoll.flips,
-          delta: ahRoll.delta,
-          base: ahpBase,
-          value: attacker.hp
-        });
-      }
     }
     window._pendingDef = defVal;
     window._pendingAtkDef = aDefVal;
-  } else { window._pendingDef = 0; window._pendingAtkDef = 0; }
-  log(`${attacker.name} 코인 공격 ${fmtC(attacker.atkC) || ""} → ${aAtk}`);
+  } else {
+    // hero face: still roll attacker shared coin (already done); keep attacker DEF for charge
+    window._pendingDef = 0;
+    window._pendingAtkDef = aDefVal;
+  }
+
+  const skLabel = (typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[atkSkillOf(attacker)])
+    ? ATK_SKILL_HELP[atkSkillOf(attacker)][0] : "";
+  log(`${attacker.name} 공유코인 N=${aShared.n} 앞면${aShared.heads} → 공 ${aAtk}` + (atkSkillOf(attacker) > 1 ? ` [${skLabel}]` : ""));
   showCoinResult("코인 배틀", rows, async () => {
     attacker._fxAtk = aAtk;
     if (target.kind === "minion" && def) def._fxAtk = dAtk;
     render();
     await waitMs(280);
     const atkEl = Vfx.elOf(attacker.uid);
-    if (target.kind === "hero") {
-      const isMeHero = target.owner === meView().me;
-      const defEl = Vfx.heroOf(isMeHero);
-      const crit = aAtk >= attacker.atk + 3;
-      try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
-      await Vfx.attackSeq(atkEl, defEl, aAtk, crit);
-      dealHero(target.owner, aAtk);
-      render();
-      await waitMs(420);
-    } else {
-      const blocked = window._pendingDef || 0;
-      const backBlock = window._pendingAtkDef || 0;
-      const pierce = (attacker.keywords || []).includes("pierce") || attacker.atkSkill === 2 || String(attacker.text || "").includes("관통");
-      const dmgIn = Math.max(0, aAtk - (pierce ? 0 : blocked));
-      const dmgBack = Math.max(0, dAtk - backBlock);
-      log(`${def.name} 방어 ${blocked} → 체력피해 ${dmgIn}`);
-      const defEl = Vfx.elOf(def.uid);
-      const crit = dmgIn >= attacker.atk + 2;
-      try {
-        if (typeof SpellFx !== "undefined" && SpellFx.playCombat) {
-          SpellFx.playCombat("attack");
-          SpellFx.playCombat("defend");
+    const aDefNow = window._pendingAtkDef || 0;
+    const sk = atkSkillOf(attacker);
+    const foe = opponent(p);
+
+    // —— 9 광역공격: shared roll → all enemy board minions; counter = front only ——
+    if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
+      const victims = foe.board.filter(m => m.hp > 0 && !m.dying).slice();
+      log(`${attacker.name} 광역공격 → 적 하수인 ${victims.length}체`);
+      for (const vic of victims) {
+        if (attacker.hp <= 0 || attacker.dying) break;
+        const blocked = Math.max(0, vic.def || 0);
+        const calc = calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefNow, vic);
+        const hpDmg = calc.hpDmg;
+        log(`${vic.name} 방어 ${blocked} → 체력피해 ${hpDmg}`);
+        const defEl = Vfx.elOf(vic.uid);
+        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
+        await Vfx.attackSeq(atkEl, defEl, hpDmg, hpDmg >= attacker.atk + 2);
+        damageMinion(foe, vic, hpDmg, combatKillCtx(attacker, p));
+        if (!(vic.hp > 0 && !vic.dying)) {
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
+          Vfx.death(Vfx.elOf(vic.uid));
         }
-      } catch (e) {}
-      await Vfx.attackSeq(atkEl, defEl, dmgIn, crit);
-      damageMinion(target.owner, def, dmgIn);
+        render();
+        await waitMs(220);
+      }
+      const primary = victims[0];
+      const primarySurvived = primary && primary.hp > 0 && !primary.dying;
+      if (sk !== 11 && primarySurvived && dAtk && attacker.hp > 0 && !attacker.dying) {
+        const dmgBack = Math.max(0, dAtk - aDefNow);
+        if (dmgBack > 0) {
+          log(`${primary.name} 반격`);
+          const atkNow = Vfx.elOf(attacker.uid);
+          const defNow = Vfx.elOf(primary.uid);
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter"); } catch (e) {}
+          await Vfx.parrySeq(defNow, atkNow, dmgBack);
+          damageMinion(p, attacker, dmgBack, combatKillCtx(primary, foe));
+          render();
+          await waitMs(360);
+        }
+      } else if (primary && !primarySurvived) {
+        log(`${primary.name} 격파 · 반격 없음`);
+      }
       render();
       await waitMs(360);
-      const survived = def && def.hp > 0 && !def.dying;
-      if (survived && dmgBack && attacker.hp > 0 && !attacker.dying) {
-        log(`${def.name} 반격`);
-        const atkNow = Vfx.elOf(attacker.uid);
-        const defNow = Vfx.elOf(def.uid);
-        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter"); } catch (e) {}
-        await Vfx.parrySeq(defNow, atkNow, dmgBack);
-        damageMinion(p, attacker, dmgBack);
+    } else if (target.kind === "hero") {
+      const hits = (sk === 4) ? 2 : 1;
+      for (let hit = 1; hit <= hits; hit++) {
+        if (attacker.hp <= 0 || attacker.dying) break;
+        if (target.owner.hp <= 0) break;
+        const isMeHero = target.owner === meView().me;
+        const defEl = Vfx.heroOf(isMeHero);
+        const calc = calcAtkSkillHpDamage(attacker, aAtk, 0, aDefNow, null);
+        let hpDmg = calc.hpDmg;
+        if (hits > 1) log(`${attacker.name} 연속 ${hit}/${hits}`);
+        const crit = hpDmg >= attacker.atk + 3 || sk === 5;
+        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
+        await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
+        if (sk === 5 && hpDmg >= 1) {
+          dealHero(target.owner, Math.max(hpDmg, target.owner.hp));
+          log(`${attacker.name} 치명공격 → 영웅 즉사급 피해`);
+        } else {
+          dealHero(target.owner, hpDmg);
+        }
+        if (sk === 6) applyLifesteal(attacker, hpDmg);
+        render();
+        await waitMs(hits > 1 ? 300 : 420);
+      }
+    } else {
+      // single minion: 연속(4)=two hits with counter each; 혼란(11)=no counter; 돌파(10)=overkill chain
+      const hits = (sk === 4) ? 2 : 1;
+      let lastHpDmg = 0;
+      let lastHpBefore = 0;
+      let killedByHit = false;
+      for (let hit = 1; hit <= hits; hit++) {
+        if (attacker.hp <= 0 || attacker.dying) break;
+        if (!(def && def.hp > 0 && !def.dying)) break;
+        const blocked = (hit === 1) ? (window._pendingDef || 0) : Math.max(0, def.def || 0);
+        const backBlock = window._pendingAtkDef || 0;
+        const calc = calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefNow, def);
+        let hpDmg = calc.hpDmg;
+        if (hits > 1) log(`${attacker.name} 연속 ${hit}/${hits}`);
+        log(`${def.name} 방어 ${blocked}` + (sk === 2 ? ` (관통 흡수 ${calc.absorbed})` : "") + ` → 체력피해 ${hpDmg}`);
+        const defEl = Vfx.elOf(def.uid);
+        const crit = hpDmg >= attacker.atk + 2 || sk === 5;
+        try {
+          if (typeof SpellFx !== "undefined" && SpellFx.playCombat) {
+            SpellFx.playCombat("attack");
+            SpellFx.playCombat("defend");
+          }
+        } catch (e) {}
+        await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
+
+        const hpBefore = def.hp;
+        if (sk === 5 && hpDmg >= 1) {
+          damageMinion(target.owner, def, Math.max(hpDmg, def.hp), combatKillCtx(attacker, p));
+          log(`${attacker.name} 치명공격 → ${def.name} 즉사`);
+        } else {
+          damageMinion(target.owner, def, hpDmg, combatKillCtx(attacker, p));
+        }
+        const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
+        if (sk === 6) applyLifesteal(attacker, hpDealt);
         render();
         await waitMs(360);
-      } else if (!survived) {
-        log(`${def.name} 격파 · 반격 없음`);
-        const deadEl = Vfx.elOf(def.uid);
-        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
-        Vfx.death(deadEl);
-        await waitMs(520);
+        lastHpDmg = hpDmg;
+        lastHpBefore = hpBefore;
+        const survived = def && def.hp > 0 && !def.dying;
+        killedByHit = !survived;
+        if (sk !== 11 && survived && dAtk && attacker.hp > 0 && !attacker.dying) {
+          const dmgBack = Math.max(0, dAtk - backBlock);
+          if (dmgBack > 0) {
+            log(`${def.name} 반격`);
+            const atkNow = Vfx.elOf(attacker.uid);
+            const defNow = Vfx.elOf(def.uid);
+            try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter"); } catch (e) {}
+            await Vfx.parrySeq(defNow, atkNow, dmgBack);
+            damageMinion(p, attacker, dmgBack, combatKillCtx(def, target.owner));
+            render();
+            await waitMs(360);
+          }
+        } else if (sk === 11 && survived) {
+          log(`${attacker.name} 혼란공격 · 반격 없음`);
+        } else if (!survived) {
+          log(`${def.name} 격파 · 반격 없음`);
+          const deadEl = Vfx.elOf(def.uid);
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
+          Vfx.death(deadEl);
+          await waitMs(520);
+          break;
+        }
+      }
+
+      // —— 10 돌파공격: leftover HP dmg (overkill) trampling next ——
+      if (sk === 10 && killedByHit && attacker.hp > 0 && !attacker.dying) {
+        let leftover = Math.max(0, lastHpDmg - lastHpBefore);
+        const boardCap = Math.max(1, foe.board.length + 1);
+        let hops = 0;
+        let lastUid = def.uid;
+        while (leftover > 0 && hops < boardCap && attacker.hp > 0 && !attacker.dying) {
+          const living = foe.board.filter(m => m.hp > 0 && !m.dying && m.uid !== lastUid);
+          let next = null;
+          const all = foe.board;
+          const idx = all.findIndex(m => m.uid === lastUid);
+          if (idx >= 0) {
+            for (let i = idx + 1; i < all.length; i++) {
+              if (all[i].hp > 0 && !all[i].dying) { next = all[i]; break; }
+            }
+          }
+          if (!next) next = living[0] || null;
+          if (!next) {
+            if (!foe.board.some(m => m.hp > 0 && !m.dying)) {
+              log(`${attacker.name} 돌파 → 영웅 (잔여 ${leftover})`);
+              const isMeHero = foe === meView().me;
+              const hEl = Vfx.heroOf(isMeHero);
+              try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
+              await Vfx.attackSeq(Vfx.elOf(attacker.uid), hEl, leftover, false);
+              dealHero(foe, leftover);
+              render();
+              await waitMs(300);
+            }
+            break;
+          }
+          const nBlocked = Math.max(0, next.def || 0);
+          if (leftover <= nBlocked) {
+            log(`${attacker.name} 돌파 → ${next.name} 잔여 ${leftover} ≤ 방어 ${nBlocked} · 돌파 종료`);
+            break;
+          }
+          hops++;
+          const nDmg = Math.max(0, leftover - nBlocked);
+          log(`${attacker.name} 돌파 → ${next.name} (${hops}) 잔여ATK ${leftover}`);
+          log(`${next.name} 방어 ${nBlocked} → 체력피해 ${nDmg}`);
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack"); } catch (e) {}
+          await Vfx.attackSeq(Vfx.elOf(attacker.uid), Vfx.elOf(next.uid), nDmg, false);
+          const nb = next.hp;
+          damageMinion(foe, next, nDmg, combatKillCtx(attacker, p));
+          render();
+          await waitMs(280);
+          if (next.hp > 0 && !next.dying) {
+            log(`${next.name} 생존 · 돌파 종료`);
+            break;
+          }
+          log(`${next.name} 격파`);
+          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
+          Vfx.death(Vfx.elOf(next.uid));
+          await waitMs(400);
+          leftover = Math.max(0, nDmg - nb);
+          lastUid = next.uid;
+        }
       }
     }
     await waitMs(240);
@@ -161,7 +338,7 @@ function doAttack(p, attacker, target, auto) {
           try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death"); } catch (e) {}
           Vfx.death(el);
         }
-        destroyMinion(pl, mm);
+        destroyMinion(pl, mm, { fromSpell: false });
       });
       pl._hurt = null;
       pl.board.forEach(mm => { mm._hurt = null; mm._fxAtk = null; });
