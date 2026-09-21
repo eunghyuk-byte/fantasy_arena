@@ -394,7 +394,9 @@ async function composeCardFace(c, opts={}) {
   if (txt) {
     const tSize = Math.round(H*0.037) + 2;
     ctx.save();
-    ctx.fillStyle = "#2a2014";
+    // 대지·빛 등 밝은 프레임: 짙은 갈흑. 암·불 어두운 프레임: 채도 낮은 밝은 회(순백 X).
+    const darkFrame = (tribe.id === "dark" || tribe.id === "fire");
+    ctx.fillStyle = darkFrame ? "#c9c2b6" : "#2a2014";
     ctx.font = "700 " + tSize + "px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -483,7 +485,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v67namefont", c.id, c.type || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v68descink", c.id, c.type || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
