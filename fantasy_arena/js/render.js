@@ -418,12 +418,13 @@ async function composeCardFace(c, opts={}) {
   }
 
   paintNumber(ctx, String(c.cost ?? 0), W*0.1542, H*0.103, Math.round(H*0.070));
-  if (c.type === "minion") {
+  const paintFrameStats = c.type === "minion" || (c.type === "item" && !c.instant);
+  if (paintFrameStats) {
     const hp = opts.hp != null ? opts.hp : c.hp;
     paintNumber(ctx, String(c.atk ?? 0), W*0.1525, H*0.9032, Math.round(H*0.066));
     paintNumber(ctx, String(c.def ?? 0), W*0.5008, H*0.9032, Math.round(H*0.066));
     paintNumber(ctx, String(hp ?? 0), W*0.8628, H*0.9032, Math.round(H*0.066));
-    await paintStatCoins(ctx, c, W, H);
+    if (c.type === "minion") await paintStatCoins(ctx, c, W, H);
   }
   try {
     return canvas.toDataURL("image/jpeg", 0.92);
@@ -485,7 +486,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v78descink", c.id, c.type || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v79descink", c.id, c.type || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
