@@ -2306,7 +2306,7 @@ html.is-desktop, html.is-desktop body {
 }
 
 /* ===== P0 LAYOUT 2026-09-21: keep battle UI inside stage ===== */
-/* Stage clip */
+/* Hard clip stage */
 #app, #game, #game.active {
   overflow: hidden !important;
 }
@@ -2317,14 +2317,26 @@ html.is-desktop, html.is-desktop body {
   box-sizing: border-box !important;
 }
 
-/* Keep playfield inside ornate board frame (safe inset) */
-#game.active .playfield {
-  padding: 3.2% 2.2% 2.4% 2.2% !important;
+/* Board art inset so ornate frame/gems stay fully on stage */
+#game.active > #boardBgLayer {
+  inset: 2.4% 2.8% 2.8% 2.8% !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+  object-position: center center !important;
 }
 
-/* Opp hand needs real height — 8% was clipping card backs */
+/* Playfield sits inside board frame */
+#game.active .playfield {
+  padding: 5% 3.5% 4% 3.5% !important;
+}
+
+/* Rows: opp backs fully visible */
 #game.active .col-main {
-  grid-template-rows: 12% 27% 27% 30% 4% !important;
+  grid-template-rows: 11% 27% 27% 31% 4% !important;
 }
 
 #game.active .opp-hand {
@@ -2334,16 +2346,15 @@ html.is-desktop, html.is-desktop body {
   min-height: 0 !important;
   align-items: flex-end !important;
   justify-content: center !important;
-  padding: 2px 10% 2px !important;
+  padding: 2px 12% 2px !important;
   box-sizing: border-box !important;
 }
 #game.active .opp-hand .back {
-  height: min(72%, 7.2cqh) !important;
-  width: calc(min(72%, 7.2cqh) * 0.70) !important;
+  height: min(70%, 6.8cqh) !important;
+  width: calc(min(70%, 6.8cqh) * 0.70) !important;
   max-height: 100% !important;
   margin-left: -10px !important;
   flex: 0 0 auto !important;
-  transform: none !important;
 }
 #game.active .opp-hand .back:first-child { margin-left: 0 !important; }
 
@@ -2354,37 +2365,46 @@ html.is-desktop, html.is-desktop body {
   min-height: 0 !important;
   align-items: flex-end !important;
   justify-content: center !important;
-  padding: 4px 5% 10px !important;
+  padding: 4px 6% 12px !important;
   box-sizing: border-box !important;
 }
 #game.active .my-hand .card,
 #game.active .my-hand .card.playable {
-  height: calc(100% - 16px) !important;
-  max-height: calc(100% - 16px) !important;
+  height: calc(100% - 18px) !important;
+  max-height: calc(100% - 18px) !important;
   width: auto !important;
   aspect-ratio: 2 / 3 !important;
-  margin-left: -16px !important;
+  margin-left: -14px !important;
   overflow: hidden !important;
   flex: 0 0 auto !important;
   transform-origin: bottom center !important;
 }
 #game.active .my-hand .card:first-child { margin-left: 0 !important; }
 #game.active .my-hand .card:hover {
-  transform: translateY(-10px) scale(1.04) !important;
+  transform: translateY(-8px) scale(1.03) !important;
   z-index: 30 !important;
 }
 
 #game.active .hint {
   overflow: hidden !important;
-  padding: 0 8% !important;
-  font-size: clamp(11px, 1.6cqh, 14px) !important;
-  line-height: 1.2 !important;
+  padding: 0 10% !important;
+  font-size: clamp(11px, 1.5cqh, 13px) !important;
+  line-height: 1.15 !important;
   white-space: nowrap !important;
   text-overflow: ellipsis !important;
 }
 
-/* Board art: contain so frame gems stay on-screen; letterbox OK inside stage */
-#game.active > #boardBgLayer {
-  object-fit: contain !important;
-  object-position: center center !important;
+/* HUD/buttons inset from stage edge */
+#game.active .col-hud {
+  padding: 10px 10px 14px 6px !important;
+  box-sizing: border-box !important;
+}
+#game.active .col-hud .end-btn,
+#game.active .col-hud .give-btn {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.bgm-btn {
+  top: 10px !important;
+  right: 10px !important;
 }
