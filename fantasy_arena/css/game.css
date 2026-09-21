@@ -3161,3 +3161,17 @@ html.is-desktop, html.is-desktop body {
   object-fit: contain;
   filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .48));
 }
+
+
+/* ===== P0 spell VFX size ~30% smaller (sharper look) ===== */
+#spellFx .fx-stage .fx-strip,
+#spellFx .fx-stage .fx-asset {
+  width: min(55vmin, 420px) !important;
+  height: min(55vmin, 420px) !important;
+  max-width: min(55vmin, 420px) !important;
+  max-height: min(55vmin, 420px) !important;
+}
+#spellFx .fx-stage .fx-asset {
+  height: auto !important;
+  max-height: min(55vmin, 420px) !important;
+}
