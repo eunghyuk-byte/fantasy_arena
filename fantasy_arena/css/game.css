@@ -1240,7 +1240,7 @@
     z-index: 2;
   }
   #game.active .my-hand .card {
-    margin-left: calc(min(98%, 34cqh) * -0.42) !important;
+    margin-left: calc(min(98%, 34cqh) * -0.50) !important;
   }
   #game.active .opp-hand .back {
     margin-left: -18px !important;
