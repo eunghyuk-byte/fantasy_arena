@@ -52,7 +52,7 @@ function deckFor(hero, isAI) {
 function makePlayer(hero, isAI, name) {
   return {
     name, hero, isAI,
-    hp: 50, maxHp: 50,
+    hp: 30, maxHp: 30,
     mana: 0, maxMana: 0,
     powerUsed: false,
     deck: deckFor(hero, isAI),
@@ -158,8 +158,14 @@ function beginTurn(p) {
   state.acting = p;
   p.maxMana = Math.min(10, p.maxMana + 1);
   p.mana = p.maxMana;
+  if (p.manaNext) { p.mana += p.manaNext; p.manaNext = 0; }
+  p.noPlayMinion = false;
+  p.coinP = null;
   p.powerUsed = false;
-  p.board.forEach(m => { m.canAttack = true; m.attacksLeft = 1; });
+  p.board.forEach(m => {
+    if (m.skipAttack) { m.canAttack = false; m.attacksLeft = 0; m.skipAttack = false; }
+    else { m.canAttack = true; m.attacksLeft = 1; }
+  });
   draw(p, 1);
   log(`${p.name}의 턴 · 마나 ${p.mana}`);
 }
@@ -217,6 +223,10 @@ function passTurn() {
 
 function playCard(p, card, target) {
   if (p.mana < card.cost) return false;
+  if (card.type === "minion" && p.noPlayMinion) {
+    log("이번 턴에는 유닛을 낼 수 없습니다");
+    return false;
+  }
   if (card.type === "minion" && p.board.length >= 6) {
     log("전장이 가득 찼습니다 (최대 6장)");
     return false;
@@ -269,6 +279,8 @@ function buildSpellFx(stage, kind, card) {
 function needsTarget(card) {
   const fx = card.type === "spell" ? card.spell : card.battlecry;
   if (!fx) return false;
+  if (fx.type === "draw_ex" && (fx.sacOwn || fx.bounceOwn || fx.enemyDmg)) return true;
+  if (fx.type === "kill_if" || fx.type === "set_one" || fx.type === "grant_extra" || fx.type === "double_def" || fx.type === "copy_own") return true;
   return ["dmg", "kill", "buff"].includes(fx.type) && fx.target;
 }
 
@@ -276,6 +288,33 @@ function validTargets(p, fx) {
   const e = opponent(p);
   const list = [];
   if (!fx) return list;
+  if (fx.type === "draw_ex" && (fx.sacOwn || fx.bounceOwn)) {
+    p.board.forEach(m => list.push({ kind: "minion", owner: p, minion: m }));
+    return list;
+  }
+  if (fx.type === "draw_ex" && fx.enemyDmg) {
+    e.board.forEach(m => list.push({ kind: "minion", owner: e, minion: m }));
+    return list;
+  }
+  if (fx.type === "kill_if") {
+    e.board.forEach(m => {
+      if (fx.minAtk != null && (m.atk || 0) < fx.minAtk) return;
+      if (fx.maxAtk != null && (m.atk || 0) > fx.maxAtk) return;
+      if (fx.maxCost != null && (m.cost || 0) > fx.maxCost) return;
+      if (fx.anyCoin && !((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0))) return;
+      list.push({ kind: "minion", owner: e, minion: m });
+    });
+    return list;
+  }
+  if (fx.type === "set_one") {
+    const sides = fx.target === "any_minion" ? [p, e] : fx.target === "own_minion" ? [p] : [e];
+    sides.forEach(pl => pl.board.forEach(m => list.push({ kind: "minion", owner: pl, minion: m })));
+    return list;
+  }
+  if (fx.type === "grant_extra" || fx.type === "double_def" || fx.type === "copy_own") {
+    p.board.forEach(m => list.push({ kind: "minion", owner: p, minion: m }));
+    return list;
+  }
   if (fx.target === "any_enemy") {
     list.push({ kind: "hero", owner: e });
     e.board.forEach(m => list.push({ kind: "minion", owner: e, minion: m }));
@@ -310,10 +349,64 @@ function applyFx(p, fx, target) {
   if (!fx) return;
   if (fx.type === "dmg") {
     dealToTarget(p, target, fx.value);
+    if (target && target.kind === "minion") {
+      if (fx.skipAttack) target.minion.skipAttack = true;
+      if (fx.coin) {
+        target.minion.atkC = (target.minion.atkC || 0) + fx.coin;
+        target.minion.defC = (target.minion.defC || 0) + fx.coin;
+        target.minion.hpC = (target.minion.hpC || 0) + fx.coin;
+      }
+    }
   } else if (fx.type === "heal_hero") {
     p.hp = Math.min(p.maxHp, p.hp + fx.value);
+  } else if (fx.type === "mana_next") {
+    p.manaNext = (p.manaNext || 0) + (fx.value || 0);
   } else if (fx.type === "draw") {
     draw(p, fx.value);
+  } else if (fx.type === "draw_ex") {
+    if (fx.payHp) dealHero(p, fx.payHp);
+    if (fx.healHero) p.hp = Math.min(p.maxHp, p.hp + fx.healHero);
+    if (fx.manaNext) p.manaNext = (p.manaNext || 0) + fx.manaNext;
+    if (fx.ownAllHp) [...p.board].forEach(m => damageMinion(p, m, fx.ownAllHp));
+    if (fx.enemyDef) [...e.board].forEach(m => { m.def = Math.max(0, (m.def || 0) + fx.enemyDef); });
+    if (fx.enemyDmg && target && target.kind === "minion") damageMinion(target.owner, target.minion, fx.enemyDmg);
+    if (fx.noPlayMinion) p.noPlayMinion = true;
+    if ((fx.sacOwn || fx.bounceOwn) && target && target.kind === "minion" && target.owner === p) {
+      const m = target.minion;
+      if (fx.bounceOwn) {
+        p.board = p.board.filter(x => x !== m);
+        p.hand.push(m);
+      } else {
+        destroyMinion(p, m);
+      }
+    }
+    let n = fx.draw || 0;
+    if (fx.drawBoard) n = p.board.length;
+    if (n > 0) draw(p, n);
+  } else if (fx.type === "aoe_pack") {
+    const hit = (pl, m, dmg) => {
+      if (dmg) damageMinion(pl, m, dmg);
+      if (fx.coin) {
+        m.atkC = (m.atkC || 0) + fx.coin;
+        m.defC = (m.defC || 0) + fx.coin;
+        m.hpC = (m.hpC || 0) + fx.coin;
+      }
+      if (fx.atkC) m.atkC = (m.atkC || 0) + fx.atkC;
+      if (fx.defC) m.defC = (m.defC || 0) + fx.defC;
+      if (fx.hpC) m.hpC = (m.hpC || 0) + fx.hpC;
+      if (fx.skipAttack) m.skipAttack = true;
+    };
+    const edmg = fx.enemy || 0;
+    const odmg = fx.own || 0;
+    const both = fx.all || 0;
+    if (both) {
+      [...p.board].forEach(m => hit(p, m, both));
+      [...e.board].forEach(m => hit(e, m, both));
+    } else {
+      [...e.board].forEach(m => hit(e, m, edmg));
+      if (odmg) [...p.board].forEach(m => damageMinion(p, m, odmg));
+      if (fx.ownHp) [...p.board].forEach(m => { m.hp += fx.ownHp; m.maxHp = (m.maxHp || m.hp) + fx.ownHp; });
+    }
   } else if (fx.type === "aoe_enemy") {
     [...e.board].forEach(m => damageMinion(e, m, fx.value));
   } else if (fx.type === "aoe_all_enemy") {
@@ -321,12 +414,82 @@ function applyFx(p, fx, target) {
     [...e.board].forEach(m => damageMinion(e, m, fx.value));
   } else if (fx.type === "kill") {
     if (target && target.kind === "minion") destroyMinion(target.owner, target.minion);
+  } else if (fx.type === "kill_if") {
+    if (target && target.kind === "minion") destroyMinion(target.owner, target.minion);
+  } else if (fx.type === "set_one") {
+    if (target && target.kind === "minion") {
+      const m = target.minion;
+      if (fx.atk != null) m.atk = fx.atk;
+      if (fx.def != null) m.def = fx.def;
+      if (fx.hp != null) { m.hp = fx.hp; m.maxHp = fx.hp; }
+      if (fx.coinZero) { m.atkC = 0; m.defC = 0; m.hpC = 0; }
+    }
+  } else if (fx.type === "copy_own") {
+    if (target && target.kind === "minion" && p.board.length < 6) {
+      const o = target.minion;
+      const c = cloneCard(o.id);
+      c.atk = o.atk;
+      c.def = o.def || 0;
+      c.hp = o.hp;
+      c.maxHp = o.maxHp || o.hp;
+      c.atkC = o.atkC || 0;
+      c.defC = o.defC || 0;
+      c.hpC = o.hpC || 0;
+      c.keywords = [...(o.keywords || [])];
+      c.ability = o.ability;
+      if (fx.kw) c.keywords = Array.from(new Set([...(c.keywords || []), fx.kw]));
+      if (fx.ability) c.ability = fx.ability;
+      c.canAttack = false;
+      c.attacksLeft = 0;
+      const idx = p.board.indexOf(o);
+      p.board.splice(idx >= 0 ? idx + 1 : p.board.length, 0, c);
+    }
   } else if (fx.type === "buff") {
     if (target && target.kind === "minion") {
-      target.minion.atk += fx.atk;
-      target.minion.hp += fx.hp;
-      target.minion.maxHp += fx.hp;
+      const m = target.minion;
+      if (fx.atk) m.atk += fx.atk;
+      if (fx.def) m.def = (m.def || 0) + fx.def;
+      if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
+      if (fx.kws && fx.kws.length) {
+        m.keywords = Array.from(new Set([...(m.keywords || []), ...fx.kws]));
+      }
+      if (fx.ability) m.ability = fx.ability;
     }
+  } else if (fx.type === "wipe_all") {
+    [...p.board].forEach(m => destroyMinion(p, m));
+    [...e.board].forEach(m => destroyMinion(e, m));
+    if (fx.maxMana) p.maxMana = Math.max(0, (p.maxMana || 0) + fx.maxMana);
+  } else if (fx.type === "coin_luck") {
+    p.coinP = fx.value;
+  } else if (fx.type === "buff_all") {
+    p.board.forEach(m => {
+      if (fx.atk) m.atk += fx.atk;
+      if (fx.def) m.def = (m.def || 0) + fx.def;
+      if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
+    });
+  } else if (fx.type === "grant_extra") {
+    if (target && target.kind === "minion") {
+      const m = target.minion;
+      if (fx.atk) m.atk += fx.atk;
+      if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
+      m.canAttack = true;
+      m.attacksLeft = (m.attacksLeft || 0) + 1;
+    }
+  } else if (fx.type === "set_enemy") {
+    e.board.forEach(m => {
+      if (fx.atk != null) m.atk = fx.atk;
+      if (fx.coinZero) { m.atkC = 0; m.defC = 0; m.hpC = 0; }
+    });
+  } else if (fx.type === "grant_kw") {
+    const add = (m) => {
+      m.keywords = Array.from(new Set([...(m.keywords || []), fx.kw]));
+      if (fx.ability) m.ability = fx.ability;
+      if (fx.kw === "shield" && !(m.keywords || []).includes("shield")) m.keywords.push("shield");
+    };
+    if (fx.where === "hand") p.hand.filter(c => c.type === "minion").forEach(add);
+    else p.board.forEach(add);
+  } else if (fx.type === "double_def") {
+    if (target && target.kind === "minion") target.minion.def = (target.minion.def || 0) * 2;
   } else if (fx.type === "mana") {
     p.mana += fx.value;
   } else if (fx.type === "face") {
@@ -373,10 +536,11 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "giant_str") {
     p.board.forEach(m => { m.atk += 2; });
   } else if (fx.type === "sandhell") {
+    const n = fx.value || 1;
     [...e.board].forEach(m => {
-      m.atk = Math.max(0, m.atk - 1);
-      m.def = Math.max(0, (m.def || 0) - 1);
-      damageMinion(e, m, 1);
+      m.atk = Math.max(0, (m.atk || 0) - n);
+      m.def = Math.max(0, (m.def || 0) - n);
+      damageMinion(e, m, n);
     });
   } else if (fx.type === "petrify") {
     e.board.forEach(m => {
@@ -419,6 +583,16 @@ function damageMinion(owner, m, n) {
 }
 
 function destroyMinion(owner, m) {
+  const rebirth = (m.ability && String(m.ability).includes("환생")) || (m.keywords || []).includes("rebirth");
+  if (rebirth) {
+    m.keywords = (m.keywords || []).filter(k => k !== "rebirth");
+    if (m.ability) m.ability = String(m.ability).replace(/,?환생/, "").replace(/^,/, "");
+    m.hp = 1;
+    m.dying = false;
+    m.damaged = true;
+    log(`${m.name}이(가) 환생했다 (체력 1)`);
+    return;
+  }
   owner.board = owner.board.filter(x => x.uid !== m.uid);
   log(`${m.name} 사망`);
   if (m.deathrattle) applyFx(owner, m.deathrattle, null);
@@ -426,6 +600,7 @@ function destroyMinion(owner, m) {
 
 function cleanupBoards() {
   [state.p1, state.p2].forEach(p => {
+    p.board.filter(m => m.hp <= 0).forEach(m => destroyMinion(p, m));
     p.board = p.board.filter(m => m.hp > 0);
   });
 }
@@ -444,7 +619,8 @@ function fmtC(n) {
 }
 function rollCoins(mod) {
   const n = Math.abs(mod || 0);
-  const flips = Array.from({ length: n }, () => Math.random() < 0.5);
+  const luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
+  const flips = Array.from({ length: n }, () => Math.random() < luck);
   const heads = flips.filter(Boolean).length;
   const delta = n ? ((mod > 0 ? 1 : -1) * heads) : 0;
   return { flips, heads, delta };

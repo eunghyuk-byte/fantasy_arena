@@ -72,6 +72,7 @@ function kwLabel(m) {
   if (k.includes("taunt")) parts.push("도발");
   if (k.includes("charge")) parts.push("돌진");
   if (k.includes("shield")) parts.push("보호막");
+  if (k.includes("rebirth") || (m.ability && String(m.ability).includes("환생"))) parts.push("환생");
   return parts.join(" · ");
 }
 
