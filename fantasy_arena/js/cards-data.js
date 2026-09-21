@@ -69,7 +69,7 @@ const CARDS = [
   { id:"f5", tribe:"fire", name:"불꽃여우", cost:2, type:"minion", atk:3, def:1, hp:2, atkC:-1, defC:-1, hpC:0, atkSkill:10, text:"돌파공격" },
   { id:"f6", tribe:"fire", name:"가후", cost:8, type:"minion", atk:6, def:1, hp:8, atkC:-4, defC:0, hpC:4, rarity:"heroic", atkSkill:9, text:"광역공격" },
   { id:"f7", tribe:"fire", name:"샐러맨더", cost:2, type:"minion", atk:4, def:0, hp:3, atkC:-4, defC:0, hpC:0, atkSkill:6, text:"흡혈공격" },
-  { id:"f8", tribe:"fire", name:"용암술사", cost:4, type:"minion", atk:6, def:1, hp:4, atkC:-1, defC:-1, hpC:-1, ability:"유언", text:"유언" },
+  { id:"f8", tribe:"fire", name:"용암술사", cost:4, type:"minion", atk:6, def:1, hp:5, atkC:-4, defC:0, hpC:-4, ability:"유언", text:"유언" },
   { id:"f9", tribe:"fire", name:"용암늑대", cost:2, type:"minion", atk:2, def:1, hp:2, atkC:-1, defC:-1, hpC:-1, atkSkill:3, text:"돌진공격" },
   { id:"f10", tribe:"fire", name:"헬하운드", cost:3, type:"minion", atk:5, def:0, hp:5, atkC:-4, defC:0, hpC:-4, atkSkill:4, text:"연속공격" },
   { id:"f11", tribe:"fire", name:"바바리안", cost:3, type:"minion", atk:4, def:1, hp:3, atkC:-2, defC:0, hpC:-2, atkSkill:3, text:"돌진공격" },
