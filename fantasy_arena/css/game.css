@@ -2852,3 +2852,76 @@ html.is-desktop, html.is-desktop body {
 #spellFx .fx-stage .fx-asset.show { opacity: 1 !important; }
 #spellFx .fx-stage .fx-asset.hide { opacity: 0 !important; }
 
+
+/* ===== P0 playable yellow burn glow (Hearthstone-like) ===== */
+@keyframes playGlowBurn {
+  0%, 100% {
+    opacity: .72;
+    filter: brightness(.92) saturate(1.05);
+    box-shadow:
+      0 0 0 2px rgba(255, 232, 150, .95),
+      0 0 8px 2px rgba(255, 200, 70, .75),
+      0 0 18px 6px rgba(255, 170, 40, .45),
+      0 0 32px 10px rgba(255, 140, 20, .22),
+      inset 0 0 10px rgba(255, 245, 200, .28);
+  }
+  35% {
+    opacity: 1;
+    filter: brightness(1.18) saturate(1.2);
+    box-shadow:
+      0 0 0 2px rgba(255, 245, 190, 1),
+      0 0 12px 3px rgba(255, 210, 80, .95),
+      0 0 26px 9px rgba(255, 180, 40, .6),
+      0 0 40px 14px rgba(255, 150, 20, .3),
+      inset 0 0 14px rgba(255, 250, 210, .4);
+  }
+  65% {
+    opacity: .88;
+    filter: brightness(1.05) saturate(1.1);
+    box-shadow:
+      0 0 0 2px rgba(255, 236, 160, .98),
+      0 0 10px 2px rgba(255, 195, 60, .85),
+      0 0 22px 7px rgba(255, 165, 30, .5),
+      0 0 34px 11px rgba(255, 140, 15, .25),
+      inset 0 0 12px rgba(255, 245, 200, .32);
+  }
+}
+
+#game.active .my-hand .card.playable {
+  overflow: visible !important;
+  z-index: 4 !important;
+}
+#game.active .my-hand .card.playable .card-face {
+  position: relative !important;
+  z-index: 2 !important;
+  outline: none !important;
+  /* soft face rim only — main burn is .play-glow */
+  box-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+#game.active .my-hand .card.playable > .play-glow {
+  display: block !important;
+  position: absolute !important;
+  /* hug card-face bounds (same box as face), tiny bleed for flame bloom */
+  inset: -1px !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 12px 12px 20px 20px !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  background: transparent !important;
+  animation: playGlowBurn 1.05s ease-in-out infinite !important;
+}
+/* kill old flat outline / disabled glow overrides */
+.play-glow { display: none; }
+.card.playable > .play-glow { display: block !important; }
+.card.playable::after,
+#game.active .my-hand .card.playable::after {
+  content: none !important;
+  display: none !important;
+}
