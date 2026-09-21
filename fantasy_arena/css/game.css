@@ -2455,7 +2455,7 @@ html.is-desktop, html.is-desktop body {
 #game.active .my-hand {
   /* Hearthstone-like: hand can hang slightly past board bottom edge */
   overflow: visible !important;
-  z-index: 4 !important;
+  z-index: 8 !important; /* hand layer; card z owned by fan */
 }
 #game.active .col-main {
   overflow: hidden !important; /* stage still clips; hand can sit on board edge */
@@ -2889,7 +2889,8 @@ html.is-desktop, html.is-desktop body {
 
 #game.active .my-hand .card.playable {
   overflow: visible !important;
-  z-index: 4 !important;
+  /* z-index owned by layoutHandFan (center-peak); do not flatten all playables */
+  z-index: auto;
 }
 #game.active .my-hand .card.playable .card-face {
   position: relative !important;
@@ -2953,4 +2954,192 @@ html.is-desktop, html.is-desktop body {
 }
 #game.active #oppBoard .minion {
   cursor: default;
+}
+
+
+/* ===== v0.027 P0 FINAL — Chrome/Pages battle acceptance ===== */
+
+/* Bug5: force yellow burn glow visible (kill every prior display:none !important) */
+@keyframes playGlowBurn {
+  0%, 100% {
+    opacity: .72;
+    filter: brightness(.92) saturate(1.05);
+    box-shadow:
+      0 0 0 2px rgba(255, 232, 150, .95),
+      0 0 8px 2px rgba(255, 200, 70, .75),
+      0 0 18px 6px rgba(255, 170, 40, .45),
+      0 0 32px 10px rgba(255, 140, 20, .22),
+      inset 0 0 10px rgba(255, 245, 200, .28);
+  }
+  40% {
+    opacity: 1;
+    filter: brightness(1.2) saturate(1.25);
+    box-shadow:
+      0 0 0 2px rgba(255, 245, 190, 1),
+      0 0 14px 4px rgba(255, 210, 80, .95),
+      0 0 28px 10px rgba(255, 180, 40, .65),
+      0 0 44px 16px rgba(255, 150, 20, .32),
+      inset 0 0 14px rgba(255, 250, 210, .42);
+  }
+}
+#game.active .my-hand .card.playable {
+  overflow: visible !important;
+  z-index: auto !important; /* fan owns stacking */
+}
+#game.active .my-hand .card.playable > .play-glow {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: absolute !important;
+  inset: -3px !important;
+  width: auto !important;
+  height: auto !important;
+  border: none !important;
+  border-radius: 12px 12px 20px 20px !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  background: transparent !important;
+  animation: playGlowBurn 1.05s ease-in-out infinite !important;
+}
+#game.active .my-hand { overflow: visible !important; }
+
+/* Bug3: never stretch board chrome with dropGlow / drop-ready */
+#dropGlow,
+#dropGlow.on,
+#game.active #dropGlow {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+#game.active.drop-ready .board,
+#game.active.drop-ready .board.opp,
+#game.active.drop-ready #oppBoard {
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+  transform: none !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important; /* locked layout — no opp vertical jump */
+}
+#game.active.drop-ready #myBoard,
+#game.active #myBoard.drop-glow {
+  /* subtle inset only — never full-stage stretch */
+  box-shadow: inset 0 0 0 2px rgba(255, 224, 140, .55) !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+#game.active .board.is-inserting {
+  /* transforms on slots only — board box itself stays put */
+  box-shadow: none !important;
+  border: none !important;
+}
+#game.active #oppBoard,
+#game.active .board.opp {
+  transition: none !important;
+}
+
+/* Bug4: Chrome soft-edge — dual mask-composite can blank strips in Chrome.
+   Use a single radial mask (no composite). Force .show opacity. */
+#spellFx {
+  display: none;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  pointer-events: none !important;
+}
+#spellFx.on { display: block !important; }
+#spellFx .fx-card {
+  position: absolute !important;
+  left: 50% !important;
+  top: 18% !important;
+  width: min(260px, 34vh) !important;
+  transform: translate(-50%, 0) scale(.86) !important;
+  opacity: 0 !important;
+  z-index: 20 !important;
+  transition: transform .28s cubic-bezier(.2,1.2,.3,1), opacity .24s ease !important;
+  filter: drop-shadow(0 18px 28px rgba(0,0,0,.55)) !important;
+}
+#spellFx .fx-card.in {
+  opacity: 1 !important;
+  transform: translate(-50%, 0) scale(1) !important;
+}
+#spellFx .fx-card.out {
+  opacity: 0 !important;
+  transform: translate(-50%, -12px) scale(.9) !important;
+}
+#spellFx .fx-card img { width: 100% !important; height: auto !important; display: block !important; }
+#spellFx .fx-stage { position: absolute !important; inset: 0 !important; z-index: 10 !important; }
+#spellFx .fx-stage .fx-strip,
+#spellFx .fx-stage .fx-asset {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: min(78vmin, 600px) !important;
+  height: min(78vmin, 600px) !important;
+  transform: translate(-50%, -50%) !important;
+  overflow: hidden !important;
+  z-index: 12 !important;
+  background: transparent !important;
+  filter: drop-shadow(0 0 18px rgba(255,100,20,.55)) !important;
+  opacity: 0;
+  transition: opacity .28s ease;
+  /* Chrome-safe single mask — NO mask-composite */
+  -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 42%, rgba(0,0,0,.85) 62%, transparent 82%);
+  mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 42%, rgba(0,0,0,.85) 62%, transparent 82%);
+  -webkit-mask-composite: unset;
+  mask-composite: unset;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+#spellFx .fx-stage .fx-strip.show,
+#spellFx .fx-stage .fx-asset.show {
+  opacity: 1 !important;
+}
+#spellFx .fx-stage .fx-strip.hide,
+#spellFx .fx-stage .fx-asset.hide {
+  opacity: 0 !important;
+}
+#spellFx .fx-stage .fx-strip img {
+  height: 100% !important;
+  width: auto !important;
+  max-width: none !important;
+  display: block !important;
+}
+
+/* Bug2: peek must never outlive turn */
+#cardPeek { pointer-events: none !important; }
+
+
+/* ===== v0.027 P0+ LOUD playable burn (must win in Chrome) ===== */
+#game.active .my-hand .card.playable {
+  overflow: visible !important;
+}
+#game.active .my-hand .card.playable > .play-glow {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: absolute !important;
+  inset: -4px !important;
+  border-radius: 14px 14px 22px 22px !important;
+  border: 3px solid rgba(255, 220, 90, 0.95) !important;
+  background: transparent !important;
+  pointer-events: none !important;
+  z-index: 8 !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 180, 40, 0.9),
+    0 0 14px 4px rgba(255, 200, 60, 0.95),
+    0 0 28px 10px rgba(255, 150, 20, 0.7),
+    0 0 48px 16px rgba(255, 120, 0, 0.45),
+    inset 0 0 16px rgba(255, 245, 180, 0.45) !important;
+  animation: playGlowBurn 0.9s ease-in-out infinite !important;
+  filter: brightness(1.15) saturate(1.3) !important;
+}
+#game.active .my-hand .card.playable .card-face {
+  box-shadow: none !important;
+  filter: none !important;
 }

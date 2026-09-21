@@ -68,7 +68,10 @@ const SpellFx = (() => {
         img.style.display = "block";
         img.style.willChange = "transform";
         // fade in
-        requestAnimationFrame(() => wrap.classList.add("show"));
+        requestAnimationFrame(() => {
+          wrap.classList.add("show");
+          wrap.style.opacity = "1"; // Chrome+Pages: beat soft-mask opacity:0 races
+        });
         const tick = () => {
           img.style.transform = "translateX(" + (-i * box) + "px)";
           i += 1;
@@ -142,6 +145,7 @@ const SpellFx = (() => {
 
     try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (e) {}
     if (meta.sfxHint === "coin_flip") { try { Sfx.playCoin && Sfx.playCoin(); } catch (e) {} }
+    // Card showcase already handled by play(); keep fxCard faded during strips
     const fxCard = document.getElementById("fxCard");
     if (fxCard) { fxCard.classList.add("out"); fxCard.style.opacity = "0"; }
     const lab = document.getElementById("fxName");
@@ -535,59 +539,86 @@ const SpellFx = (() => {
       const kind = spellKind(card);
       const elem = elemOf(card);
       const low = lowSpec();
-      if (stage) { stage.innerHTML = ""; stage.dataset.elem = elem; stage.dataset.kind = kind; }
-      layer.classList.add("on");
-      layer.dataset.elem = elem;
-      layer.dataset.kind = kind;
-      const veil = layer.querySelector(".fx-veil");
-      if (veil) {
-        veil.style.setProperty("background", "transparent", "important");
-      }
-      // Never block VFX on card-face compose (hand queue can stall on mobile).
-      paintCard("", card.name || "");
-      resolveFace(card).then(src => { if (src) paintCard(src, card.name || ""); }).catch(() => {});
+      try {
+        if (stage) { stage.innerHTML = ""; stage.dataset.elem = elem; stage.dataset.kind = kind; }
+        layer.classList.add("on");
+        layer.dataset.elem = elem;
+        layer.dataset.kind = kind;
+        const veil = layer.querySelector(".fx-veil");
+        if (veil) veil.style.setProperty("background", "transparent", "important");
 
-      const usedPack = await playAssetPack(card, layer, stage);
-      if (usedPack) {
-        if (fxCard) fxCard.classList.add("out");
-        layer.classList.remove("on");
-        if (stage) stage.innerHTML = "";
-        if (fxCard) { fxCard.innerHTML = ""; fxCard.classList.remove("in", "out"); }
-        const lab = document.getElementById("fxName");
-        if (lab) lab.textContent = "";
-        resolve();
-        return;
-      }
+        let faceSrc = "";
+        try {
+          faceSrc = await Promise.race([
+            resolveFace(card),
+            new Promise(r => setTimeout(() => r(""), 300))
+          ]);
+        } catch (e) { faceSrc = ""; }
+        paintCard(faceSrc || "", card.name || "");
+        if (fxCard) {
+          fxCard.classList.remove("out");
+          fxCard.style.opacity = "";
+          fxCard.classList.add("in");
+        }
+        await new Promise(r => setTimeout(r, 650));
 
-      try { Sfx.playCardDrop(); } catch (e) {}
+        if (fxCard) {
+          fxCard.classList.add("out");
+          await new Promise(r => setTimeout(r, 220));
+          fxCard.style.opacity = "0";
+        }
 
-      setTimeout(() => { if (fxCard) fxCard.classList.add("out"); }, T.show);
-      let handle = null;
-      setTimeout(() => {
-        if (low) cssFallback(stage, elem, kind);
-        else {
-          handle = burst(elem, kind, false);
-          if (kind === "aoe" || kind === "kill" || kind === "earthquake") {
-            cssFallback(stage, elem, kind);
+        const usedPack = await playAssetPack(card, layer, stage);
+        if (!usedPack) {
+          try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (e) {}
+          let handle = null;
+          if (low) cssFallback(stage, elem, kind);
+          else {
+            handle = burst(elem, kind, false);
+            if (kind === "aoe" || kind === "kill" || kind === "earthquake") {
+              cssFallback(stage, elem, kind);
+            }
           }
+          if ((kind === "aoe" || kind === "earthquake" || elem === "earth") && game) {
+            game.classList.add("quake");
+          }
+          try { Sfx.spell && Sfx.spell(kind); } catch (e) {}
+          await new Promise(r => setTimeout(r, Math.max(900, T.vfx)));
+          if (handle) handle.stop();
+          if (game) game.classList.remove("quake");
         }
-        if ((kind === "aoe" || kind === "earthquake" || elem === "earth") && game) {
-          game.classList.add("quake");
-        }
-        try { Sfx.spell && Sfx.spell(kind); } catch (e) {}
-      }, T.vfxAt);
-      setTimeout(() => {
-        if (handle) handle.stop();
-        layer.classList.remove("on");
-        if (game) game.classList.remove("quake");
-        if (stage) stage.innerHTML = "";
-        if (fxCard) { fxCard.innerHTML = ""; fxCard.classList.remove("in", "out"); }
-        const lab = document.getElementById("fxName");
-        if (lab) lab.textContent = "";
+      } finally {
+        cleanupFx(layer, stage, fxCard);
         resolve();
-      }, T.total);
+      }
     });
   }
 
-  return { play, T, elemOf, spellKind };
+  function cleanupFx(layer, stage, fxCard) {
+    if (layer) layer.classList.remove("on");
+    if (stage) stage.innerHTML = "";
+    if (fxCard) {
+      fxCard.innerHTML = "";
+      fxCard.classList.remove("in", "out");
+      fxCard.style.opacity = "";
+    }
+    const lab = document.getElementById("fxName");
+    if (lab) lab.textContent = "";
+  }
+
+  function clear() {
+    const layer = document.getElementById("spellFx");
+    const stage = document.getElementById("fxStage");
+    const fxCard = document.getElementById("fxCard");
+    cleanupFx(layer, stage, fxCard);
+    if (layer) {
+      layer.classList.remove("on", "pack-play");
+      layer.style.display = "none";
+      // restore stylesheet control next frame
+      requestAnimationFrame(() => { try { layer.style.display = ""; } catch (e) {} });
+    }
+  }
+
+  return { play, clear, T, elemOf, spellKind };
 })();
+window.SpellFx = SpellFx;

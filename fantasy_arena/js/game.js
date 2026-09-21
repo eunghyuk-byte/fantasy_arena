@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.026";
+const GAME_VERSION = "0.027";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -182,6 +182,8 @@ function startGame(vsAI) {
 }
 
 function beginTurn(p) {
+  try { hidePeek(); } catch (e) {}
+  try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   state.acting = p;
   p.maxMana = Math.min(10, p.maxMana + 1);
   p.mana = p.maxMana;
@@ -238,6 +240,8 @@ async function runAutoCombat(p) {
   ui.battling = false;
 }
 function endTurn() {
+  try { hidePeek(); } catch (e) {}
+  try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   if (state.over || ui.battling || state.busy) return;
   const p = current();
   if (p.isAI) return;
@@ -247,6 +251,8 @@ function endTurn() {
 
 function passTurn() {
   if (state.over) return;
+  try { hidePeek(); } catch (e) {}
+  try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   state.turn = state.turn === 1 ? 2 : 1;
   if (state.turn === 1) state.turnCount++;
   beginTurn(current());
@@ -427,11 +433,11 @@ async function runSpellCast(p, card, target) {
 }
 
 function playSpellFx(card) {
-  if (window.SpellFx && SpellFx.play) return SpellFx.play(card);
+  if (typeof SpellFx !== "undefined" && SpellFx.play) return SpellFx.play(card);
   return Promise.resolve();
 }
 function buildSpellFx(stage, kind, card) {
-  if (window.SpellFx && stage) {
+  if (typeof SpellFx !== "undefined" && stage) {
     const elem = SpellFx.elemOf(card);
     stage.dataset.elem = elem;
   }
@@ -866,6 +872,11 @@ function hidePeek() {
 }
 function showPeek(el) {
   if (_drag || !el) return;
+  // Never showcase during AI turn / busy — leftover center card after endTurn
+  try {
+    if (state && (state.busy || state.over)) return;
+    if (typeof current === "function" && current() && current().isAI) return;
+  } catch (e) {}
   const img = el.querySelector("img.card-face, img");
   if (!img || !img.src) return;
   hidePeek();
@@ -878,26 +889,10 @@ function showPeek(el) {
 }
 
 function placeDropGlow(on, x, y) {
+  // Full-board yellow chrome (#dropGlow) stretches off the parchment — never show it.
   const glow = document.getElementById("dropGlow");
-  const game = document.getElementById("game");
-  if (!glow || !game) return;
-  if (!on) { glow.classList.remove("on"); return; }
-  const mine = document.getElementById("myBoard");
-  if (!mine) { glow.classList.remove("on"); return; }
-  const gr = game.getBoundingClientRect();
-  const b = mine.getBoundingClientRect();
-  const s = (window.StageSettings && StageSettings.stageScale)
-    ? StageSettings.stageScale()
-    : (parseFloat((document.getElementById("app") || {}).dataset && document.getElementById("app").dataset.stageScale || "1") || 1);
-  const top = b.top - 8;
-  const bottom = b.bottom + 8;
-  const left = b.left - 8;
-  const right = b.right + 8;
-  glow.style.top = ((top - gr.top) / s) + "px";
-  glow.style.left = ((left - gr.left) / s) + "px";
-  glow.style.width = ((right - left) / s) + "px";
-  glow.style.height = ((bottom - top) / s) + "px";
-  glow.classList.add("on");
+  if (glow) { glow.classList.remove("on"); glow.style.cssText = "display:none!important"; }
+  setDropGlow(!!on);
 }
 
 let _drag = null;
@@ -1043,10 +1038,13 @@ function overBoard(x, y) {
   return true;
 }
 function setDropGlow(on) {
-  const g = document.getElementById("game");
-  if (g) g.classList.toggle("drop-ready", !!on);
-  const b = document.getElementById("myBoard");
-  if (b) b.classList.toggle("drop-glow", !!on);
+  const game = document.getElementById("game");
+  if (game) game.classList.toggle("drop-ready", !!on);
+  const mine = document.getElementById("myBoard");
+  if (mine) mine.classList.toggle("drop-glow", !!on);
+  // Never mark opp board — prevents vertical jump / shared chrome stretch
+  const opp = document.getElementById("oppBoard");
+  if (opp) opp.classList.remove("drop-glow");
 }
 /** Insert index among own board minions from pointer X (Hearthstone-style). */
 function insertIndexFromPoint(x, y, excludeUid) {
