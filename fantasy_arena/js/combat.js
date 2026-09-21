@@ -216,6 +216,7 @@ function clearDrag() {
   }
   if (typeof placeDropGlow === "function") placeDropGlow(false);
   if (typeof clearEquipHover === "function") clearEquipHover();
+  if (typeof clearInsertPreview === "function") clearInsertPreview();
 }
 function hideScreens() {
   clearDrag();

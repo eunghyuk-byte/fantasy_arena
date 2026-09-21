@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.025";
+const GAME_VERSION = "0.026";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1048,19 +1048,76 @@ function setDropGlow(on) {
   const b = document.getElementById("myBoard");
   if (b) b.classList.toggle("drop-glow", !!on);
 }
-function slotIndexFromPoint(x, y) {
+/** Insert index among own board minions from pointer X (Hearthstone-style). */
+function insertIndexFromPoint(x, y, excludeUid) {
   const board = document.getElementById("myBoard");
   if (!board) return 0;
-  const slots = [...board.querySelectorAll(".slot")];
-  if (!slots.length) return 0;
-  let best = 0, bestD = 1e9;
-  slots.forEach((sl, i) => {
-    const r = sl.getBoundingClientRect();
-    if (r.width < 2) return;
-    const d = Math.abs(x - (r.left + r.width / 2));
-    if (d < bestD) { bestD = d; best = i; }
+  const mins = [...board.querySelectorAll(".slot.filled .minion")].filter(el => {
+    if (excludeUid && el.getAttribute("data-uid") === excludeUid) return false;
+    if (el.closest(".slot") && el.closest(".slot").classList.contains("board-drag-source")) return false;
+    return true;
   });
-  return Math.max(0, Math.min(5, best));
+  if (!mins.length) return 0;
+  for (let i = 0; i < mins.length; i++) {
+    const r = mins[i].getBoundingClientRect();
+    if (x < r.left + r.width / 2) return i;
+  }
+  return mins.length;
+}
+/** @deprecated alias — keep call sites working */
+function slotIndexFromPoint(x, y) {
+  return insertIndexFromPoint(x, y, null);
+}
+
+function clearInsertPreview() {
+  const board = document.getElementById("myBoard");
+  if (!board) return;
+  board.classList.remove("is-inserting");
+  board.querySelectorAll(".slot").forEach(sl => {
+    sl.classList.remove("shift-right", "shift-left", "board-drag-source", "insert-gap-after");
+    sl.style.removeProperty("transform");
+    sl.style.removeProperty("margin-left");
+    sl.style.removeProperty("margin-right");
+  });
+  board.querySelectorAll(".board-insert-spacer").forEach(el => el.remove());
+}
+
+function updateInsertPreview(insertIdx, excludeUid) {
+  const board = document.getElementById("myBoard");
+  if (!board) return;
+  clearInsertPreview();
+  if (insertIdx == null || insertIdx < 0) return;
+  board.classList.add("is-inserting");
+  const filled = [...board.querySelectorAll(".slot.filled")];
+  const slotW = parseFloat(getComputedStyle(board).getPropertyValue("--slot-w")) || 112;
+  const gap = parseFloat(getComputedStyle(board).gap) || 10;
+  const shift = Math.round(slotW * 0.5 + gap * 0.5);
+  let logical = 0;
+  filled.forEach(sl => {
+    const minion = sl.querySelector(".minion");
+    const uid = minion && minion.getAttribute("data-uid");
+    if (excludeUid && uid === excludeUid) {
+      sl.classList.add("board-drag-source");
+      return;
+    }
+    if (logical >= insertIdx) {
+      sl.classList.add("shift-right");
+      sl.style.setProperty("transform", "translateX(" + shift + "px)", "important");
+    }
+    logical++;
+  });
+}
+
+function reorderOwnBoard(fromUid, toIdx) {
+  const me = meView().me;
+  if (!me || !me.board) return false;
+  const fromIdx = me.board.findIndex(m => m.uid === fromUid);
+  if (fromIdx < 0) return false;
+  // toIdx = insert index among remaining units after removal (0..n-1)
+  const [m] = me.board.splice(fromIdx, 1);
+  const dest = Math.max(0, Math.min(me.board.length, toIdx));
+  me.board.splice(dest, 0, m);
+  return fromIdx !== dest;
 }
 function bindHandCard(el, card) {
   el.onpointerenter = () => showPeek(el);
@@ -1081,7 +1138,7 @@ function bindHandCard(el, card) {
     ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
     document.body.appendChild(ghost);
     el.classList.add("dragging");
-    _drag = { card, el, ghost, pid: ev.pointerId, x0: ev.clientX, y0: ev.clientY };
+    _drag = { kind: "hand", card, el, ghost, pid: ev.pointerId, x0: ev.clientX, y0: ev.clientY };
     const move = (e) => {
       if (!_drag) return;
       _drag.ghost.style.left = e.clientX + "px";
@@ -1099,7 +1156,16 @@ function bindHandCard(el, card) {
         placeDropGlow(overPlayfield(e.clientX, e.clientY) && canDropCard(cardRef), e.clientX, e.clientY);
       } else {
         clearEquipHover();
-        placeDropGlow(overBoard(e.clientX, e.clientY) && canDropCard(cardRef), e.clientX, e.clientY);
+        const on = overBoard(e.clientX, e.clientY) && canDropCard(cardRef);
+        placeDropGlow(on, e.clientX, e.clientY);
+        if (on && cardRef && cardRef.type === "minion") {
+          const idx = insertIndexFromPoint(e.clientX, e.clientY, null);
+          window._dropSlot = idx;
+          updateInsertPreview(idx, null);
+        } else {
+          window._dropSlot = null;
+          clearInsertPreview();
+        }
       }
     };
     const up = (e) => {
@@ -1149,12 +1215,96 @@ function bindHandCard(el, card) {
         return;
       }
       ok = overBoard(e.clientX, e.clientY) && canDropCard(cardRef);
-      if (ok) window._dropSlot = slotIndexFromPoint(e.clientX, e.clientY);
-      else window._dropSlot = null;
+      if (ok && cardRef && cardRef.type === "minion") {
+        window._dropSlot = insertIndexFromPoint(e.clientX, e.clientY, null);
+      } else {
+        window._dropSlot = null;
+      }
+      clearInsertPreview();
       clearDrag();
       if (ok) {
         try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
         onHandClick(cardRef);
+      }
+    };
+    window.addEventListener("pointermove", move, true);
+    window.addEventListener("pointerup", up, true);
+    window.addEventListener("pointercancel", up, true);
+    window.addEventListener("mousemove", move, true);
+    window.addEventListener("mouseup", up, true);
+  };
+  el.onpointerdown = startDrag;
+  el.onmousedown = startDrag;
+}
+
+function canReorderBoard() {
+  if (!state || state.busy || state.over) return false;
+  const me = meView().me;
+  if (!me || me.isAI) return false;
+  if (current() !== me) return false;
+  return true;
+}
+
+function bindBoardMinion(el, minion) {
+  if (!el || !minion) return;
+  el.onpointerenter = () => { if (!_drag) showPeek(el); };
+  el.onpointerleave = hidePeek;
+  const startDrag = (ev) => {
+    hidePeek();
+    if (ev.button != null && ev.button !== 0) return;
+    if (!canReorderBoard()) return;
+    if (_drag) return;
+    if (ui.targeting || ui.attacker) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    clearDrag();
+    clearInsertPreview();
+    try { if (ev.pointerId != null && el.setPointerCapture) el.setPointerCapture(ev.pointerId); } catch (err) {}
+    const r = el.getBoundingClientRect();
+    const ghost = el.cloneNode(true);
+    ghost.classList.add("drag-ghost");
+    ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
+    document.body.appendChild(ghost);
+    el.classList.add("dragging");
+    const slot = el.closest(".slot");
+    if (slot) slot.classList.add("board-drag-source");
+    _drag = { kind: "board", minion, el, ghost, pid: ev.pointerId, x0: ev.clientX, y0: ev.clientY };
+    const move = (e) => {
+      if (!_drag || _drag.kind !== "board") return;
+      _drag.ghost.style.left = e.clientX + "px";
+      _drag.ghost.style.top = e.clientY + "px";
+      if (overBoard(e.clientX, e.clientY)) {
+        placeDropGlow(true, e.clientX, e.clientY);
+        const idx = insertIndexFromPoint(e.clientX, e.clientY, minion.uid);
+        window._dropSlot = idx;
+        updateInsertPreview(idx, minion.uid);
+      } else {
+        placeDropGlow(false);
+        window._dropSlot = null;
+        clearInsertPreview();
+        if (slot) slot.classList.add("board-drag-source");
+      }
+    };
+    const up = (e) => {
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", up, true);
+      window.removeEventListener("mousemove", move, true);
+      window.removeEventListener("mouseup", up, true);
+      try { if (ev.pointerId != null && el.releasePointerCapture) el.releasePointerCapture(ev.pointerId); } catch (err) {}
+      if (!_drag || _drag.kind !== "board") return;
+      const ok = overBoard(e.clientX, e.clientY);
+      const idx = ok ? insertIndexFromPoint(e.clientX, e.clientY, minion.uid) : null;
+      clearInsertPreview();
+      clearDrag();
+      if (ok && idx != null) {
+        const changed = reorderOwnBoard(minion.uid, idx);
+        if (changed) {
+          try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
+        }
+        render();
+      } else {
+        render();
       }
     };
     window.addEventListener("pointermove", move, true);

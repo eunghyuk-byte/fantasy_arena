@@ -74,7 +74,10 @@ function render() {
     mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.mana && (c.type !== "minion" || me.board.length < 5))).join("");
   }
   document.getElementById("oppBoard").innerHTML = renderLane(opp, "opp");
-  document.getElementById("myBoard").innerHTML = renderLane(me, "me");
+  const boardDragging = dragging && _drag && _drag.kind === "board";
+  if (!boardDragging) {
+    document.getElementById("myBoard").innerHTML = renderLane(me, "me");
+  }
   document.getElementById("oppBoard").classList.toggle("empty", !opp.board.length);
   document.getElementById("myBoard").classList.toggle("empty", !me.board.length);
   layoutBoardSlots();
@@ -108,15 +111,22 @@ function render() {
       bindHandCard(el, me.hand[i]);
     });
   }
-  document.querySelectorAll("#myBoard .minion").forEach(el => {
-    el.onclick = () => onMinionClick(me, findOn(me, el.dataset.uid), "me");
-    el.onpointerenter = () => showPeek(el);
-    el.onpointerleave = hidePeek;
-  });
+  if (!(typeof _drag !== "undefined" && _drag && _drag.kind === "board")) {
+    document.querySelectorAll("#myBoard .minion").forEach(el => {
+      const unit = findOn(me, el.dataset.uid);
+      el.onclick = () => onMinionClick(me, unit, "me");
+      if (typeof bindBoardMinion === "function" && unit) bindBoardMinion(el, unit);
+      else {
+        el.onpointerenter = () => showPeek(el);
+        el.onpointerleave = hidePeek;
+      }
+    });
+  }
   document.querySelectorAll("#oppBoard .minion").forEach(el => {
     el.onclick = () => onMinionClick(opp, findOn(opp, el.dataset.uid), "opp");
     el.onpointerenter = () => showPeek(el);
     el.onpointerleave = hidePeek;
+    // Never bind reorder on enemy board
   });
 
   let hint = "";

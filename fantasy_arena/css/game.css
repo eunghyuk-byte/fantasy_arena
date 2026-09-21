@@ -2925,3 +2925,32 @@ html.is-desktop, html.is-desktop body {
   content: none !important;
   display: none !important;
 }
+
+
+/* ===== v0.026 Hearthstone-style board insert / reorder preview ===== */
+/* Locked layout (padding-left 17%/right 12%, hand -72px, layoutBoardAlign) untouched */
+#game.active .board.is-inserting > .slot.filled {
+  transition: transform 0.12s ease !important;
+  will-change: transform;
+}
+#game.active .board.is-inserting > .slot.shift-right {
+  /* transform set inline with !important from JS */
+}
+#game.active .board.is-inserting > .slot.board-drag-source,
+#game.active .board > .slot.board-drag-source {
+  opacity: 0.3 !important;
+}
+#game.active .board.is-inserting > .slot.board-drag-source .minion,
+#game.active .board > .slot.board-drag-source .minion {
+  opacity: 0.35 !important;
+}
+#game.active .board .minion.dragging {
+  opacity: 0.25 !important;
+  cursor: grabbing !important;
+}
+#game.active #myBoard .minion {
+  cursor: grab;
+}
+#game.active #oppBoard .minion {
+  cursor: default;
+}
