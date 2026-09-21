@@ -876,6 +876,10 @@
   .help-box h2 { color: var(--gold); margin: 0 0 10px; font-size: 24px; }
   .help-box h3 { color: #f3e2b0; margin: 16px 0 8px; font-size: 18px; }
   .help-box p { line-height: 1.65; font-size: 15px; margin: 0 0 10px; }
+  .help-list { margin: 0 0 10px; padding-left: 1.2em; line-height: 1.65; font-size: 15px; }
+  .help-list li { margin: 0 0 6px; }
+  .help-list b { color: #f3e2b0; }
+  .help-note { color: #cbb58a; font-size: 14px; }
   .race-item { padding: 8px 0; border-bottom: 1px solid #3a2a18; }
   .race-item b { color: var(--gold); font-size: 16px; }
   .race-item span { color: #cbb58a; font-size: 13px; margin-left: 8px; }

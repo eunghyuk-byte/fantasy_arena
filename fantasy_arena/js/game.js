@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.038";
+const GAME_VERSION = "0.039";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1625,16 +1625,24 @@ document.getElementById("btnPlaySaved").onclick = () => {
 
 
 
+const TRIBE_SPEC = {
+  earth: "특화: 체력. 체 코인 링크.",
+  fire: "특화: 공격. 기본 스탯이 높고 공 −코인이 많음.",
+  water: "특화: 방어. 방 코인 링크.",
+  wind: "특화: 안정. 코인 N≤2.",
+  light: "특화: 코인(전부 +).",
+  dark: "특화: 승부. 코인 N 3~5 맞교환."
+};
 const RACE_LORE = (typeof TRIBES !== "undefined" ? TRIBES : []).map(h => [
   h.name + " (" + h.en + ")",
-  (h.powerName ? ("영웅 능력: " + h.powerName + " — " + (h.powerText || "")) : "오픈 종족")
+  TRIBE_SPEC[h.id] || "오픈 속성"
 ]);
 
 function openHelp() {
   const box = document.getElementById("raceHelpList");
   const lore = (typeof RACE_LORE !== "undefined" && Array.isArray(RACE_LORE)) ? RACE_LORE : [];
   if (box && !box.dataset.ready) {
-    box.innerHTML = "<h3>종족 도감 (" + lore.length + ")</h3>" + lore.map(r =>
+    box.innerHTML = "<h3>속성 (" + lore.length + ")</h3>" + lore.map(r =>
       '<div class="race-item"><b>' + r[0] + '</b><p>' + r[1] + '</p></div>'
     ).join("");
     box.dataset.ready = "1";
