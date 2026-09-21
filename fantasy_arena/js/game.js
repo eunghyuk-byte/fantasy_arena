@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.103";
+const GAME_VERSION = "0.104";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -676,7 +676,7 @@ function applyFx(p, fx, target) {
         if (fx.atk != null) m.atk = fx.atk;
         if (fx.def != null) m.def = fx.def;
         if (fx.hp != null) { m.hp = fx.hp; m.maxHp = fx.hp; }
-        if (fx.coinZero) { m.atkC = 0; m.defC = 0; m.hpC = 0; }
+        if (fx.coinZero) { m.atkC = 0; m.defC = 0; m.hpC = 0; if (typeof log === "function") log(`${m.name}의 코인이 사라졌다`); }
       }
     }
   } else if (fx.type === "copy_own") {

@@ -283,7 +283,7 @@ const CARDS = [
   { id:"ds5", tribe:"dark", name:"블랙홀", cost:7, type:"spell", rarity:"common", text:"아군·적 모든 유닛 파괴, 아군 최대마나 1 감소", spell:{ type:"wipe_all", maxMana:-1 } },
   { id:"ds6", tribe:"dark", name:"해골던지기", cost:3, type:"spell", rarity:"common", text:"공격력 4 이하 적 하나 파괴", spell:{ type:"kill_if", maxAtk:4 } },
   { id:"ds7", tribe:"dark", name:"전염병", cost:4, type:"spell", rarity:"common", text:"4코 이상 모든 유닛 공=1 체=1", spell:{ type:"plague", minCost:4 } },
-  { id:"ds8", tribe:"dark", name:"13시의저주", cost:1, type:"spell", rarity:"common", text:"아군 유닛 강탈 부여", spell:{ type:"grant_kw", ability:"강탈", kw:"steal" } },
+  { id:"ds8", tribe:"dark", name:"13시의저주", cost:1, type:"spell", rarity:"common", text:"유닛 하나 코인 전부 제거", spell:{ type:"set_one", coinZero:true, target:"any_minion" } },
   { id:"fs8", tribe:"fire", name:"메테오", cost:7, type:"spell", rarity:"common", text:"적 전체 피해 4, 코인-1", spell:{ type:"aoe_pack", enemy:4, coin:-1 } }
 ];
 const SPELL_SCHOOL = { fire:"염술", wind:"풍술", water:"물술", light:"성술", dark:"암술", earth:"지술" };
@@ -790,7 +790,7 @@ const CARD_LORE = {
   "ds5": "블랙홀은 모든 이름을 삼킨다. 남은 것은 공허와, 한 단계 낮아진 숨의 한계뿐이다.",
   "ds6": "해골던지기는 약한 자의 목을 먼저 고른다. 뼈가 날아가 꽂히면, 작은 숨이 먼지처럼 흩어진다.",
   "ds7": "전염병은 무거운 자들부터 깎아 내린다. 큰 몸집일수록 빨리 마르고, 전장이 공동처럼 고요해진다.",
-  "ds8": "13시의저주는 아군의 손에 도둑질을 맡긴다. 시계가 어긋난 시각, 빼앗은 숨이 그림자 속으로 흘러든다.",
+  "ds8": "13시의저주는 코인을 흔적 없이 지운다. 저주가 닿은 유닛은 행운을 벗겨낸 듯, 모든 코인이 사라진다.",
   "ei1": "골렘의심장은 돌로 된 고동이다. 가슴에 안으면 숨이 두꺼워지고, 보호의 결이 피부처럼 돋는다.",
   "ei2": "돌도끼는 투박해도 정직하다. 날이 바위를 닮아, 맞힌 자리의 결을 그대로 가른다.",
   "ei3": "바실리스크눈은 주머니 속의 침묵이다. 시선이 열리는 순간, 근육이 돌처럼 숨을 멈춘다.",
