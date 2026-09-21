@@ -228,7 +228,7 @@ const CARDS = [
   { id:"ei1", tribe:"earth", name:"골렘의심장", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, ability:"보호", text:"보호 부여" },
   { id:"ei2", tribe:"earth", name:"돌도끼", cost:2, type:"item", rarity:"common", atk:3, def:-1, hp:0, atkSkill:2, text:"관통공격 부여" },
   { id:"ei3", tribe:"earth", name:"바실리스크눈", cost:3, type:"item", rarity:"common", atk:1, def:0, hp:1, atkSkill:8, text:"석화공격 부여" },
-  { id:"ei4", tribe:"earth", name:"노름바위", cost:4, type:"item", rarity:"common", atk:0, def:0, hp:0, text:"이 유닛 코인 수만큼 공+ · 체+" },
+  { id:"ei4", tribe:"earth", name:"노름바위", cost:4, type:"item", rarity:"common", atk:0, def:0, hp:0, text:"이 유닛 코인 수만큼 공·체+" },
   { id:"ei5", tribe:"earth", name:"모래시계", cost:5, type:"item", rarity:"uncommon", atk:1, def:0, hp:1, ability:"환생", text:"환생 부여" },
   { id:"ei6", tribe:"earth", name:"대지의팔찌", cost:7, type:"item", rarity:"rare", atk:2, def:2, hp:0, atkSkill:3, text:"돌진공격 부여" },
   { id:"fi1", tribe:"fire", name:"불꽃검", cost:1, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:7, text:"약화공격 부여" },
