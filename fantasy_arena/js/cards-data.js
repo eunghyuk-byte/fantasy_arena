@@ -545,6 +545,9 @@ const CARD_ART = {"a1":"assets/img/art/a1.jpg","a2":"assets/img/art/a2.jpg","a3"
     if (!c || !c.id) return;
     if (c.type === "item") CARD_ART[c.id] = "assets/img/art/" + c.id + ".jpg";
   });
+  // Token units: no dedicated art files — remap to similar earth art (deck/board never blank)
+  if (!CARD_ART.e40) CARD_ART.e40 = "assets/img/art/e12.jpg";       // 섬의파편 → 스톤골렘
+  if (!CARD_ART.recruit) CARD_ART.recruit = "assets/img/art/e15.jpg"; // 암석 → 암석창병
 })();
 
 const CARD_MAP = Object.fromEntries((CARDS || []).filter(c => c && c.id).map(c => [c.id, c]));
