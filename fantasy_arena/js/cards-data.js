@@ -198,7 +198,7 @@ const CARDS = [
   { id:"d28", tribe:"dark", name:"암흑자이언트", cost:6, type:"minion", atk:4, def:4, hp:8, atkC:0, defC:0, hpC:2, text:"" },
   { id:"e11", tribe:"earth", name:"숲요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"f28", tribe:"fire", name:"불꽃요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
-  { id:"n22", tribe:"wind", name:"실프", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
+  { id:"n22", tribe:"wind", name:"바람요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"a21", tribe:"water", name:"물의요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"l25", tribe:"light", name:"광휘요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"d19", tribe:"dark", name:"그림자요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
