@@ -1,0 +1,22 @@
+{
+  "id": "fs3",
+  "name": "화염구",
+  "kind": "single",
+  "durationMs": 1800,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "fire_ball",
+  "concept": "거대 파이어볼 응축 후 폭발"
+}
