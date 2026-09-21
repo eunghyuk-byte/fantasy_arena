@@ -395,7 +395,7 @@ const CARD_ART = {"a1":"assets/img/art/a1.jpg","a2":"assets/img/art/a2.jpg","a3"
 
 const CARD_MAP = Object.fromEntries((CARDS || []).filter(c => c && c.id).map(c => [c.id, c]));
 
-// Runtime roster guard — single source must stay 28 non-token minions per tribe
+// Runtime roster guard — id prefix↔tribe, tribes equal count (28 now; may grow later; NOT a hard cap of 28)
 (function assertUnitRoster() {
   if (typeof CARDS === "undefined") return;
   const letterTribe = { a: "water", d: "dark", e: "earth", f: "fire", l: "light", n: "wind" };
@@ -411,9 +411,11 @@ const CARD_MAP = Object.fromEntries((CARDS || []).filter(c => c && c.id).map(c =
     if (expected && c.tribe !== expected) badTribe.push(c.id + ":" + c.tribe + "!=" + expected);
     if (counts[c.tribe] != null) counts[c.tribe]++;
   }
-  const badCounts = tribes.filter(t => counts[t] !== 28);
-  if (badCounts.length || badIds.length || badTribe.length) {
-    console.error("[cards-data] unit roster guard FAILED", { counts, badIds, badTribe });
+  const vals = tribes.map(t => counts[t]);
+  const target = vals[0];
+  const unequal = vals.some(v => v !== target);
+  if (unequal || badIds.length || badTribe.length) {
+    console.error("[cards-data] unit roster guard FAILED", { counts, unequal, badIds, badTribe });
   }
 })();
 
