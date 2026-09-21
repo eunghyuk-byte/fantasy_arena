@@ -2380,8 +2380,8 @@ html.is-desktop, html.is-desktop body {
 #game.active .board.opp,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  padding-left: 14% !important;
-  padding-right: 14% !important; /* leave room visually under HUD overlay */
+  padding-left: 17% !important;
+  padding-right: 12% !important;
   box-sizing: border-box !important;
 }
 #game.active .board.opp {
@@ -2499,4 +2499,17 @@ html.is-desktop, html.is-desktop body {
 }
 #game.active {
   overflow: hidden !important; /* stage still clips overall */
+}
+
+/* ===== P0 hand even lower ===== */
+#game.active .my-hand {
+  padding: 36px 8% 0 !important;
+  margin-bottom: -36px !important;
+  overflow: visible !important;
+  z-index: 8 !important;
+}
+#game.active .my-hand .card,
+#game.active .my-hand .card.playable {
+  height: min(100%, 28cqh) !important;
+  max-height: 28cqh !important;
 }
