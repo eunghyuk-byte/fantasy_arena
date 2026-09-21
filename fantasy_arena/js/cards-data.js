@@ -172,7 +172,7 @@ const CARDS = [
   { id:"d1", tribe:"dark", name:"로그", cost:2, type:"minion", atk:4, def:0, hp:2, atkC:-1, defC:1, hpC:0, text:"" },
   { id:"d2", tribe:"dark", name:"사마의", cost:8, type:"minion", atk:4, def:1, hp:10, atkC:-4, defC:0, hpC:4, rarity:"heroic", atkSkill:9, text:"광역공격" },
   { id:"d3", tribe:"dark", name:"그림자궁수", cost:2, type:"minion", atk:3, def:0, hp:2, atkC:-1, defC:1, hpC:0, atkSkill:2, text:"관통공격" },
-  { id:"d4", tribe:"dark", name:"해골나방", cost:1, type:"minion", atk:1, def:0, hp:1, atkC:-1, defC:0, hpC:1, ability:"환생", text:"환생" },
+  { id:"d4", tribe:"dark", name:"해골나방", cost:1, type:"minion", atk:1, def:1, hp:1, atkC:1, defC:-1, hpC:0, text:"" },
   { id:"d5", tribe:"dark", name:"고스트", cost:2, type:"minion", atk:4, def:0, hp:2, atkC:0, defC:1, hpC:-1, text:"" },
   { id:"d6", tribe:"dark", name:"구울", cost:2, type:"minion", atk:2, def:0, hp:2, atkC:-1, defC:0, hpC:1, ability:"환생", text:"환생" },
   { id:"d7", tribe:"dark", name:"여포", cost:10, type:"minion", atk:9, def:0, hp:12, atkC:-5, defC:0, hpC:5, rarity:"legendary", atkSkill:10, ability:"환생", text:"돌파공격 · 환생" },
