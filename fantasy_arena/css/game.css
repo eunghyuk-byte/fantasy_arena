@@ -2133,3 +2133,18 @@ html.is-desktop, html.is-desktop body {
   object-fit: contain !important;
   object-position: center center !important;
 }
+
+
+/* FACE PENDING — no bare art flash */
+.card-face.face-pending {
+  opacity: 0;
+  background: #1a1008 !important;
+}
+.card-face.face-ready {
+  opacity: 1;
+  transition: opacity .14s ease;
+}
+.pool-item .card,
+.minion {
+  background: #1a1008;
+}

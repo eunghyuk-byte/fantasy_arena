@@ -360,7 +360,7 @@ const _faceWait = new Map();
 const _faceDone = new Map();
 const _composeQ = [];
 let _composeActive = 0;
-const COMPOSE_MAX = 4;
+const COMPOSE_MAX = 6;
 function enqueueCompose(fn) {
   return new Promise((resolve, reject) => {
     const run = () => {
@@ -381,11 +381,21 @@ function faceSrc(c, opts, el) {
   const key = ["v63art", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name].join("|");
   if (_faceDone.has(key)) {
     const src = _faceDone.get(key);
-    if (el && src) el.src = src;
+    if (el && src) {
+      el.src = src;
+      el.classList.remove("face-pending");
+      el.classList.add("face-ready");
+    }
     return Promise.resolve(src);
   }
   if (_faceWait.has(key)) {
-    _faceWait.get(key).then(src => { if (el && src) el.src = src; });
+    _faceWait.get(key).then(src => {
+      if (el && src) {
+        el.src = src;
+        el.classList.remove("face-pending");
+        el.classList.add("face-ready");
+      }
+    });
     return _faceWait.get(key);
   }
   const p = enqueueCompose(() => composeCardFace(c, opts || {})).then(src => {
@@ -398,10 +408,19 @@ function faceSrc(c, opts, el) {
   });
   _faceWait.set(key, p);
   p.then(src => {
-    if (el && src) el.src = src;
-    else if (el && !el.getAttribute("src")) {
-      const fb = (typeof CARD_ART !== "undefined" && CARD_ART[c.id]) ? CARD_ART[c.id] : "";
-      if (fb) el.src = fb;
+    if (!el) return;
+    if (src) {
+      el.src = src;
+      el.classList.remove("face-pending");
+      el.classList.add("face-ready");
+    } else {
+      // Compose failed — tribe SVG stub, never bare CARD_ART (prevents art→frame flash)
+      const fb = (typeof artUrl === "function") ? artUrl(c.id) : "";
+      if (fb) {
+        el.src = fb;
+        el.classList.remove("face-pending");
+        el.classList.add("face-ready");
+      }
     }
   });
   return p;
@@ -409,15 +428,16 @@ function faceSrc(c, opts, el) {
 
 function renderCard(c, playable) {
   const uid = "face_" + Math.random().toString(36).slice(2,8);
-  const placeholder = (typeof CARD_ART !== "undefined" && CARD_ART[c.id])
-    ? CARD_ART[c.id]
-    : (typeof artUrl === "function" ? artUrl(c.id) : "");
+  const cacheKey = ["v63art", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, c.hp, c.name].join("|");
+  const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
   setTimeout(() => {
     const el = document.getElementById(uid);
     if (el) faceSrc(c, {}, el);
   }, 0);
+  const pending = cached ? "" : " face-pending";
+  const srcAttr = cached ? ` src="${cached}"` : "";
   return `<div class="card ${playable ? "playable" : ""}" data-id="${c.id}">
-    <img class="card-face" id="${uid}" alt="${c.name}"${placeholder ? ` src="${placeholder}"` : ""}>
+    <img class="card-face${pending}${cached ? " face-ready" : ""}" id="${uid}" alt="${c.name}"${srcAttr}>
     ${playable ? '<span class="play-glow" aria-hidden="true"></span>' : ""}
   </div>`;
 }
@@ -482,9 +502,8 @@ function renderMinion(m, side) {
     targetable ? "can-target" : "",
   ].join(" ");
   const uid = "mface_" + m.uid;
-  const placeholder = (typeof CARD_ART !== "undefined" && CARD_ART[m.id])
-    ? CARD_ART[m.id]
-    : (typeof artUrl === "function" ? artUrl(m.id) : "");
+  const cacheKey = ["v63art", m.id, m.cost, m.atk, m.def, m.atkC, m.defC, m.hpC, m.hp, m.name].join("|");
+  const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
   setTimeout(() => {
     const el = document.getElementById(uid);
     if (el) faceSrc(m, { hp: m.hp }, el);
@@ -493,8 +512,10 @@ function renderMinion(m, side) {
   const rip = m.dying ? " rip" : "";
   const tick = m._hurt && m._hurt.dmg ? `<div class="hp-tick">-${m._hurt.dmg}</div>` : "";
   const stat = m._fxAtk != null ? `<div class="stat-pop">공 ${m._fxAtk}</div>` : "";
+  const pending = cached ? "" : " face-pending";
+  const srcAttr = cached ? ` src="${cached}"` : "";
   return `<div class="${cls}${hurt}${rip}" data-uid="${m.uid}">
-    <img class="card-face" id="${uid}" alt="${m.name}"${placeholder ? ` src="${placeholder}"` : ""}>
+    <img class="card-face${pending}${cached ? " face-ready" : ""}" id="${uid}" alt="${m.name}"${srcAttr}>
     ${tick}${stat}
   </div>`;
 }
