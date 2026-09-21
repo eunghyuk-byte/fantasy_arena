@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.040";
+const GAME_VERSION = "0.041";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -365,7 +365,7 @@ function equipItemOnUnit(p, card, unit) {
   }
   if (card.ability) {
     unit.ability = card.ability;
-    const kwMap = { "보호": "shield", "활력": "vital", "환생": "rebirth", "강탈": "steal", "위압": "awe", "혼란": "confuse", "결속": "bond", "출전": "battlecry" };
+    const kwMap = { "보호": "shield", "활력": "vital", "환생": "rebirth", "강탈": "steal", "위압": "awe", "혼란": "confuse", "결속": "bond", "출전": "battlecry", "복수": "revenge", "유언": "deathrattle", "면역": "immune" };
     const kw = kwMap[card.ability];
     if (kw) {
       unit.keywords = [...(unit.keywords || [])];
