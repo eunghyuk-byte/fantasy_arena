@@ -2322,7 +2322,7 @@ html.is-desktop, html.is-desktop body {
 }
 #game.active .col-main {
   position: relative !important;
-  grid-template-rows: 10% 28% 28% 30% 4% !important;
+  grid-template-rows: 7% 40% 28% 21% 4% !important; /* mid≈47%: boards on parchment line; hand lower */
 }
 
 /* FULL board art scaled into the play column (never intrinsic zoom) */
@@ -2370,7 +2370,7 @@ html.is-desktop, html.is-desktop body {
   height: 100% !important;
   align-items: flex-end !important;
   justify-content: center !important;
-  padding: 4px 8% 10px !important;
+  padding: 18px 8% 2px !important; /* top pad pushes fan down */
   box-sizing: border-box !important;
 }
 #game.active .my-hand .card,
@@ -2440,9 +2440,27 @@ html.is-desktop, html.is-desktop body {
 #game.active .board.opp,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  padding-left: 16% !important;
-  padding-right: 10% !important;
+  padding-left: 20% !important;
+  padding-right: 8% !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
   box-sizing: border-box !important;
+}
+
+/* ===== P0 align boards to parchment center line ===== */
+#game.active .board.opp {
+  align-items: flex-end !important;
+  padding-top: 0 !important;
+  padding-bottom: 4px !important;
+}
+#game.active #myBoard {
+  align-items: flex-start !important;
+  padding-top: 4px !important;
+  padding-bottom: 0 !important;
+}
+/* opp hand sits lower in its strip (closer to board) */
+#game.active .opp-hand {
+  align-items: flex-end !important;
+  padding-top: 8px !important;
+  padding-bottom: 0 !important;
 }
