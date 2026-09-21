@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.128";
+const GAME_VERSION = "0.130";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -326,6 +326,13 @@ function unequipItem(m) {
   if (b.grantedKw) {
     m.keywords = (m.keywords || []).filter(k => k !== b.grantedKw);
   }
+  if (b.savedCoins) {
+    m.atkC = b.savedCoins.atkC || 0;
+    m.defC = b.savedCoins.defC || 0;
+    m.hpC = b.savedCoins.hpC || 0;
+  }
+  if (b.clearedCoinGold) delete m.coinGold;
+  if (b.grantedCoinLuck) delete m.coinLuckBonus;
   delete m.equippedItem;
   delete m._itemBonuses;
   m.itemWorn = false;
@@ -378,12 +385,28 @@ function equipItemOnUnit(p, card, unit) {
     }
   }
   unit.equippedItem = { id: card.id, name: card.name, uid: card.uid };
-  unit._itemBonuses = {
+  const bonuses = {
     atk: dAtk, def: dDef, hp: dHp,
     atkSkill: card.atkSkill, prevAtkSkill,
     ability: card.ability, prevAbility,
     grantedCharge, grantedKw
   };
+  if (card.id === "ni4") {
+    bonuses.savedCoins = { atkC: unit.atkC || 0, defC: unit.defC || 0, hpC: unit.hpC || 0 };
+    unit.atkC = 0; unit.defC = 0; unit.hpC = 0;
+  }
+  if (card.id === "di4") {
+    if ((unit.atkC || 0) || (unit.defC || 0) || (unit.hpC || 0)) {
+      unit.coinBlack = false;
+      unit.coinGold = true;
+      bonuses.clearedCoinGold = true;
+    }
+  }
+  if (card.id === "li3") {
+    unit.coinLuckBonus = 0.2;
+    bonuses.grantedCoinLuck = true;
+  }
+  unit._itemBonuses = bonuses;
   unit.itemWorn = true;
   if (unit._baseText == null) unit._baseText = unit.text || "";
   unit.text = "아이템착용중" + (unit._baseText ? " · " + unit._baseText : "");
@@ -392,25 +415,7 @@ function equipItemOnUnit(p, card, unit) {
   return true;
 }
 function resolveInstantItem(p, card) {
-  const e = opponent(p);
-  if (card.id === "ni4") {
-    [...p.board, ...e.board].forEach(m => { m.atkC = 0; m.defC = 0; m.hpC = 0; });
-    log("도둑바람: 모든 유닛 코인 삭제");
-  } else if (card.id === "li3") {
-    const base = (p.coinP != null) ? p.coinP : 0.5;
-    p.coinP = Math.min(1, base + 0.2);
-    log("성스러운주화: 이번 턴 앞면 확률 +20%p");
-  } else if (card.id === "di4") {
-    const mark = (m) => {
-      if (!m) return;
-      if ((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0)) m.coinGold = true;
-    };
-    [...p.board, ...e.board].forEach(mark);
-    [...p.hand, ...e.hand].forEach(mark);
-    log("조작된주화: 코인이 금화로(앞면 고정)");
-  } else {
-    log(`${card.name} 효과`);
-  }
+  log(`${card.name} 효과`);
 }
 
 function playCard(p, card, target) {
@@ -1024,6 +1029,7 @@ function coinPoolN(m) {
 function rollSharedCoins(m) {
   const n = coinPoolN(m);
   let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
+  if (m && m.coinLuckBonus) luck = Math.min(1, luck + m.coinLuckBonus);
   if (m && m.coinGold) luck = 1;
   if (m && m.coinBlack) luck = 0;
   const flips = Array.from({ length: n }, () => Math.random() < luck);
@@ -1045,6 +1051,7 @@ function clampHp(v) { return Math.max(1, v | 0); }
 function rollCoins(mod, unit) {
   const n = Math.abs(mod || 0);
   let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
+  if (unit && unit.coinLuckBonus) luck = Math.min(1, luck + unit.coinLuckBonus);
   if (unit && unit.coinGold) luck = 1;
   if (unit && unit.coinBlack) luck = 0;
   const flips = Array.from({ length: n }, () => Math.random() < luck);
