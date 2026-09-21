@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.094";
+const GAME_VERSION = "0.095";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -177,10 +177,15 @@ function startGame(vsAI) {
     p1: makePlayer(selectedHero, false, "나"),
     p2: makePlayer(pickEnemyTribe(selectedHero, vsAI), vsAI, vsAI ? "상대 컴퓨터" : "플레이어 2"),
   };
-  draw(state.p1, 3);
-  draw(state.p2, 4);
-  state.p2.hand.push(cloneCard("coin"));
-  beginTurn(state.p1);
+  // 선공 랜덤: 후공은 손패 +1 + 동전
+  const p1First = Math.random() < 0.5;
+  const first = p1First ? state.p1 : state.p2;
+  const second = p1First ? state.p2 : state.p1;
+  draw(first, 3);
+  draw(second, 4);
+  second.hand.push(cloneCard("coin"));
+  state.turn = p1First ? 1 : 2;
+  beginTurn(first);
   showGame();
   render();
   try {
@@ -198,7 +203,7 @@ function startGame(vsAI) {
       } catch (e) {}
     })();
   } catch (e) {}
-  if (state.p1.isAI) aiTurn();
+  if (first.isAI) aiTurn();
 }
 
 function beginTurn(p) {
