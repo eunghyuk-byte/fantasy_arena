@@ -244,7 +244,7 @@ const CARDS = [
   { id:"fi4", tribe:"fire", name:"피닉스깃털", cost:5, type:"item", rarity:"rare", atk:0, def:0, hp:2, ability:"환생", text:"장착: 체+2. 환생" },
   { id:"fi5", tribe:"fire", name:"도박불꽃반지", cost:6, type:"item", rarity:"heroic", atk:10, def:0, hp:0, atkSkill:4, text:"장착: 공+10. 연속공격. 코인이 전부 뒷면이면 이 아이템 파괴" },
   { id:"fi6", tribe:"fire", name:"분노의해머", cost:7, type:"item", rarity:"heroic", atk:4, def:0, hp:0, atkSkill:9, text:"장착: 공+4. 광역공격" },
-  { id:"ni1", tribe:"wind", name:"요정의부츠", cost:1, type:"item", rarity:"common", atk:0, def:1, hp:1, text:"장착: 방+1 체+1. 출전(카드 1장)" },
+  { id:"ni1", tribe:"wind", name:"요정의부츠", cost:1, type:"item", rarity:"common", atk:0, def:1, hp:1, text:"장착: 방+1 체+1" },
   { id:"ni2", tribe:"wind", name:"올빼미의눈", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:2, text:"장착: 공+2. 관통공격" },
   { id:"ni3", tribe:"wind", name:"페어리소드", cost:3, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:7, text:"장착: 공+2. 약화공격" },
   { id:"ni4", tribe:"wind", name:"도둑바람", cost:3, type:"item", rarity:"rare", atk:0, def:0, hp:0, text:"전장 모든 유닛의 코인을 삭제한다" },
