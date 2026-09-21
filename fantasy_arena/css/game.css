@@ -2803,3 +2803,52 @@ html.is-desktop, html.is-desktop body {
 #spellFx .fx-name {
   opacity: 1 !important;
 }
+
+/* P0 soft-edge VFX window — no hard rectangle cut */
+#spellFx .fx-stage .fx-strip {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: min(78vmin, 600px) !important;
+  height: min(78vmin, 600px) !important;
+  transform: translate(-50%, -50%) !important;
+  overflow: hidden !important;
+  z-index: 12 !important;
+  background: transparent !important;
+  filter: drop-shadow(0 0 18px rgba(255,100,20,.45)) !important;
+  opacity: 0;
+  transition: opacity .28s ease;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  mask-composite: intersect;
+}
+#spellFx .fx-stage .fx-strip.show { opacity: 1 !important; }
+#spellFx .fx-stage .fx-strip.hide { opacity: 0 !important; }
+#spellFx .fx-stage .fx-asset {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(78vmin, 600px) !important;
+  height: auto !important;
+  z-index: 12 !important;
+  filter: drop-shadow(0 0 18px rgba(255,120,40,.5)) !important;
+  opacity: 0;
+  transition: opacity .28s ease;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  mask-composite: intersect;
+}
+#spellFx .fx-stage .fx-asset.show { opacity: 1 !important; }
+#spellFx .fx-stage .fx-asset.hide { opacity: 0 !important; }
+

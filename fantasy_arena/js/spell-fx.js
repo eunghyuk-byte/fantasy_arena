@@ -41,7 +41,7 @@ const SpellFx = (() => {
     return new Promise(resolve => {
       if (!stage || !url) { resolve(); return; }
       const wrap = document.createElement("div");
-      wrap.className = "fx-strip run";
+      wrap.className = "fx-strip";
       const img = document.createElement("img");
       img.alt = "";
       img.draggable = false;
@@ -53,24 +53,37 @@ const SpellFx = (() => {
       const begin = () => {
         if (started) return;
         started = true;
-        // Force layout so clientWidth is real
         void wrap.offsetWidth;
         const box = Math.max(1, wrap.clientWidth || 560);
         const natH = img.naturalHeight || frameH || 720;
         const natW = img.naturalWidth || frameW || 720;
         const n = Math.max(1, frames || Math.round(natW / Math.max(1, natH)) || 1);
         const frameMs = Math.max(55, Math.round(1000 / Math.max(1, fps || 12)));
+        const totalMs = n * frameMs;
+        const fadeMs = 280;
         let i = 0;
         img.style.height = box + "px";
         img.style.width = "auto";
         img.style.maxWidth = "none";
         img.style.display = "block";
         img.style.willChange = "transform";
+        // fade in
+        requestAnimationFrame(() => wrap.classList.add("show"));
         const tick = () => {
           img.style.transform = "translateX(" + (-i * box) + "px)";
           i += 1;
-          if (i >= n) setTimeout(finish, frameMs);
-          else setTimeout(tick, frameMs);
+          if (i >= n) {
+            wrap.classList.remove("show");
+            wrap.classList.add("hide");
+            setTimeout(finish, fadeMs);
+          } else {
+            // start fade-out on last ~few frames
+            if (i >= n - 2) {
+              wrap.classList.remove("show");
+              wrap.classList.add("hide");
+            }
+            setTimeout(tick, frameMs);
+          }
         };
         tick();
       };
@@ -80,6 +93,7 @@ const SpellFx = (() => {
       if (img.complete && img.naturalWidth) begin();
     });
   }
+
 
   function assetUrl(base, file) {
     return base + file + "?v=" + (window.GAME_VERSION || "0");
@@ -98,11 +112,14 @@ const SpellFx = (() => {
       const img = document.createElement("img");
       img.className = "fx-asset";
       img.alt = "";
-      img.src = url;
       stage.innerHTML = "";
       stage.appendChild(img);
-      const t = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, Math.max(700, ms || 900));
-      img.onerror = () => { clearTimeout(t); resolve(); };
+      img.src = url;
+      requestAnimationFrame(() => img.classList.add("show"));
+      const life = Math.max(700, ms || 900);
+      const t1 = setTimeout(() => { img.classList.remove("show"); img.classList.add("hide"); }, Math.max(200, life - 280));
+      const t2 = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, life);
+      img.onerror = () => { clearTimeout(t1); clearTimeout(t2); resolve(); };
     });
   }
   async function playAssetPack(card, layer, stage) {
