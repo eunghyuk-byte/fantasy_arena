@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.074";
+const GAME_VERSION = "0.076";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -256,7 +256,7 @@ async function runAutoCombat(p) {
   for (const m of wave) {
     if (state.over) break;
     if (!p.board.includes(m) || m.hp <= 0) continue;
-    // R7: skip units without attack rights (e.g. summoned this turn without charge)
+    // R7: 공격권 없는 유닛만 스킵 (판마: 소환 직후에도 canAttack=true)
     if (!m.canAttack || m.attacksLeft <= 0 || (Number(m.atk) || 0) <= 0) continue;
     const legal = attackTargets(p, m);
     if (!legal.length) continue;
@@ -433,8 +433,9 @@ function playCard(p, card, target) {
   if (card.type === "minion") {
     try { Sfx.playSummon && Sfx.playSummon(); } catch (e) {}
     const m = card;
-    m.canAttack = (m.keywords || []).includes("charge");
-    m.attacksLeft = m.canAttack ? 1 : 0;
+    // 판마: 소환 수면 없음 — 이번 턴에 낸 유닛도 공격 가능
+    m.canAttack = true;
+    m.attacksLeft = 1;
     const at = Math.max(0, Math.min(p.board.length, (typeof window._dropSlot === "number") ? window._dropSlot : p.board.length));
     p.board.splice(at, 0, m);
     window._dropSlot = null;
@@ -650,8 +651,8 @@ function applyFx(p, fx, target) {
       c.ability = o.ability;
       if (fx.kw) c.keywords = Array.from(new Set([...(c.keywords || []), fx.kw]));
       if (fx.ability) c.ability = fx.ability;
-      c.canAttack = false;
-      c.attacksLeft = 0;
+      c.canAttack = true;
+      c.attacksLeft = 1;
       const idx = p.board.indexOf(o);
       p.board.splice(idx >= 0 ? idx + 1 : p.board.length, 0, c);
     }
@@ -716,7 +717,7 @@ function applyFx(p, fx, target) {
     const slots = Math.max(0, 5 - p.board.length);
     for (let i = 0; i < slots; i++) {
       const tok = cloneCard("e40");
-      tok.canAttack = false; tok.attacksLeft = 0;
+      tok.canAttack = true; tok.attacksLeft = 1;
       p.board.push(tok);
     }
   } else if (fx.type === "magnet") {

@@ -184,7 +184,7 @@ function useHeroPower(p) {
     if (p.board.length >= 5) { log("전장이 가득 차 소환 실패"); return; }
     const rec = cloneCard("recruit");
     rec.atk = fx.value[0]; rec.hp = fx.value[1]; rec.maxHp = fx.value[1];
-    rec.canAttack = false; rec.attacksLeft = 0;
+    rec.canAttack = true; rec.attacksLeft = 1;
     p.board.push(rec);
     log(`${p.name} 영웅 능력: 신병 소환`);
   } else {
