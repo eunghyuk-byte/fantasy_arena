@@ -2305,7 +2305,8 @@ html.is-desktop, html.is-desktop body {
   flex: none !important;
 }
 
-/* ===== P0 LAYOUT 2026-09-21: keep battle UI inside stage ===== */
+
+/* ===== P0 LAYOUT FIX 2026-09-21b: full board contain in col-main ===== */
 #app, #game, #game.active {
   overflow: hidden !important;
 }
@@ -2315,42 +2316,49 @@ html.is-desktop, html.is-desktop body {
   min-height: 0 !important;
   box-sizing: border-box !important;
 }
+#game.active .playfield {
+  padding: 0 !important;
+  grid-template-columns: minmax(0, 1fr) minmax(96px, 12cqi) !important;
+}
+#game.active .col-main {
+  position: relative !important;
+  grid-template-rows: 10% 28% 28% 30% 4% !important;
+}
 
-/* Asymmetric inset: HUD column sits on the right — leave more right margin for frame */
-#game.active > #boardBgLayer {
-  top: 2.2% !important;
-  bottom: 2.6% !important;
-  left: 2.0% !important;
-  right: 11.5% !important; /* clear col-hud so right frame/gems aren't under/clipped by edge */
-  width: auto !important;
-  height: auto !important;
+/* FULL board art scaled into the play column (never intrinsic zoom) */
+#game.active .col-main > #boardBgLayer {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
   object-fit: contain !important;
   object-position: center center !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
 }
-
-#game.active .playfield {
-  /* match board art safe area; right pad aligns with HUD */
-  padding: 4.5% 0.5% 3.5% 3% !important;
-  grid-template-columns: minmax(0, 1fr) minmax(88px, 11cqi) !important;
+#game.active > #boardBgLayer {
+  display: none !important;
 }
-
-#game.active .col-main {
-  grid-template-rows: 11% 27% 27% 31% 4% !important;
+#game.active .col-main > *:not(#boardBgLayer) {
+  position: relative;
+  z-index: 1;
 }
 
 #game.active .opp-hand {
   overflow: hidden !important;
   height: 100% !important;
-  max-height: 100% !important;
-  min-height: 0 !important;
   align-items: flex-end !important;
   justify-content: center !important;
-  padding: 2px 10% 2px !important;
+  padding: 2px 12% 0 !important;
   box-sizing: border-box !important;
 }
 #game.active .opp-hand .back {
-  height: min(70%, 6.8cqh) !important;
-  width: calc(min(70%, 6.8cqh) * 0.70) !important;
+  height: min(68%, 6.5cqh) !important;
+  width: calc(min(68%, 6.5cqh) * 0.70) !important;
   max-height: 100% !important;
   margin-left: -10px !important;
   flex: 0 0 auto !important;
@@ -2360,17 +2368,15 @@ html.is-desktop, html.is-desktop body {
 #game.active .my-hand {
   overflow: hidden !important;
   height: 100% !important;
-  max-height: 100% !important;
-  min-height: 0 !important;
   align-items: flex-end !important;
   justify-content: center !important;
-  padding: 4px 5% 12px !important;
+  padding: 4px 8% 10px !important;
   box-sizing: border-box !important;
 }
 #game.active .my-hand .card,
 #game.active .my-hand .card.playable {
-  height: calc(100% - 18px) !important;
-  max-height: calc(100% - 18px) !important;
+  height: calc(100% - 14px) !important;
+  max-height: calc(100% - 14px) !important;
   width: auto !important;
   aspect-ratio: 2 / 3 !important;
   margin-left: -14px !important;
@@ -2386,88 +2392,44 @@ html.is-desktop, html.is-desktop body {
 
 #game.active .hint {
   overflow: hidden !important;
-  padding: 0 8% !important;
   font-size: clamp(11px, 1.5cqh, 13px) !important;
-  line-height: 1.15 !important;
   white-space: nowrap !important;
   text-overflow: ellipsis !important;
+  padding: 0 8% !important;
 }
 
 #game.active .col-hud {
-  padding: 12px 12px 16px 4px !important;
-  box-sizing: border-box !important;
+  padding: 12px 14px 16px 8px !important;
   overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 #game.active .col-hud .end-btn,
 #game.active .col-hud .give-btn {
-  max-width: 100% !important;
   width: 100% !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
 }
 .bgm-btn {
   top: 12px !important;
   right: 12px !important;
 }
 
-/* ===== P0 boardBgLayer box fix ===== */
-#game.active > #boardBgLayer {
-  position: absolute !important;
-  inset: unset !important;
-  top: 2% !important;
-  bottom: 2.4% !important;
-  left: 1.8% !important;
-  right: 12% !important;
-  width: auto !important;
-  height: auto !important;
+/* Minion fill slot (keep) */
+#game.active .board > .slot {
+  width: var(--slot-w) !important;
+  min-width: var(--slot-w) !important;
+  max-width: var(--slot-w) !important;
+  flex: 0 0 var(--slot-w) !important;
+  height: var(--slot-h) !important;
+}
+#game.active .board > .slot > .minion,
+#game.active .board .slot .minion {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
   max-width: none !important;
-  max-height: none !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
+  flex: none !important;
 }
-
-/* ===== P0 board art in col-main only ===== */
-#game.active .col-main {
-  position: relative !important;
-  overflow: hidden !important;
-}
-/* Board frame lives ONLY under the play column — never under HUD */
-#game.active .col-main > #boardBgLayer {
-  display: block !important;
-  position: absolute !important;
-  inset: 1.5% 1.2% 1.8% 1.2% !important;
-  width: auto !important;
-  height: auto !important;
-  max-width: none !important;
-  max-height: none !important;
-  margin: 0 !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-}
-#game.active .col-main > *:not(#boardBgLayer) {
-  position: relative;
-  z-index: 1;
-}
-/* Kill any leftover full-#game boardBgLayer rules */
-#game.active > #boardBgLayer {
-  display: none !important;
-}
-
-#game.active .playfield {
-  padding: 0 !important;
-  grid-template-columns: minmax(0, 1fr) minmax(92px, 12cqi) !important;
-}
-#game.active .col-main {
-  grid-template-rows: 11% 27% 27% 31% 4% !important;
-  padding: 0 !important;
-}
-#game.active .col-hud {
-  padding: 12px 14px 18px 8px !important;
-  overflow: hidden !important;
-  background: transparent !important;
+#game.active .board {
+  --slot-w: calc(var(--slot-h) * 2 / 3);
 }
