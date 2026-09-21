@@ -2428,3 +2428,46 @@ html.is-desktop, html.is-desktop body {
   z-index: 0 !important;
   pointer-events: none !important;
 }
+
+/* ===== P0 board art in col-main only ===== */
+#game.active .col-main {
+  position: relative !important;
+  overflow: hidden !important;
+}
+/* Board frame lives ONLY under the play column — never under HUD */
+#game.active .col-main > #boardBgLayer {
+  display: block !important;
+  position: absolute !important;
+  inset: 1.5% 1.2% 1.8% 1.2% !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+#game.active .col-main > *:not(#boardBgLayer) {
+  position: relative;
+  z-index: 1;
+}
+/* Kill any leftover full-#game boardBgLayer rules */
+#game.active > #boardBgLayer {
+  display: none !important;
+}
+
+#game.active .playfield {
+  padding: 0 !important;
+  grid-template-columns: minmax(0, 1fr) minmax(92px, 12cqi) !important;
+}
+#game.active .col-main {
+  grid-template-rows: 11% 27% 27% 31% 4% !important;
+  padding: 0 !important;
+}
+#game.active .col-hud {
+  padding: 12px 14px 18px 8px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
