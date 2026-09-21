@@ -2645,6 +2645,7 @@ html.is-desktop, html.is-desktop body {
 }
 #title.screen.active { position: relative; }
 
+
 /* ===== spell asset VFX ===== */
 #spellFx .fx-stage .fx-asset {
   position: absolute;
@@ -2654,5 +2655,26 @@ html.is-desktop, html.is-desktop body {
   width: min(52vmin, 420px);
   height: auto;
   pointer-events: none;
+}
+#spellFx .fx-stage .fx-strip {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(52vmin, 420px);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  pointer-events: none;
   filter: drop-shadow(0 0 18px rgba(255, 220, 120, .45));
+}
+#spellFx .fx-stage .fx-strip img {
+  height: 100%;
+  width: auto;
+  max-width: none;
+  display: block;
+  animation: fxStripRun var(--ms) steps(var(--frames)) forwards;
+}
+@keyframes fxStripRun {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% * (var(--frames) - 1) / var(--frames))); }
 }
