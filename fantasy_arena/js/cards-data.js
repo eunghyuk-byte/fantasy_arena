@@ -513,13 +513,15 @@ const RARITY_FRAMES = {
 };
 function frameOf(c) {
   const tribe = (typeof TRIBES !== "undefined" && TRIBES.find(x => x.id === (c && c.tribe))) || { id: "earth" };
-  if (c && (c.type === "spell" || c.type === "item") && typeof SPELL_FRAMES !== "undefined") return SPELL_FRAMES[tribe.id] || SPELL_FRAMES.earth;
+  // items use unit (minion) frames — same ATK/DEF/HP sockets as units
+  if (c && c.type === "spell" && typeof SPELL_FRAMES !== "undefined") return SPELL_FRAMES[tribe.id] || SPELL_FRAMES.earth;
   return (typeof DECK_FRAMES !== "undefined" && (DECK_FRAMES[tribe.id] || DECK_FRAMES.earth)) || "";
 }
 function pickFrameUrl(c, tribe) {
   const t = tribe || (typeof TRIBES !== "undefined" && TRIBES.find(x => x.id === (c && c.tribe))) || { id: "earth" };
   // Kind follows type only — token:true must NOT force unit/minion frames (coin is a spell token)
-  const kind = (c && (c.type === "spell" || c.type === "item")) ? "spell" : "minion";
+  // items share minion/unit frames (MT2-style stats on frame)
+  const kind = (c && c.type === "spell") ? "spell" : "minion";
   const rarity = (c && c.rarity) || "common";
   const key = (t.id || "earth") + "|" + kind + "|" + rarity;
   if (typeof RARITY_FRAMES !== "undefined" && RARITY_FRAMES[key]) return RARITY_FRAMES[key];
