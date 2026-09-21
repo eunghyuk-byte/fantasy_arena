@@ -1308,22 +1308,36 @@ document.getElementById("btnPlaySaved").onclick = () => {
 };
 
 
-/* 약 3분 모험 BGM — 오리지널 Web Audio 악보, 구간이 바뀌며 루프 */
+
+const RACE_LORE = (typeof TRIBES !== "undefined" ? TRIBES : []).map(h => [
+  h.name + " (" + h.en + ")",
+  (h.powerName ? ("영웅 능력: " + h.powerName + " — " + (h.powerText || "")) : "오픈 종족")
+]);
 
 function openHelp() {
   const box = document.getElementById("raceHelpList");
+  const lore = (typeof RACE_LORE !== "undefined" && Array.isArray(RACE_LORE)) ? RACE_LORE : [];
   if (box && !box.dataset.ready) {
-    box.innerHTML = "<h3>종족 도감 (" + RACE_LORE.length + ")</h3>" + RACE_LORE.map(r =>
+    box.innerHTML = "<h3>종족 도감 (" + lore.length + ")</h3>" + lore.map(r =>
       '<div class="race-item"><b>' + r[0] + '</b><p>' + r[1] + '</p></div>'
     ).join("");
     box.dataset.ready = "1";
   }
-  document.getElementById("helpPop").classList.add("show");
+  const pop = document.getElementById("helpPop");
+  if (pop) pop.classList.add("show");
 }
 function closeHelp() {
   document.getElementById("helpPop").classList.remove("show");
 }
 document.getElementById("btnHelp").onclick = openHelp;
+const _btnQuit = document.getElementById("btnQuit");
+if (_btnQuit) _btnQuit.onclick = () => {
+  try {
+    if (window.fantasyArenaDesktop && fantasyArenaDesktop.quit) { fantasyArenaDesktop.quit(); return; }
+  } catch (e) {}
+  try { window.close(); } catch (e) {}
+  location.href = "about:blank";
+};
 document.getElementById("btnHelpClose").onclick = closeHelp;
 document.getElementById("helpPop").addEventListener("click", e => {
   if (e.target.id === "helpPop") closeHelp();

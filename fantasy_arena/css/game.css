@@ -2556,3 +2556,74 @@ html.is-desktop, html.is-desktop body {
   from { opacity: 0.55; transform: scale(0.98); }
   to   { opacity: 1; transform: scale(1.03); }
 }
+
+/* ===== P0 title menu layout ===== */
+#title.screen.active {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  padding: 18px 28px 16px !important;
+  box-sizing: border-box !important;
+  overflow: auto !important;
+  height: 100% !important;
+}
+#title .title {
+  font-size: clamp(28px, 4.2cqw, 52px) !important;
+  letter-spacing: .08em !important;
+  margin: 4px 0 6px !important;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1.15 !important;
+}
+#title .subtitle {
+  margin-bottom: 14px !important;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+#title .title-body {
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 300px);
+  gap: 18px 22px;
+  align-items: start;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+#title .hero-picks {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  margin-bottom: 0 !important;
+  width: 100%;
+}
+#title .hero-card .art {
+  min-height: 96px !important;
+}
+#title .title-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  padding-top: 4px;
+}
+#title .title-menu .menu-btn {
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  font-size: 15px !important;
+}
+#title .title-note {
+  margin-top: 12px;
+  color: #9a8864;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.45;
+  flex-shrink: 0;
+}
+@media (max-width: 820px) {
+  #title .title-body { grid-template-columns: 1fr; }
+}
