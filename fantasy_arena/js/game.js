@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.122";
+const GAME_VERSION = "0.123";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -296,7 +296,7 @@ function passTurn() {
 
 
 function isEquipItem(card) {
-  return !!(card && card.type === "item" && String(card.text || "").startsWith("장착:"));
+  return !!(card && card.type === "item" && !card.instant);
 }
 function isInstantItem(card) {
   return !!(card && card.type === "item" && !isEquipItem(card));
