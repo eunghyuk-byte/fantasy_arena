@@ -40,25 +40,26 @@ const SpellFx = (() => {
   function playStrip(stage, url, frameW, frameH, frames, fps) {
     return new Promise(resolve => {
       if (!stage || !url) { resolve(); return; }
-      const ms = Math.max(200, Math.round((frames || 1) / Math.max(1, fps || 12) * 1000));
+      const n = Math.max(1, frames || 1);
+      const ms = Math.max(600, Math.round(n / Math.max(1, fps || 12) * 1000));
       const wrap = document.createElement("div");
-      wrap.className = "fx-strip";
-      wrap.style.setProperty("--fw", frameW + "px");
-      wrap.style.setProperty("--fh", frameH + "px");
-      wrap.style.setProperty("--frames", String(Math.max(1, frames || 1)));
+      wrap.className = "fx-strip run";
+      wrap.style.setProperty("--frames", String(n));
       wrap.style.setProperty("--ms", ms + "ms");
       const img = document.createElement("img");
       img.alt = "";
+      const finish = () => { try { wrap.remove(); } catch (e) {} resolve(); };
+      const start = () => {
+        void wrap.offsetWidth;
+        setTimeout(finish, ms + 80);
+      };
+      img.onload = start;
+      img.onerror = finish;
       img.src = url;
       wrap.appendChild(img);
       stage.innerHTML = "";
       stage.appendChild(wrap);
-      img.onload = () => {
-        // ensure layout
-        wrap.classList.add("run");
-      };
-      img.onerror = () => { resolve(); };
-      setTimeout(() => { try { wrap.remove(); } catch (e) {} resolve(); }, ms + 40);
+      if (img.complete && img.naturalWidth) start();
     });
   }
   function assetUrl(base, file) {
@@ -81,7 +82,7 @@ const SpellFx = (() => {
       img.src = url;
       stage.innerHTML = "";
       stage.appendChild(img);
-      const t = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, Math.max(250, ms || 900));
+      const t = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, Math.max(700, ms || 900));
       img.onerror = () => { clearTimeout(t); resolve(); };
     });
   }
@@ -107,12 +108,16 @@ const SpellFx = (() => {
     if (meta.sfxHint === "coin_flip") { try { Sfx.playCoin && Sfx.playCoin(); } catch (e) {} }
     const fxCard = document.getElementById("fxCard");
     if (fxCard) { fxCard.classList.add("out"); fxCard.style.opacity = "0"; }
+    const lab = document.getElementById("fxName");
+    if (lab) { lab.textContent = (card && card.name) || meta.name || ""; lab.style.opacity = "1"; }
+    layer.classList.add("pack-play");
 
-    if (await probeUrl(castStrip)) await playStrip(stage, castStrip, castW, castH, castFrames, fps);
-    else if (await probeUrl(castWebp)) await playWebp(stage, castWebp, castMs);
+    // Prefer animated webp; strip as fallback. Always keep layer visible long enough.
+    if (await probeUrl(castWebp)) await playWebp(stage, castWebp, Math.max(800, castMs));
+    else if (await probeUrl(castStrip)) await playStrip(stage, castStrip, castW, castH, castFrames, fps);
 
-    if (await probeUrl(hitStrip)) await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
-    else if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, hitMs);
+    if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, Math.max(700, hitMs));
+    else if (await probeUrl(hitStrip)) await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
 
     if (fxCard) { fxCard.style.opacity = ""; }
     return true;

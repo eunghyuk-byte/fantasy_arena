@@ -2682,28 +2682,73 @@ html.is-desktop, html.is-desktop body {
   to { transform: translateX(calc(-100% * (var(--frames) - 1) / var(--frames))); }
 }
 
+
 /* ===== P0 spellFx always on top ===== */
 #spellFx {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 9999 !important;
+  z-index: 99999 !important;
   pointer-events: none !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
-#spellFx.on { display: block !important; }
+#spellFx.on { display: block !important; visibility: visible !important; opacity: 1 !important; }
+#spellFx .fx-veil {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  background: radial-gradient(ellipse at 50% 45%, rgba(80,20,0,.35), rgba(0,0,0,.55)) !important;
+}
+#spellFx.pack-play .fx-veil {
+  background: radial-gradient(ellipse at 50% 45%, rgba(120,40,0,.45), rgba(0,0,0,.65)) !important;
+}
 #spellFx .fx-stage {
   position: absolute !important;
   inset: 0 !important;
-  z-index: 5 !important;
+  z-index: 10 !important;
 }
-#spellFx .fx-stage .fx-asset,
+#spellFx .fx-name {
+  display: block !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 10% !important;
+  transform: translateX(-50%) !important;
+  z-index: 20 !important;
+  color: #ffe7a8 !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 12px #000 !important;
+}
+#spellFx .fx-stage .fx-asset {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(72vmin, 560px) !important;
+  height: auto !important;
+  z-index: 12 !important;
+  filter: drop-shadow(0 0 24px rgba(255,120,40,.7)) !important;
+}
 #spellFx .fx-stage .fx-strip {
-  z-index: 6 !important;
-  width: min(70vmin, 520px) !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: min(72vmin, 560px) !important;
+  height: min(72vmin, 560px) !important;
+  transform: translate(-50%, -50%) !important;
+  overflow: hidden !important;
+  z-index: 12 !important;
+  filter: drop-shadow(0 0 24px rgba(255,120,40,.7)) !important;
 }
-#game.active > #spellFx {
-  position: fixed !important;
-  z-index: 9999 !important;
+#spellFx .fx-stage .fx-strip img {
+  height: 100% !important;
+  width: auto !important;
+  max-width: none !important;
+  display: block !important;
+  animation: fxStripRun var(--ms) steps(var(--frames)) forwards !important;
+}
+@keyframes fxStripRun {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% * (var(--frames) - 1) / var(--frames))); }
 }
 
 /* ===== P0 spell target glow ===== */
