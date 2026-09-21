@@ -235,7 +235,7 @@ const CARDS = [
   { id:"fi2", tribe:"fire", name:"불꽃도끼", cost:2, type:"item", rarity:"common", atk:3, def:0, hp:0, atkSkill:2, text:"관통공격 부여" },
   { id:"fi3", tribe:"fire", name:"불붙은건틀렛", cost:3, type:"item", rarity:"common", atk:1, def:2, hp:0, text:"" },
   { id:"fi4", tribe:"fire", name:"피닉스깃털", cost:5, type:"item", rarity:"common", atk:0, def:0, hp:2, ability:"환생", text:"환생 부여" },
-  { id:"fi5", tribe:"fire", name:"도박불꽃반지", cost:6, type:"item", rarity:"rare", atk:10, def:0, hp:0, atkSkill:4, text:"연속공격 부여. 코인이 전부 뒷면이면 이 아이템 파괴" },
+  { id:"fi5", tribe:"fire", name:"도박불꽃반지", cost:6, type:"item", rarity:"rare", atk:10, def:0, hp:0, atkSkill:4, text:"연속공격 부여. 이 유닛 코인을 돌렸을 때 전부 뒷면이면 파괴" },
   { id:"fi6", tribe:"fire", name:"분노의해머", cost:7, type:"item", rarity:"uncommon", atk:4, def:0, hp:0, atkSkill:9, text:"광역공격 부여" },
   { id:"ni1", tribe:"wind", name:"요정의부츠", cost:1, type:"item", rarity:"common", atk:0, def:1, hp:1, text:"" },
   { id:"ni2", tribe:"wind", name:"올빼미의눈", cost:2, type:"item", rarity:"common", atk:2, def:0, hp:0, atkSkill:2, text:"관통공격 부여" },
