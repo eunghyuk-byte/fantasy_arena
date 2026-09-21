@@ -117,7 +117,7 @@ const CARDS = [
   { id:"n27", tribe:"wind", name:"태사자", cost:7, type:"minion", atk:7, def:1, hp:6, atkC:1, defC:0, hpC:0, rarity:"heroic", atkSkill:4, text:"연속공격" },
   { id:"n28", tribe:"wind", name:"육손", cost:8, type:"minion", atk:3, def:1, hp:10, atkC:1, defC:0, hpC:1, rarity:"heroic", atkSkill:9, text:"광역공격" },
   { id:"a1", tribe:"water", name:"관우", cost:10, type:"minion", atk:5, def:3, hp:7, atkC:-1, defC:1, hpC:-1, rarity:"legendary", atkSkill:3, ability:"강탈", text:"돌진공격 · 강탈" },
-  { id:"a2", tribe:"water", name:"슬라임", cost:1, type:"minion", atk:3, def:0, hp:1, atkC:-1, defC:1, hpC:0, text:"" },
+  { id:"a2", tribe:"water", name:"슬라임", cost:1, type:"minion", atk:1, def:0, hp:1, atkC:0, defC:2, hpC:0, text:"" },
   { id:"a3", tribe:"water", name:"연못거북", cost:2, type:"minion", atk:2, def:1, hp:2, atkC:0, defC:1, hpC:-1, text:"" },
   { id:"a4", tribe:"water", name:"피라냐", cost:2, type:"minion", atk:2, def:0, hp:1, atkC:-1, defC:1, hpC:0, atkSkill:4, text:"연속공격" },
   { id:"a5", tribe:"water", name:"나가", cost:2, type:"minion", atk:3, def:0, hp:1, atkC:-3, defC:3, hpC:0, atkSkill:7, text:"약화공격" },
