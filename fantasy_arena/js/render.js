@@ -580,14 +580,27 @@ function layoutHandFan() {
   if (!wrap) return;
   const cards = [...wrap.querySelectorAll(".card")];
   const n = cards.length;
+  if (!n) return;
   const mid = (n - 1) / 2;
+  // Width-proportional step: fixed -72px fully stacks small/mobile cards and underlaps huge ones.
+  const w = Math.max(cards[0].offsetWidth || 0, 72);
+  const step = Math.max(28, Math.round(w * 0.38));
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - mid);
-    el.style.transform = `translateY(${Math.abs(t)*7}px) rotate(${t*2.4}deg)`;
-    // LTR z-order (Hearthstone): rightmost visually on top. Left crescent of each card is the hit target.
-    // !important beats any CSS .playable { z-index } flattening.
+    const x = Math.round(t * step);
+    const y = Math.round(Math.abs(t) * 7);
+    const rot = (t * 2.4).toFixed(2);
+    el.style.setProperty("--fan-x", x + "px");
+    el.style.setProperty("--fan-y", y + "px");
+    el.style.setProperty("--fan-r", rot + "deg");
+    el.style.setProperty("margin-left", "0", "important");
+    el.style.setProperty(
+      "transform",
+      `translateX(${x}px) translateY(${y}px) rotate(${rot}deg)`,
+      "important"
+    );
+    // LTR z-order (Hearthstone): rightmost visually on top.
     el.style.setProperty("z-index", String(20 + i), "important");
-    el.style.setProperty("margin-left", i ? "-72px" : "0", "important");
   });
 }
 
@@ -666,3 +679,13 @@ function heroStrip(p, isMe, myTurn) {
 }
 
 
+
+(function bindHandFanResize() {
+  let t = 0;
+  const kick = () => {
+    clearTimeout(t);
+    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); } catch (e) {} }, 50);
+  };
+  window.addEventListener("resize", kick);
+  window.addEventListener("orientationchange", kick);
+})();

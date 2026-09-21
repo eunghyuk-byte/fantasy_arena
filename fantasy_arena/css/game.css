@@ -1140,7 +1140,7 @@
     width: calc(min(98%, 34cqh) * 0.66) !important;
     max-height: none !important;
     max-width: none !important;
-    margin-left: -22px !important;
+    margin-left: 0 !important;
     background: transparent !important;
     box-shadow: 0 12px 20px rgba(0,0,0,.4);
   }
@@ -1251,7 +1251,7 @@
     z-index: 2;
   }
   #game.active .my-hand .card {
-    margin-left: calc(min(98%, 34cqh) * -0.62) !important;
+    margin-left: 0 !important;
   }
   #game.active .opp-hand .back {
     margin-left: -18px !important;
@@ -1949,8 +1949,8 @@
   overflow: visible !important;
 }
 #game.active .my-hand .card:hover {
-  transform: translateY(-28px) scale(1.10) !important;
-  z-index: 30 !important;
+  transform: translateX(var(--fan-x, 0px)) translateY(calc(var(--fan-y, 0px) - 28px)) rotate(var(--fan-r, 0deg)) scale(1.10) !important;
+  z-index: 40 !important;
 }
 .hud-hero .hero-slot {
   width: clamp(62px, 13cqh, 86px) !important;
@@ -2234,7 +2234,7 @@ html.is-desktop, html.is-desktop body {
   max-width: none !important;
   max-height: none !important;
   padding: 0 !important;
-  margin-left: -24px !important;
+  margin-left: 0 !important;
   overflow: hidden !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -2417,7 +2417,7 @@ html.is-desktop, html.is-desktop body {
   max-height: calc(100% - 12px) !important;
   width: auto !important;
   aspect-ratio: 2 / 3 !important;
-  margin-left: -14px !important;
+  margin-left: 0 !important;
   overflow: hidden !important;
   flex: 0 0 auto !important;
 }
@@ -2528,17 +2528,23 @@ html.is-desktop, html.is-desktop body {
 }
 
 /* ===== P0 hand fan pack inside frame ===== */
+/* Fan X/Y/rotate owned by layoutHandFan (width-proportional). Do not use fixed -72px — stacks on mobile. */
 #game.active .my-hand {
   justify-content: center !important;
   gap: 0 !important;
 }
 #game.active .my-hand .card,
 #game.active .my-hand .card.playable {
-  margin-left: -72px !important;
+  margin-left: 0 !important;
+  flex: 0 0 auto !important;
 }
 #game.active .my-hand .card:first-child,
 #game.active .my-hand .card.playable:first-child {
   margin-left: 0 !important;
+}
+#game.active .my-hand .card:hover {
+  transform: translateX(var(--fan-x, 0px)) translateY(calc(var(--fan-y, 0px) - 28px)) rotate(var(--fan-r, 0deg)) scale(1.10) !important;
+  z-index: 40 !important;
 }
 
 
