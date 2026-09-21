@@ -3143,3 +3143,21 @@ html.is-desktop, html.is-desktop body {
   box-shadow: none !important;
   filter: none !important;
 }
+
+
+/* ===== Fantasy Arena title logo ===== */
+#title .title-logo-wrap {
+  margin: 0 0 8px !important;
+  line-height: 0;
+  flex-shrink: 0;
+  text-align: center;
+}
+#title .title-logo {
+  display: block;
+  margin: 0 auto;
+  width: min(72vw, 560px);
+  max-height: min(32vh, 300px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .48));
+}
