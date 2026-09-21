@@ -379,7 +379,7 @@ async function composeCardFace(c, opts={}) {
     ctx.restore();
   }
 
-  const txt = (c.text && c.text !== "전설") ? c.text : (c.type === "spell" ? "주문" : "");
+  const txt = (c.text && c.text !== "전설" && c.text !== "레전드") ? c.text : (c.type === "spell" ? "주문" : "");
   if (txt) {
     const tSize = Math.round(H*0.037) + 2;
     ctx.save();

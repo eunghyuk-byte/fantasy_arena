@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.038";
+const GAME_VERSION = "0.044";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -365,7 +365,7 @@ function equipItemOnUnit(p, card, unit) {
   }
   if (card.ability) {
     unit.ability = card.ability;
-    const kwMap = { "보호": "shield", "활력": "vital", "환생": "rebirth", "강탈": "steal", "위압": "awe", "혼란": "confuse", "결속": "bond", "출전": "battlecry" };
+    const kwMap = { "보호": "shield", "활력": "vital", "환생": "rebirth", "강탈": "steal", "위압": "awe", "혼란": "confuse", "결속": "bond", "출전": "battlecry", "복수": "revenge", "유언": "deathrattle", "면역": "immune" };
     const kw = kwMap[card.ability];
     if (kw) {
       unit.keywords = [...(unit.keywords || [])];
@@ -1507,7 +1507,7 @@ function loreOf(id) {
   if (CARD_LORE[id]) return CARD_LORE[id];
   const c = CARD_MAP[id];
   if (!c) return "";
-  return (c.text ? c.text + " — " : "") + (c.rarity === "legendary" ? "전설 카드." : "종족의 힘을 담은 카드.");
+  return (c.text ? c.text + " — " : "") + (c.rarity === "legendary" ? "레전드 카드." : "속성의 힘을 담은 카드.");
 }
 
 let _popCardId = null;
@@ -1523,6 +1523,59 @@ function openCardMenu(id) {
   document.getElementById("cardMenuTitle").textContent = c.name;
   document.getElementById("cardMenuPop").classList.add("show");
 }
+const ATK_SKILL_HELP = {
+  1: ["일반공격", "공격력만큼 때립니다."],
+  2: ["관통공격", "방어를 깎고, 남은 피해가 체력으로 갑니다."],
+  3: ["돌진공격", "내 방어력만큼 더 때립니다."],
+  4: ["연속공격", "두 번 때립니다."],
+  5: ["치명공격", "체력이 조금이라도 깎이면 바로 죽습니다."],
+  6: ["흡혈공격", "준 피해의 절반만큼 체력을 회복합니다."],
+  7: ["약화공격", "먼저 상대 공격·방어를 1씩 낮춥니다."],
+  8: ["석화공격", "먼저 상대 공격을 0으로, 방어를 +1 합니다."],
+  9: ["광역공격", "적 유닛을 전부 때립니다."],
+  10: ["돌파공격", "죽인 뒤 남은 공격력으로 다음 적을 때립니다."],
+  11: ["혼란공격", "때리지만, 상대가 반격하지 않습니다."]
+};
+const ABI_HELP = {
+  "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",
+  "복수": "나를 죽인 적 유닛도 같이 죽습니다.",
+  "환생": "죽으면 체력 1로 한 번 다시 살아납니다.",
+  "강탈": "죽인 적을 내 편으로 가져옵니다.",
+  "출전": "낼 때 카드 1장을 뽑습니다.",
+  "유언": "죽을 때 카드 1장을 뽑습니다.",
+  "면역": "스펠 효과를 받지 않습니다."
+};
+function fmtCoinLinks(c) {
+  const parts = [];
+  const one = (label, v) => { if (!v) return; parts.push(label + (v > 0 ? "+" : "") + v); };
+  one("공", c.atkC || 0); one("방", c.defC || 0); one("체", c.hpC || 0);
+  return parts.length ? parts.join(" ") : "";
+}
+function buildLoreSkillsHtml(c) {
+  const rows = [];
+  if (c.atkSkill != null && ATK_SKILL_HELP[c.atkSkill]) {
+    const [nm, desc] = ATK_SKILL_HELP[c.atkSkill];
+    rows.push(`<div class="lore-skill"><b>${nm}</b><span>${desc}</span></div>`);
+  }
+  // dual text may mention second atk; also parse ability list
+  const abs = String(c.ability || "").split(",").map(s => s.trim()).filter(Boolean);
+  // if text lists extra atk names not in atkSkill, still show ability only here
+  abs.forEach(ab => {
+    const desc = ABI_HELP[ab];
+    if (desc) rows.push(`<div class="lore-skill"><b>${ab}</b><span>${desc}</span></div>`);
+    else if (ab) rows.push(`<div class="lore-skill"><b>${ab}</b><span></span></div>`);
+  });
+  // also surface second atk from text like "돌파공격 · 관통공격" when only first is in atkSkill
+  const t = String(c.text || "");
+  Object.values(ATK_SKILL_HELP).forEach(([nm, desc]) => {
+    if (t.includes(nm) && !(c.atkSkill != null && ATK_SKILL_HELP[c.atkSkill] && ATK_SKILL_HELP[c.atkSkill][0] === nm)) {
+      if (!rows.some(r => r.includes(`<b>${nm}</b>`))) {
+        rows.push(`<div class="lore-skill"><b>${nm}</b><span>${desc}</span></div>`);
+      }
+    }
+  });
+  return rows.join("") || "";
+}
 async function openCardLore(id) {
   const c = CARD_MAP[id];
   if (!c) return;
@@ -1534,12 +1587,17 @@ async function openCardLore(id) {
   const img = slot.querySelector("img.card-face");
   if (img && face) img.src = face;
   document.getElementById("loreName").textContent = c.name;
-  const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : ((SPELL_SCHOOL && SPELL_SCHOOL[c.tribe]) || "주문"));
-  const RARITY_KO = { common:"일반", rare:"희귀", heroic:"영웅", legendary:"전설" };
-  const rareKo = RARITY_KO[c.rarity || "common"] || "일반";
+  const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : ((SPELL_SCHOOL && SPELL_SCHOOL[c.tribe]) || "스펠"));
+  const RARITY_KO = { common:"커먼", rare:"언커먼", heroic:"레어", legendary:"레전드" };
+  const rareKo = RARITY_KO[c.rarity || "common"] || "커먼";
   const cap = (c.rarity === "legendary" || c.rarity === "heroic") ? "덱당 1장" : "최대 2장";
-  const bits = [c.cost + "마나", (TRIBES.find(t => t.id === c.tribe) || {}).name || "", raceNm, c.type === "minion" ? (c.atk + "/" + (c.def||0) + "/" + c.hp) : "주문", rareKo, cap];
+  const tribeNm = (TRIBES.find(t => t.id === c.tribe) || {}).name || "";
+  const stats = c.type === "minion" ? (c.atk + "/" + (c.def||0) + "/" + c.hp) : (c.type === "item" ? ((c.atk||0) + "/" + (c.def||0) + "/" + (c.hp||0)) : "-");
+  const coin = (c.type === "minion") ? fmtCoinLinks(c) : "";
+  const bits = [c.cost + "마나", tribeNm, raceNm, stats, coin ? ("코인 " + coin) : "", rareKo, cap];
   document.getElementById("loreMeta").textContent = bits.filter(Boolean).join(" · ");
+  const skEl = document.getElementById("loreSkills");
+  if (skEl) skEl.innerHTML = buildLoreSkillsHtml(c);
   document.getElementById("loreText").textContent = loreOf(id);
   document.getElementById("cardLorePop").classList.add("show");
 }
@@ -1551,7 +1609,7 @@ function renderBuilder() {
   const _typeKo = { all:"전체", minion:"유닛", spell:"스펠", item:"아이템" }[ui.typeFilter || "all"] || "전체";
   document.getElementById("poolTitle").textContent = selectedHero.name + " · " + _typeKo + " (" + _pool.length + "장" + (ui.typeFilter==="all" ? " · 아이템 "+_ic : "") + ")";
   const meta = document.getElementById("deckMeta");
-  meta.textContent = draftDeck.length + " / 30  ·  일반·희귀 2장, 영웅·전설 1장";
+  meta.textContent = draftDeck.length + " / 30  ·  커먼·언커먼 2장, 레어·레전드 1장";
   meta.className = "deck-meta " + (draftDeck.length === 30 ? "ok" : "bad");
   const pool = document.getElementById("cardPool");
   pool.innerHTML = tribeCards().map(c => {
@@ -1625,16 +1683,24 @@ document.getElementById("btnPlaySaved").onclick = () => {
 
 
 
+const TRIBE_SPEC = {
+  earth: "특화: 체력. 체 코인 링크.",
+  fire: "특화: 공격. 기본 스탯이 높고 공 −코인이 많음.",
+  water: "특화: 방어. 방 코인 링크.",
+  wind: "특화: 안정. 코인 N≤2.",
+  light: "특화: 코인(전부 +).",
+  dark: "특화: 승부. 코인 N 3~5 맞교환."
+};
 const RACE_LORE = (typeof TRIBES !== "undefined" ? TRIBES : []).map(h => [
   h.name + " (" + h.en + ")",
-  (h.powerName ? ("영웅 능력: " + h.powerName + " — " + (h.powerText || "")) : "오픈 종족")
+  TRIBE_SPEC[h.id] || "오픈 속성"
 ]);
 
 function openHelp() {
   const box = document.getElementById("raceHelpList");
   const lore = (typeof RACE_LORE !== "undefined" && Array.isArray(RACE_LORE)) ? RACE_LORE : [];
   if (box && !box.dataset.ready) {
-    box.innerHTML = "<h3>종족 도감 (" + lore.length + ")</h3>" + lore.map(r =>
+    box.innerHTML = "<h3>속성 (" + lore.length + ")</h3>" + lore.map(r =>
       '<div class="race-item"><b>' + r[0] + '</b><p>' + r[1] + '</p></div>'
     ).join("");
     box.dataset.ready = "1";
