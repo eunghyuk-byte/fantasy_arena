@@ -17,6 +17,7 @@
     <button class="menu-btn" id="btnAi">이 덱으로 컴퓨터와 대결</button>
     <button class="menu-btn ghost" id="btnPvp">같은 화면 1대1 (핫시트)</button>
     <button class="menu-btn ghost" id="btnHelp">도움말 · 종족</button>
+    <button class="menu-btn ghost" id="btnSettings">설정 · 해상도</button>
     <p style="margin-top:18px;color:#9a8864;font-size:13px;max-width:520px;text-align:center;line-height:1.5">
       50체력 · 마나 1~10 · 전장 7 · 손패 10 · 도발/돌진/보호막/전투의 함성<br>
       선공 3장, 후공 4장 + 동전.
@@ -25,6 +26,22 @@
 
 
   
+
+<div class="help-pop" id="settingsPop">
+  <div class="help-box settings-box">
+    <h2>설정</h2>
+    <h3>해상도</h3>
+    <p>하스스톤처럼 고정 4:3 게임 창 크기를 고릅니다. 창이 더 크면 검은 여백(레터박스), 작으면 비율을 유지한 채 축소됩니다.</p>
+    <label class="settings-row" for="resSelect">해상도
+      <select id="resSelect" class="settings-select"></select>
+    </label>
+    <label class="settings-row settings-check" for="fsToggle">
+      <input type="checkbox" id="fsToggle" /> 전체 화면
+    </label>
+    <button class="menu-btn" id="btnSettingsClose" style="min-width:160px;margin-top:18px">닫기</button>
+  </div>
+</div>
+
 <div class="help-pop" id="helpPop">
   <div class="help-box">
     <h2>도움말</h2>
@@ -136,6 +153,7 @@
 <script src="js/vfx.js"></script>
 <script src="js/bgm.js"></script>
 <script src="js/sfx.js"></script>
+<script src="js/settings.js"></script>
 <script src="js/render.js"></script>
 <script src="js/combat.js"></script>
 <script src="js/spell-fx.js"></script>

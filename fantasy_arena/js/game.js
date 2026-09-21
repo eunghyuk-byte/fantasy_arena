@@ -703,14 +703,17 @@ function placeDropGlow(on, x, y) {
   if (!mine) { glow.classList.remove("on"); return; }
   const gr = game.getBoundingClientRect();
   const b = mine.getBoundingClientRect();
+  const s = (window.StageSettings && StageSettings.stageScale)
+    ? StageSettings.stageScale()
+    : (parseFloat((document.getElementById("app") || {}).dataset && document.getElementById("app").dataset.stageScale || "1") || 1);
   const top = b.top - 8;
   const bottom = b.bottom + 8;
   const left = b.left - 8;
   const right = b.right + 8;
-  glow.style.top = (top - gr.top) + "px";
-  glow.style.left = (left - gr.left) + "px";
-  glow.style.width = (right - left) + "px";
-  glow.style.height = (bottom - top) + "px";
+  glow.style.top = ((top - gr.top) / s) + "px";
+  glow.style.left = ((left - gr.left) / s) + "px";
+  glow.style.width = ((right - left) / s) + "px";
+  glow.style.height = ((bottom - top) / s) + "px";
   glow.classList.add("on");
 }
 
@@ -729,10 +732,15 @@ function overBoard(x, y) {
   const opp = document.getElementById("oppBoard");
   if (!mine) return false;
   const r = mine.getBoundingClientRect();
-  if (x < r.left || x > r.right || y < r.top || y > r.bottom) return false;
+  // Pad hit box — scaled stages + hand fan made exact rect drops flaky
+  const padX = Math.max(12, r.width * 0.04);
+  const padY = Math.max(16, r.height * 0.08);
+  if (x < r.left - padX || x > r.right + padX || y < r.top - padY || y > r.bottom + padY) return false;
   if (opp) {
     const o = opp.getBoundingClientRect();
-    if (y <= o.bottom + 8) return false;
+    // Only reject if clearly still in the enemy lane (not merely near the shared midline)
+    const mid = (o.bottom + r.top) / 2;
+    if (y < mid) return false;
   }
   return true;
 }
@@ -759,20 +767,23 @@ function slotIndexFromPoint(x, y) {
 function bindHandCard(el, card) {
   el.onpointerenter = () => showPeek(el);
   el.onpointerleave = hidePeek;
-  el.onpointerdown = (ev) => {
+  // Prefer pointer events; also bind mouse* so headless/Electron drags never miss
+  const startDrag = (ev) => {
     hidePeek();
     if (ev.button != null && ev.button !== 0) return;
     if (!canDropCard(card)) return;
+    if (_drag) return;
     ev.preventDefault();
     ev.stopPropagation();
     clearDrag();
+    try { if (ev.pointerId != null && el.setPointerCapture) el.setPointerCapture(ev.pointerId); } catch (err) {}
     const r = el.getBoundingClientRect();
     const ghost = el.cloneNode(true);
     ghost.classList.add("drag-ghost");
     ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
     document.body.appendChild(ghost);
     el.classList.add("dragging");
-    _drag = { card, el, ghost, pid: ev.pointerId };
+    _drag = { card, el, ghost, pid: ev.pointerId, x0: ev.clientX, y0: ev.clientY };
     const move = (e) => {
       if (!_drag) return;
       _drag.ghost.style.left = e.clientX + "px";
@@ -783,6 +794,9 @@ function bindHandCard(el, card) {
       window.removeEventListener("pointermove", move, true);
       window.removeEventListener("pointerup", up, true);
       window.removeEventListener("pointercancel", up, true);
+      window.removeEventListener("mousemove", move, true);
+      window.removeEventListener("mouseup", up, true);
+      try { if (ev.pointerId != null && el.releasePointerCapture) el.releasePointerCapture(ev.pointerId); } catch (err) {}
       if (!_drag) return;
       const cardRef = _drag.card;
       const ok = overBoard(e.clientX, e.clientY) && canDropCard(cardRef);
@@ -790,14 +804,18 @@ function bindHandCard(el, card) {
       else window._dropSlot = null;
       clearDrag();
       if (ok) {
-        Sfx.playCardDrop();
+        try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
         onHandClick(cardRef);
       }
     };
     window.addEventListener("pointermove", move, true);
     window.addEventListener("pointerup", up, true);
     window.addEventListener("pointercancel", up, true);
+    window.addEventListener("mousemove", move, true);
+    window.addEventListener("mouseup", up, true);
   };
+  el.onpointerdown = startDrag;
+  el.onmousedown = startDrag;
 }
 
 function onHandClick(card) {

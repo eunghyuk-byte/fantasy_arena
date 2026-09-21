@@ -15,7 +15,11 @@ function render() {
   document.getElementById("oppHand").innerHTML = opp.hand.map(() => `<div class="back"></div>`).join("");
   const mh = document.getElementById("myHand");
   mh.style.setProperty("--n", String(Math.max(me.hand.length, 1)));
-  mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.mana && (c.type !== "minion" || me.board.length < 6))).join("");
+  // Do not rebuild hand DOM mid-drag — destroys pointer target and breaks drops
+  const dragging = (typeof _drag !== "undefined" && _drag);
+  if (!dragging) {
+    mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.mana && (c.type !== "minion" || me.board.length < 6))).join("");
+  }
   document.getElementById("oppBoard").innerHTML = renderLane(opp, "opp");
   document.getElementById("myBoard").innerHTML = renderLane(me, "me");
   document.getElementById("oppBoard").classList.toggle("empty", !opp.board.length);
@@ -38,14 +42,16 @@ function render() {
     requestAnimationFrame(() => { try { flyDrawCard(); } catch (e) {} });
   }
 
-  const handEls = document.querySelectorAll("#myHand .card");
-  const nHand = handEls.length;
-  handEls.forEach((el, i) => {
-    const t = nHand <= 1 ? 0 : (i - (nHand - 1) / 2);
-    el.style.transform = "rotate(" + (t * 4.2) + "deg) translateY(" + (Math.abs(t) * 8) + "px)";
-    el.style.zIndex = String(10 + i);
-    bindHandCard(el, me.hand[i]);
-  });
+  if (!(typeof _drag !== "undefined" && _drag)) {
+    const handEls = document.querySelectorAll("#myHand .card");
+    const nHand = handEls.length;
+    handEls.forEach((el, i) => {
+      const t = nHand <= 1 ? 0 : (i - (nHand - 1) / 2);
+      el.style.transform = "rotate(" + (t * 4.2) + "deg) translateY(" + (Math.abs(t) * 8) + "px)";
+      el.style.zIndex = String(10 + i);
+      bindHandCard(el, me.hand[i]);
+    });
+  }
   document.querySelectorAll("#myBoard .minion").forEach(el => {
     el.onclick = () => onMinionClick(me, findOn(me, el.dataset.uid), "me");
     el.onpointerenter = () => showPeek(el);
@@ -148,25 +154,18 @@ function paintSmall(ctx, text, x, y, neg) {
 
 
 
-async function punchFrame(img) {
-  try {
-    const c = document.createElement("canvas");
-    c.width = img.width; c.height = img.height;
-    const x = c.getContext("2d");
-    x.drawImage(img, 0, 0);
-    const id = x.getImageData(0, 0, c.width, c.height);
-    const d = id.data;
-    const w = c.width, h = c.height;
-    for (let i = 0; i < d.length; i += 4) {
-      const px = ((i / 4) % w), py = ((i / 4) / w) | 0;
-      const edge = px < w * 0.04 || px > w * 0.96 || py < h * 0.025 || py > h * 0.975;
-      if (edge && d[i] < 22 && d[i+1] < 18 && d[i+2] < 16) d[i+3] = 0;
-    }
-    x.putImageData(id, 0, 0);
-    return c;
-  } catch (e) { return img; }
+const _punchCache = new WeakMap();
+const _punchByUrl = new Map();
+async function punchFrame(img, urlKey) {
+  // Skip getImageData edge punch — freezes UI when composing many high-res cards.
+  if (!img) return img;
+  if (urlKey && _punchByUrl.has(urlKey)) return _punchByUrl.get(urlKey);
+  if (_punchCache.has(img)) return _punchCache.get(img);
+  _punchCache.set(img, img);
+  if (urlKey) _punchByUrl.set(urlKey, img);
+  return img;
 }
-function composeCardFace(c, opts={}) {
+async function composeCardFace(c, opts={}) {
   const W = 768, H = 1152;
   const canvas = document.createElement("canvas");
   canvas.width = W; canvas.height = H;
@@ -195,15 +194,38 @@ function composeCardFace(c, opts={}) {
   if (typeof CARD_ART !== "undefined" && CARD_ART[c.id]) art = await loadImg(CARD_ART[c.id]);
   if (!art && c.type !== "spell" && typeof CARD_FACE !== "undefined" && CARD_FACE[c.id]) art = await loadImg(CARD_FACE[c.id]);
   if (art) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(artX, artY, artW, artH);
+    ctx.clip();
+    ctx.imageSmoothingEnabled = true;
+    try { ctx.imageSmoothingQuality = "high"; } catch (e) {}
     if (tribe.id === "dark") ctx.filter = "brightness(1.48) contrast(1.10) saturate(1.12)";
     const isFull = !!(typeof CARD_ART !== "undefined" && CARD_ART[c.id]);
     let sx=0, sy=0, sw=art.width, sh=art.height;
     if (!isFull) {
+      // Crop source region only — still drawn with uniform scale (never stretch)
       sx = Math.floor(art.width * 0.13);
       sy = Math.floor(art.height * 0.15);
       sw = Math.floor(art.width * 0.74);
       sh = Math.floor(art.height * 0.42);
     }
+    // HARD RULE: one scale for both axes (cover or contain). Never stretch.
+    const drawUniform = (mode, focusX, focusY, scaleMul) => {
+      const base = mode === "cover"
+        ? Math.max(artW / sw, artH / sh)
+        : Math.min(artW / sw, artH / sh);
+      const scale = base * (scaleMul || 1);
+      const dw = sw * scale;
+      const dh = sh * scale;
+      let dx = artX + artW * focusX - dw * focusX;
+      let dy = artY + artH * focusY - dh * focusY;
+      if (mode === "cover") {
+        dx = Math.max(artX + artW - dw, Math.min(artX, dx));
+        dy = Math.max(artY + artH - dh, Math.min(artY, dy));
+      }
+      ctx.drawImage(art, sx, sy, sw, sh, dx, dy, dw, dh);
+    };
     const FOCUS = {
       e1:0.32, e2:0.30, e3:0.22, e4:0.36, e5:0.30, e6:0.34, e7:0.28, e8:0.30,
       e9:0.32, e10:0.30, e11:0.30, e12:0.28, e13:0.28, e14:0.30, e15:0.34,
@@ -213,38 +235,27 @@ function composeCardFace(c, opts={}) {
     };
     const fy = FOCUS[c.id] != null ? FOCUS[c.id] : 0.42;
     const landscape = sw / sh >= 1.05;
-    const cover = Math.max(artW / sw, artH / sh);
-    const contain = Math.min(artW / sw, artH / sh);
     const FOCUS_X = { e22:0.38, e23:0.40, e24:0.42 };
     if (landscape) {
-      const scale = cover;
-      const dw = sw * scale, dh = sh * scale;
       const fx = FOCUS_X[c.id] != null ? FOCUS_X[c.id] : 0.50;
-      let dx = artX + artW * 0.50 - dw * fx;
-      let dy = artY + (artH - dh) / 2;
-      dx = Math.max(artX + artW - dw, Math.min(artX, dx));
-      ctx.drawImage(art, sx, sy, sw, sh, dx, dy, dw, dh);
+      drawUniform("cover", fx, 0.50, 1);
     } else {
-      const bs = cover * 1.12;
-      const bdw = sw * bs, bdh = sh * bs;
-      const bdx = artX + (artW - bdw) / 2;
-      const bdy = artY + artH * 0.42 - bdh * fy;
+      // Soft cover blur fill (uniform) + contain subject (uniform)
       ctx.save();
-      ctx.filter = "blur(12px)";
-      ctx.drawImage(art, sx, sy, sw, sh, bdx, bdy, bdw, bdh);
+      ctx.filter = (tribe.id === "dark" ? "brightness(1.48) contrast(1.10) saturate(1.12) " : "") + "blur(12px)";
+      drawUniform("cover", 0.50, fy, 1.12);
       ctx.restore();
-      const scale = contain;
-      const dw = sw * scale, dh = sh * scale;
-      const dx = artX + (artW - dw) / 2;
-      const dy = artY + (artH - dh) / 2;
-      ctx.drawImage(art, sx, sy, sw, sh, dx, dy, dw, dh);
+      if (tribe.id === "dark") ctx.filter = "brightness(1.48) contrast(1.10) saturate(1.12)";
+      drawUniform("contain", 0.50, 0.50, 1);
     }
-  }
     ctx.filter = "none";
+    ctx.restore();
+  }
+  ctx.filter = "none";
 
   ctx.restore();
   const frame = await loadImg(frameUrl);
-  if (frame) ctx.drawImage(punchFrame(frame), 0, 0, W, H);
+  if (frame) ctx.drawImage(await punchFrame(frame, frameUrl), 0, 0, W, H);
 
   ctx.save();
   ctx.font = "800 " + Math.round(H*0.042) + "px 'Noto Sans KR', sans-serif";
@@ -346,14 +357,43 @@ async function paintStatCoins(ctx, c, W, H) {
 }
 
 const _faceWait = new Map();
+const _faceDone = new Map();
+const _composeQ = [];
+let _composeActive = 0;
+const COMPOSE_MAX = 2;
+function enqueueCompose(fn) {
+  return new Promise((resolve, reject) => {
+    const run = () => {
+      _composeActive++;
+      Promise.resolve()
+        .then(fn)
+        .then(v => { _composeActive--; resolve(v); pump(); })
+        .catch(err => { _composeActive--; reject(err); pump(); });
+    };
+    const pump = () => {
+      while (_composeActive < COMPOSE_MAX && _composeQ.length) _composeQ.shift()();
+    };
+    _composeQ.push(run);
+    pump();
+  });
+}
 function faceSrc(c, opts, el) {
-  const key = ["v62mid", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name].join("|");
+  const key = ["v63art", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name].join("|");
+  if (_faceDone.has(key)) {
+    const src = _faceDone.get(key);
+    if (el && src) el.src = src;
+    return Promise.resolve(src);
+  }
   if (_faceWait.has(key)) {
-    _faceWait.get(key).then(src => { if (el) el.src = src; });
+    _faceWait.get(key).then(src => { if (el && src) el.src = src; });
     return _faceWait.get(key);
   }
-  const p = composeCardFace(c, opts || {}).catch(err => {
+  const p = enqueueCompose(() => composeCardFace(c, opts || {})).then(src => {
+    if (src) _faceDone.set(key, src);
+    return src;
+  }).catch(err => {
     console.warn("composeCardFace", err);
+    if (typeof CARD_ART !== "undefined" && CARD_ART[c.id]) return CARD_ART[c.id];
     return (typeof CARD_FACE !== "undefined" && CARD_FACE[c.id]) ? CARD_FACE[c.id] : "";
   });
   _faceWait.set(key, p);

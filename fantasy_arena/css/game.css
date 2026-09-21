@@ -22,14 +22,17 @@
   #app {
     position: absolute;
     left: 50%; top: 50%;
-    width: min(100vw, calc(100vh * 4 / 3));
-    height: min(100vh, calc(100vw * 3 / 4));
+    /* Fixed logical stage (JS sets exact px). Outer window only letterboxes / scales. */
+    width: var(--stage-w, 1280px);
+    height: var(--stage-h, 960px);
     transform: translate(-50%, -50%);
+    transform-origin: center center;
     display: flex; flex-direction: column;
     background: #0b0705;
     overflow: hidden;
     container-type: size;
     container-name: stage;
+    box-shadow: 0 0 0 2px #2a1c10, 0 12px 40px rgba(0,0,0,.65);
   }
 
   .screen {
@@ -184,7 +187,7 @@
     width: 100% !important;
     height: 100% !important;
     z-index: 0 !important;
-    object-fit: fill !important;
+    object-fit: contain !important;
     pointer-events: none !important;
   }
   #game.active > .playfield {
@@ -829,14 +832,9 @@
   }
   .rarity-bar button.on { background:#5a4018; color:#fff3c8; border-color:#e8c36a; }
 
+  /* Viewport media must not reflow the fixed #app stage (HS-style). */
   @media (max-width: 720px) {
-    .hero-strip { grid-template-columns: 1fr auto; }
-    .side { display: none; }
-    .board { margin: 4px 6px; }
-    .minion, .card { width: auto; height: auto; }
-    .my-hand { height: auto; }
-    .opp-hand { height: auto; }
-    .board { margin: 2px 8px; }
+    /* title hero picks still tighten via earlier rule; in-game layout stays cq-based */
   }
 
   .card-pop {
@@ -1405,7 +1403,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: fill;
+    object-fit: contain;
     z-index: 0;
     pointer-events: none;
   }
@@ -1488,10 +1486,10 @@
   }
   @keyframes fxShake {
     0%,100% { transform: translate(0,0); }
-    20% { transform: translate(-5px, 3px); }
-    40% { transform: translate(6px, -2px); }
-    60% { transform: translate(-3px, -4px); }
-    80% { transform: translate(4px, 2px); }
+    20% { transform: translate(-2px, 1px); }
+    40% { transform: translate(2px, -1px); }
+    60% { transform: translate(-1px, -2px); }
+    80% { transform: translate(1px, 1px); }
   }
   .minion.fx-lunge { animation: fxLunge .5s cubic-bezier(.2,.8,.2,1); z-index: 8; }
   @keyframes fxLunge {
@@ -2071,4 +2069,67 @@
 .draw-ghost img {
   width: 100%; height: 100%; object-fit: contain; display: block;
   filter: drop-shadow(0 12px 16px rgba(0,0,0,.5));
+}
+
+
+/* ===== settings: resolution + fullscreen ===== */
+.settings-box { width: min(480px, 94vw); }
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 12px 0;
+  color: #f3e2b0;
+  font-size: 16px;
+  font-weight: 700;
+}
+.settings-select {
+  flex: 1;
+  max-width: 260px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 2px solid #6a5228;
+  background: #120c08;
+  color: #ffe7a8;
+  font: inherit;
+  font-size: 15px;
+}
+.settings-check {
+  justify-content: flex-start;
+  font-weight: 700;
+  cursor: pointer;
+}
+.settings-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: #e4c36a;
+}
+
+
+/* ===== Electron desktop: window size == stage ===== */
+html.is-desktop, html.is-desktop body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+#app.desktop-fill {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+
+/* art: never stretch — aspect ratio preserved (contain/cover only) */
+.card-face, .minion .card-face, #game.active .my-hand .card .card-face,
+.drag-ghost img, .lore-box .lore-card img, .pool-item img {
+  object-fit: contain !important;
+  object-position: center center !important;
 }
