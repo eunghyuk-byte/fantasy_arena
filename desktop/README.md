@@ -25,8 +25,8 @@ Artifacts (version from package.json):
 - `dist/Fantasy Arena <version>.exe` — portable (no install)
 
 Copy renamed builds for distribution, e.g.:
-- `FantasyArena-Setup-0.0.10.exe`
-- `FantasyArena-Portable-0.0.10.exe`
+- `FantasyArena-Setup-0.0.83.exe`
+- `FantasyArena-Portable-0.0.83.exe`
 
 ## Install / play (Windows)
 1. Run the Setup `.exe`, pick a folder (or use Portable).
