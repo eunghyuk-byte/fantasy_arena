@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.119";
+const GAME_VERSION = "0.120";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -720,21 +720,20 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "coin_luck") {
     p.coinP = fx.value;
   } else if (fx.type === "own_black_buff") {
-    const mark = (m) => {
-      if (!m) return;
-      if ((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0)) {
-        m.coinGold = false;
-        m.coinBlack = true;
+    if (target && target.kind === "minion" && target.owner === p) {
+      const m = target.minion;
+      if (isImmune(m)) { log(`${m.name} 면역 · 스펠 효과 무시`); }
+      else {
+        if ((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0)) {
+          m.coinGold = false;
+          m.coinBlack = true;
+        }
+        if (fx.atk) m.atk += fx.atk;
+        if (fx.def) m.def = (m.def || 0) + fx.def;
+        if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
+        if (typeof log === "function") log(`불길한예감: ${m.name} 코인 블랙, 공방체+${fx.atk || 0}`);
       }
-    };
-    p.board.forEach(mark);
-    p.hand.forEach(mark);
-    p.board.forEach(m => {
-      if (fx.atk) m.atk += fx.atk;
-      if (fx.def) m.def = (m.def || 0) + fx.def;
-      if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
-    });
-    if (typeof log === "function") log("불길한예감: 아군 코인 블랙, 아군 전체 공방체+" + (fx.atk || 0));
+    }
   } else if (fx.type === "buff_all") {
     p.board.forEach(m => {
       if (fx.atk) m.atk += fx.atk;
