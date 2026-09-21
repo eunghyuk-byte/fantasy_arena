@@ -150,7 +150,7 @@ const CARDS = [
   { id:"l5", tribe:"light", name:"축복방패병", cost:1, type:"minion", atk:1, def:2, hp:4, atkC:0, defC:1, hpC:0, ability:"보호", text:"보호" },
   { id:"l6", tribe:"light", name:"빛늑대", cost:2, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, text:"" },
   { id:"l7", tribe:"light", name:"성녀", cost:2, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, text:"" },
-  { id:"l8", tribe:"light", name:"신관", cost:2, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, ability:"출전", text:"출전" },
+  { id:"l8", tribe:"light", name:"신관", cost:2, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, text:"" },
   { id:"l9", tribe:"light", name:"예언자", cost:2, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, text:"" },
   { id:"l10", tribe:"light", name:"황충", cost:8, type:"minion", atk:2, def:1, hp:10, atkC:1, defC:1, hpC:1, rarity:"heroic", atkSkill:5, text:"치명공격" },
   { id:"l11", tribe:"light", name:"골드골렘", cost:3, type:"minion", atk:1, def:2, hp:5, atkC:0, defC:1, hpC:1, text:"" },
@@ -200,7 +200,7 @@ const CARDS = [
   { id:"f28", tribe:"fire", name:"불꽃요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, ability:"출전", text:"출전" },
   { id:"n22", tribe:"wind", name:"바람요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, ability:"출전", text:"출전" },
   { id:"a21", tribe:"water", name:"물의요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, ability:"출전", text:"출전" },
-  { id:"l25", tribe:"light", name:"광휘요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
+  { id:"l25", tribe:"light", name:"광휘요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, ability:"출전", text:"출전" },
   { id:"d19", tribe:"dark", name:"그림자요정", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, ability:"출전", text:"출전" },
   { id:"l17", tribe:"light", name:"황월영", cost:3, type:"minion", atk:1, def:1, hp:2, atkC:1, defC:1, hpC:1, rarity:"heroic", ability:"보호", text:"보호" },
   // --- tokens ---
