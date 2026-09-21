@@ -259,7 +259,7 @@ function playCard(p, card, target) {
     return false;
   }
   if (card.type === "minion" && p.board.length >= 5) {
-    log("전장이 가득 찼습니다 (최대 6장)");
+    log("전장이 가득 찼습니다 (최대 5장)");
     return false;
   }
   p.mana -= card.cost;
@@ -526,14 +526,14 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "face") {
     dealHero(e, fx.value);
   } else if (fx.type === "float_def") {
-    const n = Math.max(0, 6 - p.board.length) + Math.max(0, 6 - e.board.length);
+    const n = Math.max(0, 5 - p.board.length) + Math.max(0, 5 - e.board.length);
     [...p.board, ...e.board].forEach(m => { m.def = Math.max(0, (m.def || 0) - n); });
   } else if (fx.type === "seal_giant") {
     e.board.forEach(m => {
       if ((m.hp || 0) >= 6) { m.atk = 0; m.atkC = 0; }
     });
   } else if (fx.type === "summon_islands") {
-    const slots = Math.max(0, 6 - p.board.length);
+    const slots = Math.max(0, 5 - p.board.length);
     for (let i = 0; i < slots; i++) {
       const tok = cloneCard("e40");
       tok.canAttack = false; tok.attacksLeft = 0;
@@ -547,7 +547,7 @@ function applyFx(p, fx, target) {
     const n = Math.floor((p.maxMana || 0) / 2);
     [...e.board].forEach(m => damageMinion(e, m, n));
   } else if (fx.type === "sandtrap") {
-    const n = Math.max(0, 6 - p.board.length);
+    const n = Math.max(0, 5 - p.board.length);
     e.board.slice(0, n).forEach(m => damageMinion(e, m, 3));
   } else if (fx.type === "maze") {
     [...e.board].forEach(m => { if ((m.cost || 0) > (p.maxMana || 0)) m.dying = true; });
