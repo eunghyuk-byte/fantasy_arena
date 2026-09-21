@@ -382,7 +382,14 @@ const SpellFx = (() => {
   }
 
   async function resolveFace(card) {
-    const ready = card.face || (typeof CARD_FACE !== "undefined" && CARD_FACE[card.id]) || "";
+    // Spells/items (incl. spell tokens like coin): always compose — CARD_FACE may be a stale unit-framed bake
+    if (card && (card.type === "spell" || card.type === "item") && typeof composeCardFace === "function") {
+      try {
+        const src = await composeCardFace(card);
+        if (src && typeof src === "string") return src;
+      } catch (e) {}
+    }
+    const ready = (card && card.face) || (typeof CARD_FACE !== "undefined" && CARD_FACE[card && card.id]) || "";
     if (ready && typeof ready === "string" && ready.indexOf("[object") < 0) return ready;
     if (typeof composeCardFace === "function") {
       try {

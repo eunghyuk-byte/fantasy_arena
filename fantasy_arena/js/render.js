@@ -429,6 +429,8 @@ async function composeCardFace(c, opts={}) {
   } catch (err) {
     console.warn("card face export failed", err);
     if (typeof CARD_ART !== "undefined" && CARD_ART[c.id]) return CARD_ART[c.id];
+    // Spells/items: never fall back to CARD_FACE (coin was baked on a unit frame)
+    if (c && (c.type === "spell" || c.type === "item")) return canvas.toDataURL();
     if (typeof CARD_FACE !== "undefined" && CARD_FACE[c.id]) return CARD_FACE[c.id];
     return canvas.toDataURL();
   }
@@ -482,7 +484,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v65punch", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v66spellframe", c.id, c.type || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
@@ -511,6 +513,8 @@ function faceSrc(c, opts, el) {
   }).catch(err => {
     console.warn("composeCardFace", err);
     if (typeof CARD_ART !== "undefined" && CARD_ART[c.id]) return CARD_ART[c.id];
+    // Spells/items: skip CARD_FACE fallback (avoids unit-framed coin.jpg)
+    if (c && (c.type === "spell" || c.type === "item")) return "";
     return (typeof CARD_FACE !== "undefined" && CARD_FACE[c.id]) ? CARD_FACE[c.id] : "";
   });
   _faceWait.set(key, p);

@@ -518,6 +518,7 @@ function frameOf(c) {
 }
 function pickFrameUrl(c, tribe) {
   const t = tribe || (typeof TRIBES !== "undefined" && TRIBES.find(x => x.id === (c && c.tribe))) || { id: "earth" };
+  // Kind follows type only — token:true must NOT force unit/minion frames (coin is a spell token)
   const kind = (c && (c.type === "spell" || c.type === "item")) ? "spell" : "minion";
   const rarity = (c && c.rarity) || "common";
   const key = (t.id || "earth") + "|" + kind + "|" + rarity;
