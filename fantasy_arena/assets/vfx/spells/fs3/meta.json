@@ -1,22 +1,26 @@
 {
   "id": "fs3",
   "name": "화염구",
-  "kind": "single",
-  "durationMs": 1800,
-  "fps": 12,
+  "fps": 14,
+  "loop": false,
+  "layout": "horizontal",
+  "targetMode": "unit",
+  "flight": true,
   "cast": {
-    "file": "cast.webp",
-    "frames": 12,
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 18,
     "w": 720,
     "h": 720
   },
   "impact": {
-    "file": "impact.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 16,
+    "w": 720,
+    "h": 720
   },
+  "durationMs": 2429,
   "anchor": "target",
-  "sfxHint": "fire_ball",
-  "concept": "거대 파이어볼 응축 후 폭발"
+  "concept": "둥근 대형 화염구 비행 후 묵직한 구형 폭발"
 }

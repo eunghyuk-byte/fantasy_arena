@@ -1,22 +1,26 @@
 {
   "id": "fs1",
   "name": "화염화살",
-  "kind": "single",
-  "durationMs": 1600,
-  "fps": 12,
+  "fps": 14,
+  "loop": false,
+  "layout": "horizontal",
+  "targetMode": "unit",
+  "flight": true,
   "cast": {
-    "file": "cast.webp",
-    "frames": 12,
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 18,
     "w": 720,
     "h": 720
   },
   "impact": {
-    "file": "impact.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 16,
+    "w": 720,
+    "h": 720
   },
+  "durationMs": 2429,
   "anchor": "target",
-  "sfxHint": "fire_projectile",
-  "concept": "화염 화살이 응축되어 직격 파열"
+  "concept": "가느다란 불화살 직선 비행 후 핀포인트 스파크"
 }

@@ -1,22 +1,26 @@
 {
   "id": "fs4",
   "name": "화염탄",
-  "kind": "single",
-  "durationMs": 1700,
-  "fps": 12,
+  "fps": 14,
+  "loop": false,
+  "layout": "horizontal",
+  "targetMode": "unit",
+  "flight": false,
   "cast": {
-    "file": "cast.webp",
-    "frames": 12,
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 18,
     "w": 720,
     "h": 720
   },
   "impact": {
-    "file": "impact.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 16,
+    "w": 720,
+    "h": 720
   },
+  "durationMs": 2429,
   "anchor": "target",
-  "sfxHint": "fire_shell",
-  "concept": "폭열 탄환이 타겟을 소멸"
+  "concept": "대상 내부부터 타들어가 재가 되는 처형 임팩트"
 }

@@ -1,22 +1,26 @@
 {
   "id": "fs2",
   "name": "화염폭풍",
-  "kind": "aoe",
-  "durationMs": 2000,
-  "fps": 12,
+  "fps": 14,
+  "loop": false,
+  "layout": "horizontal",
+  "targetMode": "aoe_enemy",
+  "flight": false,
   "cast": {
-    "file": "cast.webp",
-    "frames": 12,
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 18,
     "w": 720,
     "h": 720
   },
   "aoe": {
-    "file": "aoe.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
+    "file": "aoe_strip.png",
+    "webp": "aoe.webp",
+    "frames": 16,
+    "w": 720,
+    "h": 720
   },
+  "durationMs": 2429,
   "anchor": "board-center",
-  "sfxHint": "fire_whirlwind",
-  "concept": "화염 회오리가 전장을 삼킴"
+  "concept": "중앙 화염 회오리 광역, 투사체 없음"
 }
