@@ -53,6 +53,7 @@ function layoutBoardSlots() {
 
 function render() {
   if (!state) return;
+  try { if (typeof hidePeek === "function") hidePeek(); } catch (e) {}
   const { me, opp } = meView();
   const myTurn = current() === me && !current().isAI && !state.over;
 
@@ -103,13 +104,10 @@ function render() {
 
   if (!(typeof _drag !== "undefined" && _drag)) {
     const handEls = document.querySelectorAll("#myHand .card");
-    const nHand = handEls.length;
     handEls.forEach((el, i) => {
-      const t = nHand <= 1 ? 0 : (i - (nHand - 1) / 2);
-      el.style.transform = "rotate(" + (t * 1.8) + "deg) translateY(" + (Math.abs(t) * 3) + "px)";
-      el.style.zIndex = String(10 + i);
       bindHandCard(el, me.hand[i]);
     });
+    layoutHandFan();
   }
   if (!(typeof _drag !== "undefined" && _drag && _drag.kind === "board")) {
     document.querySelectorAll("#myBoard .minion").forEach(el => {
@@ -564,10 +562,13 @@ function layoutHandFan() {
   if (!wrap) return;
   const cards = [...wrap.querySelectorAll(".card")];
   const n = cards.length;
+  const mid = (n - 1) / 2;
   cards.forEach((el, i) => {
-    const t = n <= 1 ? 0 : (i - (n - 1) / 2);
+    const t = n <= 1 ? 0 : (i - mid);
     el.style.transform = `translateY(${Math.abs(t)*7}px) rotate(${t*2.4}deg)`;
-    el.style.zIndex = String(20 + i);
+    // LTR z-order (Hearthstone): rightmost visually on top. Left crescent of each card is the hit target.
+    // !important beats any CSS .playable { z-index } flattening.
+    el.style.setProperty("z-index", String(20 + i), "important");
     el.style.setProperty("margin-left", i ? "-72px" : "0", "important");
   });
 }
