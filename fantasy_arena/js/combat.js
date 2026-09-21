@@ -352,24 +352,6 @@ function doAttack(p, attacker, target, auto) {
   });
 }
 
-function useHeroPower(p) {
-  if (p.powerUsed || p.mana < 2) return;
-  p.mana -= 2;
-  p.powerUsed = true;
-  const fx = p.hero.power;
-  if (fx.type === "summon") {
-    if (p.board.length >= 5) { log("전장이 가득 차 소환 실패"); return; }
-    const rec = cloneCard("recruit");
-    rec.atk = fx.value[0]; rec.hp = fx.value[1]; rec.maxHp = fx.value[1];
-    rec.canAttack = true; rec.attacksLeft = 1;
-    p.board.push(rec);
-    log(`${p.name} 영웅 능력: 신병 소환`);
-  } else {
-    applyFx(p, fx, { kind: "hero", owner: opponent(p) });
-    log(`${p.name} 영웅 능력: ${p.hero.powerName}`);
-  }
-  checkWin();
-}
 
 function checkWin() {
   if (state.over) return;

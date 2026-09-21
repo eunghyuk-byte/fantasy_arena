@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.084";
+const GAME_VERSION = "0.085";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -83,7 +83,6 @@ function makePlayer(hero, isAI, name) {
     name, hero, isAI,
     hp: 40, maxHp: 40,
     mana: 0, maxMana: 0,
-    powerUsed: false,
     deck: deckFor(hero, isAI),
     hand: [],
     board: [],
@@ -211,7 +210,6 @@ function beginTurn(p) {
   if (p.manaNext) { p.mana += p.manaNext; p.manaNext = 0; }
   p.noPlayMinion = false;
   p.coinP = null;
-  p.powerUsed = false;
   p.board.forEach(m => {
     if (m.skipAttack) { m.canAttack = false; m.attacksLeft = 0; m.skipAttack = false; }
     else { m.canAttack = true; m.attacksLeft = 1; }
@@ -1601,7 +1599,6 @@ function onMinionClick(owner, minion, side) {
 document.getElementById("game").addEventListener("click", (e) => {
   if (e.target.id === "endBtn") { Sfx.playTurn && Sfx.playTurn(); endTurn(); return; }
   if (e.target.id === "giveBtn") { confirmGiveUp(); return; }
-  if (e.target.id === "powerBtn" || e.target.closest("#powerBtn")) { return; }
   const portrait = e.target.closest(".hero-portrait, .hero-slot, .hud-hero");
   if (portrait) {
     const { me, opp } = meView();
@@ -1622,9 +1619,6 @@ document.getElementById("game").addEventListener("click", (e) => {
       ui.attacker = null;
       render();
       return;
-    }
-    if (who === me && current() === me && !current().isAI) {
-      useHeroPower(me); render();
     }
   }
 });

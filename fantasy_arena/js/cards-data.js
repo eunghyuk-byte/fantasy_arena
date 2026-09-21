@@ -1,17 +1,11 @@
 
 const TRIBES = [
-  { id: "earth", name: "땅", en: "Earth", icon: "🪨", open: true, color: "#8b5a2b",
-    powerName: "암석 방패", powerText: "1/2 암석 소환", power: { type: "summon", value: [1,2] } },
-  { id: "fire", name: "불", en: "Fire", icon: "🔥", open: true, color: "#d44512",
-    powerName: "불씨", powerText: "적 영웅에게 피해 1", power: { type: "face", value: 1 } },
-  { id: "wind", name: "바람", en: "Wind", icon: "🌬️", open: true, color: "#7ec8c8",
-    powerName: "돌풍", powerText: "적 영웅에게 피해 1", power: { type: "face", value: 1 } },
-  { id: "water", name: "물", en: "Water", icon: "💧", open: true, color: "#2a7ad4",
-    powerName: "샘물", powerText: "내 영웅 회복 2", power: { type: "heal_hero", value: 2 } },
-  { id: "dark", name: "암흑", en: "Dark", icon: "🌑", open: true, color: "#5a2a7a",
-    powerName: "암흑검", powerText: "적 영웅에게 피해 1", power: { type: "face", value: 1 } },
-  { id: "light", name: "빛", en: "Light", icon: "✨", open: true, color: "#f0e0a0",
-    powerName: "성광", powerText: "내 영웅 회복 2", power: { type: "heal_hero", value: 2 } },
+  { id: "earth", name: "땅", en: "Earth", icon: "🪨", open: true, color: "#8b5a2b" },
+  { id: "fire", name: "불", en: "Fire", icon: "🔥", open: true, color: "#d44512" },
+  { id: "wind", name: "바람", en: "Wind", icon: "🌬️", open: true, color: "#7ec8c8" },
+  { id: "water", name: "물", en: "Water", icon: "💧", open: true, color: "#2a7ad4" },
+  { id: "dark", name: "암흑", en: "Dark", icon: "🌑", open: true, color: "#5a2a7a" },
+  { id: "light", name: "빛", en: "Light", icon: "✨", open: true, color: "#f0e0a0" },
 ];
 
 const TRIBE_ICONS = {
@@ -205,7 +199,6 @@ const CARDS = [
   { id:"l17", tribe:"light", name:"황월영", cost:3, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:1, hpC:1, rarity:"heroic", ability:"보호", text:"보호" },
   // --- tokens ---
   { id:"e40", tribe:"earth", name:"섬의파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", text:"토큰" },
-  { id:"recruit", tribe:"earth", name:"암석", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, text:"영웅 능력" },
   // --- spells / items ---
 { id:"fs1", tribe:"fire", name:"화염화살", cost:2, type:"spell", text:"적 하나 피해 3", spell:{ type:"dmg", value:3, target:"enemy_minion" } },
   { id:"fs2", tribe:"fire", name:"화염폭풍", cost:4, type:"spell", text:"적 전체 피해 2, 코인-1", spell:{ type:"aoe_pack", enemy:2, coin:-1 } },
@@ -463,8 +456,7 @@ const CARD_RACE = {
   n25:"기수",
   n26:"기수",
   n27:"장수",
-  n28:"명장",
-  recruit:"짐승"
+  n28:"명장"
 };
 function parseCoin(v) {
   if (v == null || v === "") return 0;
@@ -508,7 +500,7 @@ const BADGES = {
   'def': "assets/img/badges/def.svg",
   'hp': "assets/img/badges/hp.svg",
 };
-const CARD_FACE = {"e1": "assets/img/faces/e1.jpg", "e2": "assets/img/faces/e2.jpg", "e3": "assets/img/faces/e3.jpg", "e4": "assets/img/faces/e4.jpg", "e5": "assets/img/faces/e5.jpg", "e6": "assets/img/faces/e6.jpg", "e7": "assets/img/faces/e7.jpg", "e8": "assets/img/faces/e8.jpg", "e9": "assets/img/faces/e9.jpg", "e10": "assets/img/faces/e10.jpg", "e11": "assets/img/faces/e11.jpg", "e12": "assets/img/faces/e12.jpg", "e13": "assets/img/faces/e13.jpg", "e14": "assets/img/faces/e14.jpg", "e15": "assets/img/faces/e15.jpg", "e16": "assets/img/faces/e16.jpg", "e17": "assets/img/faces/e17.jpg", "e18": "assets/img/faces/e18.jpg", "e19": "assets/img/faces/e19.jpg", "e20": "assets/img/faces/e20.jpg", "f1": "assets/img/faces/f1.jpg", "f2": "assets/img/faces/f2.jpg", "f3": "assets/img/faces/f3.jpg", "f4": "assets/img/faces/f4.jpg", "f5": "assets/img/faces/f5.jpg", "f6": "assets/img/faces/f6.jpg", "f7": "assets/img/faces/f7.jpg", "f8": "assets/img/faces/f8.jpg", "f9": "assets/img/faces/f9.jpg", "f10": "assets/img/faces/f10.jpg", "f11": "assets/img/faces/f11.jpg", "f12": "assets/img/faces/f12.jpg", "f13": "assets/img/faces/f13.jpg", "f14": "assets/img/faces/f14.jpg", "f15": "assets/img/faces/f15.jpg", "f16": "assets/img/faces/f16.jpg", "f17": "assets/img/faces/f17.jpg", "f18": "assets/img/faces/f18.jpg", "f19": "assets/img/faces/f19.jpg", "f20": "assets/img/faces/f20.jpg", "n1": "assets/img/faces/n1.jpg", "n2": "assets/img/faces/n2.jpg", "n3": "assets/img/faces/n3.jpg", "n4": "assets/img/faces/n4.jpg", "n5": "assets/img/faces/n5.jpg", "n6": "assets/img/faces/n6.jpg", "n7": "assets/img/faces/n7.jpg", "n8": "assets/img/faces/n8.jpg", "n9": "assets/img/faces/n9.jpg", "n10": "assets/img/faces/n10.jpg", "n11": "assets/img/faces/n11.jpg", "n12": "assets/img/faces/n12.jpg", "n13": "assets/img/faces/n13.jpg", "n14": "assets/img/faces/n14.jpg", "n15": "assets/img/faces/n15.jpg", "n16": "assets/img/faces/n16.jpg", "n17": "assets/img/faces/n17.jpg", "n18": "assets/img/faces/n18.jpg", "n19": "assets/img/faces/n19.jpg", "n20": "assets/img/faces/n20.jpg", "a1": "assets/img/faces/a1.jpg", "a2": "assets/img/faces/a2.jpg", "a3": "assets/img/faces/a3.jpg", "a4": "assets/img/faces/a4.jpg", "a5": "assets/img/faces/a5.jpg", "a6": "assets/img/faces/a6.jpg", "a7": "assets/img/faces/a7.jpg", "a8": "assets/img/faces/a8.jpg", "a9": "assets/img/faces/a9.jpg", "a10": "assets/img/faces/a10.jpg", "a11": "assets/img/faces/a11.jpg", "a12": "assets/img/faces/a12.jpg", "a13": "assets/img/faces/a13.jpg", "a14": "assets/img/faces/a14.jpg", "a15": "assets/img/faces/a15.jpg", "a16": "assets/img/faces/a16.jpg", "a17": "assets/img/faces/a17.jpg", "a18": "assets/img/faces/a18.jpg", "a19": "assets/img/faces/a19.jpg", "a20": "assets/img/faces/a20.jpg", "coin": "assets/img/faces/coin.jpg", "recruit": "assets/img/faces/recruit.jpg"};
+const CARD_FACE = {"e1": "assets/img/faces/e1.jpg", "e2": "assets/img/faces/e2.jpg", "e3": "assets/img/faces/e3.jpg", "e4": "assets/img/faces/e4.jpg", "e5": "assets/img/faces/e5.jpg", "e6": "assets/img/faces/e6.jpg", "e7": "assets/img/faces/e7.jpg", "e8": "assets/img/faces/e8.jpg", "e9": "assets/img/faces/e9.jpg", "e10": "assets/img/faces/e10.jpg", "e11": "assets/img/faces/e11.jpg", "e12": "assets/img/faces/e12.jpg", "e13": "assets/img/faces/e13.jpg", "e14": "assets/img/faces/e14.jpg", "e15": "assets/img/faces/e15.jpg", "e16": "assets/img/faces/e16.jpg", "e17": "assets/img/faces/e17.jpg", "e18": "assets/img/faces/e18.jpg", "e19": "assets/img/faces/e19.jpg", "e20": "assets/img/faces/e20.jpg", "f1": "assets/img/faces/f1.jpg", "f2": "assets/img/faces/f2.jpg", "f3": "assets/img/faces/f3.jpg", "f4": "assets/img/faces/f4.jpg", "f5": "assets/img/faces/f5.jpg", "f6": "assets/img/faces/f6.jpg", "f7": "assets/img/faces/f7.jpg", "f8": "assets/img/faces/f8.jpg", "f9": "assets/img/faces/f9.jpg", "f10": "assets/img/faces/f10.jpg", "f11": "assets/img/faces/f11.jpg", "f12": "assets/img/faces/f12.jpg", "f13": "assets/img/faces/f13.jpg", "f14": "assets/img/faces/f14.jpg", "f15": "assets/img/faces/f15.jpg", "f16": "assets/img/faces/f16.jpg", "f17": "assets/img/faces/f17.jpg", "f18": "assets/img/faces/f18.jpg", "f19": "assets/img/faces/f19.jpg", "f20": "assets/img/faces/f20.jpg", "n1": "assets/img/faces/n1.jpg", "n2": "assets/img/faces/n2.jpg", "n3": "assets/img/faces/n3.jpg", "n4": "assets/img/faces/n4.jpg", "n5": "assets/img/faces/n5.jpg", "n6": "assets/img/faces/n6.jpg", "n7": "assets/img/faces/n7.jpg", "n8": "assets/img/faces/n8.jpg", "n9": "assets/img/faces/n9.jpg", "n10": "assets/img/faces/n10.jpg", "n11": "assets/img/faces/n11.jpg", "n12": "assets/img/faces/n12.jpg", "n13": "assets/img/faces/n13.jpg", "n14": "assets/img/faces/n14.jpg", "n15": "assets/img/faces/n15.jpg", "n16": "assets/img/faces/n16.jpg", "n17": "assets/img/faces/n17.jpg", "n18": "assets/img/faces/n18.jpg", "n19": "assets/img/faces/n19.jpg", "n20": "assets/img/faces/n20.jpg", "a1": "assets/img/faces/a1.jpg", "a2": "assets/img/faces/a2.jpg", "a3": "assets/img/faces/a3.jpg", "a4": "assets/img/faces/a4.jpg", "a5": "assets/img/faces/a5.jpg", "a6": "assets/img/faces/a6.jpg", "a7": "assets/img/faces/a7.jpg", "a8": "assets/img/faces/a8.jpg", "a9": "assets/img/faces/a9.jpg", "a10": "assets/img/faces/a10.jpg", "a11": "assets/img/faces/a11.jpg", "a12": "assets/img/faces/a12.jpg", "a13": "assets/img/faces/a13.jpg", "a14": "assets/img/faces/a14.jpg", "a15": "assets/img/faces/a15.jpg", "a16": "assets/img/faces/a16.jpg", "a17": "assets/img/faces/a17.jpg", "a18": "assets/img/faces/a18.jpg", "a19": "assets/img/faces/a19.jpg", "a20": "assets/img/faces/a20.jpg", "coin": "assets/img/faces/coin.jpg"};
 const RARITY_FRAMES = {
   "earth|minion|common": "assets/img/frames/rarity/earth_minion_common.png",
   "earth|minion|rare": "assets/img/frames/rarity/earth_minion_rare.png",
@@ -547,7 +539,6 @@ const CARD_ART = {"a1":"assets/img/art/a1.jpg","a2":"assets/img/art/a2.jpg","a3"
   });
   // Token units: no dedicated art files — remap to similar earth art (deck/board never blank)
   if (!CARD_ART.e40) CARD_ART.e40 = "assets/img/art/e12.jpg";       // 섬의파편 → 스톤골렘
-  if (!CARD_ART.recruit) CARD_ART.recruit = "assets/img/art/e15.jpg"; // 암석 → 암석창병
 })();
 
 const CARD_MAP = Object.fromEntries((CARDS || []).filter(c => c && c.id).map(c => [c.id, c]));
@@ -613,7 +604,6 @@ const CARD_LORE = {
   "e27": "샌드웜이 모래 밑을 가르면 사막이 강처럼 흐른다. 입을 벌린 순간, 전장은 한 줄기의 골짜기가 된다.",
   "e28": "이끼방패병은 이끼를 갑옷처럼 두른다. 방패에 닿은 칼날은 미끄러지고, 그 자리에 푸른 흔적만 남는다.",
   "e40": "떠오른 섬에서 떨어진 한 조각. 작아도 흙의 기억이 남아, 빈 칸을 조용히 메운다.",
-  "recruit": "영웅의 손끝에서 피어난 암석. 말은 없지만 대지의 약속을 대신 서 있다.",
   "f1": "레드드래곤이 하늘을 가로지르면 노을이 피가 된다. 숨결이 쏟아지는 곳마다 그림자가 먼저 타오른다.",
   "f2": "불꽃궁수는 시위에 불씨를 매단다. 화살이 박힌 자리는 검게 남고, 연기가 적의 이름을 지운다.",
   "f3": "임프는 난로에서 튀어나온 장난. 커튼을 만나면 진지해지고, 진지해지면 이미 불길이다.",

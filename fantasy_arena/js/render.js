@@ -635,7 +635,6 @@ function heroStrip(p, isMe, myTurn) {
   let canTarget = false;
   if (ui.targeting) canTarget = ui.targeting.targets.some(t => t.kind === "hero" && t.owner === p);
   if (ui.attacker && !isMe) canTarget = attackTargets(me, ui.attacker).some(t => t.kind === "hero");
-  const powerReady = isMe && myTurn && !p.powerUsed && p.mana >= 2;
   const endReady = isMe && myTurn;
   const icon = (typeof TRIBE_ICONS !== "undefined" && TRIBE_ICONS[p.hero.id]) || "";
   const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
