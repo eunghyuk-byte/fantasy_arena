@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.120";
+const GAME_VERSION = "0.121";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -490,7 +490,7 @@ function needsTarget(card) {
   const fx = card.type === "spell" ? card.spell : card.battlecry;
   if (!fx) return false;
   if (fx.type === "draw_ex" && (fx.sacOwn || fx.bounceOwn || fx.enemyDmg)) return true;
-  if (fx.type === "kill_if" || fx.type === "set_one" || fx.type === "grant_extra" || fx.type === "double_def" || fx.type === "copy_own") return true;
+  if (fx.type === "kill_if" || fx.type === "set_one" || fx.type === "grant_extra" || fx.type === "double_def" || fx.type === "copy_own" || fx.type === "own_black_buff") return true;
   return ["dmg", "kill", "buff"].includes(fx.type) && fx.target;
 }
 
