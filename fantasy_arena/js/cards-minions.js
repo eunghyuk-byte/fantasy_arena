@@ -175,5 +175,13 @@ const MINIONS = [
   if (typeof CARDS === "undefined") return;
   const keep = CARDS.filter(c => c && c.type !== "minion");
   CARDS.splice(0, CARDS.length, ...MINIONS, ...keep);
+  // CARD_MAP was built in cards-data.js before this overlay — rebuild so every
+  // CARDS id resolves correctly for cloneCard / deck builder / game.js.
+  if (typeof CARD_MAP !== "undefined") {
+    for (const k of Object.keys(CARD_MAP)) delete CARD_MAP[k];
+    for (const c of CARDS) {
+      if (c && c.id) CARD_MAP[c.id] = c;
+    }
+  }
 })();
 

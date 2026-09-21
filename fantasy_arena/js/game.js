@@ -21,7 +21,8 @@ function shuffle(a) {
   return x;
 }
 function buildDeck(tribeId) {
-  const pool = CARDS.filter(c => !c.token && c.tribe === tribeId).map(c => c.id);
+  // Items/artifacts deferred — keep only minions + spells in normal tribe decks
+  const pool = CARDS.filter(c => !c.token && c.tribe === tribeId && c.type !== "item" && !/^it\d+$/.test(c.id)).map(c => c.id);
   const d = [];
   while (d.length < 30) {
     const id = pool[d.length % pool.length];
@@ -875,7 +876,8 @@ document.addEventListener("keydown", e => {
 let draftDeck = [];
 
 function tribeCards() {
-  return CARDS.filter(c => !c.token && c.tribe === selectedHero.id)
+  // Items/artifacts deferred — deck builder shows units + spells only
+  return CARDS.filter(c => !c.token && c.tribe === selectedHero.id && c.type !== "item" && !/^it\d+$/.test(c.id))
     .filter(c => {
       if (!ui.rarityFilter || ui.rarityFilter === "all") return true;
       return (c.rarity || "common") === ui.rarityFilter;
