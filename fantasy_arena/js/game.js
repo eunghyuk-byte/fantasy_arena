@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.130";
+const GAME_VERSION = "0.131";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -394,6 +394,20 @@ function equipItemOnUnit(p, card, unit) {
   if (card.id === "ni4") {
     bonuses.savedCoins = { atkC: unit.atkC || 0, defC: unit.defC || 0, hpC: unit.hpC || 0 };
     unit.atkC = 0; unit.defC = 0; unit.hpC = 0;
+  }
+  if (card.id === "fi5") {
+    bonuses.savedCoins = { atkC: unit.atkC || 0, defC: unit.defC || 0, hpC: unit.hpC || 0 };
+    const a = unit.atkC || 0, d = unit.defC || 0, h = unit.hpC || 0;
+    const n = Math.max(Math.abs(a), Math.abs(d), Math.abs(h));
+    if (n <= 0) {
+      unit.atkC = -5; unit.defC = 0; unit.hpC = 0;
+    } else {
+      const sign = (v) => (v > 0 ? 1 : v < 0 ? -1 : 0);
+      const sa = sign(a), sd = sign(d), sh = sign(h);
+      unit.atkC = sa ? sa * 5 : 0;
+      unit.defC = sd ? sd * 5 : 0;
+      unit.hpC = sh ? sh * 5 : 0;
+    }
   }
   if (card.id === "di4") {
     if ((unit.atkC || 0) || (unit.defC || 0) || (unit.hpC || 0)) {

@@ -86,12 +86,6 @@ function doAttack(p, attacker, target, auto) {
   const aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
   const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef);
   if (aShared.dHp) attacker.hp = clampHp((Number(attacker.hp) || 0) + aShared.dHp);
-  // fi5: 코인 있을 때만, 돌린 결과 전부 뒷면이면 파괴 (이번 타 공방체는 유지)
-  if (attacker.equippedItem && attacker.equippedItem.id === "fi5" && aShared.flips && aShared.flips.length && aShared.heads === 0) {
-    try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_break"); } catch (e) {}
-    if (typeof unequipItem === "function") unequipItem(attacker);
-    if (typeof log === "function") log(attacker.name + "의 도박불꽃반지가 파괴되었다");
-  }
   const rows = [];
   if (aShared.flips.length) {
     rows.push({
@@ -115,11 +109,6 @@ function doAttack(p, attacker, target, auto) {
     dAtk = clampAtk((Number(def.atk) || 0) + dShared.dAtk);
     const defVal = clampDef((Number(def.def) || 0) + dShared.dDef);
     if (dShared.dHp) def.hp = clampHp((Number(def.hp) || 0) + dShared.dHp);
-    if (def.equippedItem && def.equippedItem.id === "fi5" && dShared.flips && dShared.flips.length && dShared.heads === 0) {
-      try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_break"); } catch (e) {}
-      if (typeof unequipItem === "function") unequipItem(def);
-      if (typeof log === "function") log(def.name + "의 도박불꽃반지가 파괴되었다");
-    }
     if (dShared.flips.length) {
       rows.push({
         label: def.name + " 공유코인",
