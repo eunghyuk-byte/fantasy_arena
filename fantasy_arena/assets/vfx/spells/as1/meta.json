@@ -1,0 +1,22 @@
+{
+  "id": "as1",
+  "name": "냉기화살",
+  "kind": "single",
+  "durationMs": 1600,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "water_frost_arrow",
+  "concept": "결정 냉기화살이 동결 파열"
+}

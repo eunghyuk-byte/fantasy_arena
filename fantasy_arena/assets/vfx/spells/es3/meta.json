@@ -1,0 +1,22 @@
+{
+  "id": "es3",
+  "name": "샌드트랩",
+  "kind": "special",
+  "durationMs": 1700,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "board-center",
+  "sfxHint": "earth_sandtrap",
+  "concept": "모래 함정이 이빨처럼 닫힘"
+}

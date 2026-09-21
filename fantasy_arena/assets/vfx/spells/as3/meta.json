@@ -1,0 +1,22 @@
+{
+  "id": "as3",
+  "name": "익사",
+  "kind": "single",
+  "durationMs": 1800,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "water_drown",
+  "concept": "수중 소용돌이가 아래로 끌어당김"
+}

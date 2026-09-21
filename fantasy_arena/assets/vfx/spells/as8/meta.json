@@ -1,0 +1,22 @@
+{
+  "id": "as8",
+  "name": "개구리변신",
+  "kind": "aoe",
+  "durationMs": 1900,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "aoe": {
+    "file": "aoe.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "board-center",
+  "sfxHint": "water_frog",
+  "concept": "변신 연못에서 개구리로 축소"
+}

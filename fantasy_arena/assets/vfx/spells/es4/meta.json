@@ -1,0 +1,22 @@
+{
+  "id": "es4",
+  "name": "미로생성",
+  "kind": "buff",
+  "durationMs": 1800,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "self-board",
+  "sfxHint": "earth_maze",
+  "concept": "미로 석벽이 혼란 소용돌이를 그림"
+}

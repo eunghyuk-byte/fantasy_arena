@@ -1,0 +1,22 @@
+{
+  "id": "es5",
+  "name": "땅굴숨기",
+  "kind": "draw",
+  "durationMs": 1700,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "self-board",
+  "sfxHint": "earth_burrow",
+  "concept": "땅굴에서 카드가 솟구침"
+}

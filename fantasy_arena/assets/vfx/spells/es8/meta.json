@@ -1,0 +1,22 @@
+{
+  "id": "es8",
+  "name": "거대화",
+  "kind": "buff",
+  "durationMs": 1600,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "earth_enlarge",
+  "concept": "거대화 오라가 아군을 키움"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "as2",
+  "name": "물거울",
+  "kind": "buff",
+  "durationMs": 1700,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "water_mirror",
+  "concept": "수면 거울이 분신을 비춤"
+}
