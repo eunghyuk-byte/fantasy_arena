@@ -130,7 +130,7 @@ function render() {
   let hint = "";
   if (ui.targeting) hint = "대상을 선택하세요. 빈 곳 클릭으로 취소.";
   else if (ui.battling) hint = "자동 전투 중…";
-  else if (myTurn) hint = "하수인·마법 모두 전장으로 드래그. 마법은 전장에 놓는 순간 시전됩니다.";
+  else if (myTurn) hint = "유닛·스펠 모두 전장으로 드래그. 스펠은 전장에 놓는 순간 시전됩니다.";
   else if (current().isAI) hint = "상대가 생각 중…";
   else hint = "상대 턴입니다. (핫시트: 화면을 넘겨 주세요)";
   document.getElementById("hint").textContent = hint;
@@ -363,7 +363,7 @@ async function composeCardFace(c, opts={}) {
 
   const headerTxt = (c.type === "minion")
     ? (c.race || (typeof CARD_RACE !== "undefined" && CARD_RACE[c.id]) || "")
-    : (c.type === "item" ? "아이템" : "마법");
+    : (c.type === "item" ? "아이템" : "스펠");
   if (headerTxt) {
     ctx.save();
     // Same size as card title

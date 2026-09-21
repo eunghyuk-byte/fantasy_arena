@@ -5,4 +5,4 @@
 3. const 값은 경로 문자열로 치환 (`HUD_UI.board`, `CARD_FACE`, `CARD_ART`, 프레임 등)
 4. 로직 분할: `cards-data.js` → `vfx.js` → `sfx.js` → `combat.js` → `render.js` → `game.js`
 5. `index.html`이 위 순서로 스크립트 로드
-6. 동작 확인: 타이틀 → 덱 → 전투 배경/카드 얼굴/코인/마법 쇼케이스
+6. 동작 확인: 타이틀 → 덱 → 전투 배경/카드 얼굴/코인/스펠 쇼케이스

@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.089";
+const GAME_VERSION = "0.090";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -880,7 +880,7 @@ function resolveDeath(owner, m) {
     draw(owner, 1);
   } else if (ab === "복수") {
     if (fromSpell) {
-      log(`${m.name} 복수 · 마법 사망이라 미발동`);
+      log(`${m.name} 복수 · 스펠 사망이라 미발동`);
     } else if (ctx.killer && ctx.killerOwner && ctx.killer.hp > 0 && !ctx.killer.dying) {
       log(`${m.name} 복수 → ${ctx.killer.name} 사망`);
       ctx.killer.hp = 0;
@@ -1766,7 +1766,7 @@ async function openCardLore(id) {
   const img = slot.querySelector("img.card-face");
   if (img && face) img.src = face;
   document.getElementById("loreName").textContent = c.name;
-  const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : "마법");
+  const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : "스펠");
   const RARITY_KO = { common:"커먼", rare:"언커먼", heroic:"레어", legendary:"레전드" };
   const rareKo = RARITY_KO[c.rarity || "common"] || "커먼";
   const cap = (c.rarity === "legendary" || c.rarity === "heroic") ? "덱당 1장" : "최대 2장";

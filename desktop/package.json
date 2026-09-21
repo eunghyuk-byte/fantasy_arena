@@ -1,8 +1,8 @@
 {
   "name": "fantasy-arena-desktop",
-  "version": "0.0.89",
+  "version": "0.0.90",
   "private": true,
-  "description": "Electron shell for Fantasy Arena \u2014 fixed 4:3 window like Hearthstone",
+  "description": "Electron shell for Fantasy Arena — fixed 4:3 window like Hearthstone",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
