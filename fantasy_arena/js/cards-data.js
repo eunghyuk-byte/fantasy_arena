@@ -146,7 +146,7 @@ const CARDS = [
   { id:"l7", tribe:"light", name:"성녀", cost:2, type:"minion", atk:2, def:1, hp:1, atkC:0, defC:0, hpC:3, text:"" },
   { id:"l8", tribe:"light", name:"신관", cost:2, type:"minion", atk:1, def:0, hp:2, atkC:0, defC:3, hpC:0, text:"" },
   { id:"l9", tribe:"light", name:"예언자", cost:2, type:"minion", atk:3, def:0, hp:2, atkC:0, defC:1, hpC:1, text:"" },
-  { id:"l10", tribe:"light", name:"황충", cost:8, type:"minion", atk:3, def:1, hp:7, atkC:1, defC:1, hpC:1, rarity:"rare", atkSkill:5, text:"치명공격" },
+  { id:"l10", tribe:"light", name:"황충", cost:8, type:"minion", atk:1, def:0, hp:10, atkC:3, defC:0, hpC:3, rarity:"rare", atkSkill:5, text:"치명공격" },
   { id:"l11", tribe:"light", name:"골드골렘", cost:3, type:"minion", atk:2, def:0, hp:4, atkC:1, defC:1, hpC:1, text:"" },
   { id:"l12", tribe:"light", name:"성기사", cost:3, type:"minion", atk:3, def:0, hp:3, atkC:0, defC:1, hpC:0, ability:"보호", text:"보호" },
   { id:"l13", tribe:"light", name:"광명창병", cost:1, type:"minion", atk:3, def:0, hp:1, atkC:1, defC:0, hpC:0, text:"" },
