@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.121";
+const GAME_VERSION = "0.122";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -720,7 +720,7 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "coin_luck") {
     p.coinP = fx.value;
   } else if (fx.type === "own_black_buff") {
-    if (target && target.kind === "minion" && target.owner === p) {
+    if (target && target.kind === "minion") {
       const m = target.minion;
       if (isImmune(m)) { log(`${m.name} 면역 · 스펠 효과 무시`); }
       else {
