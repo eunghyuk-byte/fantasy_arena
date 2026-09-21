@@ -2305,9 +2305,8 @@ html.is-desktop, html.is-desktop body {
   flex: none !important;
 }
 
-
 /* ===== P0 LAYOUT 2026-09-21: keep battle UI inside stage ===== */
-/* Nothing may paint outside the fixed stage */
+/* Stage clip */
 #app, #game, #game.active {
   overflow: hidden !important;
 }
@@ -2315,12 +2314,38 @@ html.is-desktop, html.is-desktop body {
 #game.active .col-main {
   overflow: hidden !important;
   min-height: 0 !important;
+  box-sizing: border-box !important;
 }
 
-/* Rows: hand gets room, but cards must fit INSIDE the hand row */
-#game.active .col-main {
-  grid-template-rows: 8% 29% 29% 31% 3% !important;
+/* Keep playfield inside ornate board frame (safe inset) */
+#game.active .playfield {
+  padding: 3.2% 2.2% 2.4% 2.2% !important;
 }
+
+/* Opp hand needs real height — 8% was clipping card backs */
+#game.active .col-main {
+  grid-template-rows: 12% 27% 27% 30% 4% !important;
+}
+
+#game.active .opp-hand {
+  overflow: hidden !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  padding: 2px 10% 2px !important;
+  box-sizing: border-box !important;
+}
+#game.active .opp-hand .back {
+  height: min(72%, 7.2cqh) !important;
+  width: calc(min(72%, 7.2cqh) * 0.70) !important;
+  max-height: 100% !important;
+  margin-left: -10px !important;
+  flex: 0 0 auto !important;
+  transform: none !important;
+}
+#game.active .opp-hand .back:first-child { margin-left: 0 !important; }
 
 #game.active .my-hand {
   overflow: hidden !important;
@@ -2329,46 +2354,37 @@ html.is-desktop, html.is-desktop body {
   min-height: 0 !important;
   align-items: flex-end !important;
   justify-content: center !important;
-  padding: 2px 4% 6px !important;
+  padding: 4px 5% 10px !important;
   box-sizing: border-box !important;
-  gap: 0 !important;
 }
-
-/* Card height = hand row, never 38cqh (that was taller than the row → clipped) */
 #game.active .my-hand .card,
 #game.active .my-hand .card.playable {
-  height: calc(100% - 10px) !important;
-  max-height: calc(100% - 10px) !important;
+  height: calc(100% - 16px) !important;
+  max-height: calc(100% - 16px) !important;
   width: auto !important;
   aspect-ratio: 2 / 3 !important;
-  margin-left: -18px !important;
+  margin-left: -16px !important;
   overflow: hidden !important;
   flex: 0 0 auto !important;
   transform-origin: bottom center !important;
 }
-#game.active .my-hand .card:first-child {
-  margin-left: 0 !important;
-}
+#game.active .my-hand .card:first-child { margin-left: 0 !important; }
 #game.active .my-hand .card:hover {
-  /* lift within stage — do not scale so big cards leave the window */
-  transform: translateY(-14px) scale(1.05) !important;
+  transform: translateY(-10px) scale(1.04) !important;
   z-index: 30 !important;
 }
 
-#game.active .opp-hand {
+#game.active .hint {
   overflow: hidden !important;
-  padding: 4px 8% 0 !important;
-  box-sizing: border-box !important;
+  padding: 0 8% !important;
+  font-size: clamp(11px, 1.6cqh, 14px) !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
 }
 
-/* Board art: fill stage so top gems aren't letterbox-clipped oddly */
+/* Board art: contain so frame gems stay on-screen; letterbox OK inside stage */
 #game.active > #boardBgLayer {
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
-}
-
-/* Peek/pop cards stay inside stage via #app overflow hidden */
-.card-pop, #cardMenuPop {
-  max-width: 100% !important;
-  max-height: 100% !important;
 }
