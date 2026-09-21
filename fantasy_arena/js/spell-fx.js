@@ -112,12 +112,12 @@ const SpellFx = (() => {
     if (lab) { lab.textContent = (card && card.name) || meta.name || ""; lab.style.opacity = "1"; }
     layer.classList.add("pack-play");
 
-    // Prefer animated webp; strip as fallback. Always keep layer visible long enough.
-    if (await probeUrl(castWebp)) await playWebp(stage, castWebp, Math.max(800, castMs));
-    else if (await probeUrl(castStrip)) await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+    // Strips first: chroma-keyed webp can be fully transparent (opaque=0).
+    if (await probeUrl(castStrip)) await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+    else if (await probeUrl(castWebp)) await playWebp(stage, castWebp, Math.max(800, castMs));
 
-    if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, Math.max(700, hitMs));
-    else if (await probeUrl(hitStrip)) await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+    if (await probeUrl(hitStrip)) await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+    else if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, Math.max(700, hitMs));
 
     if (fxCard) { fxCard.style.opacity = ""; }
     return true;
