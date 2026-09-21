@@ -26,7 +26,8 @@ function layoutBoardAlign() {
   if (oppBoard < 0.18) { oppBoard = 0.18; myBoard = rest - oppBoard; }
   if (myBoard < 0.16) { myBoard = 0.16; oppBoard = rest - myBoard; }
   const pct = (x) => (x * 100).toFixed(2) + "%";
-  main.style.gridTemplateRows = [oppHand, oppBoard, myBoard, hand, hint].map(pct).join(" ");
+  const rows = [oppHand, oppBoard, myBoard, hand, hint].map(pct).join(" ");
+  main.style.setProperty("grid-template-rows", rows, "important");
 }
 
 function layoutBoardSlots() {

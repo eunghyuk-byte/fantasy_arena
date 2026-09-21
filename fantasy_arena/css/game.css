@@ -2350,7 +2350,7 @@ html.is-desktop, html.is-desktop body {
   height: 100% !important;
   display: grid !important;
   /* Align to parchment: center line ~ mid stage */
-  grid-template-rows: 8% 36% 28% 24% 4% !important;
+  /* rows: layoutBoardAlign */
   grid-template-columns: 1fr !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -2450,8 +2450,7 @@ html.is-desktop, html.is-desktop body {
 
 /* ===== P0 hand may overhang board bottom (HS) ===== */
 #game.active .col-main {
-  /* default rows; JS layoutBoardAlign overrides to parchment center line */
-  grid-template-rows: 7% 40% 28% 21% 4% !important;
+  /* grid-template-rows set by layoutBoardAlign (parchment center line) */
 }
 #game.active .my-hand {
   /* Hearthstone-like: hand can hang slightly past board bottom edge */
