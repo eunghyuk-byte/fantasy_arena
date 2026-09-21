@@ -2460,3 +2460,18 @@ html.is-desktop, html.is-desktop body {
 #game.active .col-main {
   overflow: hidden !important; /* stage still clips; hand can sit on board edge */
 }
+
+/* ===== P0 gap from parchment center line ===== */
+/* Center line stays; nudge rows away from it slightly */
+#game.active .board.opp {
+  align-items: flex-end !important;
+  padding-bottom: clamp(10px, 2.2cqh, 22px) !important;
+  padding-top: 0 !important;
+  box-sizing: border-box !important;
+}
+#game.active #myBoard {
+  align-items: flex-start !important;
+  padding-top: clamp(10px, 2.2cqh, 22px) !important;
+  padding-bottom: 0 !important;
+  box-sizing: border-box !important;
+}
