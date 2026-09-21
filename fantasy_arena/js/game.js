@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.013";
+const GAME_VERSION = "0.014";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1395,14 +1395,14 @@ function renderHeroPicks() {
       if (!h.open) return;
       selectedHero = h;
       renderHeroPicks();
-
-(function paintBuildVer() {
-  const el = document.getElementById("buildVer");
-  if (el) el.textContent = "v" + GAME_VERSION;
-})();
     };
   });
 }
+function paintBuildVer() {
+  const el = document.getElementById("buildVer");
+  if (el) el.textContent = "v" + GAME_VERSION;
+}
+paintBuildVer();
 renderHeroPicks();
 document.getElementById("btnAi").onclick = () => startGame(true);
 document.getElementById("btnPvp").onclick = () => startGame(false);
