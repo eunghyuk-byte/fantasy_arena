@@ -1,3 +1,4 @@
+const GAME_VERSION = "0.001";
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 function cloneCard(id) {
@@ -1291,6 +1292,11 @@ function renderHeroPicks() {
       if (!h.open) return;
       selectedHero = h;
       renderHeroPicks();
+
+(function paintBuildVer() {
+  const el = document.getElementById("buildVer");
+  if (el) el.textContent = "v" + GAME_VERSION;
+})();
     };
   });
 }
