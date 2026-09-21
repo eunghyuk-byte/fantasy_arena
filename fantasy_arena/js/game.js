@@ -1144,6 +1144,10 @@ function tribeCards() {
   // Deck builder: units + spells + items
   return CARDS.filter(c => !c.token && c.tribe === selectedHero.id)
     .filter(c => {
+      if (!ui.typeFilter || ui.typeFilter === "all") return true;
+      return c.type === ui.typeFilter;
+    })
+    .filter(c => {
       if (!ui.rarityFilter || ui.rarityFilter === "all") return true;
       return (c.rarity || "common") === ui.rarityFilter;
     })
@@ -1231,7 +1235,10 @@ async function openCardLore(id) {
 
 
 function renderBuilder() {
-  document.getElementById("poolTitle").textContent = selectedHero.name + " 카드 (" + selectedHero.en + ")";
+  const _pool = tribeCards();
+  const _ic = _pool.filter(c => c.type === "item").length;
+  const _typeKo = { all:"전체", minion:"유닛", spell:"스펠", item:"아이템" }[ui.typeFilter || "all"] || "전체";
+  document.getElementById("poolTitle").textContent = selectedHero.name + " · " + _typeKo + " (" + _pool.length + "장" + (ui.typeFilter==="all" ? " · 아이템 "+_ic : "") + ")";
   const meta = document.getElementById("deckMeta");
   meta.textContent = draftDeck.length + " / 30  ·  일반·희귀 2장, 영웅·전설 1장";
   meta.className = "deck-meta " + (draftDeck.length === 30 ? "ok" : "bad");
@@ -1244,6 +1251,10 @@ function renderBuilder() {
       ${renderCard(c, n < cap && draftDeck.length < 30)}
     </div>`;
   }).join("");
+  document.querySelectorAll("#typeBar button").forEach(btn => {
+    btn.classList.toggle("on", btn.dataset.t === (ui.typeFilter || "all"));
+    btn.onclick = (ev) => { ev.stopPropagation(); ui.typeFilter = btn.dataset.t; renderBuilder(); };
+  });
   document.querySelectorAll("#rarityBar button").forEach(btn => {
     btn.classList.toggle("on", btn.dataset.r === ui.rarityFilter);
     btn.onclick = (ev) => { ev.stopPropagation(); ui.rarityFilter = btn.dataset.r; renderBuilder(); };
