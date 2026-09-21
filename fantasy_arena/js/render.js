@@ -525,9 +525,9 @@ function layoutHandFan() {
   const n = cards.length;
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
-    el.style.transform = `translateY(${Math.abs(t)*2}px) rotate(${t*1.2}deg)`;
+    el.style.transform = `translateY(${Math.abs(t)*2}px) rotate(${t*1.1}deg)`;
     el.style.zIndex = String(20 + i);
-    el.style.marginLeft = i ? "-36px" : "0";
+    el.style.setProperty("margin-left", i ? "-72px" : "0", "important");
   });
 }
 

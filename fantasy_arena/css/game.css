@@ -2515,3 +2515,17 @@ html.is-desktop, html.is-desktop body {
   max-height: 20cqh !important;
   width: auto !important;
 }
+
+/* ===== P0 hand fan pack inside frame ===== */
+#game.active .my-hand {
+  justify-content: center !important;
+  gap: 0 !important;
+}
+#game.active .my-hand .card,
+#game.active .my-hand .card.playable {
+  margin-left: -72px !important;
+}
+#game.active .my-hand .card:first-child,
+#game.active .my-hand .card.playable:first-child {
+  margin-left: 0 !important;
+}
