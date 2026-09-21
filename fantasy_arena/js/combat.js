@@ -1,16 +1,15 @@
 function doAttack(p, attacker, target, auto) {
   return new Promise(resolve => {
   if (!attacker || attacker.hp <= 0) { resolve(); return; }
-  if (!auto) {
-    if (!attacker.canAttack || attacker.attacksLeft <= 0) { resolve(); return; }
-    const legal = attackTargets(p, attacker);
-    const ok = legal.some(t => t.kind === target.kind && (t.kind === "hero" || t.minion.uid === target.minion.uid));
-    if (!ok) { resolve(); return; }
-    attacker.attacksLeft -= 1;
-    attacker.canAttack = attacker.attacksLeft > 0;
-  }
+  // R7: auto combat must obey the same attack rights as manual attacks
+  if (!attacker.canAttack || attacker.attacksLeft <= 0) { resolve(); return; }
+  const legal = attackTargets(p, attacker);
+  const ok = legal.some(t => t.kind === target.kind && (t.kind === "hero" || t.minion.uid === target.minion.uid));
+  if (!ok) { resolve(); return; }
+  attacker.attacksLeft -= 1;
+  attacker.canAttack = attacker.attacksLeft > 0;
   const aRoll = rollCoins(attacker.atkC);
-  const aAtk = Math.max(0, attacker.atk + aRoll.delta);
+  const aAtk = Math.max(0, (Number(attacker.atk) || 0) + aRoll.delta);
   const rows = [];
   if (aRoll.flips && aRoll.flips.length) {
     rows.push({
@@ -26,7 +25,7 @@ function doAttack(p, attacker, target, auto) {
   if (target.kind === "minion") {
     def = target.minion;
     dRoll = rollCoins(def.atkC);
-    dAtk = Math.max(0, def.atk + dRoll.delta);
+    dAtk = Math.max(0, (Number(def.atk) || 0) + dRoll.delta);
     if (dRoll.flips && dRoll.flips.length) {
       rows.push({
         label: def.name + " 반격",
@@ -38,7 +37,7 @@ function doAttack(p, attacker, target, auto) {
       });
     }
     const defRoll = rollCoins(def.defC);
-    const defVal = Math.max(0, (def.def || 0) + defRoll.delta);
+    const defVal = Math.max(0, (Number(def.def) || 0) + defRoll.delta);
     if (defRoll.flips && defRoll.flips.length) {
       rows.push({
         label: def.name + " 방어",
@@ -50,7 +49,48 @@ function doAttack(p, attacker, target, auto) {
       });
     }
     const aDefRoll = rollCoins(attacker.defC);
-    const aDefVal = Math.max(0, (attacker.def || 0) + aDefRoll.delta);
+    const aDefVal = Math.max(0, (Number(attacker.def) || 0) + aDefRoll.delta);
+    if (aDefRoll.flips && aDefRoll.flips.length) {
+      rows.push({
+        label: attacker.name + " 방어",
+        modLabel: fmtC(attacker.defC),
+        flips: aDefRoll.flips,
+        delta: aDefRoll.delta,
+        base: attacker.def || 0,
+        value: aDefVal
+      });
+    }
+    // R5: hpC coin rolls apply in combat (symmetric with atkC/defC)
+    if (def.hpC) {
+      const hRoll = rollCoins(def.hpC);
+      const hpBase = def.hp;
+      def.hp = Math.max(0, (Number(def.hp) || 0) + hRoll.delta);
+      if (hRoll.flips && hRoll.flips.length) {
+        rows.push({
+          label: def.name + " 체력",
+          modLabel: fmtC(def.hpC),
+          flips: hRoll.flips,
+          delta: hRoll.delta,
+          base: hpBase,
+          value: def.hp
+        });
+      }
+    }
+    if (attacker.hpC) {
+      const ahRoll = rollCoins(attacker.hpC);
+      const ahpBase = attacker.hp;
+      attacker.hp = Math.max(0, (Number(attacker.hp) || 0) + ahRoll.delta);
+      if (ahRoll.flips && ahRoll.flips.length) {
+        rows.push({
+          label: attacker.name + " 체력",
+          modLabel: fmtC(attacker.hpC),
+          flips: ahRoll.flips,
+          delta: ahRoll.delta,
+          base: ahpBase,
+          value: attacker.hp
+        });
+      }
+    }
     window._pendingDef = defVal;
     window._pendingAtkDef = aDefVal;
   } else { window._pendingDef = 0; window._pendingAtkDef = 0; }
@@ -238,7 +278,7 @@ function aiTurn() {
 
 function scorePlay(p, card) {
   let s = card.cost * 2 + (card.atk || 0) + (card.hp || 0);
-  if ((card.keywords || []).includes("taunt")) s += 2;
+  // taunt deprecated (R4-A): board-empty-hero rule in attackTargets
   if ((card.keywords || []).includes("charge")) s += 3;
   if (card.spell && card.spell.type === "dmg") {
     const e = opponent(p);

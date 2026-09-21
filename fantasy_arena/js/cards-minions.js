@@ -16,7 +16,7 @@ const MINIONS = [
   { id:"e14", tribe:"earth", name:"마초", cost:9, type:"minion", atk:9, def:3, hp:10, atkC:0, defC:0, hpC:1, text:"" },
   { id:"e15", tribe:"earth", name:"암석창병", cost:1, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, text:"" },
   { id:"e16", tribe:"earth", name:"켄타우로스", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
-  { id:"e17", tribe:"earth", name:"고르곤", cost:3, type:"minion", atk:4, def:1, hp:5, atkC:0, defC:0, hpC:1, text:"" },
+  { id:"e17", tribe:"earth", name:"고르곤", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"e18", tribe:"earth", name:"대지의 정령", cost:4, type:"minion", atk:4, def:1, hp:5, atkC:0, defC:0, hpC:1, text:"" },
   { id:"e19", tribe:"earth", name:"곽가", cost:8, type:"minion", atk:8, def:3, hp:9, atkC:0, defC:0, hpC:1, text:"" },
   { id:"e20", tribe:"earth", name:"베헤모스", cost:6, type:"minion", atk:6, def:5, hp:10, atkC:0, defC:0, hpC:2, text:"" },
@@ -47,7 +47,7 @@ const MINIONS = [
   { id:"f17", tribe:"fire", name:"불의 정령", cost:4, type:"minion", atk:4, def:1, hp:5, atkC:0, defC:0, hpC:1, text:"" },
   { id:"f18", tribe:"fire", name:"이프리트", cost:4, type:"minion", atk:4, def:1, hp:5, atkC:0, defC:0, hpC:1, text:"" },
   { id:"f19", tribe:"fire", name:"케르베로스", cost:5, type:"minion", atk:4, def:1, hp:5, atkC:0, defC:0, hpC:1, text:"" },
-  { id:"f20", tribe:"fire", name:"데빌", cost:3, type:"minion", atk:8, def:3, hp:9, atkC:0, defC:0, hpC:1, text:"" },
+  { id:"f20", tribe:"fire", name:"데빌", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"f21", tribe:"fire", name:"화염창병", cost:1, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, text:"" },
   { id:"f22", tribe:"fire", name:"하후돈", cost:7, type:"minion", atk:7, def:2, hp:8, atkC:0, defC:0, hpC:1, text:"" },
   { id:"f23", tribe:"fire", name:"발록", cost:5, type:"minion", atk:5, def:2, hp:6, atkC:1, defC:0, hpC:0, text:"" },
@@ -68,7 +68,7 @@ const MINIONS = [
   { id:"n11", tribe:"wind", name:"그리핀", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"n12", tribe:"wind", name:"윈드골렘", cost:3, type:"minion", atk:1, def:2, hp:5, atkC:0, defC:1, hpC:1, text:"" },
   { id:"n13", tribe:"wind", name:"폭풍드래곤", cost:9, type:"minion", atk:9, def:3, hp:10, atkC:0, defC:0, hpC:1, text:"" },
-  { id:"n14", tribe:"wind", name:"폭풍창병", cost:1, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
+  { id:"n14", tribe:"wind", name:"폭풍창병", cost:1, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:0, hpC:0, text:"" },
   { id:"n15", tribe:"wind", name:"회오리무희", cost:5, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"n16", tribe:"wind", name:"가루다", cost:4, type:"minion", atk:4, def:1, hp:5, atkC:0, defC:0, hpC:1, text:"" },
   { id:"n17", tribe:"wind", name:"바람의 정령", cost:4, type:"minion", atk:4, def:1, hp:5, atkC:0, defC:0, hpC:1, text:"" },
@@ -150,7 +150,7 @@ const MINIONS = [
   { id:"d13", tribe:"dark", name:"미라", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"d14", tribe:"dark", name:"서큐버스", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"d15", tribe:"dark", name:"나이트메어", cost:4, type:"minion", atk:4, def:1, hp:5, atkC:0, defC:0, hpC:1, text:"" },
-  { id:"d16", tribe:"dark", name:"듀라한", cost:3, type:"minion", atk:5, def:1, hp:4, atkC:1, defC:0, hpC:0, text:"일반공격" },
+  { id:"d16", tribe:"dark", name:"듀라한", cost:3, type:"minion", atk:3, def:1, hp:4, atkC:1, defC:0, hpC:0, text:"일반공격" },
   { id:"d17", tribe:"dark", name:"저주방패병", cost:1, type:"minion", atk:1, def:2, hp:4, atkC:0, defC:1, hpC:0, text:"" },
   { id:"d18", tribe:"dark", name:"장료", cost:6, type:"minion", atk:6, def:2, hp:7, atkC:1, defC:0, hpC:0, text:"" },
   { id:"d20", tribe:"dark", name:"가고일", cost:5, type:"minion", atk:5, def:2, hp:4, atkC:1, defC:0, hpC:0, text:"일반공격" },
@@ -177,6 +177,14 @@ const MINIONS = [
   CARDS.splice(0, CARDS.length, ...MINIONS, ...keep);
   // CARD_MAP was built in cards-data.js before this overlay — rebuild so every
   // CARDS id resolves correctly for cloneCard / deck builder / game.js.
+  // Token minions (wiped by overlay — re-add for hero power / summon_islands)
+  const TOKENS = [
+    { id:"e40", tribe:"earth", name:"섬의파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", text:"토큰" },
+    { id:"recruit", tribe:"earth", name:"암석", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, text:"영웅 능력" },
+  ];
+  for (const t of TOKENS) {
+    if (!CARDS.some(c => c && c.id === t.id)) CARDS.push(t);
+  }
   if (typeof CARD_MAP !== "undefined") {
     for (const k of Object.keys(CARD_MAP)) delete CARD_MAP[k];
     for (const c of CARDS) {

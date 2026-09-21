@@ -2,6 +2,29 @@
 function uid() { return Math.random().toString(36).slice(2, 9); }
 function cloneCard(id) {
   const b = CARD_MAP[id];
+  if (!b) {
+    console.warn("cloneCard missing id", id);
+    return {
+      id: id || "missing",
+      name: "?",
+      cost: 0,
+      type: "minion",
+      tribe: "earth",
+      atk: 0,
+      def: 0,
+      hp: 1,
+      atkC: 0,
+      defC: 0,
+      hpC: 0,
+      keywords: [],
+      uid: uid(),
+      maxHp: 1,
+      canAttack: false,
+      attacksLeft: 0,
+      damaged: false,
+      token: true,
+    };
+  }
   return {
     ...b,
     keywords: [...(b.keywords || [])],
@@ -53,7 +76,7 @@ function deckFor(hero, isAI) {
 function makePlayer(hero, isAI, name) {
   return {
     name, hero, isAI,
-    hp: 30, maxHp: 30,
+    hp: 40, maxHp: 40,
     mana: 0, maxMana: 0,
     powerUsed: false,
     deck: deckFor(hero, isAI),
@@ -86,7 +109,8 @@ function draw(p, n = 1) {
     }
     const id = p.deck.pop();
     if (p.hand.length >= 10) {
-      log(`${p.name}의 손패가 가득 차 ${CARD_MAP[id].name}이(가) 불탔다`);
+      const nm = (CARD_MAP[id] && CARD_MAP[id].name) || id;
+      log(`${p.name}의 손패가 가득 차 ${nm}이(가) 불탔다`);
     } else {
       p.hand.push(cloneCard(id));
       if (!p.isAI) p._drew = true;
@@ -197,8 +221,14 @@ async function runAutoCombat(p) {
   for (const m of wave) {
     if (state.over) break;
     if (!p.board.includes(m) || m.hp <= 0) continue;
+    // R7: skip units without attack rights (e.g. summoned this turn without charge)
+    if (!m.canAttack || m.attacksLeft <= 0 || (Number(m.atk) || 0) <= 0) continue;
+    const legal = attackTargets(p, m);
+    if (!legal.length) continue;
     const foe = e.board.find(x => x.hp > 0);
     const target = foe ? { kind: "minion", owner: e, minion: foe } : { kind: "hero", owner: e };
+    const ok = legal.some(t => t.kind === target.kind && (t.kind === "hero" || t.minion.uid === target.minion.uid));
+    if (!ok) continue;
     await doAttack(p, m, target, true);
     render();
     await waitMs(480);
@@ -561,6 +591,7 @@ function dealToTarget(srcOwner, target, n) {
 }
 
 function dealHero(p, n) {
+  n = Number(n) || 0;
   if (!n) return;
   try { Sfx.playHeroHit && Sfx.playHeroHit(); } catch (e) {}
   const from = p.hp;
@@ -584,6 +615,8 @@ function damageMinion(owner, m, n) {
 }
 
 function destroyMinion(owner, m) {
+  if (!owner || !m) return;
+  if (!owner.board.some(x => x.uid === m.uid)) return;
   const rebirth = (m.ability && String(m.ability).includes("환생")) || (m.keywords || []).includes("rebirth");
   if (rebirth) {
     m.keywords = (m.keywords || []).filter(k => k !== "rebirth");
@@ -601,8 +634,9 @@ function destroyMinion(owner, m) {
 
 function cleanupBoards() {
   [state.p1, state.p2].forEach(p => {
-    p.board.filter(m => m.hp <= 0).forEach(m => destroyMinion(p, m));
-    p.board = p.board.filter(m => m.hp > 0);
+    const dead = p.board.filter(m => m.hp <= 0 || m.dying);
+    dead.forEach(m => destroyMinion(p, m));
+    p.board = p.board.filter(m => m.hp > 0 && !m.dying);
   });
 }
 
@@ -656,8 +690,18 @@ function showCoinResult(title, rows, done) {
     setTimeout(() => { if (img) img.src = h ? plus : minus; }, delay);
     setTimeout(() => { el.innerHTML = `<img class="coin-flat" src="${h ? plus : minus}" alt="">`; }, delay + 480);
   });
+  let settled = false;
+  const finishCoin = () => {
+    if (settled) return;
+    settled = true;
+    layer.classList.remove("show");
+    if (done) done();
+  };
   const btn = document.getElementById("coinOk");
-  if (btn) btn.onclick = () => { layer.classList.remove("show"); if (done) done(); };
+  if (btn) btn.onclick = finishCoin;
+  // Auto-advance so AI / end-turn combat never softlocks waiting for OK
+  const autoMs = Math.max(900, 520 + flipsN * 300 + 380);
+  setTimeout(finishCoin, autoMs);
 }
 
 function confirmGiveUp() {
