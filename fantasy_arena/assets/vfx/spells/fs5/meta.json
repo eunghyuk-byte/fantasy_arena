@@ -1,0 +1,22 @@
+{
+  "id": "fs5",
+  "name": "폭염",
+  "kind": "special",
+  "durationMs": 1800,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "aoe": {
+    "file": "aoe.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "self-board",
+  "sfxHint": "fire_heatwave",
+  "concept": "자기장 폭염 — 고통의 열파"
+}

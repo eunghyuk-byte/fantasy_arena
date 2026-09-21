@@ -1,0 +1,22 @@
+{
+  "id": "ns3",
+  "name": "상승기류",
+  "kind": "draw",
+  "durationMs": 1800,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "self-board",
+  "sfxHint": "wind_updraft",
+  "concept": "상승 기류가 카드를 하늘로 띄움"
+}

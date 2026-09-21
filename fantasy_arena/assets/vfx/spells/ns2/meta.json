@@ -1,0 +1,22 @@
+{
+  "id": "ns2",
+  "name": "진공베기",
+  "kind": "single",
+  "durationMs": 1700,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "wind_vacuum_slash",
+  "concept": "진공 풍인이 공간을 찢음"
+}

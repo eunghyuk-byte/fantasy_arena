@@ -1,0 +1,22 @@
+{
+  "id": "ns7",
+  "name": "한줄기바람",
+  "kind": "single",
+  "durationMs": 1400,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "target",
+  "sfxHint": "wind_cut",
+  "concept": "한 줄기의 얇은 풍인 + 드로우 스파크"
+}

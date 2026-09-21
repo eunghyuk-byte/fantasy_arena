@@ -1,0 +1,22 @@
+{
+  "id": "fs6",
+  "name": "광분",
+  "kind": "buff",
+  "durationMs": 1500,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "self-board",
+  "sfxHint": "fire_rage",
+  "concept": "분노 오라가 마나를 달굼"
+}

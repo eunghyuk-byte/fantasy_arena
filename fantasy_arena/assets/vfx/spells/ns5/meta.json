@@ -1,0 +1,22 @@
+{
+  "id": "ns5",
+  "name": "토네이도",
+  "kind": "aoe",
+  "durationMs": 2100,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "aoe": {
+    "file": "aoe.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "board-center",
+  "sfxHint": "wind_tornado",
+  "concept": "토네이도가 전장을 흡입"
+}

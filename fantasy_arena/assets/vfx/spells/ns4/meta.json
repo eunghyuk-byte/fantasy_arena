@@ -1,0 +1,22 @@
+{
+  "id": "ns4",
+  "name": "떠오르는섬",
+  "kind": "special",
+  "durationMs": 1900,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "board-center",
+  "sfxHint": "wind_island",
+  "concept": "룬 부유섬이 바람에 고정"
+}
