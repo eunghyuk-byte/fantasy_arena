@@ -2669,6 +2669,7 @@ html.is-desktop, html.is-desktop body {
   overflow: hidden !important;
   z-index: 12 !important;
   background: transparent !important;
+  mix-blend-mode: screen !important;
   filter: drop-shadow(0 0 18px rgba(255,100,20,.55)) !important;
 }
 #spellFx .fx-stage .fx-strip img {
@@ -2697,10 +2698,10 @@ html.is-desktop, html.is-desktop body {
   position: absolute !important;
   inset: 0 !important;
   z-index: 1 !important;
-  background: radial-gradient(ellipse at 50% 45%, rgba(80,20,0,.35), rgba(0,0,0,.55)) !important;
+  background: transparent !important;
 }
 #spellFx.pack-play .fx-veil {
-  background: radial-gradient(ellipse at 50% 45%, rgba(120,40,0,.45), rgba(0,0,0,.65)) !important;
+  background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,.18), rgba(0,0,0,.28)) !important;
 }
 #spellFx .fx-stage {
   position: absolute !important;
@@ -2727,6 +2728,7 @@ html.is-desktop, html.is-desktop body {
   width: min(72vmin, 560px) !important;
   height: auto !important;
   z-index: 12 !important;
+  mix-blend-mode: screen !important;
   filter: drop-shadow(0 0 24px rgba(255,120,40,.7)) !important;
 }
 #spellFx .fx-stage .fx-strip {
