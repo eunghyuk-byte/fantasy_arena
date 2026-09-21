@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.112";
+const GAME_VERSION = "0.113";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -568,7 +568,7 @@ function resolvePlayAbility(p, m) {
   const ab = abilityOf(m);
   if (!ab) return;
   if (ab === "출전") {
-    log(`${m.name} 출전 → 카드 1장 뽑기`);
+    log(`${m.name} 출전 → 드로우1`);
     draw(p, 1);
   }
 }
@@ -732,6 +732,7 @@ function applyFx(p, fx, target) {
         const m = target.minion;
         if (fx.atk) m.atk += fx.atk;
         if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
+        m.atkSkill = 4; // 연속 부여
         m.canAttack = true;
         m.attacksLeft = (m.attacksLeft || 0) + 1;
       }
@@ -809,6 +810,16 @@ function applyFx(p, fx, target) {
       m.def = Math.max(0, (m.def || 0) - n);
       damageMinion(e, m, n, { fromSpell: true });
     });
+  } else if (fx.type === "plague") {
+    const minC = fx.minCost != null ? fx.minCost : 0;
+    [...p.board, ...e.board].forEach(m => {
+      if ((m.cost || 0) < minC) return;
+      if (isImmune(m)) return;
+      if (fx.atk != null) m.atk = fx.atk;
+      else m.atk = 1;
+      if (fx.hp != null) { m.hp = fx.hp; m.maxHp = fx.hp; }
+      else { m.hp = 1; m.maxHp = 1; }
+    });
   } else if (fx.type === "petrify") {
     e.board.forEach(m => {
       if (isImmune(m)) return;
@@ -881,7 +892,7 @@ function resolveDeath(owner, m) {
   const hasRebirth = (ab && String(ab).includes("환생")) || (m.keywords || []).includes("rebirth");
 
   if (ab === "유언") {
-    log(`${m.name} 유언 → 카드 1장 뽑기`);
+    log(`${m.name} 유언 → 드로우1`);
     draw(owner, 1);
   } else if (ab === "복수") {
     if (fromSpell) {
@@ -1725,8 +1736,8 @@ const ABI_HELP = {
   "복수": "나를 죽인 적 유닛도 같이 죽습니다.",
   "환생": "죽으면 체력 1로 한 번 다시 살아납니다.",
   "강탈": "나를 죽인 적을 내 편으로 가져옵니다.",
-  "출전": "낼 때 카드 1장을 뽑습니다.",
-  "유언": "죽을 때 카드 1장을 뽑습니다.",
+  "출전": "낼 때 드로우1",
+  "유언": "죽을 때 드로우1",
   "면역": "스펠 효과를 받지 않습니다."
 };
 function fmtCoinLinks(c) {
