@@ -323,7 +323,7 @@ function equipItemOnUnit(p, card, unit) {
   }
   if (card.ability) {
     unit.ability = card.ability;
-    const kwMap = { "보호": "shield", "활력": "vital", "환생": "rebirth", "강탈": "steal", "위압": "awe", "혼란": "confuse" };
+    const kwMap = { "보호": "shield", "활력": "vital", "환생": "rebirth", "강탈": "steal", "위압": "awe", "혼란": "confuse", "결속": "bond", "출전": "battlecry" };
     const kw = kwMap[card.ability];
     if (kw) {
       unit.keywords = [...(unit.keywords || [])];
@@ -348,11 +348,11 @@ function resolveInstantItem(p, card) {
   const e = opponent(p);
   if (card.id === "ni4") {
     [...p.board, ...e.board].forEach(m => { m.atkC = 0; m.defC = 0; m.hpC = 0; });
-    log("무풍: 모든 유닛 코인 0");
+    log("도둑바람: 모든 유닛 코인 삭제");
   } else if (card.id === "li3") {
     const base = (p.coinP != null) ? p.coinP : 0.5;
     p.coinP = Math.min(1, base + 0.2);
-    log("행운의빛: 이번 턴 앞면 확률 +20%p");
+    log("성스러운주화: 이번 턴 앞면 확률 +20%p");
   } else if (card.id === "di4") {
     const mark = (m) => {
       if (!m) return;
@@ -360,7 +360,7 @@ function resolveInstantItem(p, card) {
     };
     [...p.board, ...e.board].forEach(mark);
     [...p.hand, ...e.hand].forEach(mark);
-    log("황금저주: 코인이 금화로(앞면 고정)");
+    log("조작된주화: 코인이 금화로(앞면 고정)");
   } else {
     log(`${card.name} 효과`);
   }
