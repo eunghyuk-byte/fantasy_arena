@@ -71,7 +71,7 @@ function render() {
     const nHand = handEls.length;
     handEls.forEach((el, i) => {
       const t = nHand <= 1 ? 0 : (i - (nHand - 1) / 2);
-      el.style.transform = "rotate(" + (t * 4.2) + "deg) translateY(" + (Math.abs(t) * 8) + "px)";
+      el.style.transform = "rotate(" + (t * 3.2) + "deg) translateY(" + (Math.abs(t) * 5) + "px)";
       el.style.zIndex = String(10 + i);
       bindHandCard(el, me.hand[i]);
     });
@@ -493,9 +493,9 @@ function layoutHandFan() {
   const n = cards.length;
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
-    el.style.transform = `translateY(${Math.abs(t)*8}px) rotate(${t*4.2}deg)`;
+    el.style.transform = `translateY(${Math.abs(t)*5}px) rotate(${t*3.2}deg)`;
     el.style.zIndex = String(20 + i);
-    el.style.marginLeft = i ? "-24px" : "0";
+    el.style.marginLeft = i ? "-18px" : "0";
   });
 }
 
