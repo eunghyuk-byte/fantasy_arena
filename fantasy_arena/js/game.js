@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.097";
+const GAME_VERSION = "0.098";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1856,7 +1856,10 @@ function paintBuildVer() {
 paintBuildVer();
 renderHeroPicks();
 document.getElementById("btnAi").onclick = () => startGame(true);
-document.getElementById("btnPvp").onclick = () => startGame(false);
+document.getElementById("btnPvp").onclick = () => {
+  try { document.getElementById("settingsPop").classList.remove("show"); } catch (e) {}
+  startGame(false);
+};
 document.getElementById("btnDeck").onclick = () => { draftDeck = (loadSavedDecks()[selectedHero.id] || []).slice(); showBuilder(); };
 document.getElementById("btnBackMenu").onclick = () => backTitle();
 document.getElementById("btnClearDeck").onclick = () => { draftDeck = []; renderBuilder(); };
