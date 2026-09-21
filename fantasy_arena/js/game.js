@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.115";
+const GAME_VERSION = "0.116";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
