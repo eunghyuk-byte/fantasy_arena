@@ -49,30 +49,35 @@ const SpellFx = (() => {
       stage.innerHTML = "";
       stage.appendChild(wrap);
       const finish = () => { try { wrap.remove(); } catch (e) {} resolve(); };
-      img.onerror = finish;
-      img.onload = () => {
+      let started = false;
+      const begin = () => {
+        if (started) return;
+        started = true;
+        // Force layout so clientWidth is real
+        void wrap.offsetWidth;
         const box = Math.max(1, wrap.clientWidth || 560);
         const natH = img.naturalHeight || frameH || 720;
         const natW = img.naturalWidth || frameW || 720;
-        const n = Math.max(1, frames || Math.round(natW / natH) || 1);
-        const frameMs = Math.max(50, Math.round(1000 / Math.max(1, fps || 12)));
-        // JS frame stepper — works on Safari/iOS (CSS steps(var()) does not)
+        const n = Math.max(1, frames || Math.round(natW / Math.max(1, natH)) || 1);
+        const frameMs = Math.max(55, Math.round(1000 / Math.max(1, fps || 12)));
         let i = 0;
+        img.style.height = box + "px";
+        img.style.width = "auto";
+        img.style.maxWidth = "none";
+        img.style.display = "block";
+        img.style.willChange = "transform";
         const tick = () => {
           img.style.transform = "translateX(" + (-i * box) + "px)";
           i += 1;
           if (i >= n) setTimeout(finish, frameMs);
           else setTimeout(tick, frameMs);
         };
-        img.style.height = box + "px";
-        img.style.width = "auto";
-        img.style.maxWidth = "none";
-        img.style.display = "block";
-        img.style.willChange = "transform";
         tick();
       };
+      img.onerror = finish;
+      img.onload = begin;
       img.src = url;
-      if (img.complete && img.naturalWidth) img.onload();
+      if (img.complete && img.naturalWidth) begin();
     });
   }
 
