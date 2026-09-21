@@ -1,0 +1,22 @@
+{
+  "id": "deck_draw",
+  "fps": 12,
+  "loop": false,
+  "cast": {
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 10,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 8,
+    "w": 720,
+    "h": 720
+  },
+  "durationMs": 1500,
+  "anchor": "hand",
+  "concept": "덱에서 카드 뒷면이 튕겨 손패로"
+}
