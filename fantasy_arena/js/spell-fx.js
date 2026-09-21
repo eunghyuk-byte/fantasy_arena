@@ -166,7 +166,10 @@ const SpellFx = (() => {
         const natW = img.naturalWidth || frameW || 720;
         const vertical = layoutHint === "vertical" || (layoutHint !== "horizontal" && natH > natW);
         const n = Math.max(1, frames || Math.round((vertical ? natH : natW) / Math.max(1, vertical ? natW : natH)) || 1);
-        const frameMs = Math.max(55, Math.round(1000 / Math.max(1, fps || 12)));
+        // Floor ~28 so pack 2× (fps*2≈24) is real; spell path at fps12 stays ~83ms
+        const frameMs = (opts.frameMs != null)
+          ? opts.frameMs
+          : Math.max(28, Math.round(1000 / Math.max(1, fps || 12)));
         const fadeMs = 280;
         let i = 0;
         if (vertical) {
@@ -794,12 +797,14 @@ const SpellFx = (() => {
 
       let played = false;
       // Strip-first only — never fall back to empty/chroma webp.
+      // Pack VFX at 2× speed (half duration); size via CSS .pack-play
+      const packFps = Math.max(1, fps) * 2;
       if (await probeUrl(castStrip)) {
-        await playStrip(stage, castStrip, castW, castH, castFrames, fps, layoutHint);
+        await playStrip(stage, castStrip, castW, castH, castFrames, packFps, layoutHint);
         played = true;
       }
       if (await probeUrl(hitStrip)) {
-        await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps, layoutHint);
+        await playStrip(stage, hitStrip, hitW, hitH, hitFrames, packFps, layoutHint);
         played = true;
       }
       return played;
@@ -809,8 +814,20 @@ const SpellFx = (() => {
     }
   }
 
+  // Disabled overlay packs: mute instantly (no queue, no play)
+  const PACK_MUTE_IDS = {
+    ui: { deck_draw: true, hero_intro: true }
+  };
+  function isPackMuted(kind, id) {
+    if (kind === "coins") return true; // all coin packs
+    const map = PACK_MUTE_IDS[kind];
+    return !!(map && id && map[id]);
+  }
+
   function playPack(kind, id, opts) {
     opts = opts || {};
+    // Early-resolve before enqueue so muted packs never block the queue
+    if (isPackMuted(kind, id)) return Promise.resolve(false);
     const run = () => _playPackInner(kind, id, opts);
     if (opts.skipQueue) return run();
     const p = _packQueue.then(run, run);
@@ -819,7 +836,7 @@ const SpellFx = (() => {
   }
   function playUi(id, opts) { return playPack("ui", id, opts); }
   function playCombat(id, opts) { return playPack("combat", id, opts); }
-  function playCoin(id, opts) { return playPack("coins", id, opts); }
+  function playCoin(id, opts) { return Promise.resolve(false); }
   function playItem(id, opts) { return playPack("items", id, opts); }
   function playMatch(id, opts) { return playPack("match", id, opts); }
 
