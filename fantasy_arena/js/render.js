@@ -360,7 +360,7 @@ const _faceWait = new Map();
 const _faceDone = new Map();
 const _composeQ = [];
 let _composeActive = 0;
-const COMPOSE_MAX = 2;
+const COMPOSE_MAX = 4;
 function enqueueCompose(fn) {
   return new Promise((resolve, reject) => {
     const run = () => {
@@ -397,18 +397,27 @@ function faceSrc(c, opts, el) {
     return (typeof CARD_FACE !== "undefined" && CARD_FACE[c.id]) ? CARD_FACE[c.id] : "";
   });
   _faceWait.set(key, p);
-  p.then(src => { if (el && src) el.src = src; });
+  p.then(src => {
+    if (el && src) el.src = src;
+    else if (el && !el.getAttribute("src")) {
+      const fb = (typeof CARD_ART !== "undefined" && CARD_ART[c.id]) ? CARD_ART[c.id] : "";
+      if (fb) el.src = fb;
+    }
+  });
   return p;
 }
 
 function renderCard(c, playable) {
   const uid = "face_" + Math.random().toString(36).slice(2,8);
+  const placeholder = (typeof CARD_ART !== "undefined" && CARD_ART[c.id])
+    ? CARD_ART[c.id]
+    : (typeof artUrl === "function" ? artUrl(c.id) : "");
   setTimeout(() => {
     const el = document.getElementById(uid);
     if (el) faceSrc(c, {}, el);
   }, 0);
   return `<div class="card ${playable ? "playable" : ""}" data-id="${c.id}">
-    <img class="card-face" id="${uid}" alt="${c.name}">
+    <img class="card-face" id="${uid}" alt="${c.name}"${placeholder ? ` src="${placeholder}"` : ""}>
     ${playable ? '<span class="play-glow" aria-hidden="true"></span>' : ""}
   </div>`;
 }
@@ -473,6 +482,9 @@ function renderMinion(m, side) {
     targetable ? "can-target" : "",
   ].join(" ");
   const uid = "mface_" + m.uid;
+  const placeholder = (typeof CARD_ART !== "undefined" && CARD_ART[m.id])
+    ? CARD_ART[m.id]
+    : (typeof artUrl === "function" ? artUrl(m.id) : "");
   setTimeout(() => {
     const el = document.getElementById(uid);
     if (el) faceSrc(m, { hp: m.hp }, el);
@@ -482,7 +494,7 @@ function renderMinion(m, side) {
   const tick = m._hurt && m._hurt.dmg ? `<div class="hp-tick">-${m._hurt.dmg}</div>` : "";
   const stat = m._fxAtk != null ? `<div class="stat-pop">공 ${m._fxAtk}</div>` : "";
   return `<div class="${cls}${hurt}${rip}" data-uid="${m.uid}">
-    <img class="card-face" id="${uid}" alt="${m.name}">
+    <img class="card-face" id="${uid}" alt="${m.name}"${placeholder ? ` src="${placeholder}"` : ""}>
     ${tick}${stat}
   </div>`;
 }
