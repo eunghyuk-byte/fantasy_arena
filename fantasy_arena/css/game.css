@@ -2504,14 +2504,14 @@ html.is-desktop, html.is-desktop body {
 /* ===== P0 hand even lower ===== */
 /* LOCK: do not touch .board / layoutBoardAlign board rows — board frozen */
 #game.active .my-hand {
-  padding: 44px 8% 0 !important;
-  margin-bottom: -48px !important;
+  padding: 52px 8% 0 !important;
+  margin-bottom: -72px !important;
   overflow: visible !important;
   z-index: 8 !important;
 }
 #game.active .my-hand .card,
 #game.active .my-hand .card.playable {
-  height: min(100%, 24cqh) !important;
-  max-height: 24cqh !important;
+  height: min(100%, 22cqh) !important;
+  max-height: 22cqh !important;
   width: auto !important;
 }
