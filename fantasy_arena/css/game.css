@@ -2433,3 +2433,16 @@ html.is-desktop, html.is-desktop body {
 #game.active .board {
   --slot-w: calc(var(--slot-h) * 2 / 3);
 }
+
+/* ===== P0 board shift right inside parchment ===== */
+/* Keep left-fill, but start inside the ornate left frame (was overflowing left) */
+#game.active .board,
+#game.active .board.opp,
+#game.active #myBoard {
+  justify-content: flex-start !important;
+  padding-left: 16% !important;
+  padding-right: 10% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
