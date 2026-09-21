@@ -38,7 +38,7 @@ const CARDS = [
   { id:"e1", tribe:"earth", name:"놀", cost:1, type:"minion", atk:1, def:0, hp:3, atkC:-1, defC:0, hpC:1, text:"" },
   { id:"e2", tribe:"earth", name:"대지술사", cost:4, type:"minion", atk:3, def:0, hp:6, atkC:0, defC:0, hpC:3, atkSkill:7, text:"약화공격" },
   { id:"e3", tribe:"earth", name:"그린드래곤", cost:9, type:"minion", atk:6, def:0, hp:12, atkC:-3, defC:0, hpC:3, atkSkill:9, text:"광역공격" },
-  { id:"e4", tribe:"earth", name:"드라이어드", cost:2, type:"minion", atk:0, def:0, hp:4, atkC:0, defC:0, hpC:4, text:"" },
+  { id:"e4", tribe:"earth", name:"드라이어드", cost:2, type:"minion", atk:0, def:0, hp:5, atkC:1, defC:0, hpC:1, text:"" },
   { id:"e5", tribe:"earth", name:"드워프병사", cost:2, type:"minion", atk:2, def:0, hp:4, atkC:-2, defC:0, hpC:2, text:"" },
   { id:"e6", tribe:"earth", name:"만드라고라", cost:2, type:"minion", atk:1, def:0, hp:3, atkC:0, defC:0, hpC:3, atkSkill:7, text:"약화공격" },
   { id:"e7", tribe:"earth", name:"샌드맨", cost:2, type:"minion", atk:2, def:1, hp:3, atkC:0, defC:-1, hpC:1, text:"" },
