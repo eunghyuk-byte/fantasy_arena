@@ -1,0 +1,19 @@
+{
+  "id": "attack",
+  "fps": 12,
+  "loop": false,
+  "cast": {
+    "file": "cast_strip.png",
+    "webp": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact_strip.png",
+    "webp": "impact.webp",
+    "frames": 10,
+    "w": 720,
+    "h": 720
+  }
+}
