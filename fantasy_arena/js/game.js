@@ -2,6 +2,29 @@
 function uid() { return Math.random().toString(36).slice(2, 9); }
 function cloneCard(id) {
   const b = CARD_MAP[id];
+  if (!b) {
+    console.warn("cloneCard missing id", id);
+    return {
+      id: id || "missing",
+      name: "?",
+      cost: 0,
+      type: "minion",
+      tribe: "earth",
+      atk: 0,
+      def: 0,
+      hp: 1,
+      atkC: 0,
+      defC: 0,
+      hpC: 0,
+      keywords: [],
+      uid: uid(),
+      maxHp: 1,
+      canAttack: false,
+      attacksLeft: 0,
+      damaged: false,
+      token: true,
+    };
+  }
   return {
     ...b,
     keywords: [...(b.keywords || [])],
@@ -21,7 +44,8 @@ function shuffle(a) {
   return x;
 }
 function buildDeck(tribeId) {
-  const pool = CARDS.filter(c => !c.token && c.tribe === tribeId).map(c => c.id);
+  // Items/artifacts deferred — keep only minions + spells in normal tribe decks
+  const pool = CARDS.filter(c => !c.token && c.tribe === tribeId && c.type !== "item" && !/^it\d+$/.test(c.id)).map(c => c.id);
   const d = [];
   while (d.length < 30) {
     const id = pool[d.length % pool.length];
@@ -52,7 +76,7 @@ function deckFor(hero, isAI) {
 function makePlayer(hero, isAI, name) {
   return {
     name, hero, isAI,
-    hp: 30, maxHp: 30,
+    hp: 40, maxHp: 40,
     mana: 0, maxMana: 0,
     powerUsed: false,
     deck: deckFor(hero, isAI),
@@ -85,7 +109,8 @@ function draw(p, n = 1) {
     }
     const id = p.deck.pop();
     if (p.hand.length >= 10) {
-      log(`${p.name}의 손패가 가득 차 ${CARD_MAP[id].name}이(가) 불탔다`);
+      const nm = (CARD_MAP[id] && CARD_MAP[id].name) || id;
+      log(`${p.name}의 손패가 가득 차 ${nm}이(가) 불탔다`);
     } else {
       p.hand.push(cloneCard(id));
       if (!p.isAI) p._drew = true;
@@ -196,8 +221,14 @@ async function runAutoCombat(p) {
   for (const m of wave) {
     if (state.over) break;
     if (!p.board.includes(m) || m.hp <= 0) continue;
+    // R7: skip units without attack rights (e.g. summoned this turn without charge)
+    if (!m.canAttack || m.attacksLeft <= 0 || (Number(m.atk) || 0) <= 0) continue;
+    const legal = attackTargets(p, m);
+    if (!legal.length) continue;
     const foe = e.board.find(x => x.hp > 0);
     const target = foe ? { kind: "minion", owner: e, minion: foe } : { kind: "hero", owner: e };
+    const ok = legal.some(t => t.kind === target.kind && (t.kind === "hero" || t.minion.uid === target.minion.uid));
+    if (!ok) continue;
     await doAttack(p, m, target, true);
     render();
     await waitMs(480);
@@ -227,8 +258,8 @@ function playCard(p, card, target) {
     log("이번 턴에는 유닛을 낼 수 없습니다");
     return false;
   }
-  if (card.type === "minion" && p.board.length >= 6) {
-    log("전장이 가득 찼습니다 (최대 6장)");
+  if (card.type === "minion" && p.board.length >= 5) {
+    log("전장이 가득 찼습니다 (최대 5장)");
     return false;
   }
   p.mana -= card.cost;
@@ -425,7 +456,7 @@ function applyFx(p, fx, target) {
       if (fx.coinZero) { m.atkC = 0; m.defC = 0; m.hpC = 0; }
     }
   } else if (fx.type === "copy_own") {
-    if (target && target.kind === "minion" && p.board.length < 6) {
+    if (target && target.kind === "minion" && p.board.length < 5) {
       const o = target.minion;
       const c = cloneCard(o.id);
       c.atk = o.atk;
@@ -495,14 +526,14 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "face") {
     dealHero(e, fx.value);
   } else if (fx.type === "float_def") {
-    const n = Math.max(0, 6 - p.board.length) + Math.max(0, 6 - e.board.length);
+    const n = Math.max(0, 5 - p.board.length) + Math.max(0, 5 - e.board.length);
     [...p.board, ...e.board].forEach(m => { m.def = Math.max(0, (m.def || 0) - n); });
   } else if (fx.type === "seal_giant") {
     e.board.forEach(m => {
       if ((m.hp || 0) >= 6) { m.atk = 0; m.atkC = 0; }
     });
   } else if (fx.type === "summon_islands") {
-    const slots = Math.max(0, 6 - p.board.length);
+    const slots = Math.max(0, 5 - p.board.length);
     for (let i = 0; i < slots; i++) {
       const tok = cloneCard("e40");
       tok.canAttack = false; tok.attacksLeft = 0;
@@ -516,7 +547,7 @@ function applyFx(p, fx, target) {
     const n = Math.floor((p.maxMana || 0) / 2);
     [...e.board].forEach(m => damageMinion(e, m, n));
   } else if (fx.type === "sandtrap") {
-    const n = Math.max(0, 6 - p.board.length);
+    const n = Math.max(0, 5 - p.board.length);
     e.board.slice(0, n).forEach(m => damageMinion(e, m, 3));
   } else if (fx.type === "maze") {
     [...e.board].forEach(m => { if ((m.cost || 0) > (p.maxMana || 0)) m.dying = true; });
@@ -560,6 +591,7 @@ function dealToTarget(srcOwner, target, n) {
 }
 
 function dealHero(p, n) {
+  n = Number(n) || 0;
   if (!n) return;
   try { Sfx.playHeroHit && Sfx.playHeroHit(); } catch (e) {}
   const from = p.hp;
@@ -583,6 +615,8 @@ function damageMinion(owner, m, n) {
 }
 
 function destroyMinion(owner, m) {
+  if (!owner || !m) return;
+  if (!owner.board.some(x => x.uid === m.uid)) return;
   const rebirth = (m.ability && String(m.ability).includes("환생")) || (m.keywords || []).includes("rebirth");
   if (rebirth) {
     m.keywords = (m.keywords || []).filter(k => k !== "rebirth");
@@ -600,8 +634,9 @@ function destroyMinion(owner, m) {
 
 function cleanupBoards() {
   [state.p1, state.p2].forEach(p => {
-    p.board.filter(m => m.hp <= 0).forEach(m => destroyMinion(p, m));
-    p.board = p.board.filter(m => m.hp > 0);
+    const dead = p.board.filter(m => m.hp <= 0 || m.dying);
+    dead.forEach(m => destroyMinion(p, m));
+    p.board = p.board.filter(m => m.hp > 0 && !m.dying);
   });
 }
 
@@ -630,8 +665,8 @@ function showCoinResult(title, rows, done) {
   if (!rows.length) { if (done) done(); return; }
   const layer = document.getElementById("coinLayer");
   const box = document.getElementById("coinBox");
-  const plus = (typeof COIN_PLUS !== "undefined") ? COIN_PLUS : "";
-  const minus = (typeof COIN_MINUS !== "undefined") ? COIN_MINUS : "";
+  const plus = (typeof COIN_PLUS !== "undefined" && COIN_PLUS) ? COIN_PLUS : "assets/img/coins/plus.png";
+  const minus = (typeof COIN_MINUS !== "undefined" && COIN_MINUS) ? COIN_MINUS : "assets/img/coins/minus.png";
   let flipsN = 0;
   box.innerHTML = `<h3>${title}</h3>` + rows.map(r => {
     if (!r.flips.length) return "";
@@ -655,8 +690,18 @@ function showCoinResult(title, rows, done) {
     setTimeout(() => { if (img) img.src = h ? plus : minus; }, delay);
     setTimeout(() => { el.innerHTML = `<img class="coin-flat" src="${h ? plus : minus}" alt="">`; }, delay + 480);
   });
+  let settled = false;
+  const finishCoin = () => {
+    if (settled) return;
+    settled = true;
+    layer.classList.remove("show");
+    if (done) done();
+  };
   const btn = document.getElementById("coinOk");
-  if (btn) btn.onclick = () => { layer.classList.remove("show"); if (done) done(); };
+  if (btn) btn.onclick = finishCoin;
+  // Auto-advance so AI / end-turn combat never softlocks waiting for OK
+  const autoMs = Math.max(900, 520 + flipsN * 300 + 380);
+  setTimeout(finishCoin, autoMs);
 }
 
 function confirmGiveUp() {
@@ -702,14 +747,17 @@ function placeDropGlow(on, x, y) {
   if (!mine) { glow.classList.remove("on"); return; }
   const gr = game.getBoundingClientRect();
   const b = mine.getBoundingClientRect();
+  const s = (window.StageSettings && StageSettings.stageScale)
+    ? StageSettings.stageScale()
+    : (parseFloat((document.getElementById("app") || {}).dataset && document.getElementById("app").dataset.stageScale || "1") || 1);
   const top = b.top - 8;
   const bottom = b.bottom + 8;
   const left = b.left - 8;
   const right = b.right + 8;
-  glow.style.top = (top - gr.top) + "px";
-  glow.style.left = (left - gr.left) + "px";
-  glow.style.width = (right - left) + "px";
-  glow.style.height = (bottom - top) + "px";
+  glow.style.top = ((top - gr.top) / s) + "px";
+  glow.style.left = ((left - gr.left) / s) + "px";
+  glow.style.width = ((right - left) / s) + "px";
+  glow.style.height = ((bottom - top) / s) + "px";
   glow.classList.add("on");
 }
 
@@ -720,7 +768,7 @@ function canDropCard(card) {
   const me = meView().me;
   if (state.over || current() !== me || me.isAI) return false;
   if (me.mana < card.cost) return false;
-  if (card.type === "minion" && me.board.length >= 6) return false;
+  if (card.type === "minion" && me.board.length >= 5) return false;
   return true;
 }
 function overBoard(x, y) {
@@ -728,10 +776,15 @@ function overBoard(x, y) {
   const opp = document.getElementById("oppBoard");
   if (!mine) return false;
   const r = mine.getBoundingClientRect();
-  if (x < r.left || x > r.right || y < r.top || y > r.bottom) return false;
+  // Pad hit box — scaled stages + hand fan made exact rect drops flaky
+  const padX = Math.max(12, r.width * 0.04);
+  const padY = Math.max(16, r.height * 0.08);
+  if (x < r.left - padX || x > r.right + padX || y < r.top - padY || y > r.bottom + padY) return false;
   if (opp) {
     const o = opp.getBoundingClientRect();
-    if (y <= o.bottom + 8) return false;
+    // Only reject if clearly still in the enemy lane (not merely near the shared midline)
+    const mid = (o.bottom + r.top) / 2;
+    if (y < mid) return false;
   }
   return true;
 }
@@ -758,20 +811,23 @@ function slotIndexFromPoint(x, y) {
 function bindHandCard(el, card) {
   el.onpointerenter = () => showPeek(el);
   el.onpointerleave = hidePeek;
-  el.onpointerdown = (ev) => {
+  // Prefer pointer events; also bind mouse* so headless/Electron drags never miss
+  const startDrag = (ev) => {
     hidePeek();
     if (ev.button != null && ev.button !== 0) return;
     if (!canDropCard(card)) return;
+    if (_drag) return;
     ev.preventDefault();
     ev.stopPropagation();
     clearDrag();
+    try { if (ev.pointerId != null && el.setPointerCapture) el.setPointerCapture(ev.pointerId); } catch (err) {}
     const r = el.getBoundingClientRect();
     const ghost = el.cloneNode(true);
     ghost.classList.add("drag-ghost");
     ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
     document.body.appendChild(ghost);
     el.classList.add("dragging");
-    _drag = { card, el, ghost, pid: ev.pointerId };
+    _drag = { card, el, ghost, pid: ev.pointerId, x0: ev.clientX, y0: ev.clientY };
     const move = (e) => {
       if (!_drag) return;
       _drag.ghost.style.left = e.clientX + "px";
@@ -782,6 +838,9 @@ function bindHandCard(el, card) {
       window.removeEventListener("pointermove", move, true);
       window.removeEventListener("pointerup", up, true);
       window.removeEventListener("pointercancel", up, true);
+      window.removeEventListener("mousemove", move, true);
+      window.removeEventListener("mouseup", up, true);
+      try { if (ev.pointerId != null && el.releasePointerCapture) el.releasePointerCapture(ev.pointerId); } catch (err) {}
       if (!_drag) return;
       const cardRef = _drag.card;
       const ok = overBoard(e.clientX, e.clientY) && canDropCard(cardRef);
@@ -789,14 +848,18 @@ function bindHandCard(el, card) {
       else window._dropSlot = null;
       clearDrag();
       if (ok) {
-        Sfx.playCardDrop();
+        try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
         onHandClick(cardRef);
       }
     };
     window.addEventListener("pointermove", move, true);
     window.addEventListener("pointerup", up, true);
     window.addEventListener("pointercancel", up, true);
+    window.addEventListener("mousemove", move, true);
+    window.addEventListener("mouseup", up, true);
   };
+  el.onpointerdown = startDrag;
+  el.onmousedown = startDrag;
 }
 
 function onHandClick(card) {
@@ -804,7 +867,7 @@ function onHandClick(card) {
   if (state.over || current() !== me || current().isAI) return;
   if (ui.targeting || ui.attacker) { ui.targeting = null; ui.attacker = null; render(); }
   if (me.mana < card.cost) return;
-  if (card.type === "minion" && me.board.length >= 6) return;
+  if (card.type === "minion" && me.board.length >= 5) return;
   if (needsTarget(card)) {
     const fx = card.type === "spell" ? card.spell : card.battlecry;
     const targets = validTargets(me, fx);
@@ -875,7 +938,8 @@ document.addEventListener("keydown", e => {
 let draftDeck = [];
 
 function tribeCards() {
-  return CARDS.filter(c => !c.token && c.tribe === selectedHero.id)
+  // Items/artifacts deferred — deck builder shows units + spells only
+  return CARDS.filter(c => !c.token && c.tribe === selectedHero.id && c.type !== "item" && !/^it\d+$/.test(c.id))
     .filter(c => {
       if (!ui.rarityFilter || ui.rarityFilter === "all") return true;
       return (c.rarity || "common") === ui.rarityFilter;

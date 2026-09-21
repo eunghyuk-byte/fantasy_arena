@@ -1,0 +1,65 @@
+{
+  "name": "fantasy-arena-desktop",
+  "version": "0.0.10",
+  "private": true,
+  "description": "Electron shell for Fantasy Arena \u2014 fixed 4:3 window like Hearthstone",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "playtest": "electron . --playtest",
+    "dist": "electron-builder --win",
+    "pack": "electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.showpick.fantasyarena",
+    "productName": "Fantasy Arena",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../fantasy_arena",
+        "to": "fantasy_arena",
+        "filter": [
+          "**/*",
+          "!node_modules/**",
+          "!qa_*/**",
+          "!**/*.map"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Fantasy Arena"
+    },
+    "asar": true,
+    "publish": null
+  },
+  "author": "SHOWPICK"
+}
