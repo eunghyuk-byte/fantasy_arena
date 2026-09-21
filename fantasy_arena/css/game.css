@@ -2475,3 +2475,28 @@ html.is-desktop, html.is-desktop body {
   padding-bottom: 0 !important;
   box-sizing: border-box !important;
 }
+
+/* ===== P0 hand lower (may clip HS-style) ===== */
+#game.active .my-hand {
+  align-items: flex-end !important;
+  justify-content: center !important;
+  /* pull fan toward bottom edge; clipping OK */
+  padding: 28px 8% 0 !important;
+  margin-bottom: -18px !important;
+  overflow: visible !important;
+  z-index: 6 !important;
+  box-sizing: border-box !important;
+}
+#game.active .my-hand .card,
+#game.active .my-hand .card.playable {
+  height: min(100%, 26cqh) !important;
+  max-height: 26cqh !important;
+  transform-origin: bottom center !important;
+}
+#game.active .col-main {
+  /* allow hand to paint past bottom of main into stage edge */
+  overflow: visible !important;
+}
+#game.active {
+  overflow: hidden !important; /* stage still clips overall */
+}
