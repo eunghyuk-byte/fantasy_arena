@@ -1,6 +1,7 @@
 {
   "id": "fs2",
   "name": "화염폭풍",
+  "concept": "중앙 회오리가 팔 형태를 바꾸며 상승 / 광역은 불꽃 링+파편",
   "fps": 14,
   "loop": false,
   "layout": "horizontal",
@@ -8,19 +9,16 @@
   "flight": false,
   "cast": {
     "file": "cast_strip.png",
-    "webp": "cast.webp",
     "frames": 18,
     "w": 720,
     "h": 720
   },
   "aoe": {
     "file": "aoe_strip.png",
-    "webp": "aoe.webp",
     "frames": 16,
     "w": 720,
     "h": 720
   },
-  "durationMs": 2429,
-  "anchor": "board-center",
-  "concept": "중앙 화염 회오리 광역, 투사체 없음"
+  "durationMs": 2428,
+  "anchor": "board-center"
 }

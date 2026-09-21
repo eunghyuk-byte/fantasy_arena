@@ -1,6 +1,7 @@
 {
   "id": "fs1",
   "name": "화염화살",
+  "concept": "가느다란 불화살 — 꼬리 혀·스파크가 프레임마다 바뀌며 직선 비행 / 명중은 핀포인트 스파크",
   "fps": 14,
   "loop": false,
   "layout": "horizontal",
@@ -8,19 +9,16 @@
   "flight": true,
   "cast": {
     "file": "cast_strip.png",
-    "webp": "cast.webp",
     "frames": 18,
     "w": 720,
     "h": 720
   },
   "impact": {
     "file": "impact_strip.png",
-    "webp": "impact.webp",
     "frames": 16,
     "w": 720,
     "h": 720
   },
-  "durationMs": 2429,
-  "anchor": "target",
-  "concept": "가느다란 불화살 직선 비행 후 핀포인트 스파크"
+  "durationMs": 2428,
+  "anchor": "target"
 }

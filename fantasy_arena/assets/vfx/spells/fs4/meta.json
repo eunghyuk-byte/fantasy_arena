@@ -1,6 +1,7 @@
 {
   "id": "fs4",
   "name": "화염탄",
+  "concept": "대상 예열 균열 → 내부부터 붕괴해 재가 됨",
   "fps": 14,
   "loop": false,
   "layout": "horizontal",
@@ -8,19 +9,16 @@
   "flight": false,
   "cast": {
     "file": "cast_strip.png",
-    "webp": "cast.webp",
     "frames": 18,
     "w": 720,
     "h": 720
   },
   "impact": {
     "file": "impact_strip.png",
-    "webp": "impact.webp",
     "frames": 16,
     "w": 720,
     "h": 720
   },
-  "durationMs": 2429,
-  "anchor": "target",
-  "concept": "대상 내부부터 타들어가 재가 되는 처형 임팩트"
+  "durationMs": 2428,
+  "anchor": "target"
 }
