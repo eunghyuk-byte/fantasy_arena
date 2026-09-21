@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.027";
+const GAME_VERSION = "0.29";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -157,9 +157,11 @@ function flyDrawCard() {
 
 
 function pickEnemyTribe(mine, vsAI) {
-  if (vsAI) return TRIBES.find(tr => tr.id === "earth") || mine;
-  const open = TRIBES.filter(tr => tr.open && tr.id !== mine.id);
-  return open[Math.floor(Math.random() * open.length)] || mine;
+  // AI·핫시트 모두: 열린 종족 중 랜덤 (내 종족 제외, 없으면 전체 열린 종족)
+  const others = TRIBES.filter(tr => tr.open && tr.id !== (mine && mine.id));
+  const pool = others.length ? others : TRIBES.filter(tr => tr.open);
+  if (!pool.length) return mine;
+  return pool[Math.floor(Math.random() * pool.length)] || mine;
 }
 
 function startGame(vsAI) {
