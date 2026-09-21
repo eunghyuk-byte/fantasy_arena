@@ -216,7 +216,10 @@
   let _resizeTimer = 0;
   window.addEventListener("resize", () => {
     clearTimeout(_resizeTimer);
-    _resizeTimer = setTimeout(() => applyStageResolution(), 50);
+    _resizeTimer = setTimeout(() => {
+      applyStageResolution();
+      try { if (typeof layoutBoardSlots === "function") layoutBoardSlots(); } catch (e) {}
+    }, 50);
   });
   document.addEventListener("fullscreenchange", () => {
     applyStageResolution();

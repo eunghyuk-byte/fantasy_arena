@@ -1,3 +1,25 @@
+
+function layoutBoardSlots() {
+  ["myBoard", "oppBoard"].forEach(id => {
+    const board = document.getElementById(id);
+    if (!board) return;
+    const bh = board.clientHeight || 0;
+    const bw = board.clientWidth || 0;
+    // Fit up to 5 units in board width; height ~88% of lane
+    let slotH = Math.floor(bh * 0.88);
+    if (!slotH || slotH < 120) slotH = 160;
+    if (slotH > 220) slotH = 220;
+    let slotW = Math.floor(slotH * 2 / 3);
+    const maxW = Math.floor((bw - 24) / 5.15);
+    if (maxW > 40 && slotW > maxW) {
+      slotW = maxW;
+      slotH = Math.floor(slotW * 3 / 2);
+    }
+    board.style.setProperty("--slot-h", slotH + "px");
+    board.style.setProperty("--slot-w", slotW + "px");
+  });
+}
+
 function render() {
   if (!state) return;
   const { me, opp } = meView();
@@ -18,12 +40,14 @@ function render() {
   // Do not rebuild hand DOM mid-drag — destroys pointer target and breaks drops
   const dragging = (typeof _drag !== "undefined" && _drag);
   if (!dragging) {
-    mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.mana && (c.type !== "minion" || me.board.length < 6))).join("");
+    mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.mana && (c.type !== "minion" || me.board.length < 5))).join("");
   }
   document.getElementById("oppBoard").innerHTML = renderLane(opp, "opp");
   document.getElementById("myBoard").innerHTML = renderLane(me, "me");
   document.getElementById("oppBoard").classList.toggle("empty", !opp.board.length);
   document.getElementById("myBoard").classList.toggle("empty", !me.board.length);
+  layoutBoardSlots();
+  requestAnimationFrame(() => layoutBoardSlots());
 
   document.getElementById("oppStrip").innerHTML = heroStrip(opp, false, myTurn);
   document.getElementById("myStrip").innerHTML = heroStrip(me, true, myTurn);
@@ -471,13 +495,13 @@ function layoutHandFan() {
     const t = n <= 1 ? 0 : (i - (n - 1) / 2);
     el.style.transform = `translateY(${Math.abs(t)*8}px) rotate(${t*4.2}deg)`;
     el.style.zIndex = String(20 + i);
-    el.style.marginLeft = i ? "-42%" : "0";
+    el.style.marginLeft = i ? "-36px" : "0";
   });
 }
 
 function renderLane(p, who) {
   const cells = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 5; i++) {
     const inner = p.board[i] ? renderMinion(p.board[i], who) : "";
     cells.push(`<div class="slot ${p.board[i] ? "filled" : "empty"}" data-n="${i+1}">${inner}</div>`);
   }

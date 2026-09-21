@@ -163,7 +163,7 @@ function useHeroPower(p) {
   p.powerUsed = true;
   const fx = p.hero.power;
   if (fx.type === "summon") {
-    if (p.board.length >= 6) { log("전장이 가득 차 소환 실패"); return; }
+    if (p.board.length >= 5) { log("전장이 가득 차 소환 실패"); return; }
     const rec = cloneCard("recruit");
     rec.atk = fx.value[0]; rec.hp = fx.value[1]; rec.maxHp = fx.value[1];
     rec.canAttack = false; rec.attacksLeft = 0;
@@ -249,7 +249,7 @@ function aiTurn() {
   const tryPlay = () => {
     const plays = p.hand
       .filter(c => c.cost <= p.mana)
-      .filter(c => c.type !== "minion" || p.board.length < 6)
+      .filter(c => c.type !== "minion" || p.board.length < 5)
       .sort((a, b) => scorePlay(p, b) - scorePlay(p, a));
     for (const card of plays) {
       let target = null;

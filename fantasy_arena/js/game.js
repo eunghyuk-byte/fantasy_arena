@@ -258,7 +258,7 @@ function playCard(p, card, target) {
     log("이번 턴에는 유닛을 낼 수 없습니다");
     return false;
   }
-  if (card.type === "minion" && p.board.length >= 6) {
+  if (card.type === "minion" && p.board.length >= 5) {
     log("전장이 가득 찼습니다 (최대 6장)");
     return false;
   }
@@ -456,7 +456,7 @@ function applyFx(p, fx, target) {
       if (fx.coinZero) { m.atkC = 0; m.defC = 0; m.hpC = 0; }
     }
   } else if (fx.type === "copy_own") {
-    if (target && target.kind === "minion" && p.board.length < 6) {
+    if (target && target.kind === "minion" && p.board.length < 5) {
       const o = target.minion;
       const c = cloneCard(o.id);
       c.atk = o.atk;
@@ -768,7 +768,7 @@ function canDropCard(card) {
   const me = meView().me;
   if (state.over || current() !== me || me.isAI) return false;
   if (me.mana < card.cost) return false;
-  if (card.type === "minion" && me.board.length >= 6) return false;
+  if (card.type === "minion" && me.board.length >= 5) return false;
   return true;
 }
 function overBoard(x, y) {
@@ -867,7 +867,7 @@ function onHandClick(card) {
   if (state.over || current() !== me || current().isAI) return;
   if (ui.targeting || ui.attacker) { ui.targeting = null; ui.attacker = null; render(); }
   if (me.mana < card.cost) return;
-  if (card.type === "minion" && me.board.length >= 6) return;
+  if (card.type === "minion" && me.board.length >= 5) return;
   if (needsTarget(card)) {
     const fx = card.type === "spell" ? card.spell : card.battlecry;
     const targets = validTargets(me, fx);
