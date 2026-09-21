@@ -20,6 +20,6 @@
 | icons/metal | 없음 → metal unit 임시 |
 
 # 보강 계획 metal
-1. deck_metal_unit_{common,rare,heroic,legendary}.png 768x1152
+1. deck_metal_unit_{common,uncommon,rare,legendary}.png 768x1152
 2. deck_metal_magic_* 동일
 3. icons/metal.png 정사각 엠블럼

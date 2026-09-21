@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.092";
+const GAME_VERSION = "0.093";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1646,7 +1646,7 @@ function tribeCards() {
 function copiesInDraft(id) { return draftDeck.filter(x => x === id).length; }
 function maxCopies(id) {
   const c = CARD_MAP[id];
-  return (c && (c.rarity === "legendary" || c.rarity === "heroic")) ? 1 : 2;
+  return (c && (c.rarity === "legendary" || c.rarity === "rare")) ? 1 : 2;
 }
 
 function addToDraft(id) {
@@ -1767,9 +1767,9 @@ async function openCardLore(id) {
   if (img && face) img.src = face;
   document.getElementById("loreName").textContent = c.name;
   const raceNm = c.type === "minion" ? (c.race || (CARD_RACE && CARD_RACE[c.id]) || "") : (c.type === "item" ? "아이템" : "스펠");
-  const RARITY_KO = { common:"커먼", rare:"언커먼", heroic:"레어", legendary:"레전드" };
+  const RARITY_KO = { common:"커먼", uncommon:"언커먼", rare:"레어", legendary:"레전드" };
   const rareKo = RARITY_KO[c.rarity || "common"] || "커먼";
-  const cap = (c.rarity === "legendary" || c.rarity === "heroic") ? "덱당 1장" : "최대 2장";
+  const cap = (c.rarity === "legendary" || c.rarity === "rare") ? "덱당 1장" : "최대 2장";
   const tribeNm = (TRIBES.find(t => t.id === c.tribe) || {}).name || "";
   const stats = c.type === "minion" ? (c.atk + "/" + (c.def||0) + "/" + c.hp) : (c.type === "item" ? ((c.atk||0) + "/" + (c.def||0) + "/" + (c.hp||0)) : "-");
   const coin = (c.type === "minion") ? fmtCoinLinks(c) : "";

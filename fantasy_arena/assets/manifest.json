@@ -537,14 +537,14 @@
       "name": "earth_minion_common"
     },
     {
-      "path": "assets/img/frames/rarity/earth_minion_rare.png",
+      "path": "assets/img/frames/rarity/earth_minion_uncommon.png",
       "bytes": 1029260,
-      "name": "earth_minion_rare"
+      "name": "earth_minion_uncommon"
     },
     {
-      "path": "assets/img/frames/rarity/earth_minion_heroic.png",
+      "path": "assets/img/frames/rarity/earth_minion_rare.png",
       "bytes": 1025172,
-      "name": "earth_minion_heroic"
+      "name": "earth_minion_rare"
     },
     {
       "path": "assets/img/frames/rarity/earth_minion_legendary.png",
@@ -557,14 +557,14 @@
       "name": "earth_spell_common"
     },
     {
-      "path": "assets/img/frames/rarity/earth_spell_rare.png",
+      "path": "assets/img/frames/rarity/earth_spell_uncommon.png",
       "bytes": 975466,
-      "name": "earth_spell_rare"
+      "name": "earth_spell_uncommon"
     },
     {
-      "path": "assets/img/frames/rarity/earth_spell_heroic.png",
+      "path": "assets/img/frames/rarity/earth_spell_rare.png",
       "bytes": 970640,
-      "name": "earth_spell_heroic"
+      "name": "earth_spell_rare"
     },
     {
       "path": "assets/img/frames/rarity/earth_spell_legendary.png",
