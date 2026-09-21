@@ -3,7 +3,7 @@ const Bgm = (() => {
   const STEMS = { menu: "menu", battle: "battle" };
   const EXTS = [".ogg", ".mp3", ".m4a", ".wav"];
   let unlocked = false, wanted = true, track = "menu";
-  let vol = 0.72, duckMul = 1;
+  let vol = 0.36, duckMul = 1;
   const beds = { menu: null, battle: null };
   const urls = { menu: "", battle: "" };
 

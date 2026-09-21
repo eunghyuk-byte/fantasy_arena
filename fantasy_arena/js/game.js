@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.095";
+const GAME_VERSION = "0.096";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1886,7 +1886,8 @@ function openHelp() {
   const box = document.getElementById("raceHelpList");
   const lore = (typeof RACE_LORE !== "undefined" && Array.isArray(RACE_LORE)) ? RACE_LORE : [];
   if (box && !box.dataset.ready) {
-    box.innerHTML = "<h3>속성 (" + lore.length + ")</h3>" + lore.map(r =>
+    // HTML already has <h3>속성</h3>; fill attribute items only (no duplicate heading)
+    box.innerHTML = lore.map(r =>
       '<div class="race-item"><b>' + r[0] + '</b><p>' + r[1] + '</p></div>'
     ).join("");
     box.dataset.ready = "1";
