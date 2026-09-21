@@ -2644,3 +2644,15 @@ html.is-desktop, html.is-desktop body {
   font-variant-numeric: tabular-nums;
 }
 #title.screen.active { position: relative; }
+
+/* ===== spell asset VFX ===== */
+#spellFx .fx-stage .fx-asset {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: min(52vmin, 420px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 0 18px rgba(255, 220, 120, .45));
+}

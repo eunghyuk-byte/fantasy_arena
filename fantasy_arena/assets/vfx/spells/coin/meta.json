@@ -1,0 +1,22 @@
+{
+  "id": "coin",
+  "name": "동전",
+  "kind": "special",
+  "durationMs": 900,
+  "fps": 12,
+  "cast": {
+    "file": "cast.webp",
+    "frames": 12,
+    "w": 720,
+    "h": 720
+  },
+  "impact": {
+    "file": "impact.webp",
+    "frames": 10,
+    "w": 560,
+    "h": 560
+  },
+  "anchor": "hand",
+  "sfxHint": "coin_flip",
+  "concept": "금화 한 장이 뒤집혀 마나 스파크"
+}

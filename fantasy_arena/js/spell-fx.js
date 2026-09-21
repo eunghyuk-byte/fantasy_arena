@@ -21,6 +21,51 @@ const SpellFx = (() => {
   ELEM["불"] = ELEM.fire; ELEM["물"] = ELEM.water; ELEM["바람"] = ELEM.wind;
   ELEM["땅"] = ELEM.earth; ELEM["빛"] = ELEM.light; ELEM["암흑"] = ELEM.dark;
 
+  const ASSET_BASE = "assets/vfx/spells/";
+  const _metaCache = {};
+  async function loadSpellMeta(id) {
+    if (!id) return null;
+    if (_metaCache[id] !== undefined) return _metaCache[id];
+    try {
+      const res = await fetch(ASSET_BASE + id + "/meta.json", { cache: "no-store" });
+      if (!res.ok) { _metaCache[id] = null; return null; }
+      const meta = await res.json();
+      _metaCache[id] = meta;
+      return meta;
+    } catch (e) {
+      _metaCache[id] = null;
+      return null;
+    }
+  }
+  function playAnimImg(stage, url, ms) {
+    return new Promise(resolve => {
+      if (!stage || !url) { resolve(); return; }
+      const img = document.createElement("img");
+      img.className = "fx-asset";
+      img.alt = "";
+      img.src = url;
+      stage.innerHTML = "";
+      stage.appendChild(img);
+      const t = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, Math.max(200, ms || 900));
+      img.onerror = () => { clearTimeout(t); resolve(); };
+    });
+  }
+  async function playAssetPack(card, layer, stage) {
+    const meta = await loadSpellMeta(card && card.id);
+    if (!meta) return false;
+    const base = ASSET_BASE + meta.id + "/";
+    const castMs = Math.max(400, Math.round((meta.cast && meta.cast.frames ? meta.cast.frames : 12) / (meta.fps || 12) * 1000));
+    const impactMs = Math.max(300, Math.round((meta.impact && meta.impact.frames ? meta.impact.frames : 8) / (meta.fps || 12) * 1000));
+    const castFile = (meta.cast && meta.cast.file) || "cast.webp";
+    const impactFile = (meta.impact && meta.impact.file) || "impact.webp";
+    try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (e) {}
+    if (meta.sfxHint === "coin_flip") { try { Sfx.playCoin && Sfx.playCoin(); } catch (e) {} }
+    await playAnimImg(stage, base + castFile + "?v=" + (window.GAME_VERSION || "0"), castMs);
+    await playAnimImg(stage, base + impactFile + "?v=" + (window.GAME_VERSION || "0"), impactMs);
+    return true;
+  }
+
+
   function lowSpec() {
     try {
       if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
@@ -393,10 +438,22 @@ const SpellFx = (() => {
         const pal = ELEM[elem] || ELEM.earth;
         veil.style.background = pal.veil;
       }
-      try { Sfx.playCardDrop(); } catch (e) {}
-
       const src = await resolveFace(card);
       paintCard(src, card.name || "");
+
+      const usedPack = await playAssetPack(card, layer, stage);
+      if (usedPack) {
+        if (fxCard) fxCard.classList.add("out");
+        layer.classList.remove("on");
+        if (stage) stage.innerHTML = "";
+        if (fxCard) { fxCard.innerHTML = ""; fxCard.classList.remove("in", "out"); }
+        const lab = document.getElementById("fxName");
+        if (lab) lab.textContent = "";
+        resolve();
+        return;
+      }
+
+      try { Sfx.playCardDrop(); } catch (e) {}
 
       setTimeout(() => { if (fxCard) fxCard.classList.add("out"); }, T.show);
       let handle = null;
@@ -404,7 +461,6 @@ const SpellFx = (() => {
         if (low) cssFallback(stage, elem, kind);
         else {
           handle = burst(elem, kind, false);
-          // Layer a light CSS accent for heavy spells
           if (kind === "aoe" || kind === "kill" || kind === "earthquake") {
             cssFallback(stage, elem, kind);
           }
