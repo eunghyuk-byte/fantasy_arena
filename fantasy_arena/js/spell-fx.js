@@ -21,23 +21,39 @@ const SpellFx = (() => {
   ELEM["불"] = ELEM.fire; ELEM["물"] = ELEM.water; ELEM["바람"] = ELEM.wind;
   ELEM["땅"] = ELEM.earth; ELEM["빛"] = ELEM.light; ELEM["암흑"] = ELEM.dark;
 
-  const ASSET_BASE = "assets/vfx/spells/";
+  const KIND_BASE = {
+    spells: "assets/vfx/spells/",
+    combat: "assets/vfx/combat/",
+    ui: "assets/vfx/ui/",
+    coins: "assets/vfx/coins/",
+    items: "assets/vfx/items/",
+    match: "assets/vfx/match/"
+  };
+  const ASSET_BASE = KIND_BASE.spells;
   const _metaCache = {};
-  async function loadSpellMeta(id) {
+  function packBase(kind, id) {
+    const root = KIND_BASE[kind] || ("assets/vfx/" + kind + "/");
+    return root + id + "/";
+  }
+  async function loadPackMeta(kind, id) {
     if (!id) return null;
-    if (_metaCache[id] !== undefined) return _metaCache[id];
+    const key = (kind || "spells") + "/" + id;
+    if (_metaCache[key] !== undefined) return _metaCache[key];
     try {
-      const res = await fetch(ASSET_BASE + id + "/meta.json", { cache: "no-store" });
-      if (!res.ok) { _metaCache[id] = null; return null; }
+      const res = await fetch(packBase(kind, id) + "meta.json", { cache: "no-store" });
+      if (!res.ok) { _metaCache[key] = null; return null; }
       const meta = await res.json();
-      _metaCache[id] = meta;
+      _metaCache[key] = meta;
       return meta;
     } catch (e) {
-      _metaCache[id] = null;
+      _metaCache[key] = null;
       return null;
     }
   }
-  function playStrip(stage, url, frameW, frameH, frames, fps) {
+  async function loadSpellMeta(id) {
+    return loadPackMeta("spells", id);
+  }
+  function playStrip(stage, url, frameW, frameH, frames, fps, layoutHint) {
     return new Promise(resolve => {
       if (!stage || !url) { resolve(); return; }
       const wrap = document.createElement("div");
@@ -57,30 +73,36 @@ const SpellFx = (() => {
         const box = Math.max(1, wrap.clientWidth || 560);
         const natH = img.naturalHeight || frameH || 720;
         const natW = img.naturalWidth || frameW || 720;
-        const n = Math.max(1, frames || Math.round(natW / Math.max(1, natH)) || 1);
+        const vertical = layoutHint === "vertical" || (layoutHint !== "horizontal" && natH > natW);
+        const n = Math.max(1, frames || Math.round((vertical ? natH : natW) / Math.max(1, vertical ? natW : natH)) || 1);
         const frameMs = Math.max(55, Math.round(1000 / Math.max(1, fps || 12)));
-        const totalMs = n * frameMs;
         const fadeMs = 280;
         let i = 0;
-        img.style.height = box + "px";
-        img.style.width = "auto";
+        if (vertical) {
+          img.style.width = box + "px";
+          img.style.height = "auto";
+        } else {
+          img.style.height = box + "px";
+          img.style.width = "auto";
+        }
         img.style.maxWidth = "none";
+        img.style.maxHeight = "none";
         img.style.display = "block";
         img.style.willChange = "transform";
-        // fade in
         requestAnimationFrame(() => {
           wrap.classList.add("show");
-          wrap.style.opacity = "1"; // Chrome+Pages: beat soft-mask opacity:0 races
+          wrap.style.opacity = "1";
         });
         const tick = () => {
-          img.style.transform = "translateX(" + (-i * box) + "px)";
+          img.style.transform = vertical
+            ? ("translateY(" + (-i * box) + "px)")
+            : ("translateX(" + (-i * box) + "px)");
           i += 1;
           if (i >= n) {
             wrap.classList.remove("show");
             wrap.classList.add("hide");
             setTimeout(finish, fadeMs);
           } else {
-            // start fade-out on last ~few frames
             if (i >= n - 2) {
               wrap.classList.remove("show");
               wrap.classList.add("hide");
@@ -154,15 +176,16 @@ const SpellFx = (() => {
 
     // Strips only. Chroma-keyed webp is often fully transparent — never fall back to it.
     let played = false;
+    const layoutHint = meta.layout || null;
     if (await probeUrl(castStrip)) {
-      await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+      await playStrip(stage, castStrip, castW, castH, castFrames, fps, layoutHint);
       played = true;
     }
     if (await probeUrl(hitStrip)) {
-      await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+      await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps, layoutHint);
       played = true;
     } else if (meta.aoe && await probeUrl(assetUrl(base, "aoe_strip.png"))) {
-      await playStrip(stage, assetUrl(base, "aoe_strip.png"), hitW, hitH, hitFrames, fps);
+      await playStrip(stage, assetUrl(base, "aoe_strip.png"), hitW, hitH, hitFrames, fps, layoutHint);
       played = true;
     }
     if (!played) {
@@ -594,6 +617,76 @@ const SpellFx = (() => {
     });
   }
 
+  let _packQueue = Promise.resolve();
+
+  async function _playPackInner(kind, id, opts) {
+    opts = opts || {};
+    if (!kind || !id) return false;
+    const meta = await loadPackMeta(kind, id);
+    const base = packBase(kind, id);
+    const fps = (meta && meta.fps) || 12;
+    const layoutHint = (meta && meta.layout) || opts.layout || null;
+    const cast = (meta && meta.cast) || {};
+    const hit = (meta && (meta.impact || meta.aoe)) || {};
+    const castFrames = cast.frames || 12;
+    const hitFrames = hit.frames || 8;
+    const castW = cast.w || 720, castH = cast.h || 720;
+    const hitW = hit.w || 720, hitH = hit.h || 720;
+    const castStrip = assetUrl(base, "cast_strip.png");
+    const hitStripName = (meta && meta.aoe) ? "aoe_strip.png" : "impact_strip.png";
+    const hitStrip = assetUrl(base, hitStripName);
+
+    const layer = ensureLayer();
+    const stage = document.getElementById("fxStage");
+    const fxCard = document.getElementById("fxCard");
+    try {
+      if (fxCard) {
+        fxCard.innerHTML = "";
+        fxCard.classList.remove("in", "out");
+        fxCard.style.opacity = "0";
+      }
+      const lab = document.getElementById("fxName");
+      if (lab) {
+        lab.textContent = opts.label || (meta && (meta.name || meta.concept)) || "";
+        lab.style.opacity = lab.textContent ? "1" : "0";
+      }
+      layer.classList.add("on", "pack-play");
+      layer.style.display = "";
+      const veil = layer.querySelector(".fx-veil");
+      if (veil) veil.style.setProperty("background", "transparent", "important");
+      if (stage) stage.innerHTML = "";
+
+      let played = false;
+      // Strip-first only — never fall back to empty/chroma webp.
+      if (await probeUrl(castStrip)) {
+        await playStrip(stage, castStrip, castW, castH, castFrames, fps, layoutHint);
+        played = true;
+      }
+      if (await probeUrl(hitStrip)) {
+        await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps, layoutHint);
+        played = true;
+      }
+      return played;
+    } finally {
+      cleanupFx(layer, stage, fxCard);
+      if (layer) layer.classList.remove("pack-play");
+    }
+  }
+
+  function playPack(kind, id, opts) {
+    opts = opts || {};
+    const run = () => _playPackInner(kind, id, opts);
+    if (opts.skipQueue) return run();
+    const p = _packQueue.then(run, run);
+    _packQueue = p.catch(() => {});
+    return p;
+  }
+  function playUi(id, opts) { return playPack("ui", id, opts); }
+  function playCombat(id, opts) { return playPack("combat", id, opts); }
+  function playCoin(id, opts) { return playPack("coins", id, opts); }
+  function playItem(id, opts) { return playPack("items", id, opts); }
+  function playMatch(id, opts) { return playPack("match", id, opts); }
+
   function cleanupFx(layer, stage, fxCard) {
     if (layer) layer.classList.remove("on");
     if (stage) stage.innerHTML = "";
@@ -619,6 +712,6 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, elemOf, spellKind };
+  return { play, clear, T, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch };
 })();
 window.SpellFx = SpellFx;
