@@ -169,7 +169,7 @@ const CARDS = [
   { id:"d4", tribe:"dark", name:"해골나방", cost:1, type:"minion", atk:1, def:0, hp:3, atkC:0, defC:1, hpC:-1, text:"" },
   { id:"d5", tribe:"dark", name:"고스트", cost:2, type:"minion", atk:3, def:0, hp:2, atkC:-3, defC:0, hpC:3, atkSkill:11, text:"혼란공격" },
   { id:"d6", tribe:"dark", name:"구울", cost:4, type:"minion", atk:2, def:0, hp:2, atkC:4, defC:0, hpC:4, ability:"환생", text:"환생" },
-  { id:"d7", tribe:"dark", name:"여포", cost:10, type:"minion", atk:12, def:1, hp:11, atkC:-5, defC:0, hpC:-5, rarity:"legendary", atkSkill:11, ability:"환생", text:"혼란공격 · 환생" },
+  { id:"d7", tribe:"dark", name:"여포", cost:10, type:"minion", atk:11, def:1, hp:10, atkC:-5, defC:0, hpC:-5, rarity:"legendary", atkSkill:11, ability:"환생", text:"혼란공격 · 환생" },
   { id:"d8", tribe:"dark", name:"암흑창병", cost:1, type:"minion", atk:2, def:0, hp:1, atkC:1, defC:0, hpC:0, atkSkill:2, text:"관통공격" },
   { id:"d9", tribe:"dark", name:"스켈레톤", cost:2, type:"minion", atk:3, def:0, hp:3, atkC:0, defC:1, hpC:-1, text:"" },
   { id:"d10", tribe:"dark", name:"심연술사", cost:4, type:"minion", atk:3, def:0, hp:3, atkC:5, defC:0, hpC:5, text:"" },
