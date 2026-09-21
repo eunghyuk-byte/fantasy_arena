@@ -3122,7 +3122,7 @@ html.is-desktop, html.is-desktop body {
   display: block !important;
 }
 
-/* ===== v0.093: rarity keys; was v0.092 pack overlay half size (spell strips unchanged) ===== */
+/* ===== v0.094: unit token banner 토큰; was v0.093 rarity keys ===== */
 #spellFx.pack-play .fx-stage .fx-strip {
   width: min(36vmin, 280px) !important;
   height: min(36vmin, 280px) !important;

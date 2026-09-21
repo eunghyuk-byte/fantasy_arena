@@ -362,7 +362,7 @@ async function composeCardFace(c, opts={}) {
   ctx.restore();
 
   const headerTxt = (c.type === "minion")
-    ? (c.race || (typeof CARD_RACE !== "undefined" && CARD_RACE[c.id]) || "")
+    ? (c.token ? "토큰" : (c.race || (typeof CARD_RACE !== "undefined" && CARD_RACE[c.id]) || ""))
     : (c.type === "item" ? "아이템" : "스펠");
   if (headerTxt) {
     ctx.save();
