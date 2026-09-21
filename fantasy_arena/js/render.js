@@ -350,7 +350,7 @@ async function composeCardFace(c, opts={}) {
   if (frame) ctx.drawImage(await punchFrame(frame, frameUrl), 0, 0, W, H);
 
   ctx.save();
-  ctx.font = "800 " + Math.round(H*0.042) + "px 'Noto Sans KR', sans-serif";
+  ctx.font = "800 " + (Math.round(H*0.042) + 2) + "px 'Noto Sans KR', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.lineJoin = "round";
@@ -366,7 +366,6 @@ async function composeCardFace(c, opts={}) {
     : (c.type === "item" ? "아이템" : "스펠");
   if (headerTxt) {
     ctx.save();
-    // Same size as card title
     const hs = Math.round(H*0.042);
     ctx.font = "800 " + hs + "px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
@@ -484,7 +483,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v66spellframe", c.id, c.type || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v67namefont", c.id, c.type || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
