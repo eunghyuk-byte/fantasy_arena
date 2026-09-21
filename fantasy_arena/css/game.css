@@ -2660,15 +2660,16 @@ html.is-desktop, html.is-desktop body {
   pointer-events: none;
 }
 #spellFx .fx-stage .fx-strip {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: min(52vmin, 420px);
-  aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%);
-  overflow: hidden;
-  pointer-events: none;
-  filter: drop-shadow(0 0 18px rgba(255, 220, 120, .45));
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: min(72vmin, 560px) !important;
+  height: min(72vmin, 560px) !important;
+  transform: translate(-50%, -50%) !important;
+  overflow: hidden !important;
+  z-index: 12 !important;
+  background: transparent !important;
+  filter: drop-shadow(0 0 18px rgba(255,100,20,.55)) !important;
 }
 #spellFx .fx-stage .fx-strip img {
   height: 100%;
@@ -2682,28 +2683,73 @@ html.is-desktop, html.is-desktop body {
   to { transform: translateX(calc(-100% * (var(--frames) - 1) / var(--frames))); }
 }
 
+
 /* ===== P0 spellFx always on top ===== */
 #spellFx {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 9999 !important;
+  z-index: 99999 !important;
   pointer-events: none !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
-#spellFx.on { display: block !important; }
+#spellFx.on { display: block !important; visibility: visible !important; opacity: 1 !important; }
+#spellFx .fx-veil {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  background: transparent !important;
+}
+#spellFx.pack-play .fx-veil {
+  background: transparent !important;
+}
 #spellFx .fx-stage {
   position: absolute !important;
   inset: 0 !important;
-  z-index: 5 !important;
+  z-index: 10 !important;
 }
-#spellFx .fx-stage .fx-asset,
+#spellFx .fx-name {
+  display: block !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 10% !important;
+  transform: translateX(-50%) !important;
+  z-index: 20 !important;
+  color: #ffe7a8 !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 12px #000 !important;
+}
+#spellFx .fx-stage .fx-asset {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(72vmin, 560px) !important;
+  height: auto !important;
+  z-index: 12 !important;
+  filter: drop-shadow(0 0 24px rgba(255,120,40,.7)) !important;
+}
 #spellFx .fx-stage .fx-strip {
-  z-index: 6 !important;
-  width: min(70vmin, 520px) !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: min(72vmin, 560px) !important;
+  height: min(72vmin, 560px) !important;
+  transform: translate(-50%, -50%) !important;
+  overflow: hidden !important;
+  z-index: 12 !important;
+  filter: drop-shadow(0 0 24px rgba(255,120,40,.7)) !important;
 }
-#game.active > #spellFx {
-  position: fixed !important;
-  z-index: 9999 !important;
+#spellFx .fx-stage .fx-strip img {
+  height: 100% !important;
+  width: auto !important;
+  max-width: none !important;
+  display: block !important;
+  /* animation set in JS with concrete steps(N) — Safari rejects steps(var(--frames)) */
+}
+@keyframes fxStripRun {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% * (var(--frames) - 1) / var(--frames))); }
 }
 
 /* ===== P0 spell target glow ===== */
@@ -2714,4 +2760,168 @@ html.is-desktop, html.is-desktop body {
   outline-offset: 3px !important;
   box-shadow: 0 0 18px rgba(255, 200, 80, .85), 0 0 36px rgba(255, 140, 40, .45) !important;
   filter: brightness(1.12) saturate(1.15);
+}
+
+
+/* ===== v0.021: spellFx veil never tints; strip viewport clean ===== */
+#spellFx .fx-veil,
+#spellFx.pack-play .fx-veil,
+#spellFx[data-elem] .fx-veil,
+#spellFx[data-elem="fire"] .fx-veil,
+#spellFx[data-elem="water"] .fx-veil,
+#spellFx[data-elem="wind"] .fx-veil,
+#spellFx[data-elem="earth"] .fx-veil,
+#spellFx[data-elem="light"] .fx-veil,
+#spellFx[data-elem="dark"] .fx-veil {
+  background: transparent !important;
+  opacity: 0 !important;
+}
+#spellFx .fx-stage .fx-strip {
+  background: transparent !important;
+  overflow: hidden !important;
+  /* one-frame square viewport */
+  aspect-ratio: 1 / 1 !important;
+}
+
+
+/* P0 visible cssFallback */
+#spellFx .fx-stage .fx-spark,
+#spellFx .fx-stage .shockwave,
+#spellFx .fx-stage .shock,
+#spellFx .fx-stage .aura {
+  display: block !important;
+  opacity: 1 !important;
+  z-index: 15 !important;
+}
+#spellFx .fx-stage .fx-spark.fx-fire {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, #fff6c8 0%, #ff8a20 45%, #ff3a00 75%, transparent 100%) !important;
+  box-shadow: 0 0 16px #ff6a18 !important;
+}
+#spellFx .fx-name {
+  opacity: 1 !important;
+}
+
+/* P0 soft-edge VFX window — no hard rectangle cut */
+#spellFx .fx-stage .fx-strip {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: min(78vmin, 600px) !important;
+  height: min(78vmin, 600px) !important;
+  transform: translate(-50%, -50%) !important;
+  overflow: hidden !important;
+  z-index: 12 !important;
+  background: transparent !important;
+  filter: drop-shadow(0 0 18px rgba(255,100,20,.45)) !important;
+  opacity: 0;
+  transition: opacity .28s ease;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  mask-composite: intersect;
+}
+#spellFx .fx-stage .fx-strip.show { opacity: 1 !important; }
+#spellFx .fx-stage .fx-strip.hide { opacity: 0 !important; }
+#spellFx .fx-stage .fx-asset {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(78vmin, 600px) !important;
+  height: auto !important;
+  z-index: 12 !important;
+  filter: drop-shadow(0 0 18px rgba(255,120,40,.5)) !important;
+  opacity: 0;
+  transition: opacity .28s ease;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  mask-composite: intersect;
+}
+#spellFx .fx-stage .fx-asset.show { opacity: 1 !important; }
+#spellFx .fx-stage .fx-asset.hide { opacity: 0 !important; }
+
+
+/* ===== P0 playable yellow burn glow (Hearthstone-like) ===== */
+@keyframes playGlowBurn {
+  0%, 100% {
+    opacity: .72;
+    filter: brightness(.92) saturate(1.05);
+    box-shadow:
+      0 0 0 2px rgba(255, 232, 150, .95),
+      0 0 8px 2px rgba(255, 200, 70, .75),
+      0 0 18px 6px rgba(255, 170, 40, .45),
+      0 0 32px 10px rgba(255, 140, 20, .22),
+      inset 0 0 10px rgba(255, 245, 200, .28);
+  }
+  35% {
+    opacity: 1;
+    filter: brightness(1.18) saturate(1.2);
+    box-shadow:
+      0 0 0 2px rgba(255, 245, 190, 1),
+      0 0 12px 3px rgba(255, 210, 80, .95),
+      0 0 26px 9px rgba(255, 180, 40, .6),
+      0 0 40px 14px rgba(255, 150, 20, .3),
+      inset 0 0 14px rgba(255, 250, 210, .4);
+  }
+  65% {
+    opacity: .88;
+    filter: brightness(1.05) saturate(1.1);
+    box-shadow:
+      0 0 0 2px rgba(255, 236, 160, .98),
+      0 0 10px 2px rgba(255, 195, 60, .85),
+      0 0 22px 7px rgba(255, 165, 30, .5),
+      0 0 34px 11px rgba(255, 140, 15, .25),
+      inset 0 0 12px rgba(255, 245, 200, .32);
+  }
+}
+
+#game.active .my-hand .card.playable {
+  overflow: visible !important;
+  z-index: 4 !important;
+}
+#game.active .my-hand .card.playable .card-face {
+  position: relative !important;
+  z-index: 2 !important;
+  outline: none !important;
+  /* soft face rim only — main burn is .play-glow */
+  box-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+#game.active .my-hand .card.playable > .play-glow {
+  display: block !important;
+  position: absolute !important;
+  /* hug card-face bounds (same box as face), tiny bleed for flame bloom */
+  inset: -2px !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 12px 12px 20px 20px !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  background: transparent !important;
+  animation: playGlowBurn 1.05s ease-in-out infinite !important;
+}
+/* kill old flat outline / disabled glow overrides */
+.play-glow { display: none; }
+.card.playable > .play-glow { display: block !important; }
+.card.playable::after,
+#game.active .my-hand .card.playable::after {
+  content: none !important;
+  display: none !important;
 }

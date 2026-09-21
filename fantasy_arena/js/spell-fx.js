@@ -40,27 +40,61 @@ const SpellFx = (() => {
   function playStrip(stage, url, frameW, frameH, frames, fps) {
     return new Promise(resolve => {
       if (!stage || !url) { resolve(); return; }
-      const ms = Math.max(200, Math.round((frames || 1) / Math.max(1, fps || 12) * 1000));
       const wrap = document.createElement("div");
       wrap.className = "fx-strip";
-      wrap.style.setProperty("--fw", frameW + "px");
-      wrap.style.setProperty("--fh", frameH + "px");
-      wrap.style.setProperty("--frames", String(Math.max(1, frames || 1)));
-      wrap.style.setProperty("--ms", ms + "ms");
       const img = document.createElement("img");
       img.alt = "";
-      img.src = url;
+      img.draggable = false;
       wrap.appendChild(img);
       stage.innerHTML = "";
       stage.appendChild(wrap);
-      img.onload = () => {
-        // ensure layout
-        wrap.classList.add("run");
+      const finish = () => { try { wrap.remove(); } catch (e) {} resolve(); };
+      let started = false;
+      const begin = () => {
+        if (started) return;
+        started = true;
+        void wrap.offsetWidth;
+        const box = Math.max(1, wrap.clientWidth || 560);
+        const natH = img.naturalHeight || frameH || 720;
+        const natW = img.naturalWidth || frameW || 720;
+        const n = Math.max(1, frames || Math.round(natW / Math.max(1, natH)) || 1);
+        const frameMs = Math.max(55, Math.round(1000 / Math.max(1, fps || 12)));
+        const totalMs = n * frameMs;
+        const fadeMs = 280;
+        let i = 0;
+        img.style.height = box + "px";
+        img.style.width = "auto";
+        img.style.maxWidth = "none";
+        img.style.display = "block";
+        img.style.willChange = "transform";
+        // fade in
+        requestAnimationFrame(() => wrap.classList.add("show"));
+        const tick = () => {
+          img.style.transform = "translateX(" + (-i * box) + "px)";
+          i += 1;
+          if (i >= n) {
+            wrap.classList.remove("show");
+            wrap.classList.add("hide");
+            setTimeout(finish, fadeMs);
+          } else {
+            // start fade-out on last ~few frames
+            if (i >= n - 2) {
+              wrap.classList.remove("show");
+              wrap.classList.add("hide");
+            }
+            setTimeout(tick, frameMs);
+          }
+        };
+        tick();
       };
-      img.onerror = () => { resolve(); };
-      setTimeout(() => { try { wrap.remove(); } catch (e) {} resolve(); }, ms + 40);
+      img.onerror = finish;
+      img.onload = begin;
+      img.src = url;
+      if (img.complete && img.naturalWidth) begin();
     });
   }
+
+
   function assetUrl(base, file) {
     return base + file + "?v=" + (window.GAME_VERSION || "0");
   }
@@ -78,11 +112,14 @@ const SpellFx = (() => {
       const img = document.createElement("img");
       img.className = "fx-asset";
       img.alt = "";
-      img.src = url;
       stage.innerHTML = "";
       stage.appendChild(img);
-      const t = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, Math.max(250, ms || 900));
-      img.onerror = () => { clearTimeout(t); resolve(); };
+      img.src = url;
+      requestAnimationFrame(() => img.classList.add("show"));
+      const life = Math.max(700, ms || 900);
+      const t1 = setTimeout(() => { img.classList.remove("show"); img.classList.add("hide"); }, Math.max(200, life - 280));
+      const t2 = setTimeout(() => { try { img.remove(); } catch (e) {} resolve(); }, life);
+      img.onerror = () => { clearTimeout(t1); clearTimeout(t2); resolve(); };
     });
   }
   async function playAssetPack(card, layer, stage) {
@@ -107,13 +144,28 @@ const SpellFx = (() => {
     if (meta.sfxHint === "coin_flip") { try { Sfx.playCoin && Sfx.playCoin(); } catch (e) {} }
     const fxCard = document.getElementById("fxCard");
     if (fxCard) { fxCard.classList.add("out"); fxCard.style.opacity = "0"; }
+    const lab = document.getElementById("fxName");
+    if (lab) { lab.textContent = (card && card.name) || meta.name || ""; lab.style.opacity = "1"; }
+    layer.classList.add("pack-play");
 
-    if (await probeUrl(castStrip)) await playStrip(stage, castStrip, castW, castH, castFrames, fps);
-    else if (await probeUrl(castWebp)) await playWebp(stage, castWebp, castMs);
-
-    if (await probeUrl(hitStrip)) await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
-    else if (await probeUrl(hitWebp)) await playWebp(stage, hitWebp, hitMs);
-
+    // Strips only. Chroma-keyed webp is often fully transparent — never fall back to it.
+    let played = false;
+    if (await probeUrl(castStrip)) {
+      await playStrip(stage, castStrip, castW, castH, castFrames, fps);
+      played = true;
+    }
+    if (await probeUrl(hitStrip)) {
+      await playStrip(stage, hitStrip, hitW, hitH, hitFrames, fps);
+      played = true;
+    } else if (meta.aoe && await probeUrl(assetUrl(base, "aoe_strip.png"))) {
+      await playStrip(stage, assetUrl(base, "aoe_strip.png"), hitW, hitH, hitFrames, fps);
+      played = true;
+    }
+    if (!played) {
+      // Guaranteed visible burst if strips fail to load (mobile/network)
+      cssFallback(stage, elemOf(card), spellKind(card));
+      await new Promise(r => setTimeout(r, 900));
+    }
     if (fxCard) { fxCard.style.opacity = ""; }
     return true;
   }
@@ -122,7 +174,6 @@ const SpellFx = (() => {
   function lowSpec() {
     try {
       if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
-      if (navigator.deviceMemory && navigator.deviceMemory < 4) return true;
     } catch (e) {}
     return false;
   }
@@ -490,11 +541,11 @@ const SpellFx = (() => {
       layer.dataset.kind = kind;
       const veil = layer.querySelector(".fx-veil");
       if (veil) {
-        const pal = ELEM[elem] || ELEM.earth;
-        veil.style.background = pal.veil;
+        veil.style.setProperty("background", "transparent", "important");
       }
-      const src = await resolveFace(card);
-      paintCard(src, card.name || "");
+      // Never block VFX on card-face compose (hand queue can stall on mobile).
+      paintCard("", card.name || "");
+      resolveFace(card).then(src => { if (src) paintCard(src, card.name || ""); }).catch(() => {});
 
       const usedPack = await playAssetPack(card, layer, stage);
       if (usedPack) {

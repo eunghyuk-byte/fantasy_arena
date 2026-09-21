@@ -213,13 +213,41 @@ function paintSmall(ctx, text, x, y, neg) {
 const _punchCache = new WeakMap();
 const _punchByUrl = new Map();
 async function punchFrame(img, urlKey) {
-  // Skip getImageData edge punch — freezes UI when composing many high-res cards.
+  // Punch near-white art windows + near-black JPEG bleed to alpha. Cached per URL.
+  // Pre-keyed PNG/WebP (unit/*.png) already transparent — skip heavy scan.
   if (!img) return img;
   if (urlKey && _punchByUrl.has(urlKey)) return _punchByUrl.get(urlKey);
   if (_punchCache.has(img)) return _punchCache.get(img);
-  _punchCache.set(img, img);
-  if (urlKey) _punchByUrl.set(urlKey, img);
-  return img;
+  if (urlKey && /\.(png|webp)(\?|$)/i.test(urlKey)) {
+    _punchCache.set(img, img);
+    _punchByUrl.set(urlKey, img);
+    return img;
+  }
+  try {
+    const c = document.createElement("canvas");
+    c.width = img.naturalWidth || img.width;
+    c.height = img.naturalHeight || img.height;
+    const x = c.getContext("2d", { willReadFrequently: true });
+    x.drawImage(img, 0, 0);
+    const id = x.getImageData(0, 0, c.width, c.height);
+    const d = id.data;
+    const w = c.width, h = c.height;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      if (r >= 228 && g >= 228 && b >= 228) { d[i + 3] = 0; continue; }
+      const px = (i / 4) % w, py = ((i / 4) / w) | 0;
+      const edge = px < w * 0.045 || px > w * 0.955 || py < h * 0.03 || py > h * 0.97;
+      if (edge && r < 24 && g < 20 && b < 18) d[i + 3] = 0;
+    }
+    x.putImageData(id, 0, 0);
+    _punchCache.set(img, c);
+    if (urlKey) _punchByUrl.set(urlKey, c);
+    return c;
+  } catch (e) {
+    _punchCache.set(img, img);
+    if (urlKey) _punchByUrl.set(urlKey, img);
+    return img;
+  }
 }
 async function composeCardFace(c, opts={}) {
   const W = 768, H = 1152;
@@ -433,8 +461,11 @@ function enqueueCompose(fn) {
     pump();
   });
 }
+function faceCacheKey(c, opts) {
+  return ["v65punch", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+}
 function faceSrc(c, opts, el) {
-  const key = ["v64item", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", c.equippedItem && c.equippedItem.id || ""].join("|");
+  const key = faceCacheKey(c, opts);
   if (_faceDone.has(key)) {
     const src = _faceDone.get(key);
     if (el && src) {
@@ -484,7 +515,7 @@ function faceSrc(c, opts, el) {
 
 function renderCard(c, playable) {
   const uid = "face_" + Math.random().toString(36).slice(2,8);
-  const cacheKey = ["v64item", c.id, c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, c.hp, c.name, c.type || ""].join("|");
+  const cacheKey = faceCacheKey(c, {});
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
   setTimeout(() => {
     const el = document.getElementById(uid);
@@ -558,7 +589,7 @@ function renderMinion(m, side) {
     targetable ? "can-target" : "",
   ].join(" ");
   const uid = "mface_" + m.uid;
-  const cacheKey = ["v64item", m.id, m.cost, m.atk, m.def, m.atkC, m.defC, m.hpC, m.hp, m.name, m.itemWorn ? "eq" : "", (m.equippedItem && m.equippedItem.id) || ""].join("|");
+  const cacheKey = faceCacheKey(m, { hp: m.hp });
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
   setTimeout(() => {
     const el = document.getElementById(uid);
