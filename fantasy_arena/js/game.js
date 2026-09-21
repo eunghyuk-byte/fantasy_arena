@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.077";
+const GAME_VERSION = "0.078";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -556,6 +556,29 @@ function resolveSpell(p, card, target) {
   applyFx(p, card.spell, target);
 }
 
+
+function adjustSharedCoinN(m, delta) {
+  // 공유 물리 코인 N만 증감. 골드/블랙 변환 아님. 링크 부호 유지, |링크|=newN 또는 0.
+  if (!m || !delta) return;
+  const links = [m.atkC || 0, m.defC || 0, m.hpC || 0];
+  const nz = links.filter(v => v !== 0).map(Math.abs);
+  const N = nz.length ? Math.max(...nz) : 0;
+  let newN = Math.max(0, Math.min(5, N + delta));
+  if (N === 0 && delta > 0) {
+    // 링크 없는 유닛에 코인+ : 기본적으로 공+ 링크 부여(최소 의미 있는 N)
+    m.atkC = newN; m.defC = 0; m.hpC = 0;
+    return;
+  }
+  const scale = (v) => {
+    if (!v) return 0;
+    const sign = v > 0 ? 1 : -1;
+    return newN === 0 ? 0 : sign * newN;
+  };
+  m.atkC = scale(m.atkC || 0);
+  m.defC = scale(m.defC || 0);
+  m.hpC = scale(m.hpC || 0);
+}
+
 function applyFx(p, fx, target) {
   const e = opponent(p);
   if (!fx) return;
@@ -564,9 +587,7 @@ function applyFx(p, fx, target) {
     if (target && target.kind === "minion") {
       if (fx.skipAttack) target.minion.skipAttack = true;
       if (fx.coin) {
-        target.minion.atkC = (target.minion.atkC || 0) + fx.coin;
-        target.minion.defC = (target.minion.defC || 0) + fx.coin;
-        target.minion.hpC = (target.minion.hpC || 0) + fx.coin;
+        adjustSharedCoinN(target.minion, fx.coin);
       }
     }
   } else if (fx.type === "heal_hero") {
@@ -599,9 +620,7 @@ function applyFx(p, fx, target) {
     const hit = (pl, m, dmg) => {
       if (dmg) damageMinion(pl, m, dmg);
       if (fx.coin) {
-        m.atkC = (m.atkC || 0) + fx.coin;
-        m.defC = (m.defC || 0) + fx.coin;
-        m.hpC = (m.hpC || 0) + fx.coin;
+        adjustSharedCoinN(m, fx.coin);
       }
       if (fx.atkC) m.atkC = (m.atkC || 0) + fx.atkC;
       if (fx.defC) m.defC = (m.defC || 0) + fx.defC;
