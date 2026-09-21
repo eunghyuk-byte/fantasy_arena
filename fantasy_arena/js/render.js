@@ -77,7 +77,8 @@ function render() {
   document.getElementById("oppBoard").classList.toggle("empty", !opp.board.length);
   document.getElementById("myBoard").classList.toggle("empty", !me.board.length);
   layoutBoardSlots();
-  requestAnimationFrame(() => layoutBoardSlots());
+  layoutBoardAlign();
+  requestAnimationFrame(() => { layoutBoardSlots(); layoutBoardAlign(); });
 
   document.getElementById("oppStrip").innerHTML = heroStrip(opp, false, myTurn);
   document.getElementById("myStrip").innerHTML = heroStrip(me, true, myTurn);
