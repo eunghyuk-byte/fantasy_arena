@@ -84,7 +84,7 @@ const CARDS = [
   { id:"f20", tribe:"fire", name:"데빌", cost:3, type:"minion", atk:9, def:0, hp:1, atkC:-1, defC:0, hpC:0, text:"" },
   { id:"f21", tribe:"fire", name:"화염창병", cost:1, type:"minion", atk:2, def:0, hp:1, atkC:-1, defC:0, hpC:0, atkSkill:2, text:"관통공격" },
   { id:"f22", tribe:"fire", name:"하후돈", cost:7, type:"minion", atk:9, def:0, hp:9, atkC:-3, defC:0, hpC:0, rarity:"heroic", atkSkill:6, text:"흡혈공격" },
-  { id:"f23", tribe:"fire", name:"발록", cost:5, type:"minion", atk:12, def:0, hp:2, atkC:-1, defC:0, hpC:0, atkSkill:2, text:"관통공격" },
+  { id:"f23", tribe:"fire", name:"발록", cost:5, type:"minion", atk:10, def:0, hp:8, atkC:-5, defC:0, hpC:-5, atkSkill:2, text:"관통공격" },
   { id:"f24", tribe:"fire", name:"키메라", cost:6, type:"minion", atk:16, def:0, hp:2, atkC:-1, defC:0, hpC:-1, text:"" },
   { id:"f25", tribe:"fire", name:"타이폰", cost:6, type:"minion", atk:15, def:0, hp:3, atkC:-1, defC:0, hpC:-1, text:"" },
   { id:"f26", tribe:"fire", name:"피닉스", cost:5, type:"minion", atk:13, def:0, hp:2, atkC:-1, defC:0, hpC:-1, text:"" },
