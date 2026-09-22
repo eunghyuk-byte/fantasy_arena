@@ -62,41 +62,6 @@
       "name": "deck"
     },
     {
-      "path": "assets/img/frames/unit/earth.jpg",
-      "bytes": 631,
-      "name": "earth"
-    },
-    {
-      "path": "assets/img/frames/unit/fire.jpg",
-      "bytes": 281193,
-      "name": "fire"
-    },
-    {
-      "path": "assets/img/frames/unit/wind.jpg",
-      "bytes": 223062,
-      "name": "wind"
-    },
-    {
-      "path": "assets/img/frames/unit/water.jpg",
-      "bytes": 258086,
-      "name": "water"
-    },
-    {
-      "path": "assets/img/frames/unit/light.jpg",
-      "bytes": 239755,
-      "name": "light"
-    },
-    {
-      "path": "assets/img/frames/unit/dark.jpg",
-      "bytes": 181573,
-      "name": "dark"
-    },
-    {
-      "path": "assets/img/frames/unit/metal.jpg",
-      "bytes": 246751,
-      "name": "metal"
-    },
-    {
       "path": "assets/img/frames/spell/fire.webp",
       "bytes": 232806,
       "name": "fire"
@@ -1090,6 +1055,126 @@
       "path": "assets/img/art/a17.jpg",
       "bytes": 173554,
       "name": "a17"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_dark_unit_common_frame.png",
+      "bytes": 2304576,
+      "name": "deck_dark_unit_common_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_dark_unit_legendary_frame.png",
+      "bytes": 2306579,
+      "name": "deck_dark_unit_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_dark_unit_rare_frame.png",
+      "bytes": 2306929,
+      "name": "deck_dark_unit_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_dark_unit_uncommon_frame.png",
+      "bytes": 2306149,
+      "name": "deck_dark_unit_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_earth_unit_common_frame.png",
+      "bytes": 2091098,
+      "name": "deck_earth_unit_common_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_earth_unit_legendary_frame.png",
+      "bytes": 2052521,
+      "name": "deck_earth_unit_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_earth_unit_rare_frame.png",
+      "bytes": 2093561,
+      "name": "deck_earth_unit_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_earth_unit_uncommon_frame.png",
+      "bytes": 2093333,
+      "name": "deck_earth_unit_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_fire_unit_common_frame.png",
+      "bytes": 2692253,
+      "name": "deck_fire_unit_common_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_fire_unit_legendary_frame.png",
+      "bytes": 2692901,
+      "name": "deck_fire_unit_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_fire_unit_rare_frame.png",
+      "bytes": 2693264,
+      "name": "deck_fire_unit_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_fire_unit_uncommon_frame.png",
+      "bytes": 2692835,
+      "name": "deck_fire_unit_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_light_unit_common_frame.png",
+      "bytes": 2156057,
+      "name": "deck_light_unit_common_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_light_unit_legendary_frame.png",
+      "bytes": 2175171,
+      "name": "deck_light_unit_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_light_unit_rare_frame.png",
+      "bytes": 2158403,
+      "name": "deck_light_unit_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_light_unit_uncommon_frame.png",
+      "bytes": 2157650,
+      "name": "deck_light_unit_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_water_unit_common_frame.png",
+      "bytes": 2403527,
+      "name": "deck_water_unit_common_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_water_unit_legendary_frame.png",
+      "bytes": 2350944,
+      "name": "deck_water_unit_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_water_unit_rare_frame.png",
+      "bytes": 2404797,
+      "name": "deck_water_unit_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_water_unit_uncommon_frame.png",
+      "bytes": 2403775,
+      "name": "deck_water_unit_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_wind_unit_common_frame.png",
+      "bytes": 2204012,
+      "name": "deck_wind_unit_common_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_wind_unit_legendary_frame.png",
+      "bytes": 2222299,
+      "name": "deck_wind_unit_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_wind_unit_rare_frame.png",
+      "bytes": 2207232,
+      "name": "deck_wind_unit_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/unit/deck_wind_unit_uncommon_frame.png",
+      "bytes": 2207069,
+      "name": "deck_wind_unit_uncommon_frame"
     }
   ]
 }

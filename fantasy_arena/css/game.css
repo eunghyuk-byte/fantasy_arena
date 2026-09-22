@@ -2569,8 +2569,9 @@ html.is-desktop, html.is-desktop body {
 #game.active .minion.equip-glow::after {
   content: "";
   position: absolute;
-  inset: -8%;
-  border-radius: 18px;
+  /* tighter — face JPEG fills slot after deck_* pad crop */
+  inset: -2%;
+  border-radius: 14px;
   pointer-events: none;
   box-shadow: 0 0 0 2px rgba(255, 236, 150, 0.9), 0 0 28px 8px rgba(255, 210, 80, 0.45);
   background: radial-gradient(circle at 30% 20%, rgba(255,255,220,0.35), transparent 55%);
@@ -2770,7 +2771,8 @@ html.is-desktop, html.is-desktop body {
 #game.active .hero-slot.spell-glow,
 #game.active .hero-portrait.spell-glow {
   outline: 3px solid #ffe08a !important;
-  outline-offset: 3px !important;
+  /* hug metal silhouette (compose crops ~8% transparent pad into face JPEG) */
+  outline-offset: 0px !important;
   box-shadow: 0 0 18px rgba(255, 200, 80, .85), 0 0 36px rgba(255, 140, 40, .45) !important;
   filter: brightness(1.12) saturate(1.15);
 }
@@ -3416,4 +3418,29 @@ html.is-desktop #game.active .my-hand .card.playable,
     height: min(90%, 22cqh) !important;
     max-height: min(220px, 22cqh) !important;
   }
+}
+
+
+/* ===== v0.158: board can-attack / selected glow (metal silhouette ≈ card box after pad crop) ===== */
+#game.active .minion.can-attack {
+  outline: 2px solid rgba(255, 226, 150, .95) !important;
+  outline-offset: 0px !important;
+  box-shadow:
+    0 0 10px 2px rgba(255, 200, 70, .65),
+    0 0 22px 6px rgba(255, 160, 40, .35) !important;
+  filter: brightness(1.08) saturate(1.1);
+}
+#game.active .minion.selected {
+  transform: translateY(-4px);
+  outline: 3px solid rgba(255, 240, 180, 1) !important;
+  outline-offset: 1px !important;
+  box-shadow:
+    0 0 14px 3px rgba(255, 220, 100, .85),
+    0 0 28px 8px rgba(255, 180, 50, .45) !important;
+  filter: brightness(1.14) saturate(1.15);
+  z-index: 7;
+}
+#game.active .minion.can-target {
+  outline: 2px solid #ff6b4a !important;
+  outline-offset: 1px !important;
 }

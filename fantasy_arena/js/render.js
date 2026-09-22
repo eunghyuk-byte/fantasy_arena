@@ -265,6 +265,49 @@ async function punchFrame(img, urlKey) {
     return img;
   }
 }
+
+const _opaqueBBoxByUrl = new Map();
+/** Opaque alpha bbox of a frame image/canvas. Cached by urlKey. */
+function frameOpaqueBBox(src, urlKey) {
+  if (!src) return null;
+  if (urlKey && _opaqueBBoxByUrl.has(urlKey)) return _opaqueBBoxByUrl.get(urlKey);
+  try {
+    const w = src.naturalWidth || src.width;
+    const h = src.naturalHeight || src.height;
+    if (!w || !h) return null;
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const x = c.getContext("2d", { willReadFrequently: true });
+    x.drawImage(src, 0, 0);
+    const data = x.getImageData(0, 0, w, h).data;
+    let l = w, t = h, r = 0, b = 0, found = false;
+    for (let y = 0; y < h; y++) {
+      for (let px = 0; px < w; px++) {
+        if (data[(y * w + px) * 4 + 3] > 8) {
+          found = true;
+          if (px < l) l = px;
+          if (px > r) r = px;
+          if (y < t) t = y;
+          if (y > b) b = y;
+        }
+      }
+    }
+    if (!found) {
+      const full = { l: 0, t: 0, w, h, pad: false };
+      if (urlKey) _opaqueBBoxByUrl.set(urlKey, full);
+      return full;
+    }
+    const bw = r - l + 1, bh = b - t + 1;
+    // Significant outer transparent pad (deck_* frames ~8%)
+    const pad = (l > w * 0.02) || (t > h * 0.02) || ((w - 1 - r) > w * 0.02) || ((h - 1 - b) > h * 0.02);
+    const box = { l, t, w: bw, h: bh, pad };
+    if (urlKey) _opaqueBBoxByUrl.set(urlKey, box);
+    return box;
+  } catch (e) {
+    return null;
+  }
+}
+
 async function composeCardFace(c, opts={}) {
   const W = 768, H = 1152;
   const canvas = document.createElement("canvas");
@@ -275,7 +318,8 @@ async function composeCardFace(c, opts={}) {
 
   ctx.fillStyle = "#1a1008";
   ctx.fillRect(0, 0, W, H);
-  const artX = W * 0.112, artY = H * 0.122, artW = W * 0.776, artH = H * 0.448;
+  // Portrait hole relative to opaque silhouette of deck_* unit frames (1300x2000, ~8% pad cropped on draw)
+  const artX = W * 0.118, artY = H * 0.114, artW = W * 0.765, artH = H * 0.435;
   ctx.fillStyle = tribe.color || "#1a1008";
   ctx.fillRect(artX, artY, artW, artH);
   ctx.save();
@@ -355,7 +399,14 @@ async function composeCardFace(c, opts={}) {
 
   ctx.restore();
   const frame = await loadImg(frameUrl);
-  if (frame) ctx.drawImage(await punchFrame(frame, frameUrl), 0, 0, W, H);
+  if (frame) {
+    const punched = await punchFrame(frame, frameUrl);
+    const box = frameOpaqueBBox(punched, frameUrl);
+    // Crop wider transparent outer padding so metal silhouette fills the 768x1152 face
+    // (JPEG export has no alpha — uncropped pad becomes dark margins and glows sit inset/wrong)
+    if (box && box.pad) ctx.drawImage(punched, box.l, box.t, box.w, box.h, 0, 0, W, H);
+    else ctx.drawImage(punched, 0, 0, W, H);
+  }
 
   ctx.save();
   ctx.font = "800 " + (Math.round(H*0.042) + 2) + "px 'Noto Sans KR', sans-serif";
@@ -641,7 +692,8 @@ function renderMinion(m, side) {
   const cls = [
     "minion",
     (m.keywords || []).includes("taunt") ? "taunt" : "",
-    "",
+    canAtk ? "can-attack" : "",
+    selected ? "selected" : "",
     targetable ? "can-target" : "",
   ].join(" ");
   const uid = "mface_" + m.uid;
