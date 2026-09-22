@@ -2741,13 +2741,18 @@ html.is-desktop, html.is-desktop body {
 }
 
 
-/* ===== P0 build version badge ===== */
+/* ===== P0 build version badge (below quit, menu bottom-right) ===== */
+#title .title-menu .build-ver,
 #buildVer.build-ver,
 .build-ver {
-  position: fixed !important;
-  top: 12px !important;
-  right: 16px !important;
-  z-index: 10000 !important;
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  z-index: auto !important;
+  align-self: flex-end;
+  margin-top: 4px;
+  width: fit-content;
+  box-sizing: border-box;
   color: #ffe7a8 !important;
   font-size: 15px !important;
   font-weight: 700 !important;
