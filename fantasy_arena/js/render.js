@@ -64,8 +64,9 @@ function layoutBoardAlign() {
   let midFrac = (midY - mr.top) / mr.height;
   midFrac = Math.max(0.38, Math.min(0.58, midFrac));
   // Rows: oppHand | oppBoard | myBoard | myHand | hint
-  // Hand row must stay large (0.28) — shrinking to 0.20 made hand cards tiny (v0.198 regression)
-  const hand = 0.28, hint = 0.015, oppHand = 0.06;
+  // HAND LAYOUT LOCK (see LAYOUT_HAND_LOCK.md) — do not shrink below 0.28; negative CSS margin forbidden
+  const HAND_ROW_FRAC = 0.28; // LOCKED
+  const hand = HAND_ROW_FRAC, hint = 0.015, oppHand = 0.06;
   const rest = 1 - hand - hint - oppHand; // boards total
   // Boundary after oppHand+oppBoard == midFrac (parchment center ornament)
   let oppBoard = midFrac - oppHand;

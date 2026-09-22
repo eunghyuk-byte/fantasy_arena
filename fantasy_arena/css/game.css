@@ -3792,3 +3792,32 @@ html.is-desktop #game.active .my-hand .card.playable,
   padding-bottom: clamp(8px, 1.5cqh, 16px) !important;
   z-index: 4 !important;
 }
+
+/* =====================================================================
+   HAND LAYOUT LOCK v0.204 — DO NOT OVERRIDE BELOW THIS LINE
+   See LAYOUT_HAND_LOCK.md. Negative margin-bottom on .my-hand is FORBIDDEN.
+   ===================================================================== */
+#game.active .col-main > .my-hand#myHand,
+#game.active .col-main > .my-hand {
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 6px !important;
+  padding-bottom: 12px !important;
+  overflow: hidden !important;
+  z-index: 8 !important;
+  align-items: flex-end !important;
+}
+#game.active .col-main > .my-hand#myHand .card,
+#game.active .col-main > .my-hand .card,
+#game.active .col-main > .my-hand .card.playable {
+  height: min(94%, 22cqh) !important;
+  max-height: min(210px, 22cqh) !important;
+  min-height: 150px !important;
+  width: auto !important;
+  aspect-ratio: 2 / 3 !important;
+  flex: 0 0 auto !important;
+  transform-origin: bottom center !important;
+}
+#game.active .col-main > #myBoard {
+  z-index: 4 !important;
+}

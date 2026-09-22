@@ -214,3 +214,8 @@
 ## 23. 자원 표기 = 소울 (HARD, 2026-09-23, v0.201)
 - 플레이어 문구·UI에서 「마나」 금지. 자원 표기 = **소울**.
 - 내부 키도 soul / maxSoul / soulNext / spell types soul·soul_next. DOM·CSS·assets 동일.
+
+## 핸드·전장 레이아웃 (2026-09-23 v0.204 잠금)
+- 상세: `fantasy_arena/LAYOUT_HAND_LOCK.md`
+- hand 행 0.28 고정, `.my-hand` **음수 margin-bottom 금지**, 큰 padding-top 금지
+- 회귀 시 전장/덱 수정과 핸드 CSS를 같이 건드리지 말 것
