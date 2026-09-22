@@ -3157,43 +3157,42 @@ html.is-desktop, html.is-desktop body {
 }
 
 
-/* ===== Fantasy Arena title brand (emblem + wordmark stand) ===== */
-/* Emblem ~half prior size: ≤ wordmark F-height / pedestal, gap not stuck */
+/* ===== Fantasy Arena title brand (lock to user guide v0.154) ===== */
+/* Emblem ≈ capital F height; top-align with letters; clear gap; above pedestal */
 #title .title-brand {
   position: relative;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex-shrink: 0;
-  width: min(94%, 760px);
-  margin: 8px auto 12px;
-  min-height: min(18vh, 140px);
-  gap: 18px; /* space between emblem and wordmark */
+  width: min(94%, 780px);
+  margin: 10px auto 14px;
+  min-height: 0;
+  gap: 22px;
   z-index: 2;
 }
 #title .title-emblem {
   position: relative;
   z-index: 3;
-  /* ~half of previous min(38vw,210); keep under wordmark/pedestal height */
-  width: min(16vw, 96px);
+  width: min(11vw, 72px);
   height: auto;
-  max-height: min(14vh, 88px);
+  max-height: 72px;
   aspect-ratio: 1 / 1;
   object-fit: contain;
   flex: 0 0 auto;
-  margin-right: 0;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .5));
+  margin: 2px 0 0 0; /* optical top align with gold letters */
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, .5));
   pointer-events: none;
 }
 #title .title-wordmark {
   position: relative;
   z-index: 1;
-  width: min(62vw, 460px);
+  width: min(64vw, 480px);
   height: auto;
-  max-height: min(18vh, 130px);
+  max-height: min(20vh, 140px);
   object-fit: contain;
-  object-position: left center;
+  object-position: left top;
   flex: 0 1 auto;
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .4));
   pointer-events: none;
@@ -3205,16 +3204,15 @@ html.is-desktop, html.is-desktop body {
 @media (max-width: 640px) {
   #title .title-brand {
     width: min(96%, 560px);
-    min-height: min(16vh, 120px);
-    gap: 12px;
+    gap: 14px;
   }
   #title .title-emblem {
-    width: min(18vw, 72px);
-    max-height: min(12vh, 68px);
+    width: min(14vw, 56px);
+    max-height: 56px;
   }
   #title .title-wordmark {
-    width: min(68vw, 320px);
-    max-height: min(15vh, 100px);
+    width: min(70vw, 340px);
+    max-height: min(16vh, 110px);
   }
 }
 
