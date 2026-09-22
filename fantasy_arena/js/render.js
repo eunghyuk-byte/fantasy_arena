@@ -825,7 +825,7 @@ function layoutEndBtn() {
   const contentLeft = br.left + (br.width - contentW) / 2;
   const contentTop = br.top + (br.height - contentH) / 2;
   // 4000×3000 board art — empty oval in right gold frame between hero sockets
-  const CX = 0.968;
+  const CX = 0.978;
   const CY = 0.460;
   const WIDTH_FRAC = 0.092;
   const bw = contentW * WIDTH_FRAC;
