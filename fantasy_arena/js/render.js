@@ -484,11 +484,11 @@ async function composeCardFace(c, opts={}) {
     ctx.restore();
   }
 
-  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.103, Math.round(H*0.070));
+  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.1013, Math.round(H*0.070));
   const paintFrameStats = c.type === "minion" || (c.type === "item");
   if (paintFrameStats) {
     const hp = opts.hp != null ? opts.hp : c.hp;
-    paintNumber(ctx, String(c.atk ?? 0), W*0.1369, H*0.9032, Math.round(H*0.066));
+    paintNumber(ctx, String(c.atk ?? 0), W*0.1343, H*0.9032, Math.round(H*0.066));
     paintNumber(ctx, String(c.def ?? 0), W*0.5008, H*0.9032, Math.round(H*0.066));
     paintNumber(ctx, String(hp ?? 0), W*0.8745, H*0.9032, Math.round(H*0.066));
     if (c.type === "minion") await paintStatCoins(ctx, c, W, H);
@@ -512,7 +512,7 @@ async function paintStatCoins(ctx, c, W, H) {
   const gap = Math.round(size * 0.06);
   const cy = H * 0.972;
   const slots = [
-    [W * 0.1369, parseCoin(c.atkC)],
+    [W * 0.1343, parseCoin(c.atkC)],
     [W * 0.5008, parseCoin(c.defC)],
     [W * 0.8745, parseCoin(c.hpC)]
   ];
@@ -553,7 +553,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v96statNudge4", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v97statNudge5", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
