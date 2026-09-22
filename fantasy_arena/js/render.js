@@ -24,11 +24,14 @@ function layoutBoardDecks() {
     deck.style.margin = "0";
     deck.style.boxSizing = "border-box";
     if (edge === "top") {
-      deck.style.top = (br.top - mr.top + 6) + "px";
+      // Opp deck: sit low in opp lane (near unit row), not stuck to top frame
+      const pileH = Math.max(96, Math.min(120, br.height * 0.42));
+      const topPad = Math.max(8, br.height * 0.52);
+      deck.style.top = (br.top - mr.top + topPad) + "px";
       deck.style.bottom = "auto";
-      deck.style.height = Math.max(90, br.height * 0.85) + "px";
+      deck.style.height = pileH + "px";
       deck.style.justifyContent = "flex-start";
-      deck.style.paddingTop = "4px";
+      deck.style.paddingTop = "0";
       deck.style.paddingBottom = "0";
     } else {
       deck.style.top = "auto";

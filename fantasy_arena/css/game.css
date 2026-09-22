@@ -3643,7 +3643,7 @@ body.dragging-card {
   overscroll-behavior: none;
 }
 
-/* ===== v0.195: decks on LEFT of board frame (HUD heroes stay RIGHT) ===== */
+/* ===== v0.197: decks LEFT; opp deck+hero lower; board left-fill lock ===== */
 #game.active #oppDeck,
 #game.active #myDeck {
   position: absolute !important;
@@ -3658,11 +3658,12 @@ body.dragging-card {
   pointer-events: none !important;
   grid-area: unset !important;
 }
+/* Fallback before JS layoutBoardDecks; JS overrides top/height in px */
 #game.active #oppDeck {
-  top: 10% !important;
-  height: 30% !important;
+  top: 32% !important;
+  height: 22% !important;
   justify-content: flex-start !important;
-  padding-top: 10px !important;
+  padding-top: 0 !important;
   bottom: auto !important;
 }
 #game.active #myDeck {
@@ -3680,5 +3681,29 @@ body.dragging-card {
 #game.active #myDeck .pile-stack {
   width: min(72px, 100%);
   height: min(104px, 17cqh);
+}
+
+/* Opp hero: drop well below top frame (match lowered opp deck band) */
+#game.active #oppStrip {
+  margin-top: clamp(88px, 16vh, 160px) !important;
+  padding-top: 0 !important;
+}
+#game.active .col-hud {
+  justify-content: space-between !important;
+  padding-top: 0 !important;
+}
+#game.active #oppStrip .hud-hero {
+  margin-top: 0 !important;
+}
+
+/* Board units: ALWAYS left-fill (wins over any earlier center) */
+#game.active .board,
+#game.active .board.opp,
+#game.active #oppBoard,
+#game.active #myBoard {
+  justify-content: flex-start !important;
+  padding-left: 17% !important;
+  padding-right: 12% !important;
+  box-sizing: border-box !important;
 }
 
