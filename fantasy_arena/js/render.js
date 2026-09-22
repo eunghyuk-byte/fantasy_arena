@@ -380,17 +380,19 @@ async function composeCardFace(c, opts={}) {
     const fy = FOCUS[c.id] != null ? FOCUS[c.id] : 0.42;
     const landscape = sw / sh >= 1.05;
     const FOCUS_X = { e22:0.38, e23:0.40, e24:0.42 };
+    // Item frames show a bit more portrait — bump art ~5% uniform (no stretch)
+    const itemZoom = (c.type === "item") ? 1.05 : 1;
     if (landscape) {
       const fx = FOCUS_X[c.id] != null ? FOCUS_X[c.id] : 0.50;
-      drawUniform("cover", fx, 0.50, 1);
+      drawUniform("cover", fx, 0.50, 1 * itemZoom);
     } else {
       // Soft cover blur fill (uniform) + contain subject (uniform)
       ctx.save();
       ctx.filter = (tribe.id === "dark" ? "brightness(1.48) contrast(1.10) saturate(1.12) " : "") + "blur(12px)";
-      drawUniform("cover", 0.50, fy, 1.12);
+      drawUniform("cover", 0.50, fy, 1.12 * itemZoom);
       ctx.restore();
       if (tribe.id === "dark") ctx.filter = "brightness(1.48) contrast(1.10) saturate(1.12)";
-      drawUniform("contain", 0.50, 0.50, 1);
+      drawUniform("contain", 0.50, 0.50, 1 * itemZoom);
     }
     ctx.filter = "none";
     ctx.restore();
@@ -554,7 +556,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v99hideTypeLabel", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v100itemArt5", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
