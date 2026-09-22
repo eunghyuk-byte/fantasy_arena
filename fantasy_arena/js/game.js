@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.182";
+const GAME_VERSION = "0.183";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -903,6 +903,15 @@ function damageMinion(owner, m, n, ctx) {
   if (n > 0 && hasShield) {
     if (abilityOf(m) === "보호") m.ability = null;
     m.keywords = (m.keywords || []).filter(k => k !== "shield");
+    // Drop 「보호」 from on-card text so the face matches live shield state.
+    if (m.text) {
+      m.text = String(m.text)
+        .replace(/\s*·\s*보호/g, "")
+        .replace(/보호\s*·\s*/g, "")
+        .replace(/^보호$/g, "")
+        .trim();
+      if (!m.text) m.text = "";
+    }
     log(`${m.name}의 보호막이 깨졌다`);
     m._hurt = { from: m.hp, to: m.hp, dmg: 0, shielded: true };
     return;
