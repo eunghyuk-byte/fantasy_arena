@@ -1,5 +1,5 @@
 {
-  "count": 218,
+  "count": 250,
   "items": [
     {
       "path": "assets/img/coins/plus.png",
@@ -60,31 +60,6 @@
       "path": "assets/img/hud/deck.jpg",
       "bytes": 87124,
       "name": "deck"
-    },
-    {
-      "path": "assets/img/frames/spell/fire.webp",
-      "bytes": 232806,
-      "name": "fire"
-    },
-    {
-      "path": "assets/img/frames/spell/wind.webp",
-      "bytes": 173428,
-      "name": "wind"
-    },
-    {
-      "path": "assets/img/frames/spell/water.webp",
-      "bytes": 191908,
-      "name": "water"
-    },
-    {
-      "path": "assets/img/frames/spell/light.webp",
-      "bytes": 189464,
-      "name": "light"
-    },
-    {
-      "path": "assets/img/frames/spell/dark.webp",
-      "bytes": 117656,
-      "name": "dark"
     },
     {
       "path": "assets/img/faces/e1.jpg",
@@ -515,26 +490,6 @@
       "path": "assets/img/frames/rarity/earth_minion_legendary.png",
       "bytes": 1011328,
       "name": "earth_minion_legendary"
-    },
-    {
-      "path": "assets/img/frames/rarity/earth_spell_common.png",
-      "bytes": 933667,
-      "name": "earth_spell_common"
-    },
-    {
-      "path": "assets/img/frames/rarity/earth_spell_uncommon.png",
-      "bytes": 975466,
-      "name": "earth_spell_uncommon"
-    },
-    {
-      "path": "assets/img/frames/rarity/earth_spell_rare.png",
-      "bytes": 970640,
-      "name": "earth_spell_rare"
-    },
-    {
-      "path": "assets/img/frames/rarity/earth_spell_legendary.png",
-      "bytes": 923683,
-      "name": "earth_spell_legendary"
     },
     {
       "path": "assets/img/art/e25.jpg",
@@ -1175,6 +1130,126 @@
       "path": "assets/img/frames/unit/deck_wind_unit_uncommon_frame.png",
       "bytes": 2207069,
       "name": "deck_wind_unit_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_dark_spell_common_frame.png",
+      "bytes": 2576579,
+      "name": "deck_dark_spell_common_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_dark_spell_legendary_frame.png",
+      "bytes": 2687064,
+      "name": "deck_dark_spell_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_dark_spell_rare_frame.png",
+      "bytes": 2687350,
+      "name": "deck_dark_spell_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_dark_spell_uncommon_frame.png",
+      "bytes": 2686876,
+      "name": "deck_dark_spell_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_earth_spell_common_frame.png",
+      "bytes": 2447078,
+      "name": "deck_earth_spell_common_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_earth_spell_legendary_frame.png",
+      "bytes": 2539104,
+      "name": "deck_earth_spell_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_earth_spell_rare_frame.png",
+      "bytes": 2539529,
+      "name": "deck_earth_spell_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_earth_spell_uncommon_frame.png",
+      "bytes": 2538927,
+      "name": "deck_earth_spell_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_fire_spell_common_frame.png",
+      "bytes": 2657032,
+      "name": "deck_fire_spell_common_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_fire_spell_legendary_frame.png",
+      "bytes": 2797337,
+      "name": "deck_fire_spell_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_fire_spell_rare_frame.png",
+      "bytes": 2797647,
+      "name": "deck_fire_spell_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_fire_spell_uncommon_frame.png",
+      "bytes": 2797151,
+      "name": "deck_fire_spell_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_light_spell_common_frame.png",
+      "bytes": 2390707,
+      "name": "deck_light_spell_common_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_light_spell_legendary_frame.png",
+      "bytes": 2472593,
+      "name": "deck_light_spell_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_light_spell_rare_frame.png",
+      "bytes": 2473130,
+      "name": "deck_light_spell_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_light_spell_uncommon_frame.png",
+      "bytes": 2472279,
+      "name": "deck_light_spell_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_water_spell_common_frame.png",
+      "bytes": 2816743,
+      "name": "deck_water_spell_common_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_water_spell_legendary_frame.png",
+      "bytes": 2816192,
+      "name": "deck_water_spell_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_water_spell_rare_frame.png",
+      "bytes": 2816512,
+      "name": "deck_water_spell_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_water_spell_uncommon_frame.png",
+      "bytes": 2815810,
+      "name": "deck_water_spell_uncommon_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_wind_spell_common_frame.png",
+      "bytes": 2430712,
+      "name": "deck_wind_spell_common_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_wind_spell_legendary_frame.png",
+      "bytes": 2520514,
+      "name": "deck_wind_spell_legendary_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_wind_spell_rare_frame.png",
+      "bytes": 2520859,
+      "name": "deck_wind_spell_rare_frame"
+    },
+    {
+      "path": "assets/img/frames/spell/deck_wind_spell_uncommon_frame.png",
+      "bytes": 2520393,
+      "name": "deck_wind_spell_uncommon_frame"
     }
   ]
 }

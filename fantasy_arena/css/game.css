@@ -145,24 +145,38 @@
   }
   .col-main {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(64px, 8.5cqi) minmax(0, 1fr);
     grid-template-rows: 9% minmax(0, 1fr) minmax(0, 1fr) 26% 3%;
     grid-template-areas:
-      "opphand"
-      "oppboard"
-      "myboard"
-      "myhand"
-      "hint";
+      "opphand opphand"
+      "oppdeck oppboard"
+      "mydeck myboard"
+      "myhand myhand"
+      "hint hint";
     min-width: 0;
     min-height: 0;
     height: 100%;
     position: relative;
   }
   .col-main > .opp-hand { grid-area: opphand; }
+  .col-main > #oppDeck { grid-area: oppdeck; }
   .col-main > .board.opp { grid-area: oppboard; }
+  .col-main > #myDeck { grid-area: mydeck; }
   .col-main > #myBoard { grid-area: myboard; }
   .col-main > .my-hand { grid-area: myhand; }
   .col-main > .hint { grid-area: hint; }
+  .board-deck {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .board-deck .deck-pile { pointer-events: auto; }
+  .board-deck.opp { align-items: flex-start; padding-top: 10px; }
+  .board-deck.me { align-items: flex-end; padding-bottom: 14px; }
   .col-main > .hero-row,
   .col-main > .log,
   .col-main > .corner-mana {
@@ -326,7 +340,7 @@
     border-radius: 16px;
     background: rgba(10, 16, 10, .10);
     border: 2px solid rgba(228,195,106,.32);
-    margin: 0 7%;
+    margin: 0 7% 0 2%;
     padding: 4px 8px;
     box-sizing: border-box;
   }
@@ -1734,7 +1748,7 @@
   }
   .hud-hero .hero-mana { display: none !important; }
   .board {
-    padding-left: 12% !important;
+    padding-left: 3% !important;
     padding-right: 8% !important;
   }
   #spellFx .fx-card {
@@ -1835,7 +1849,7 @@
   .board {
     justify-content: flex-start !important;
     align-items: center !important;
-    padding-left: 12% !important;
+    padding-left: 3% !important;
     padding-right: 6% !important;
   }
   .slot.empty {
@@ -2119,6 +2133,20 @@
   border-radius: 0 !important;
 }
 
+
+/* ===== left board decks (v0.195) ===== */
+.board-deck .deck-pile {
+  width: min(78px, 100%);
+}
+.board-deck .pile-stack {
+  width: min(72px, 96%);
+  height: min(104px, 18cqh);
+  margin: 0 auto;
+}
+#oppDeck .pile-count,
+#myDeck .pile-count {
+  margin-top: 2px;
+}
 
 /* ===== hero + deck stack + draw ===== */
 .side {
@@ -3614,3 +3642,43 @@ body.dragging-card {
   touch-action: none;
   overscroll-behavior: none;
 }
+
+/* ===== v0.195: decks on LEFT of board frame (HUD heroes stay RIGHT) ===== */
+#game.active #oppDeck,
+#game.active #myDeck {
+  position: absolute !important;
+  left: max(6px, 2.2%) !important;
+  width: min(84px, 9.5%) !important;
+  z-index: 6 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+  grid-area: unset !important;
+}
+#game.active #oppDeck {
+  top: 10% !important;
+  height: 30% !important;
+  justify-content: flex-start !important;
+  padding-top: 10px !important;
+  bottom: auto !important;
+}
+#game.active #myDeck {
+  top: auto !important;
+  bottom: 27% !important;
+  height: 30% !important;
+  justify-content: flex-end !important;
+  padding-bottom: 8px !important;
+}
+#game.active #oppDeck .deck-pile,
+#game.active #myDeck .deck-pile {
+  pointer-events: auto !important;
+}
+#game.active #oppDeck .pile-stack,
+#game.active #myDeck .pile-stack {
+  width: min(72px, 100%);
+  height: min(104px, 17cqh);
+}
+

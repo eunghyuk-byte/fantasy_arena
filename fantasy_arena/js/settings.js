@@ -219,6 +219,7 @@
     _resizeTimer = setTimeout(() => {
       applyStageResolution();
       try { if (typeof layoutBoardSlots === "function") layoutBoardSlots(); } catch (e) {}
+      try { if (typeof layoutBoardDecks === "function") layoutBoardDecks(); } catch (e) {}
     }, 50);
   });
   document.addEventListener("fullscreenchange", () => {

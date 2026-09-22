@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.193";
+const GAME_VERSION = "0.196";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -142,7 +142,7 @@ function draw(p, n = 1) {
 function flyDrawCard() {
   try { Sfx.playDraw && Sfx.playDraw(); } catch (e) {}
   try { if (typeof SpellFx !== "undefined" && SpellFx.playUi) SpellFx.playUi("deck_draw"); } catch (e) {}
-  const pile = document.querySelector("#myStrip .pile-stack") || document.querySelector("#myStrip .deck-pile");
+  const pile = document.querySelector("#myDeck .pile-stack") || document.querySelector("#myDeck .deck-pile");
   const hand = document.getElementById("myHand");
   if (!pile || !hand) return;
   const cards = [...hand.querySelectorAll(".card")];
@@ -231,7 +231,7 @@ function beginTurn(p) {
   p.noPlayMinion = false;
   p.coinP = null;
   p.board.forEach(m => {
-    if (m.skipAttack) { m.canAttack = false; m.attacksLeft = 0; m.skipAttack = false; }
+    if (m.skipAttack || unitCannotAttack(m)) { m.canAttack = false; m.attacksLeft = 0; m.skipAttack = false; }
     else { m.canAttack = true; m.attacksLeft = 1; }
   });
   draw(p, 1);
@@ -275,7 +275,8 @@ async function runAutoCombat(p) {
     if (state.over) break;
     if (!p.board.includes(m) || m.hp <= 0) continue;
     // R7: 공격권 없는 유닛만 스킵 (판마: 소환 직후에도 canAttack=true)
-    if (!m.canAttack || m.attacksLeft <= 0 || (Number(m.atk) || 0) <= 0) continue;
+    // 공격불가(cannotAttack): 턴 종료 자동전투에서 공격 피해를 주지 않음
+    if (unitCannotAttack(m) || !m.canAttack || m.attacksLeft <= 0 || (Number(m.atk) || 0) <= 0) continue;
     const legal = attackTargets(p, m);
     if (!legal.length) continue;
     const foe = e.board.find(x => x.hp > 0);
@@ -483,9 +484,9 @@ function playCard(p, card, target) {
   if (card.type === "minion") {
     try { Sfx.playSummon && Sfx.playSummon(); } catch (e) {}
     const m = card;
-    // 판마: 소환 수면 없음 — 이번 턴에 낸 유닛도 공격 가능
-    m.canAttack = true;
-    m.attacksLeft = 1;
+    // 판마: 소환 수면 없음 — 이번 턴에 낸 유닛도 공격 가능 (공격불가 제외)
+    if (unitCannotAttack(m)) { m.canAttack = false; m.attacksLeft = 0; }
+    else { m.canAttack = true; m.attacksLeft = 1; }
     const at = Math.max(0, Math.min(p.board.length, (typeof window._dropSlot === "number") ? window._dropSlot : p.board.length));
     p.board.splice(at, 0, m);
     window._dropSlot = null;
@@ -594,6 +595,11 @@ function findOn(p, uid) { return p.board.find(m => m.uid === uid); }
 
 function abilityOf(m) {
   return (m && m.ability) || null;
+}
+/** Permanent: skip dealing attack in end-of-turn combat / no attack rights. Still takes damage. */
+function unitCannotAttack(m) {
+  if (!m) return false;
+  return !!(m.cannotAttack || abilityOf(m) === "공격불가");
 }
 function isImmune(m) {
   if (!m) return false;
@@ -835,7 +841,8 @@ function applyFx(p, fx, target) {
     const slots = Math.max(0, 5 - p.board.length);
     for (let i = 0; i < slots; i++) {
       const tok = cloneCard("e40");
-      tok.canAttack = true; tok.attacksLeft = 1;
+      // e40 공격불가: 턴 종료 전투에서 공격하지 않음
+      tok.canAttack = false; tok.attacksLeft = 0;
       p.board.push(tok);
     }
   } else if (fx.type === "magnet") {
@@ -1970,7 +1977,8 @@ const ABI_HELP = {
   "강탈": "나를 죽인 적을 내 편으로 가져옵니다.",
   "출전": "낼 때 드로우1",
   "유언": "죽을 때 드로우1",
-  "면역": "스펠 효과를 받지 않습니다."
+  "면역": "스펠 효과를 받지 않습니다.",
+  "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다."
 };
 function fmtCoinLinks(c) {
   const parts = [];
