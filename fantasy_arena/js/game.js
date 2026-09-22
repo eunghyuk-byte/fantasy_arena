@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.194";
+const GAME_VERSION = "0.195";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -142,7 +142,7 @@ function draw(p, n = 1) {
 function flyDrawCard() {
   try { Sfx.playDraw && Sfx.playDraw(); } catch (e) {}
   try { if (typeof SpellFx !== "undefined" && SpellFx.playUi) SpellFx.playUi("deck_draw"); } catch (e) {}
-  const pile = document.querySelector("#myStrip .pile-stack") || document.querySelector("#myStrip .deck-pile");
+  const pile = document.querySelector("#myDeck .pile-stack") || document.querySelector("#myDeck .deck-pile");
   const hand = document.getElementById("myHand");
   if (!pile || !hand) return;
   const cards = [...hand.querySelectorAll(".card")];

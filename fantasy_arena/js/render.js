@@ -1,5 +1,48 @@
 
 
+
+function layoutBoardDecks() {
+  const main = document.querySelector("#game.active .col-main");
+  const oppB = document.getElementById("oppBoard");
+  const myB = document.getElementById("myBoard");
+  const oppD = document.getElementById("oppDeck");
+  const myD = document.getElementById("myDeck");
+  if (!main || !oppB || !myB || !oppD || !myD) return;
+  const mr = main.getBoundingClientRect();
+  if (mr.width < 8 || mr.height < 8) return;
+  const place = (board, deck, edge) => {
+    const br = board.getBoundingClientRect();
+    const w = Math.max(56, Math.min(84, br.width * 0.11));
+    deck.style.position = "absolute";
+    deck.style.left = Math.max(4, br.left - mr.left + br.width * 0.015) + "px";
+    deck.style.width = w + "px";
+    deck.style.zIndex = "6";
+    deck.style.display = "flex";
+    deck.style.flexDirection = "column";
+    deck.style.alignItems = "center";
+    deck.style.pointerEvents = "none";
+    deck.style.margin = "0";
+    deck.style.boxSizing = "border-box";
+    if (edge === "top") {
+      deck.style.top = (br.top - mr.top + 6) + "px";
+      deck.style.bottom = "auto";
+      deck.style.height = Math.max(90, br.height * 0.85) + "px";
+      deck.style.justifyContent = "flex-start";
+      deck.style.paddingTop = "4px";
+      deck.style.paddingBottom = "0";
+    } else {
+      deck.style.top = "auto";
+      deck.style.bottom = (mr.bottom - br.bottom + 4) + "px";
+      deck.style.height = Math.max(90, br.height * 0.85) + "px";
+      deck.style.justifyContent = "flex-end";
+      deck.style.paddingTop = "0";
+      deck.style.paddingBottom = "6px";
+    }
+  };
+  place(oppB, oppD, "top");
+  place(myB, myD, "bottom");
+}
+
 function layoutBoardAlign() {
   const bg = document.getElementById("boardBgLayer");
   const main = document.querySelector("#game.active .col-main");
@@ -83,8 +126,13 @@ function render() {
   document.getElementById("myBoard").classList.toggle("empty", !me.board.length);
   layoutBoardSlots();
   layoutBoardAlign();
-  requestAnimationFrame(() => { layoutBoardSlots(); layoutBoardAlign(); });
+  layoutBoardDecks();
+  requestAnimationFrame(() => { layoutBoardSlots(); layoutBoardAlign(); layoutBoardDecks(); });
 
+  const oppDeckEl = document.getElementById("oppDeck");
+  const myDeckEl = document.getElementById("myDeck");
+  if (oppDeckEl) oppDeckEl.innerHTML = renderDeckPile(opp);
+  if (myDeckEl) myDeckEl.innerHTML = renderDeckPile(me);
   document.getElementById("oppStrip").innerHTML = heroStrip(opp, false, myTurn);
   document.getElementById("myStrip").innerHTML = heroStrip(me, true, myTurn);
   const ohr = document.getElementById("oppHeroRow");
@@ -719,13 +767,7 @@ function renderMinion(m, side) {
   </div>`;
 }
 
-function heroStrip(p, isMe, myTurn) {
-  const { me } = meView();
-  let canTarget = false;
-  if (ui.targeting) canTarget = ui.targeting.targets.some(t => t.kind === "hero" && t.owner === p);
-  if (ui.attacker && !isMe) canTarget = attackTargets(me, ui.attacker).some(t => t.kind === "hero");
-  const endReady = isMe && myTurn;
-  const icon = (typeof TRIBE_ICONS !== "undefined" && TRIBE_ICONS[p.hero.id]) || "";
+function renderDeckPile(p) {
   const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
   const nDeck = p.deck.length;
   const layers = Math.min(6, Math.max(1, Math.ceil(nDeck / 5)));
@@ -733,15 +775,21 @@ function heroStrip(p, isMe, myTurn) {
   for (let i = 0; i < layers; i++) {
     stack += `<i class="pile-layer" style="--i:${i};background-image:url('${hud.deck || ""}')"></i>`;
   }
-  const pile = `
-      <div class="deck-pile" data-n="${nDeck}">
+  return `<div class="deck-pile" data-n="${nDeck}">
         <div class="pile-stack">${stack}</div>
         <div class="pile-count">${nDeck}</div>
       </div>`;
+}
+
+function heroStrip(p, isMe, myTurn) {
+  const { me } = meView();
+  let canTarget = false;
+  if (ui.targeting) canTarget = ui.targeting.targets.some(t => t.kind === "hero" && t.owner === p);
+  if (ui.attacker && !isMe) canTarget = attackTargets(me, ui.attacker).some(t => t.kind === "hero");
+  const endReady = isMe && myTurn;
   const hero = `<div class="hud-hero">${renderHeroSlot(p, isMe)}</div>`;
-  if (!isMe) return `<div class="side">${pile}${hero}</div>`;
+  if (!isMe) return `<div class="side">${hero}</div>`;
   return `<div class="side">
-      ${pile}
       ${hero}
       <button class="end-btn ${endReady ? "go" : ""}" id="endBtn" ${endReady ? "" : "disabled"}>턴 종료</button>
       <button class="give-btn" id="giveBtn">게임 종료</button>
@@ -754,7 +802,7 @@ function heroStrip(p, isMe, myTurn) {
   let t = 0;
   const kick = () => {
     clearTimeout(t);
-    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); } catch (e) {} }, 50);
+    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); layoutBoardDecks(); } catch (e) {} }, 50);
   };
   window.addEventListener("resize", kick);
   window.addEventListener("orientationchange", kick);
