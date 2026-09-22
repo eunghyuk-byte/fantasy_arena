@@ -18,7 +18,7 @@ function layoutBoardAlign() {
   midFrac = Math.max(0.38, Math.min(0.58, midFrac));
   // Rows: oppHand | oppBoard | myBoard | myHand | hint
   // Keep hand sizable; split remaining around midFrac
-  const hand = 0.28, hint = 0.015, oppHand = 0.06;
+  const hand = 0.295, hint = 0.002, oppHand = 0.06; /* hint overlays top-left; give row to hand */
   const rest = 1 - hand - hint - oppHand; // boards total
   // Boundary after oppHand+oppBoard == midFrac
   let oppBoard = midFrac - oppHand;
