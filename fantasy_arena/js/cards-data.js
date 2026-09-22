@@ -13,7 +13,7 @@ const TRIBE_ICONS = {
   fire:"assets/img/icons/fire.png",
   wind:"assets/img/icons/wind.png",
   water:"assets/img/icons/water.png",
-  light:"assets/img/icons/light.jpg",
+  light:"assets/img/icons/light.png",
   dark:"assets/img/icons/dark.png",
   metal:"assets/img/frames/unit/metal.png"
 };
