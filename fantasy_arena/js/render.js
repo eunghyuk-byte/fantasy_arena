@@ -318,8 +318,9 @@ async function composeCardFace(c, opts={}) {
 
   ctx.fillStyle = "#1a1008";
   ctx.fillRect(0, 0, W, H);
-  // Portrait hole relative to opaque silhouette of deck_* unit frames (1300x2000, ~8% pad cropped on draw)
-  const artX = W * 0.118, artY = H * 0.114, artW = W * 0.765, artH = H * 0.435;
+  // Portrait window for deck_* frames (opaque-bbox cropped). Sized to fully cover the
+  // transparent art hole so no #1a1008 bars show at top/bottom inside the arch.
+  const artX = W * 0.110, artY = H * 0.088, artW = W * 0.780, artH = H * 0.475;
   ctx.fillStyle = tribe.color || "#1a1008";
   ctx.fillRect(artX, artY, artW, artH);
   ctx.save();
@@ -378,22 +379,11 @@ async function composeCardFace(c, opts={}) {
       n1:0.28, n5:0.28, a1:0.36
     };
     const fy = FOCUS[c.id] != null ? FOCUS[c.id] : 0.42;
-    const landscape = sw / sh >= 1.05;
     const FOCUS_X = { e22:0.38, e23:0.40, e24:0.42 };
-    // Uniform art zoom for unit/spell/item (same size, no stretch). 1.21 = prior 1.10 × +10%.
-    const artZoom = 1.21;
-    if (landscape) {
-      const fx = FOCUS_X[c.id] != null ? FOCUS_X[c.id] : 0.50;
-      drawUniform("cover", fx, 0.50, 1 * artZoom);
-    } else {
-      // Soft cover blur fill (uniform) + contain subject (uniform)
-      ctx.save();
-      ctx.filter = (tribe.id === "dark" ? "brightness(1.48) contrast(1.10) saturate(1.12) " : "") + "blur(12px)";
-      drawUniform("cover", 0.50, fy, 1.12 * artZoom);
-      ctx.restore();
-      if (tribe.id === "dark") ctx.filter = "brightness(1.48) contrast(1.10) saturate(1.12)";
-      drawUniform("contain", 0.50, 0.50, 1 * artZoom);
-    }
+    // Always cover the portrait hole (uniform scale, never stretch). No artZoom —
+    // letterboxing was from contain / undersized hole rect, not from zoom.
+    const fx = FOCUS_X[c.id] != null ? FOCUS_X[c.id] : 0.50;
+    drawUniform("cover", fx, fy, 1);
     ctx.filter = "none";
     ctx.restore();
   }
@@ -556,7 +546,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v102artZoom121", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v103portraitFill", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
