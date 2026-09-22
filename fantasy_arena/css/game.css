@@ -3158,6 +3158,7 @@ html.is-desktop, html.is-desktop body {
 
 
 /* ===== Fantasy Arena title brand (emblem + wordmark stand) ===== */
+/* Emblem ~half prior size: ≤ wordmark F-height / pedestal, gap not stuck */
 #title .title-brand {
   position: relative;
   display: flex;
@@ -3165,29 +3166,32 @@ html.is-desktop, html.is-desktop body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: min(92%, 720px);
-  margin: 6px auto 10px;
-  min-height: min(28vh, 220px);
+  width: min(94%, 760px);
+  margin: 8px auto 12px;
+  min-height: min(18vh, 140px);
+  gap: 18px; /* space between emblem and wordmark */
   z-index: 2;
 }
 #title .title-emblem {
   position: relative;
-  z-index: 3; /* in front of wordmark / pedestal */
-  width: min(38vw, 210px);
+  z-index: 3;
+  /* ~half of previous min(38vw,210); keep under wordmark/pedestal height */
+  width: min(16vw, 96px);
   height: auto;
+  max-height: min(14vh, 88px);
   aspect-ratio: 1 / 1;
   object-fit: contain;
   flex: 0 0 auto;
-  margin-right: -28px; /* overlap into wordmark like mockup */
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, .55));
+  margin-right: 0;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .5));
   pointer-events: none;
 }
 #title .title-wordmark {
   position: relative;
   z-index: 1;
-  width: min(58vw, 420px);
+  width: min(62vw, 460px);
   height: auto;
-  max-height: min(22vh, 160px);
+  max-height: min(18vh, 130px);
   object-fit: contain;
   object-position: left center;
   flex: 0 1 auto;
@@ -3200,16 +3204,17 @@ html.is-desktop, html.is-desktop body {
 }
 @media (max-width: 640px) {
   #title .title-brand {
-    width: min(96%, 520px);
-    min-height: min(24vh, 180px);
+    width: min(96%, 560px);
+    min-height: min(16vh, 120px);
+    gap: 12px;
   }
   #title .title-emblem {
-    width: min(36vw, 150px);
-    margin-right: -18px;
+    width: min(18vw, 72px);
+    max-height: min(12vh, 68px);
   }
   #title .title-wordmark {
-    width: min(62vw, 300px);
-    max-height: min(18vh, 120px);
+    width: min(68vw, 320px);
+    max-height: min(15vh, 100px);
   }
 }
 
