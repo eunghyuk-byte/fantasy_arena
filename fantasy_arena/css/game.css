@@ -3580,3 +3580,14 @@ html.is-desktop #game.active .my-hand .card.playable,
   font-size: 13px;
   line-height: 1.4;
 }
+
+/* Tablet: stop browser scroll/gesture from stealing hand→board card drags */
+#game.active .my-hand .card,
+#game.active .board .minion {
+  touch-action: none;
+}
+body.dragging-card {
+  overflow: hidden !important;
+  touch-action: none;
+  overscroll-behavior: none;
+}

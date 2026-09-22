@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.189";
+const GAME_VERSION = "0.190";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1301,6 +1301,26 @@ function placeDropGlow(on, x, y) {
 
 let _drag = null;
 
+/** Remember last good pointer coords — pointercancel often reports 0,0. */
+function trackDragXY(e) {
+  if (!_drag || !e) return;
+  const x = e.clientX, y = e.clientY;
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+  if (x === 0 && y === 0 && e.type === "pointercancel") return;
+  _drag.lastX = x;
+  _drag.lastY = y;
+}
+function dragPointerXY(e) {
+  let x = e && e.clientX;
+  let y = e && e.clientY;
+  const invalid = !Number.isFinite(x) || !Number.isFinite(y) || (x === 0 && y === 0);
+  if (invalid && _drag) {
+    if (_drag.lastX != null && _drag.lastY != null) return { x: _drag.lastX, y: _drag.lastY };
+    if (_drag.x0 != null && _drag.y0 != null) return { x: _drag.x0, y: _drag.y0 };
+  }
+  return { x: x || 0, y: y || 0 };
+}
+
 function unitFromPoint(x, y) {
   // Ally board only (item equip)
   const me = meView().me;
@@ -1414,8 +1434,9 @@ function overPlayfield(x, y) {
   const opp = document.getElementById("oppBoard");
   if (!opp) return false;
   const r = opp.getBoundingClientRect();
-  const padX = Math.max(12, r.width * 0.04);
-  const padY = Math.max(16, r.height * 0.08);
+  const touch = !!(typeof _drag !== "undefined" && _drag && (_drag.pointerType === "touch" || _drag.pointerType === "pen"));
+  const padX = Math.max(touch ? 28 : 12, r.width * (touch ? 0.08 : 0.04));
+  const padY = Math.max(touch ? 48 : 16, r.height * (touch ? 0.22 : 0.08));
   return x >= r.left - padX && x <= r.right + padX && y >= r.top - padY && y <= r.bottom + padY;
 }
 function spellDragTargets(card) {
@@ -1439,9 +1460,11 @@ function overBoard(x, y) {
   const opp = document.getElementById("oppBoard");
   if (!mine) return false;
   const r = mine.getBoundingClientRect();
-  // Pad hit box — scaled stages + hand fan made exact rect drops flaky
-  const padX = Math.max(12, r.width * 0.04);
-  const padY = Math.max(16, r.height * 0.08);
+  // Pad hit box — scaled stages + hand fan made exact rect drops flaky;
+  // touch gets a larger pad (fat-finger / tablet aiming).
+  const touch = !!(typeof _drag !== "undefined" && _drag && (_drag.pointerType === "touch" || _drag.pointerType === "pen"));
+  const padX = Math.max(touch ? 28 : 12, r.width * (touch ? 0.08 : 0.04));
+  const padY = Math.max(touch ? 48 : 16, r.height * (touch ? 0.22 : 0.08));
   if (x < r.left - padX || x > r.right + padX || y < r.top - padY || y > r.bottom + padY) return false;
   if (opp) {
     const o = opp.getBoundingClientRect();
@@ -1550,28 +1573,36 @@ function bindHandCard(el, card) {
     ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
     document.body.appendChild(ghost);
     el.classList.add("dragging");
-    _drag = { kind: "hand", card, el, ghost, pid: ev.pointerId, x0: ev.clientX, y0: ev.clientY };
+    document.body.classList.add("dragging-card");
+    _drag = {
+      kind: "hand", card, el, ghost, pid: ev.pointerId,
+      x0: ev.clientX, y0: ev.clientY, lastX: ev.clientX, lastY: ev.clientY,
+      pointerType: ev.pointerType || "mouse"
+    };
     const move = (e) => {
       if (!_drag) return;
-      _drag.ghost.style.left = e.clientX + "px";
-      _drag.ghost.style.top = e.clientY + "px";
+      if (e.cancelable) try { e.preventDefault(); } catch (err) {}
+      trackDragXY(e);
+      const { x, y } = dragPointerXY(e);
+      _drag.ghost.style.left = x + "px";
+      _drag.ghost.style.top = y + "px";
       const cardRef = _drag.card;
       if (cardRef && cardRef.type === "item" && isEquipItem(cardRef)) {
         placeDropGlow(false);
-        highlightEquipHover(e.clientX, e.clientY, canDropCard(cardRef));
+        highlightEquipHover(x, y, canDropCard(cardRef));
       } else if (cardRef && cardRef.type === "spell" && needsTarget(cardRef)) {
         placeDropGlow(false);
         const targets = spellDragTargets(cardRef) || [];
-        highlightSpellHover(e.clientX, e.clientY, targets);
+        highlightSpellHover(x, y, targets);
       } else if (cardRef && cardRef.type === "spell") {
         clearEquipHover();
-        placeDropGlow(overPlayfield(e.clientX, e.clientY) && canDropCard(cardRef), e.clientX, e.clientY);
+        placeDropGlow(overPlayfield(x, y) && canDropCard(cardRef), x, y);
       } else {
         clearEquipHover();
-        const on = overBoard(e.clientX, e.clientY) && canDropCard(cardRef);
-        placeDropGlow(on, e.clientX, e.clientY);
+        const on = overBoard(x, y) && canDropCard(cardRef);
+        placeDropGlow(on, x, y);
         if (on && cardRef && cardRef.type === "minion") {
-          const idx = insertIndexFromPoint(e.clientX, e.clientY, null);
+          const idx = insertIndexFromPoint(x, y, null);
           window._dropSlot = idx;
           updateInsertPreview(idx, null);
         } else {
@@ -1588,10 +1619,12 @@ function bindHandCard(el, card) {
       window.removeEventListener("mouseup", up, true);
       try { if (ev.pointerId != null && el.releasePointerCapture) el.releasePointerCapture(ev.pointerId); } catch (err) {}
       if (!_drag) return;
+      trackDragXY(e);
+      const { x, y } = dragPointerXY(e);
       const cardRef = _drag.card;
       let ok = false;
       if (cardRef && cardRef.type === "item" && isEquipItem(cardRef)) {
-        const hit = unitFromPoint(e.clientX, e.clientY);
+        const hit = unitFromPoint(x, y);
         clearEquipHover();
         clearDrag();
         if (hit && canDropCard(cardRef)) {
@@ -1603,7 +1636,7 @@ function bindHandCard(el, card) {
       }
       if (cardRef && cardRef.type === "spell" && needsTarget(cardRef)) {
         const targets = spellDragTargets(cardRef) || [];
-        const hit = spellTargetFromPoint(e.clientX, e.clientY, targets);
+        const hit = spellTargetFromPoint(x, y, targets);
         clearEquipHover();
         clearDrag();
         if (hit && canDropCard(cardRef)) {
@@ -1616,7 +1649,7 @@ function bindHandCard(el, card) {
         return;
       }
       if (cardRef && cardRef.type === "spell") {
-        ok = overPlayfield(e.clientX, e.clientY) && canDropCard(cardRef);
+        ok = overPlayfield(x, y) && canDropCard(cardRef);
         clearEquipHover();
         clearDrag();
         if (ok) {
@@ -1626,9 +1659,9 @@ function bindHandCard(el, card) {
         }
         return;
       }
-      ok = overBoard(e.clientX, e.clientY) && canDropCard(cardRef);
+      ok = overBoard(x, y) && canDropCard(cardRef);
       if (ok && cardRef && cardRef.type === "minion") {
-        window._dropSlot = insertIndexFromPoint(e.clientX, e.clientY, null);
+        window._dropSlot = insertIndexFromPoint(x, y, null);
       } else {
         window._dropSlot = null;
       }
@@ -1678,16 +1711,24 @@ function bindBoardMinion(el, minion) {
     ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
     document.body.appendChild(ghost);
     el.classList.add("dragging");
+    document.body.classList.add("dragging-card");
     const slot = el.closest(".slot");
     if (slot) slot.classList.add("board-drag-source");
-    _drag = { kind: "board", minion, el, ghost, pid: ev.pointerId, x0: ev.clientX, y0: ev.clientY };
+    _drag = {
+      kind: "board", minion, el, ghost, pid: ev.pointerId,
+      x0: ev.clientX, y0: ev.clientY, lastX: ev.clientX, lastY: ev.clientY,
+      pointerType: ev.pointerType || "mouse"
+    };
     const move = (e) => {
       if (!_drag || _drag.kind !== "board") return;
-      _drag.ghost.style.left = e.clientX + "px";
-      _drag.ghost.style.top = e.clientY + "px";
-      if (overBoard(e.clientX, e.clientY)) {
-        placeDropGlow(true, e.clientX, e.clientY);
-        const idx = insertIndexFromPoint(e.clientX, e.clientY, minion.uid);
+      if (e.cancelable) try { e.preventDefault(); } catch (err) {}
+      trackDragXY(e);
+      const { x, y } = dragPointerXY(e);
+      _drag.ghost.style.left = x + "px";
+      _drag.ghost.style.top = y + "px";
+      if (overBoard(x, y)) {
+        placeDropGlow(true, x, y);
+        const idx = insertIndexFromPoint(x, y, minion.uid);
         window._dropSlot = idx;
         updateInsertPreview(idx, minion.uid);
       } else {
@@ -1705,8 +1746,10 @@ function bindBoardMinion(el, minion) {
       window.removeEventListener("mouseup", up, true);
       try { if (ev.pointerId != null && el.releasePointerCapture) el.releasePointerCapture(ev.pointerId); } catch (err) {}
       if (!_drag || _drag.kind !== "board") return;
-      const ok = overBoard(e.clientX, e.clientY);
-      const idx = ok ? insertIndexFromPoint(e.clientX, e.clientY, minion.uid) : null;
+      trackDragXY(e);
+      const { x, y } = dragPointerXY(e);
+      const ok = overBoard(x, y);
+      const idx = ok ? insertIndexFromPoint(x, y, minion.uid) : null;
       clearInsertPreview();
       clearDrag();
       if (ok && idx != null) {

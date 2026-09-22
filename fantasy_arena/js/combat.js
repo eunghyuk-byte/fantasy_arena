@@ -390,6 +390,7 @@ function clearDrag() {
     if (_drag.el) _drag.el.classList.remove("dragging");
     _drag = null;
   }
+  try { document.body.classList.remove("dragging-card"); } catch (err) {}
   if (typeof placeDropGlow === "function") placeDropGlow(false);
   if (typeof clearEquipHover === "function") clearEquipHover();
   if (typeof clearInsertPreview === "function") clearInsertPreview();
