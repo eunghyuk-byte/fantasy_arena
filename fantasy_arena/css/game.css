@@ -916,6 +916,22 @@
     background: #24180c; color:#e8d7a8; font-weight:700; cursor:pointer;
   }
   .rarity-bar button.on { background:#5a4018; color:#fff3c8; border-color:#e8c36a; }
+  .pool-search {
+    min-width: 180px;
+    flex: 1 1 180px;
+    max-width: 280px;
+    margin: 0 8px 0 0;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #c9a227;
+    background: #1c140e;
+    color: #fff3c8;
+    font-size: 13px;
+    font-weight: 700;
+    outline: none;
+  }
+  .pool-search::placeholder { color: #9a8760; font-weight: 600; }
+  .pool-search:focus { border-color: #e8c36a; box-shadow: 0 0 0 2px rgba(232,195,106,.25); }
 
   /* Viewport media must not reflow the fixed #app stage (HS-style). */
   @media (max-width: 720px) {

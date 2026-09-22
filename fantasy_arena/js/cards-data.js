@@ -649,7 +649,7 @@ const CARD_MAP = Object.fromEntries((CARDS || []).filter(c => c && c.id).map(c =
 
 let selectedHero = TRIBES.find(x => x.open);
 let state = null;
-let ui = { targeting: null, attacker: null, battling: false, rarityFilter: "all", typeFilter: "all" };
+let ui = { targeting: null, attacker: null, battling: false, rarityFilter: "all", typeFilter: "all", searchQuery: "" };
 
 
 const CARD_LORE = {

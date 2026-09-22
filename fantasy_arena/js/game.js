@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.185";
+const GAME_VERSION = "0.186";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1700,6 +1700,24 @@ document.addEventListener("keydown", e => {
 
 let draftDeck = [];
 
+
+function cardMatchesSearch(c, q) {
+  if (!q) return true;
+  const needle = String(q).trim().toLowerCase();
+  if (!needle) return true;
+  const hay = [];
+  if (c.name) hay.push(c.name);
+  if (c.text) hay.push(c.text);
+  if (c.ability) hay.push(String(c.ability));
+  const race = (c.race || (typeof CARD_RACE !== "undefined" && CARD_RACE[c.id]) || "");
+  if (race) hay.push(race);
+  if (c.atkSkill != null && typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[c.atkSkill]) {
+    hay.push(ATK_SKILL_HELP[c.atkSkill][0]);
+  }
+  // also match ability keywords listed in text like "보호 부여"
+  return hay.some(s => String(s).toLowerCase().includes(needle));
+}
+
 function tribeCards() {
   // Deck builder: units + spells + items
   return CARDS.filter(c => !c.token && c.tribe === selectedHero.id)
@@ -1711,6 +1729,7 @@ function tribeCards() {
       if (!ui.rarityFilter || ui.rarityFilter === "all") return true;
       return (c.rarity || "common") === ui.rarityFilter;
     })
+    .filter(c => cardMatchesSearch(c, ui.searchQuery || ""))
     .sort((a,b) => (a.cost||0) - (b.cost||0) || a.name.localeCompare(b.name, "ko"));
 }
 function copiesInDraft(id) { return draftDeck.filter(x => x === id).length; }
@@ -1879,6 +1898,18 @@ function renderBuilder() {
     btn.classList.toggle("on", btn.dataset.r === ui.rarityFilter);
     btn.onclick = (ev) => { ev.stopPropagation(); ui.rarityFilter = btn.dataset.r; renderBuilder(); };
   });
+  const search = document.getElementById("poolSearch");
+  if (search) {
+    const q = ui.searchQuery || "";
+    if (search.value !== q) search.value = q;
+    if (!search._bound) {
+      search._bound = true;
+      search.addEventListener("input", () => {
+        ui.searchQuery = search.value;
+        renderBuilder();
+      });
+    }
+  }
     pool.querySelectorAll(".pool-item").forEach(el => {
     el.onclick = () => openCardMenu(el.dataset.id);
   });
