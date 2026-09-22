@@ -825,9 +825,10 @@ function layoutEndBtn() {
   const contentLeft = br.left + (br.width - contentW) / 2;
   const contentTop = br.top + (br.height - contentH) / 2;
   // 4000×3000 board art — empty oval in right gold frame between hero sockets
-  const CX = 0.978;
-  const CY = 0.460;
-  const WIDTH_FRAC = 0.092;
+  // Board-art empty well (grey fill center ~0.9075/0.503 on 4000×3000); PNG pad bias ~+0.002
+  const CX = 0.910;
+  const CY = 0.502;
+  const WIDTH_FRAC = 0.088;
   const bw = contentW * WIDTH_FRAC;
   const bh = bw * (550 / 850);
   const left = contentLeft + contentW * CX - bw / 2 - mr.left;
