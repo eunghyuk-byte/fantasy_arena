@@ -3823,15 +3823,18 @@ html.is-desktop #game.active .my-hand .card.playable,
 }
 
 
-/* v0.208 end-turn board button */
+/* v0.209 end-turn board button — geometry owned by layoutEndBtn() */
 #game.active .col-main > #endBtn.end-btn {
   position: absolute;
   grid-area: unset !important;
   z-index: 7;
+  /* fallback only; JS sets left/top/width/height from board content box */
   top: 50%;
-  right: 15.5%;
-  transform: translateY(-50%);
-  width: 12.5%;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  transform: none;
+  width: 8%;
   height: auto;
   aspect-ratio: 850 / 550;
   min-width: 0;
