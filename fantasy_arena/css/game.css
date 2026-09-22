@@ -3157,8 +3157,8 @@ html.is-desktop, html.is-desktop body {
 }
 
 
-/* ===== Fantasy Arena title brand (lock to user guide v0.154) ===== */
-/* Emblem ≈ capital F height; top-align with letters; clear gap; above pedestal */
+/* ===== Fantasy Arena title brand (v0.155) ===== */
+/* Emblem height = full wordmark+stand; bottom aligns with pedestal tip */
 #title .title-brand {
   position: relative;
   display: flex;
@@ -3166,23 +3166,24 @@ html.is-desktop, html.is-desktop body {
   align-items: flex-start;
   justify-content: center;
   flex-shrink: 0;
-  width: min(94%, 780px);
+  width: min(94%, 800px);
   margin: 10px auto 14px;
   min-height: 0;
-  gap: 22px;
+  gap: 18px;
   z-index: 2;
 }
 #title .title-emblem {
   position: relative;
   z-index: 3;
-  width: min(11vw, 72px);
-  height: auto;
-  max-height: 72px;
+  /* match wordmark block height so bottom reaches stand tip */
+  height: min(22vh, 148px);
+  width: auto;
+  max-height: min(22vh, 148px);
   aspect-ratio: 1 / 1;
   object-fit: contain;
   flex: 0 0 auto;
-  margin: 2px 0 0 0; /* optical top align with gold letters */
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, .5));
+  margin: 0;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .5));
   pointer-events: none;
 }
 #title .title-wordmark {
@@ -3190,7 +3191,7 @@ html.is-desktop, html.is-desktop body {
   z-index: 1;
   width: min(64vw, 480px);
   height: auto;
-  max-height: min(20vh, 140px);
+  max-height: min(22vh, 148px);
   object-fit: contain;
   object-position: left top;
   flex: 0 1 auto;
@@ -3204,15 +3205,15 @@ html.is-desktop, html.is-desktop body {
 @media (max-width: 640px) {
   #title .title-brand {
     width: min(96%, 560px);
-    gap: 14px;
+    gap: 12px;
   }
   #title .title-emblem {
-    width: min(14vw, 56px);
-    max-height: 56px;
+    height: min(18vh, 112px);
+    max-height: min(18vh, 112px);
   }
   #title .title-wordmark {
     width: min(70vw, 340px);
-    max-height: min(16vh, 110px);
+    max-height: min(18vh, 112px);
   }
 }
 
