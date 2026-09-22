@@ -63,17 +63,23 @@ function layoutBoardAlign() {
   let midFrac = (midY - mr.top) / mr.height;
   midFrac = Math.max(0.38, Math.min(0.58, midFrac));
   // Rows: oppHand | oppBoard | myBoard | myHand | hint
-  // Keep hand sizable; split remaining around midFrac
-  const hand = 0.28, hint = 0.015, oppHand = 0.06;
+  // Hand smaller so myBoard top sits on parchment midline (drop-glow matches play area)
+  const hand = 0.20, hint = 0.01, oppHand = 0.055;
   const rest = 1 - hand - hint - oppHand; // boards total
-  // Boundary after oppHand+oppBoard == midFrac
+  // Boundary after oppHand+oppBoard == midFrac (parchment center ornament)
   let oppBoard = midFrac - oppHand;
   let myBoard = rest - oppBoard;
-  if (oppBoard < 0.18) { oppBoard = 0.18; myBoard = rest - oppBoard; }
-  if (myBoard < 0.16) { myBoard = 0.16; oppBoard = rest - myBoard; }
+  if (oppBoard < 0.20) { oppBoard = 0.20; myBoard = rest - oppBoard; }
+  if (myBoard < 0.20) { myBoard = 0.20; oppBoard = rest - myBoard; }
   const pct = (x) => (x * 100).toFixed(2) + "%";
   const rows = [oppHand, oppBoard, myBoard, hand, hint].map(pct).join(" ");
   main.style.setProperty("grid-template-rows", rows, "important");
+  // Single-column areas (decks are absolute overlays — old 2-col areas skew myBoard)
+  main.style.setProperty(
+    "grid-template-areas",
+    '"opphand" "oppboard" "myboard" "myhand" "hint"',
+    "important"
+  );
 }
 
 function layoutBoardSlots() {

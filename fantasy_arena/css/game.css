@@ -2520,8 +2520,8 @@ html.is-desktop, html.is-desktop body {
 #game.active .board.opp,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  padding-left: 17% !important;
-  padding-right: 12% !important;
+  padding-left: max(88px, 9%) !important;
+  padding-right: max(96px, 11%) !important;
   box-sizing: border-box !important;
 }
 #game.active .board.opp {
@@ -3696,14 +3696,40 @@ body.dragging-card {
   margin-top: 0 !important;
 }
 
-/* Board units: ALWAYS left-fill (wins over any earlier center) */
+/* Single-column grid — decks are absolute, must not use oppdeck/mydeck areas */
+#game.active .col-main {
+  grid-template-columns: 1fr !important;
+  grid-template-areas: "opphand" "oppboard" "myboard" "myhand" "hint" !important;
+}
+#game.active .col-main > .opp-hand { grid-area: opphand !important; }
+#game.active .col-main > .board.opp,
+#game.active .col-main > #oppBoard { grid-area: oppboard !important; }
+#game.active .col-main > #myBoard { grid-area: myboard !important; }
+#game.active .col-main > .my-hand { grid-area: myhand !important; }
+#game.active .col-main > .hint { grid-area: hint !important; }
+#game.active .col-main > #oppDeck,
+#game.active .col-main > #myDeck,
+#game.active .col-main > .hero-row,
+#game.active .col-main > .log,
+#game.active .col-main > .corner-mana {
+  grid-area: unset !important;
+}
+
+/* Board units: left-fill just past left deck (full-width stage; 17% looked like mid-parchment) */
 #game.active .board,
 #game.active .board.opp,
 #game.active #oppBoard,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  padding-left: 17% !important;
-  padding-right: 12% !important;
+  padding-left: max(88px, 9%) !important;
+  padding-right: max(96px, 11%) !important;
   box-sizing: border-box !important;
+}
+
+/* Drop-glow = myBoard rect must match play lane (no extra margin jump) */
+#game.active.drop-ready #myBoard,
+#game.active #myBoard.drop-glow {
+  margin: 0 !important;
+  transform: none !important;
 }
 
