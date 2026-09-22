@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.192";
+const GAME_VERSION = "0.193";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -81,7 +81,15 @@ function persistDecks(map) {
 function deckFor(hero, isAI) {
   if (!isAI) {
     const saved = loadSavedDecks()[hero.id];
-    if (Array.isArray(saved) && saved.length === 30) return shuffle(saved.slice());
+    // Drop deleted/token/unknown ids (e.g. post-hero-power leftovers, empty autoFill).
+    // cloneCard missing-id stub otherwise shows as 「?」/토큰 0/0/1 in hand.
+    if (Array.isArray(saved) && saved.length === 30) {
+      const clean = saved.filter(id => {
+        const c = CARD_MAP[id];
+        return c && !c.token;
+      });
+      if (clean.length === 30) return shuffle(clean);
+    }
   }
   return buildDeck(hero.id);
 }
@@ -1895,10 +1903,16 @@ function removeFromDraft(id) {
   renderBuilder();
 }
 function autoFillDraft() {
-  const pool = tribeCards().map(c => c.id);
+  // Prefer current builder filters; if empty (search/rarity wipe), fall back to full tribe pool.
+  let pool = tribeCards().map(c => c.id).filter(Boolean);
+  if (!pool.length) {
+    pool = CARDS.filter(c => !c.token && c.tribe === selectedHero.id).map(c => c.id);
+  }
+  if (!pool.length) return;
   let guard = 0;
   while (draftDeck.length < 30 && guard++ < 400) {
     const id = pool[Math.floor(Math.random() * pool.length)];
+    if (!id || !CARD_MAP[id] || CARD_MAP[id].token) continue;
     if (copiesInDraft(id) < maxCopies(id)) draftDeck.push(id);
   }
   renderBuilder();
