@@ -590,24 +590,30 @@ function layoutHandFan() {
   const n = cards.length;
   if (!n) return;
   const mid = (n - 1) / 2;
-  // Width-proportional step: fixed -72px fully stacks small/mobile cards and underlaps huge ones.
-  const w = Math.max(cards[0].offsetWidth || 0, 72);
-  const step = Math.max(28, Math.round(w * 0.38));
+  // Desktop lock used -72px; mobile small cards fully stacked with fixed -72.
+  // Overlap scales with width, but always leave >=28px visible strip.
+  let w = cards[0].offsetWidth || 0;
+  if (w < 40) {
+    // layout not ready — retry next frame once
+    requestAnimationFrame(() => {
+      try { layoutHandFan._retrying = false; } catch (e) {}
+    });
+    if (!layoutHandFan._retrying) {
+      layoutHandFan._retrying = true;
+      requestAnimationFrame(() => { layoutHandFan._retrying = false; layoutHandFan(); });
+    }
+    w = 110;
+  }
+  const overlap = Math.min(Math.round(w * 0.62), Math.max(40, w - 28));
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - mid);
-    const x = Math.round(t * step);
     const y = Math.round(Math.abs(t) * 7);
     const rot = (t * 2.4).toFixed(2);
-    el.style.setProperty("--fan-x", x + "px");
+    el.style.setProperty("--fan-x", "0px");
     el.style.setProperty("--fan-y", y + "px");
     el.style.setProperty("--fan-r", rot + "deg");
-    el.style.setProperty("margin-left", "0", "important");
-    el.style.setProperty(
-      "transform",
-      `translateX(${x}px) translateY(${y}px) rotate(${rot}deg)`,
-      "important"
-    );
-    // LTR z-order (Hearthstone): rightmost visually on top.
+    el.style.setProperty("margin-left", i ? ("-" + overlap + "px") : "0", "important");
+    el.style.setProperty("transform", `translateY(${y}px) rotate(${rot}deg)`, "important");
     el.style.setProperty("z-index", String(20 + i), "important");
   });
 }
