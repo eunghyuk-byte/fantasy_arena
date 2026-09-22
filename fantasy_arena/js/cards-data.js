@@ -198,7 +198,7 @@ const CARDS = [
   { id:"d19", tribe:"dark", name:"그림자요정", cost:3, type:"minion", atk:4, def:0, hp:2, atkC:-4, defC:0, hpC:4, ability:"출전", text:"출전" },
   { id:"l17", tribe:"light", name:"황월영", cost:3, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:1, hpC:1, rarity:"rare", ability:"보호", text:"보호" },
   // --- tokens ---
-  { id:"e40", tribe:"earth", name:"섬의파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", text:"토큰" },
+  { id:"e40", tribe:"earth", name:"섬의 파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", cannotAttack:true, ability:"공격불가", text:"공격불가" },
   // --- spells / items ---
 { id:"fs1", tribe:"fire", name:"화염화살", cost:2, type:"spell", rarity:"common", text:"유닛 하나 체-3", spell:{ type:"dmg", value:3, target:"any_minion" } },
   { id:"fs2", tribe:"fire", name:"화염폭풍", cost:4, type:"spell", rarity:"common", text:"적 전체 체-2, 코인-1", spell:{ type:"aoe_pack", enemy:2, coin:-1 } },
@@ -212,7 +212,7 @@ const CARDS = [
   { id:"as2", tribe:"water", name:"물거울", cost:6, type:"spell", rarity:"rare", text:"아군 하나 복사, 보호 부여", spell:{ type:"copy_own", ability:"보호", kw:"shield" } },
   { id:"as3", tribe:"water", name:"익사", cost:3, type:"spell", rarity:"common", text:"5코 이하 적 하나 파괴", spell:{ type:"kill_if", maxCost:5 } },
   { id:"es1", tribe:"earth", name:"거인의봉인", cost:3, type:"spell", rarity:"uncommon", text:"공7 이상 적 하나 파괴", spell:{ type:"kill_if", minAtk:7 } },
-  { id:"ns4", tribe:"wind", name:"떠오르는섬", cost:3, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 섬의파편(1/0/2) 소환", spell:{ type:"summon_islands" } },
+  { id:"ns4", tribe:"wind", name:"떠오르는섬", cost:3, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 섬의 파편을 소환합니다.", spell:{ type:"summon_islands" } },
   { id:"es2", tribe:"earth", name:"어스퀘이크", cost:6, type:"spell", rarity:"rare", text:"적 전체 체력을 내 최대마나 절반만큼 깎음", spell:{ type:"earthquake" } },
   { id:"es3", tribe:"earth", name:"샌드트랩", cost:4, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 적 체-3", spell:{ type:"sandtrap" } },
   { id:"es4", tribe:"earth", name:"미로생성", cost:3, type:"spell", rarity:"common", text:"아군 전체 복수 부여", spell:{ type:"grant_kw", ability:"복수", kw:"revenge" } },
