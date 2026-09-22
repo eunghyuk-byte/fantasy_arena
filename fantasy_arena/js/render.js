@@ -420,9 +420,10 @@ async function composeCardFace(c, opts={}) {
   ctx.fillText(c.name || "", W*0.50, H*0.590);
   ctx.restore();
 
+  // Item/spell frames are distinct — hide top type label. Units still show race/token.
   const headerTxt = (c.type === "minion")
     ? (c.token ? "토큰" : (c.race || (typeof CARD_RACE !== "undefined" && CARD_RACE[c.id]) || ""))
-    : (c.type === "item" ? "아이템" : "스펠");
+    : "";
   if (headerTxt) {
     ctx.save();
     const hs = Math.round(H*0.042);
@@ -553,7 +554,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v98itemFrames", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v99hideTypeLabel", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
