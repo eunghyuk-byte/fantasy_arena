@@ -3167,7 +3167,7 @@ html.is-desktop, html.is-desktop body {
   justify-content: center;
   flex-shrink: 0;
   width: min(94%, 800px);
-  margin: 10px auto 14px;
+  margin: -6px auto 10px; /* nudge logo slightly up */
   min-height: 0;
   gap: 18px;
   z-index: 2;
