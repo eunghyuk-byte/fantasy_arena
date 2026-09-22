@@ -107,7 +107,7 @@ const CARDS = [
   { id:"n23", tribe:"wind", name:"템페스트", cost:5, type:"minion", atk:4, def:0, hp:5, atkC:-1, defC:0, hpC:0, rarity:"uncommon", atkSkill:9, text:"광역공격" },
   { id:"n24", tribe:"wind", name:"폭풍자이언트", cost:6, type:"minion", atk:7, def:0, hp:6, atkC:-1, defC:0, hpC:-1, rarity:"uncommon", atkSkill:4, text:"연속공격" },
   { id:"n25", tribe:"wind", name:"썬더버드", cost:6, type:"minion", atk:4, def:0, hp:7, atkC:-1, defC:1, hpC:-1, rarity:"uncommon", atkSkill:5, text:"치명공격" },
-  { id:"n26", tribe:"wind", name:"와이번", cost:6, type:"minion", atk:8, def:0, hp:8, atkC:-1, defC:0, hpC:-1, rarity:"rare", atkSkill:2, text:"관통공격" },
+  { id:"n26", tribe:"wind", name:"와이번", cost:6, type:"minion", atk:8, def:0, hp:7, atkC:-1, defC:0, hpC:-1, rarity:"uncommon", atkSkill:2, text:"관통공격" },
   { id:"n27", tribe:"wind", name:"태사자", cost:7, type:"minion", atk:7, def:1, hp:7, atkC:1, defC:-1, hpC:-1, rarity:"rare", atkSkill:4, text:"연속공격" },
   { id:"n28", tribe:"wind", name:"육손", cost:8, type:"minion", atk:6, def:1, hp:9, atkC:0, defC:-1, hpC:-1, rarity:"rare", atkSkill:9, text:"광역공격" },
   { id:"a1", tribe:"water", name:"관우", cost:10, type:"minion", atk:4, def:3, hp:7, atkC:-1, defC:1, hpC:-1, rarity:"legendary", atkSkill:3, ability:"강탈", text:"돌진공격 · 강탈" },
