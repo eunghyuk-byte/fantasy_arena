@@ -675,7 +675,8 @@ function layoutHandFan() {
     el.style.setProperty("--fan-y", y + "px");
     el.style.setProperty("--fan-r", rot + "deg");
     el.style.setProperty("margin-left", i ? ("-" + overlap + "px") : "0", "important");
-    el.style.setProperty("transform", `translateY(${y}px) rotate(${rot}deg)`, "important");
+    // Keep transform in CSS so :hover lift can compose with fan vars
+    el.style.removeProperty("transform");
     el.style.setProperty("z-index", String(20 + i), "important");
   });
 }

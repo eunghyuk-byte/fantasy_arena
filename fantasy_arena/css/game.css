@@ -531,11 +531,17 @@
     margin-left: -38px;
     position: relative;
     transform-origin: bottom center;
+    --fan-y: 0px;
+    --fan-r: 0deg;
+    transform: translateY(var(--fan-y)) rotate(var(--fan-r));
+    transition: transform .14s ease, filter .14s ease;
   }
   #game .my-hand .card:first-child { margin-left: 0; }
-  #game .my-hand .card:hover {
-    transform: translateY(-22px) scale(1.08) !important;
-    z-index: 20 !important;
+  #game .my-hand .card:hover:not(.dragging),
+  #game.active .my-hand .card:hover:not(.dragging) {
+    transform: translateY(calc(var(--fan-y, 0px) - 36px)) rotate(var(--fan-r, 0deg)) scale(1.06) !important;
+    z-index: 80 !important;
+    filter: drop-shadow(0 14px 18px rgba(0,0,0,.45));
   }
   .card { position: relative; }
   .card.playable { overflow: visible !important; z-index: 3; }
@@ -3443,4 +3449,19 @@ html.is-desktop #game.active .my-hand .card.playable,
 #game.active .minion.can-target {
   outline: 2px solid #ff6b4a !important;
   outline-offset: 1px !important;
+}
+
+
+/* hand hover lift — keep after fan layout vars */
+#game.active .my-hand .card {
+  --fan-y: 0px;
+  --fan-r: 0deg;
+  transform: translateY(var(--fan-y)) rotate(var(--fan-r));
+  transform-origin: bottom center;
+  transition: transform .14s ease, filter .14s ease;
+}
+#game.active .my-hand .card:hover:not(.dragging) {
+  transform: translateY(calc(var(--fan-y, 0px) - 36px)) rotate(var(--fan-r, 0deg)) scale(1.06) !important;
+  z-index: 80 !important;
+  filter: drop-shadow(0 14px 18px rgba(0,0,0,.45));
 }
