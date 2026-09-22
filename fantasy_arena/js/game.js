@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.156";
+const GAME_VERSION = "0.157";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1886,8 +1886,8 @@ function renderHeroPicks() {
   const box = document.getElementById("heroPicks");
   box.innerHTML = TRIBES.map(h => `
     <div class="hero-card ${h.open && selectedHero.id === h.id ? "sel" : ""} ${h.open ? "" : "lock"}" data-id="${h.id}" style="--tc:${h.color}">
-      <div class="art"><img src="${(typeof TRIBE_ICONS!=="undefined" && TRIBE_ICONS[h.id]) || ""}" alt="${h.name}"></div>
-      <h3>${h.name}<small>${h.en}</small></h3>
+      <div class="art"><img src="${(typeof TRIBE_ICONS!=="undefined" && TRIBE_ICONS[h.id]) || ""}" alt="${h.en}"></div>
+      <h3 class="en">${h.en}</h3>
     </div>`).join("");
   box.querySelectorAll(".hero-card").forEach(el => {
     el.onclick = () => {

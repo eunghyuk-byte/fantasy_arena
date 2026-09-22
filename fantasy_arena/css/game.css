@@ -7,6 +7,7 @@
     --atk: #f3d17a;
     --board: #24301f;
     --ink: #f4ead2;
+    --font-en: "DM Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -18,6 +19,12 @@
     overflow: hidden;
   }
   button { font-family: inherit; cursor: pointer; }
+  /* English UI — Google Sans–like (DM Sans). Prefer this for all Latin labels. */
+  .en, .hero-card h3.en, .build-ver {
+    font-family: var(--font-en);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
 
   #app {
     position: absolute;
@@ -97,8 +104,11 @@
     object-position: center center;
     display: block;
   }
-  .hero-card h3 { margin: 0; color: var(--gold); font-size: 20px; }
-  .hero-card h3 small { display: block; color: #c9b48a; font-weight: 500; font-size: 12px; margin-top: 2px; }
+  .hero-card h3 {
+    margin: 0; color: var(--gold); font-size: 20px;
+    font-family: var(--font-en); font-weight: 600; letter-spacing: 0.02em;
+  }
+  .hero-card h3 small { display: none !important; }
   .hero-card p { display: none; }
   @media (max-width: 720px) {
     .hero-picks { grid-template-columns: repeat(3, minmax(96px, 1fr)); gap: 10px; padding: 0 10px; }
