@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.187";
+const GAME_VERSION = "0.188";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1077,6 +1077,29 @@ function clampAtk(v) { return Math.max(0, v | 0); }
 function clampDef(v) { return Math.max(0, Math.min(5, v | 0)); }
 /** After coin: HP floor 1 (coin alone cannot kill). */
 function clampHp(v) { return Math.max(1, v | 0); }
+/**
+ * Fantasy Masters–style HP coin for one attack exchange.
+ * Apply dHp temporarily; after the exchange call settleCombatHpCoin.
+ * Gold (+): bonus evaporates; only net damage (minus heals during fight) sticks vs pre-HP.
+ * Black (−): keep resulting HP (cut + damage stick).
+ */
+function beginCombatHpCoin(unit, dHp) {
+  if (!unit || !dHp) return null;
+  const pre = Number(unit.hp) || 0;
+  const start = clampHp(pre + dHp);
+  unit.hp = start;
+  return { unit, pre, dHp, start };
+}
+function settleCombatHpCoin(snap) {
+  if (!snap || !snap.unit) return;
+  const u = snap.unit;
+  if (!(u.hp > 0) || u.dying) return;
+  if (snap.dHp > 0) {
+    const lost = Math.max(0, snap.start - (Number(u.hp) || 0));
+    u.hp = clampHp(snap.pre - lost);
+  }
+  // dHp < 0: leave u.hp as-is (already includes black cut + damage/heal)
+}
 /** Legacy single-mod roll (non-combat). */
 function rollCoins(mod, unit) {
   const n = Math.abs(mod || 0);

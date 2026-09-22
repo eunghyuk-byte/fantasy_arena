@@ -85,7 +85,7 @@ function doAttack(p, attacker, target, auto) {
   const aShared = rollSharedCoins(attacker);
   const aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
   const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef);
-  if (aShared.dHp) attacker.hp = clampHp((Number(attacker.hp) || 0) + aShared.dHp);
+  const aHpSnap = beginCombatHpCoin(attacker, aShared.dHp);
   const rows = [];
   if (aShared.flips.length) {
     rows.push({
@@ -97,7 +97,7 @@ function doAttack(p, attacker, target, auto) {
     });
   }
 
-  let dAtk = 0, def = null;
+  let dAtk = 0, def = null, dHpSnap = null;
   if (target.kind === "minion") {
     def = target.minion;
     // 광역(9): counter primary = board front (first living)
@@ -108,7 +108,7 @@ function doAttack(p, attacker, target, auto) {
     const dShared = rollSharedCoins(def);
     dAtk = clampAtk((Number(def.atk) || 0) + dShared.dAtk);
     const defVal = clampDef((Number(def.def) || 0) + dShared.dDef);
-    if (dShared.dHp) def.hp = clampHp((Number(def.hp) || 0) + dShared.dHp);
+    dHpSnap = beginCombatHpCoin(def, dShared.dHp);
     if (dShared.flips.length) {
       rows.push({
         label: def.name + " 공유코인",
@@ -324,6 +324,9 @@ function doAttack(p, attacker, target, auto) {
         }
       }
     }
+    // Fantasy Masters: strip remaining gold HP coin bonus; black/damage already stuck
+    settleCombatHpCoin(aHpSnap);
+    settleCombatHpCoin(dHpSnap);
     await waitMs(240);
     [state.p1, state.p2].forEach(pl => {
       pl.board.filter(mm => mm.dying).forEach(mm => {
