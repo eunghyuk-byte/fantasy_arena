@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.179";
+const GAME_VERSION = "0.180";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1765,16 +1765,16 @@ function openCardMenu(id) {
 }
 const ATK_SKILL_HELP = {
   1: ["일반공격", "공격력만큼 공격합니다."],
-  2: ["관통공격", "방어를 깎고, 남은 피해가 체력으로 갑니다."],
-  3: ["돌진공격", "내 방어력만큼 더 공격합니다."],
+  2: ["관통공격", "방어를 먼저 깎으며 공격합니다."],
+  3: ["돌진공격", "내 방어력만큼 추가하여 공격합니다."],
   4: ["연속공격", "두 번 공격합니다."],
-  5: ["치명공격", "체력이 1 이상 깎이면 바로 죽습니다."],
+  5: ["치명공격", "체력을 1 이상 깎으면 적이 바로 죽습니다."],
   6: ["흡혈공격", "준 피해의 절반만큼 체력을 회복합니다."],
-  7: ["약화공격", "먼저 상대 공격·방어를 1씩 낮춥니다."],
-  8: ["석화공격", "먼저 상대 공격을 0으로, 방어를 +1 합니다."],
-  9: ["광역공격", "적 유닛을 전부 공격합니다."],
-  10: ["돌파공격", "죽인 뒤 남은 공격력으로 다음 적을 공격합니다."],
-  11: ["혼란공격", "공격하지만, 상대가 반격하지 않습니다."]
+  7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],
+  8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다."],
+  9: ["광역공격", "적 전체를 한 번에 공격합니다."],
+  10: ["돌파공격", "적 처치 후 남은 공격력으로 다음 적을 공격합니다."],
+  11: ["혼란공격", "반격을 받지 않습니다."]
 };
 const ABI_HELP = {
   "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",
@@ -1945,7 +1945,7 @@ function openHelp() {
   const box = document.getElementById("raceHelpList");
   const lore = (typeof RACE_LORE !== "undefined" && Array.isArray(RACE_LORE)) ? RACE_LORE : [];
   if (box && !box.dataset.ready) {
-    // HTML already has <h3>속성</h3>; fill attribute items only (no duplicate heading)
+    // 속성 도움말 섹션 제거됨 — raceHelpList 없으면 skip
     box.innerHTML = lore.map(r =>
       '<div class="race-item"><b>' + r[0] + '</b><p>' + r[1] + '</p></div>'
     ).join("");
