@@ -146,6 +146,7 @@ function render() {
   if (myDeckEl) myDeckEl.innerHTML = renderDeckPile(me);
   document.getElementById("oppStrip").innerHTML = heroStrip(opp, false, myTurn);
   document.getElementById("myStrip").innerHTML = heroStrip(me, true, myTurn);
+  updateEndBtn(myTurn);
   const ohr = document.getElementById("oppHeroRow");
   const mhr = document.getElementById("myHeroRow");
   if (ohr) ohr.innerHTML = renderHeroBust(opp, false);
@@ -797,14 +798,47 @@ function heroStrip(p, isMe, myTurn) {
   let canTarget = false;
   if (ui.targeting) canTarget = ui.targeting.targets.some(t => t.kind === "hero" && t.owner === p);
   if (ui.attacker && !isMe) canTarget = attackTargets(me, ui.attacker).some(t => t.kind === "hero");
-  const endReady = isMe && myTurn;
   const hero = `<div class="hud-hero">${renderHeroSlot(p, isMe)}</div>`;
   if (!isMe) return `<div class="side">${hero}</div>`;
   return `<div class="side">
       ${hero}
-      <button class="end-btn ${endReady ? "go" : ""}" id="endBtn" ${endReady ? "" : "disabled"}>턴 종료</button>
       <button class="give-btn" id="giveBtn">게임 종료</button>
     </div>`;
+}
+
+/** Board mid-right end-turn button (single #endBtn in .col-main). */
+function isHandCardPlayable(c, me) {
+  return c.cost <= me.soul && (c.type !== "minion" || me.board.length < 5);
+}
+
+function updateEndBtn(myTurn) {
+  const btn = document.getElementById("endBtn");
+  if (!btn) return;
+  const { me } = meView();
+  const label = btn.querySelector(".end-btn-label");
+  const v = (typeof GAME_VERSION !== "undefined" ? GAME_VERSION : (window.GAME_VERSION || "0"));
+  const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
+  btn.classList.remove("opp-turn", "my-turn", "glow", "go");
+  if (!myTurn) {
+    btn.classList.add("opp-turn");
+    btn.disabled = true;
+    if (label) label.textContent = "상대 턴";
+    btn.style.backgroundImage = "none";
+    return;
+  }
+  const hasPlayable = me.hand.some(c => isHandCardPlayable(c, me));
+  btn.disabled = false;
+  btn.classList.add("my-turn");
+  if (hasPlayable) {
+    btn.classList.remove("glow");
+  } else {
+    btn.classList.add("glow");
+  }
+  if (label) label.textContent = "턴 종료";
+  const src = hasPlayable
+    ? (hud.endturnMy || "assets/img/hud/endturn_my.png")
+    : (hud.endturnGlow || "assets/img/hud/endturn_glow.png");
+  btn.style.backgroundImage = "url('" + src + "?v=" + v + "')";
 }
 
 

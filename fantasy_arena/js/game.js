@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.207";
+const GAME_VERSION = "0.208";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1827,7 +1827,8 @@ function onMinionClick(owner, minion, side) {
 }
 
 document.getElementById("game").addEventListener("click", (e) => {
-  if (e.target.id === "endBtn") { Sfx.playTurn && Sfx.playTurn(); endTurn(); return; }
+  const endBtnEl = e.target.id === "endBtn" ? e.target : e.target.closest("#endBtn");
+  if (endBtnEl && !endBtnEl.disabled) { Sfx.playTurn && Sfx.playTurn(); endTurn(); return; }
   if (e.target.id === "giveBtn") { confirmGiveUp(); return; }
   const portrait = e.target.closest(".hero-portrait, .hero-slot, .hud-hero");
   if (portrait) {

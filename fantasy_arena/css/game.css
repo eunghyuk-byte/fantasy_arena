@@ -3821,3 +3821,63 @@ html.is-desktop #game.active .my-hand .card.playable,
 #game.active .col-main > #myBoard {
   z-index: 4 !important;
 }
+
+
+/* v0.208 end-turn board button */
+#game.active .col-main > #endBtn.end-btn {
+  position: absolute;
+  grid-area: unset !important;
+  z-index: 7;
+  top: 50%;
+  right: 15.5%;
+  transform: translateY(-50%);
+  width: 12.5%;
+  height: auto;
+  aspect-ratio: 850 / 550;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffe7a8;
+  font-weight: 800;
+  font-size: clamp(10px, 1.35cqi, 15px);
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 0, 0, 0.85);
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#game.active .col-main > #endBtn.end-btn .end-btn-label {
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+  line-height: 1.1;
+}
+#game.active .col-main > #endBtn.end-btn.opp-turn {
+  background-image: none !important;
+  cursor: default;
+  color: #d8c9a0;
+  text-shadow: 0 1px 2px #000, 0 0 8px rgba(0, 0, 0, 0.9);
+}
+#game.active .col-main > #endBtn.end-btn:disabled {
+  opacity: 1;
+  cursor: default;
+}
+#game.active .col-main > #endBtn.end-btn.my-turn {
+  color: #fff6d0;
+  text-shadow: 0 1px 2px #2a1800, 0 0 8px rgba(60, 30, 0, 0.75);
+  cursor: pointer;
+}
+#game.active .col-main > #endBtn.end-btn.my-turn.glow {
+  color: #eaffea;
+  text-shadow: 0 1px 2px #041808, 0 0 8px rgba(0, 60, 30, 0.8);
+}
