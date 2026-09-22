@@ -3740,3 +3740,36 @@ body.dragging-card {
   transform: translateX(3.5%) !important;
 }
 
+/* ===== v0.200: hand size restore (must win over row/calc shrink) ===== */
+#game.active .my-hand {
+  overflow: visible !important;
+  z-index: 8 !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  padding: 8px 6% 4px !important;
+  margin-bottom: -72px !important;
+  box-sizing: border-box !important;
+}
+#game.active .my-hand .card,
+#game.active .my-hand .card.playable {
+  height: min(100%, 26cqh) !important;
+  max-height: min(240px, 26cqh) !important;
+  min-height: 168px !important;
+  width: auto !important;
+  aspect-ratio: 2 / 3 !important;
+  flex: 0 0 auto !important;
+  transform-origin: bottom center !important;
+}
+html.is-desktop #game.active .my-hand,
+#app.desktop-fill #game.active .my-hand {
+  padding: 48px 8% 0 !important;
+  margin-bottom: -96px !important;
+}
+html.is-desktop #game.active .my-hand .card,
+html.is-desktop #game.active .my-hand .card.playable,
+#app.desktop-fill #game.active .my-hand .card,
+#app.desktop-fill #game.active .my-hand .card.playable {
+  height: min(100%, 24cqh) !important;
+  max-height: min(230px, 24cqh) !important;
+  min-height: 180px !important;
+}
