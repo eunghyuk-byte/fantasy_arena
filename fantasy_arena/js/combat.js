@@ -432,7 +432,7 @@ function aiTurn() {
 
   const tryPlay = () => {
     const plays = p.hand
-      .filter(c => c.cost <= p.mana)
+      .filter(c => c.cost <= p.soul)
       .filter(c => c.type !== "minion" || p.board.length < 5)
       .sort((a, b) => scorePlay(p, b) - scorePlay(p, a));
     for (const card of plays) {

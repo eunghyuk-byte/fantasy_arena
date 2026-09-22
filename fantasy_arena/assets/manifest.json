@@ -52,9 +52,9 @@
       "name": "hp"
     },
     {
-      "path": "assets/img/hud/mana.jpg",
+      "path": "assets/img/hud/soul.jpg",
       "bytes": 21186,
-      "name": "mana"
+      "name": "soul"
     },
     {
       "path": "assets/img/hud/deck.jpg",

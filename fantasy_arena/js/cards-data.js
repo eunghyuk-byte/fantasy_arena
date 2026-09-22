@@ -20,7 +20,7 @@ const TRIBE_ICONS = {
 const HUD_UI = {
   board:"assets/img/hud/board.jpg",
   hp:"assets/img/hud/hp.jpg",
-  mana:"assets/img/hud/mana.jpg",
+  soul:"assets/img/hud/soul.jpg",
   deck:"assets/img/hud/deck.jpg"
 };
 const COIN_PLUS = "assets/img/coins/plus.png";
@@ -213,7 +213,7 @@ const CARDS = [
   { id:"as3", tribe:"water", name:"익사", cost:3, type:"spell", rarity:"common", text:"5코 이하 적 하나 파괴", spell:{ type:"kill_if", maxCost:5 } },
   { id:"es1", tribe:"earth", name:"거인의봉인", cost:3, type:"spell", rarity:"uncommon", text:"공7 이상 적 하나 파괴", spell:{ type:"kill_if", minAtk:7 } },
   { id:"ns4", tribe:"wind", name:"떠오르는섬", cost:3, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 섬의 파편을 소환합니다.", spell:{ type:"summon_islands" } },
-  { id:"es2", tribe:"earth", name:"어스퀘이크", cost:6, type:"spell", rarity:"rare", text:"적 전체 체력을 내 최대마나 절반만큼 깎음", spell:{ type:"earthquake" } },
+  { id:"es2", tribe:"earth", name:"어스퀘이크", cost:6, type:"spell", rarity:"rare", text:"적 전체 체력을 내 최대소울 절반만큼 깎음", spell:{ type:"earthquake" } },
   { id:"es3", tribe:"earth", name:"샌드트랩", cost:4, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 적 체-3", spell:{ type:"sandtrap" } },
   { id:"es4", tribe:"earth", name:"미로생성", cost:3, type:"spell", rarity:"common", text:"아군 전체 복수 부여", spell:{ type:"grant_kw", ability:"복수", kw:"revenge" } },
   { id:"es5", tribe:"earth", name:"땅굴숨기", cost:2, type:"spell", rarity:"common", text:"내 유닛 수만큼 드로우", spell:{ type:"draw_ex", drawBoard:true } },
@@ -224,7 +224,7 @@ const CARDS = [
   { id:"ls2", tribe:"light", name:"축복", cost:7, type:"spell", rarity:"rare", text:"아군 하나 공·체+8, 연속공격 부여", spell:{ type:"grant_extra", atk:8, hp:8 } },
   { id:"ls3", tribe:"light", name:"정화", cost:3, type:"spell", rarity:"common", text:"유닛 하나 공=0 방=0 체=7", spell:{ type:"set_one", atk:0, def:0, hp:7, target:"any_minion" } },
   { id:"ds1", tribe:"dark", name:"파멸", cost:3, type:"spell", rarity:"common", text:"공4 이상 적 하나 파괴", spell:{ type:"kill_if", minAtk:4 } },
-  { id:"coin", name:"동전", cost:0, type:"spell", text:"이번 턴 마나 +1", spell:{ type:"mana", value:1 }, token:true },
+  { id:"coin", name:"동전", cost:0, type:"spell", text:"이번 턴 소울 +1", spell:{ type:"soul", value:1 }, token:true },
   { id:"ei1", tribe:"earth", name:"골렘의심장", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, ability:"보호", text:"보호 부여" },
   { id:"ei2", tribe:"earth", name:"돌도끼", cost:2, type:"item", rarity:"common", atk:3, def:-1, hp:0, atkSkill:2, text:"관통공격 부여" },
   { id:"ei3", tribe:"earth", name:"바실리스크눈", cost:3, type:"item", rarity:"common", ability:"면역", atk:2, def:0, hp:2, text:"면역 부여" },
@@ -275,12 +275,12 @@ const CARDS = [
   { id:"ls7", tribe:"light", name:"빛의환영", cost:2, type:"spell", rarity:"common", text:"적 전체 체-1, 아군 전체 체+1", spell:{ type:"aoe_pack", enemy:1, ownHp:1 } },
   { id:"as8", tribe:"water", name:"개구리변신", cost:4, type:"spell", rarity:"uncommon", text:"적 하나 공=1 체=1", spell:{ type:"set_one", atk:1, hp:1, target:"enemy_minion" } },
   { id:"ns8", tribe:"wind", name:"폭풍우", cost:4, type:"spell", rarity:"common", text:"적 전체 체-2, 코인-1", spell:{ type:"aoe_pack", enemy:2, coin:-1 } },
-  { id:"fs6", tribe:"fire", name:"광분", cost:1, type:"spell", rarity:"common", text:"다음 턴 내 마나+3", spell:{ type:"mana_next", value:3 } },
+  { id:"fs6", tribe:"fire", name:"광분", cost:1, type:"spell", rarity:"common", text:"다음 턴 내 소울+3", spell:{ type:"soul_next", value:3 } },
   { id:"fs7", tribe:"fire", name:"화염방패", cost:6, type:"spell", rarity:"uncommon", text:"아군 하나 방+3, 보호 부여", spell:{ type:"buff", target:"own_minion", def:3, kws:["shield"], ability:"보호" } },
   { id:"ls8", tribe:"light", name:"헌금", cost:3, type:"spell", rarity:"common", text:"드로우2. 이번 턴 유닛을 낼 수 없음", spell:{ type:"draw_ex", draw:2, noPlayMinion:true } },
   { id:"ds3", tribe:"dark", name:"헬게이트", cost:4, type:"spell", rarity:"common", text:"유닛 전체 체-3", spell:{ type:"aoe_pack", all:3 } },
   { id:"ds4", tribe:"dark", name:"불길한예감", cost:2, type:"spell", rarity:"uncommon", text:"유닛 하나 코인 블랙. 공·방·체+3", spell:{ type:"own_black_buff", target:"any_minion", atk:3, def:3, hp:3 } },
-  { id:"ds5", tribe:"dark", name:"블랙홀", cost:7, type:"spell", rarity:"rare", text:"유닛 전체 파괴, 아군 최대마나-3", spell:{ type:"wipe_all", maxMana:-3 } },
+  { id:"ds5", tribe:"dark", name:"블랙홀", cost:7, type:"spell", rarity:"rare", text:"유닛 전체 파괴, 아군 최대소울-3", spell:{ type:"wipe_all", maxSoul:-3 } },
   { id:"ds6", tribe:"dark", name:"해골던지기", cost:3, type:"spell", rarity:"common", text:"공4 이하 적 하나 파괴", spell:{ type:"kill_if", maxAtk:4 } },
   { id:"ds7", tribe:"dark", name:"전염병", cost:4, type:"spell", rarity:"common", text:"4코 이상 유닛 전체 공=1 체=1", spell:{ type:"plague", minCost:4 } },
   { id:"ds8", tribe:"dark", name:"13시의저주", cost:1, type:"spell", rarity:"uncommon", text:"유닛 하나 코인=0", spell:{ type:"set_one", coinZero:true, target:"any_minion" } },
@@ -495,7 +495,7 @@ const SPELL_FRAMES = {
   metal: "assets/img/frames/spell/deck_earth_spell_common_frame.png"
 };
 const BADGES = {
-  'mana': "assets/img/badges/mana.svg",
+  'soul': "assets/img/badges/soul.svg",
   'atk': "assets/img/badges/atk.svg",
   'def': "assets/img/badges/def.svg",
   'hp': "assets/img/badges/hp.svg",
@@ -827,7 +827,7 @@ const CARD_LORE = {
   "fs3": "손바닥에서 굴러가는 작은 태양. 던지는 순간 커지고, 맞는 순간 밤이 물러난다.",
   "fs4": "화염탄은 말이 없다. 한 점이 적중하면 형체가 재가 되고, 재만이 증거를 남긴다.",
   "fs5": "폭염은 아군의 숨까지 달군다. 뜨거운 숨결을 내쉬는 사이, 손패에 새로운 불씨가 내려앉는다.",
-  "fs6": "광분은 내일의 마나를 오늘 빌려 온다. 심장이 세 박자 빠르게 뛰면, 다음 새벽이 벌써 타오른다.",
+  "fs6": "광분은 내일의 소울을 오늘 빌려 온다. 심장이 세 박자 빠르게 뛰면, 다음 새벽이 벌써 타오른다.",
   "fs7": "화염방패는 열기로 짠 성벽이다. 다가오는 칼날이 먼저 휘고, 방패 뒤의 숨은 뜨겁게 고요하다.",
   "fs8": "메테오는 하늘이 던진 심판이다. 떨어지는 불덩이마다 코인의 기운이 타고, 대지가 짧게 울린다.",
   "ns1": "바람망토는 손패에 깃든 방패다. 펼치면 화살이 길을 잃고, 병사들의 어깨가 가벼워진다.",

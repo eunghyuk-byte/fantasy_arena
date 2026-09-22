@@ -125,7 +125,7 @@ function render() {
   // Do not rebuild hand DOM mid-drag — destroys pointer target and breaks drops
   const dragging = (typeof _drag !== "undefined" && _drag);
   if (!dragging) {
-    mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.mana && (c.type !== "minion" || me.board.length < 5))).join("");
+    mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.soul && (c.type !== "minion" || me.board.length < 5))).join("");
   }
   document.getElementById("oppBoard").innerHTML = renderLane(opp, "opp");
   const boardDragging = dragging && _drag && _drag.kind === "board";
@@ -149,10 +149,10 @@ function render() {
   const mhr = document.getElementById("myHeroRow");
   if (ohr) ohr.innerHTML = renderHeroBust(opp, false);
   if (mhr) mhr.innerHTML = renderHeroBust(me, true);
-  const om = document.getElementById("oppManaGem");
-  const mm = document.getElementById("myManaGem");
-  if (om) om.textContent = opp.mana + "/" + opp.maxMana;
-  if (mm) mm.textContent = me.mana + "/" + me.maxMana;
+  const om = document.getElementById("oppSoulGem");
+  const mm = document.getElementById("mySoulGem");
+  if (om) om.textContent = opp.soul + "/" + opp.maxSoul;
+  if (mm) mm.textContent = me.soul + "/" + me.maxSoul;
   layoutHandFan();
   layoutOppFan();
   if (me._drew) {

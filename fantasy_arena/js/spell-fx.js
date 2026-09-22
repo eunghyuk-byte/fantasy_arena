@@ -440,7 +440,7 @@ const SpellFx = (() => {
     if (t === "dmg" || t === "face") return "bolt";
     if (t === "heal_hero" || t === "buff" || t === "buff_all" || t === "grant_extra" || t === "grant_kw") return "buff";
     if (t === "kill" || t === "kill_if" || t === "wipe_all") return "kill";
-    if (t === "draw" || t === "draw_ex" || t === "mana" || t === "mana_next" || t === "coin_luck") return "utility";
+    if (t === "draw" || t === "draw_ex" || t === "soul" || t === "soul_next" || t === "coin_luck") return "utility";
     if (t === "petrify" || t === "set_one" || t === "set_enemy" || t === "magnet") return "control";
     return t;
   }

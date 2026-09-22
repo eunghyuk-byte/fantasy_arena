@@ -2,7 +2,7 @@
     --wood: #1a120c;
     --gold: #e4c36a;
     --gold-dim: #9a7b32;
-    --mana: #4aa3ff;
+    --soul: #4aa3ff;
     --hp: #e24b4b;
     --atk: #f3d17a;
     --board: #24301f;
@@ -179,7 +179,7 @@
   .board-deck.me { align-items: flex-end; padding-bottom: 14px; }
   .col-main > .hero-row,
   .col-main > .log,
-  .col-main > .corner-mana {
+  .col-main > .corner-soul {
     grid-area: unset;
   }
   .col-hud {
@@ -271,7 +271,7 @@
     background: radial-gradient(circle at 35% 30%, #ff6a55, #7a1010);
     box-shadow: 0 0 0 2px #f0d48a, 0 4px 8px #0008;
   }
-  .hero-bust .mana-gem {
+  .hero-bust .soul-gem {
     min-width: 34px; height: 34px; border-radius: 50%;
     display:flex; align-items:center; justify-content:center;
     font-weight: 900; font-size: 13px; color: #e8f4ff;
@@ -918,7 +918,7 @@
     background: rgba(80,16,16,.88); color:#ffe0e0; font-weight:800; text-align:center;
     border: 1px solid #e8c36a; font-size: 12px;
   }
-  .hero-slot .hero-mana {
+  .hero-slot .hero-soul {
     position:absolute; right:8px; bottom:6px;
     min-width: 36px; padding: 2px 7px; border-radius: 999px;
     background: rgba(16,32,80,.88); color:#d8e8ff; font-weight:800; text-align:center;
@@ -1300,7 +1300,7 @@
     object-fit: contain !important;
   }
   .minion, .card { background: transparent !important; }
-  .corner-mana {
+  .corner-soul {
     position: absolute;
     z-index: 5;
     min-width: 46px;
@@ -1314,14 +1314,14 @@
     text-align: center;
     pointer-events: none;
   }
-  .corner-mana.opp { top: 7%; right: 15.5%; }
-  .corner-mana.me { bottom: 28%; right: 15.5%; }
+  .corner-soul.opp { top: 7%; right: 15.5%; }
+  .corner-soul.me { bottom: 28%; right: 15.5%; }
   .hero-bust { flex-direction: column; gap: 4px; }
   .hero-bust .frame {
     width: min(96px, 14cqh);
     height: min(118px, 17cqh);
   }
-  .hero-bust .mana-gem { display: none !important; }
+  .hero-bust .soul-gem { display: none !important; }
   .opp-hand {
     justify-content: center;
     align-items: flex-end;
@@ -1401,8 +1401,8 @@
     width: var(--slot-w) !important;
     height: var(--slot-h) !important;
   }
-  .corner-mana.opp { top: 18px !important; right: 18px !important; bottom: auto !important; }
-  .corner-mana.me { top: auto !important; bottom: 22%; right: 18px !important; }
+  .corner-soul.opp { top: 18px !important; right: 18px !important; bottom: auto !important; }
+  .corner-soul.me { top: auto !important; bottom: 22%; right: 18px !important; }
   .card.playable::after { content: none !important; display: none !important; }
   #game.active.drop-ready #myBoard {
     box-shadow: none !important;
@@ -1464,9 +1464,9 @@
     position: absolute; left: 50%; top: 6px; transform: translateX(-50%);
     z-index: 5; pointer-events: none; width: 46%; text-align: center;
   }
-  .col-main > .corner-mana { position: absolute; z-index: 6; }
-  .col-main > .corner-mana.opp { top: 10px; right: 118px; }
-  .col-main > .corner-mana.me { bottom: 29%; right: 118px; }
+  .col-main > .corner-soul { position: absolute; z-index: 6; }
+  .col-main > .corner-soul.opp { top: 10px; right: 118px; }
+  .col-main > .corner-soul.me { bottom: 29%; right: 118px; }
   .col-hud {
     justify-content: flex-start !important;
     padding-top: 4px !important;
@@ -1475,7 +1475,7 @@
   #oppStrip { margin-top: 0 !important; }
   #myStrip { margin-top: auto; padding-bottom: 96px; }
   .pile-art { margin-top: 0 !important; }
-  .hero-mana { display: none !important; }
+  .hero-soul { display: none !important; }
   #spellFx { position: fixed; inset: 0; z-index: 80; display: none; pointer-events: none; overflow: hidden; }
   #spellFx.on { display: block; }
   #spellFx .fx-veil {
@@ -1746,7 +1746,7 @@
     min-width: 28px; padding: 1px 6px; border-radius: 999px;
     background: #8b1c1c; color: #fff; font-weight: 900; font-size: 12px;
   }
-  .hud-hero .hero-mana { display: none !important; }
+  .hud-hero .hero-soul { display: none !important; }
   .board {
     padding-left: 3% !important;
     padding-right: 8% !important;
@@ -1910,7 +1910,7 @@
     filter: none !important;
     animation: none !important;
   }
-  .corner-mana { display: none !important; }
+  .corner-soul { display: none !important; }
   .hud-hero .hero-hp {
     position: absolute;
     left: 50%;
@@ -1925,7 +1925,7 @@
     font-size: 12px;
     z-index: 3;
   }
-  .hud-hero .hero-mana {
+  .hud-hero .hero-soul {
     display: block !important;
     position: absolute;
     left: 50%;
@@ -2201,7 +2201,7 @@
   bottom: 22px !important;
   background: #8b1c1c !important;
 }
-.hud-hero .hero-mana {
+.hud-hero .hero-soul {
   display: block !important;
   bottom: 4px !important;
   background: #1a4e8a !important;
@@ -3709,7 +3709,7 @@ body.dragging-card {
 #game.active .col-main > #myDeck,
 #game.active .col-main > .hero-row,
 #game.active .col-main > .log,
-#game.active .col-main > .corner-mana {
+#game.active .col-main > .corner-soul {
   grid-area: unset !important;
 }
 

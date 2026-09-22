@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.200";
+const GAME_VERSION = "0.201";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -97,7 +97,7 @@ function makePlayer(hero, isAI, name) {
   return {
     name, hero, isAI,
     hp: 40, maxHp: 40,
-    mana: 0, maxMana: 0,
+    soul: 0, maxSoul: 0,
     deck: deckFor(hero, isAI),
     hand: [],
     board: [],
@@ -225,9 +225,9 @@ function beginTurn(p) {
   try { hidePeek(); } catch (e) {}
   try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   state.acting = p;
-  p.maxMana = Math.min(10, p.maxMana + 1);
-  p.mana = p.maxMana;
-  if (p.manaNext) { p.mana += p.manaNext; p.manaNext = 0; }
+  p.maxSoul = Math.min(10, p.maxSoul + 1);
+  p.soul = p.maxSoul;
+  if (p.soulNext) { p.soul += p.soulNext; p.soulNext = 0; }
   p.noPlayMinion = false;
   p.coinP = null;
   p.board.forEach(m => {
@@ -235,7 +235,7 @@ function beginTurn(p) {
     else { m.canAttack = true; m.attacksLeft = 1; }
   });
   draw(p, 1);
-  log(`${p.name}의 턴 · 마나 ${p.mana}`);
+  log(`${p.name}의 턴 · 소울 ${p.soul}`);
   try {
     if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
       let isMe = !p.isAI;
@@ -260,7 +260,7 @@ function renderHeroSlot(p, isMe) {
   return `<div class="hero-slot hero-portrait ${isMe ? "mine" : ""}${hurt}${canTarget ? " can-target" : ""}" data-hero="${isMe ? "me" : "opp"}" title="${p.name}">
     ${icon ? `<img src="${icon}" alt="${p.name}">` : ""}
     <div class="hero-hp">${p.hp}</div>
-    <div class="hero-mana">${p.mana}/${p.maxMana}</div>
+    <div class="hero-soul">${p.soul}/${p.maxSoul}</div>
     ${tick}
   </div>`;
 }
@@ -463,7 +463,7 @@ function resolveInstantItem(p, card) {
 }
 
 function playCard(p, card, target) {
-  if (p.mana < card.cost) return false;
+  if (p.soul < card.cost) return false;
   if (card.type === "minion" && p.noPlayMinion) {
     log("이번 턴에는 유닛을 낼 수 없습니다");
     return false;
@@ -479,7 +479,7 @@ function playCard(p, card, target) {
       return false;
     }
   }
-  p.mana -= card.cost;
+  p.soul -= card.cost;
   p.hand = p.hand.filter(c => c.uid !== card.uid);
   if (card.type === "minion") {
     try { Sfx.playSummon && Sfx.playSummon(); } catch (e) {}
@@ -667,14 +667,14 @@ function applyFx(p, fx, target) {
     }
   } else if (fx.type === "heal_hero") {
     p.hp = Math.min(p.maxHp, p.hp + fx.value);
-  } else if (fx.type === "mana_next") {
-    p.manaNext = (p.manaNext || 0) + (fx.value || 0);
+  } else if (fx.type === "soul_next") {
+    p.soulNext = (p.soulNext || 0) + (fx.value || 0);
   } else if (fx.type === "draw") {
     draw(p, fx.value);
   } else if (fx.type === "draw_ex") {
     if (fx.payHp) dealHero(p, fx.payHp);
     if (fx.healHero) p.hp = Math.min(p.maxHp, p.hp + fx.healHero);
-    if (fx.manaNext) p.manaNext = (p.manaNext || 0) + fx.manaNext;
+    if (fx.soulNext) p.soulNext = (p.soulNext || 0) + fx.soulNext;
     if (fx.ownAllHp) [...p.board].forEach(m => damageMinion(p, m, fx.ownAllHp, { fromSpell: true }));
     if (fx.enemyDef) [...e.board].forEach(m => { m.def = Math.max(0, (m.def || 0) + fx.enemyDef); });
     if (fx.enemyDmg && target && target.kind === "minion") damageMinion(target.owner, target.minion, fx.enemyDmg, { fromSpell: true });
@@ -770,7 +770,7 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "wipe_all") {
     [...p.board].forEach(m => destroyMinion(p, m, { fromSpell: true }));
     [...e.board].forEach(m => destroyMinion(e, m, { fromSpell: true }));
-    if (fx.maxMana) p.maxMana = Math.max(0, (p.maxMana || 0) + fx.maxMana);
+    if (fx.maxSoul) p.maxSoul = Math.max(0, (p.maxSoul || 0) + fx.maxSoul);
   } else if (fx.type === "coin_luck") {
     p.coinP = fx.value;
   } else if (fx.type === "own_black_buff") {
@@ -825,8 +825,8 @@ function applyFx(p, fx, target) {
       if (isImmune(target.minion)) log(`${target.minion.name} 면역 · 스펠 효과 무시`);
       else target.minion.def = (target.minion.def || 0) * 2;
     }
-  } else if (fx.type === "mana") {
-    p.mana += fx.value;
+  } else if (fx.type === "soul") {
+    p.soul += fx.value;
   } else if (fx.type === "face") {
     dealHero(e, fx.value);
   } else if (fx.type === "float_def") {
@@ -851,13 +851,13 @@ function applyFx(p, fx, target) {
       if (m.atkC || m.defC || m.hpC) { m.atk = 0; m.def = 0; }
     });
   } else if (fx.type === "earthquake") {
-    const n = Math.floor((p.maxMana || 0) / 2);
+    const n = Math.floor((p.maxSoul || 0) / 2);
     [...e.board].forEach(m => damageMinion(e, m, n, { fromSpell: true }));
   } else if (fx.type === "sandtrap") {
     const n = Math.max(0, 5 - p.board.length);
     e.board.slice(0, n).forEach(m => damageMinion(e, m, 3, { fromSpell: true }));
   } else if (fx.type === "maze") {
-    [...e.board].forEach(m => { if ((m.cost || 0) > (p.maxMana || 0)) m.dying = true; });
+    [...e.board].forEach(m => { if ((m.cost || 0) > (p.maxSoul || 0)) m.dying = true; });
     e.board.filter(m => m.dying).forEach(m => destroyMinion(e, m, { fromSpell: true }));
   } else if (fx.type === "tunnel") {
     p.board.forEach(m => {
@@ -1465,7 +1465,7 @@ function canDropCard(card) {
   if (state.busy) return false;
   const me = meView().me;
   if (state.over || current() !== me || me.isAI) return false;
-  if (me.mana < card.cost) return false;
+  if (me.soul < card.cost) return false;
   if (card.type === "minion" && me.board.length >= 5) return false;
   if (card.type === "item" && isEquipItem(card) && !me.board.length) return false;
   return true;
@@ -1791,7 +1791,7 @@ function onHandClick(card) {
   const me = meView().me;
   if (state.over || current() !== me || current().isAI) return;
   if (ui.targeting || ui.attacker) { ui.targeting = null; ui.attacker = null; render(); }
-  if (me.mana < card.cost) return;
+  if (me.soul < card.cost) return;
   if (card.type === "minion" && me.board.length >= 5) return;
   if (needsTarget(card)) {
     const fx = (card.type === "item" && isEquipItem(card))
@@ -2029,7 +2029,7 @@ async function openCardLore(id) {
   const tribeNm = (TRIBES.find(t => t.id === c.tribe) || {}).name || "";
   const stats = c.type === "minion" ? (c.atk + "/" + (c.def||0) + "/" + c.hp) : (c.type === "item" ? ((c.atk||0) + "/" + (c.def||0) + "/" + (c.hp||0)) : "-");
   const coin = (c.type === "minion") ? fmtCoinLinks(c) : "";
-  const top = [c.cost + "마나", tribeNm, raceNm, stats, coin ? ("코인 " + coin) : ""].filter(Boolean).join(" · ");
+  const top = [c.cost + "소울", tribeNm, raceNm, stats, coin ? ("코인 " + coin) : ""].filter(Boolean).join(" · ");
   const bot = [rareKo, cap].filter(Boolean).join(" · ");
   const metaEl = document.getElementById("loreMeta");
   metaEl.innerHTML = top + (bot ? "<br><br>" + bot : "");
@@ -2099,9 +2099,9 @@ function renderBuilder() {
 
 
 function updateDeckStats() {
-  const curveBox = document.getElementById("manaCurve");
+  const curveBox = document.getElementById("soulCurve");
   const compBox = document.getElementById("deckComp");
-  const avgEl = document.getElementById("manaAvg");
+  const avgEl = document.getElementById("soulAvg");
   if (!curveBox || !compBox || !avgEl) return;
   const n = draftDeck.length;
   const buckets = [0, 0, 0, 0, 0, 0, 0, 0]; // 1,2,3,4,5,6,7,8+
