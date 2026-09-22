@@ -504,75 +504,102 @@ const CARD_FACE = {"e1": "assets/img/faces/e1.jpg", "e2": "assets/img/faces/e2.j
 const RARITY_FRAMES = {
   "earth|minion|common": "assets/img/frames/unit/deck_earth_unit_common_frame.png",
   "earth|spell|common": "assets/img/frames/unit/deck_earth_unit_common_frame.png",
+  "earth|item|common": "assets/img/frames/item/deck_earth_item_common_frame.png",
   "earth|minion|uncommon": "assets/img/frames/unit/deck_earth_unit_uncommon_frame.png",
   "earth|spell|uncommon": "assets/img/frames/unit/deck_earth_unit_uncommon_frame.png",
+  "earth|item|uncommon": "assets/img/frames/item/deck_earth_item_uncommon_frame.png",
   "earth|minion|rare": "assets/img/frames/unit/deck_earth_unit_rare_frame.png",
   "earth|spell|rare": "assets/img/frames/unit/deck_earth_unit_rare_frame.png",
+  "earth|item|rare": "assets/img/frames/item/deck_earth_item_rare_frame.png",
   "earth|minion|legendary": "assets/img/frames/unit/deck_earth_unit_legendary_frame.png",
   "earth|spell|legendary": "assets/img/frames/unit/deck_earth_unit_legendary_frame.png",
+  "earth|item|legendary": "assets/img/frames/item/deck_earth_item_legendary_frame.png",
   "fire|minion|common": "assets/img/frames/unit/deck_fire_unit_common_frame.png",
   "fire|spell|common": "assets/img/frames/unit/deck_fire_unit_common_frame.png",
+  "fire|item|common": "assets/img/frames/item/deck_fire_item_common_frame.png",
   "fire|minion|uncommon": "assets/img/frames/unit/deck_fire_unit_uncommon_frame.png",
   "fire|spell|uncommon": "assets/img/frames/unit/deck_fire_unit_uncommon_frame.png",
+  "fire|item|uncommon": "assets/img/frames/item/deck_fire_item_uncommon_frame.png",
   "fire|minion|rare": "assets/img/frames/unit/deck_fire_unit_rare_frame.png",
   "fire|spell|rare": "assets/img/frames/unit/deck_fire_unit_rare_frame.png",
+  "fire|item|rare": "assets/img/frames/item/deck_fire_item_rare_frame.png",
   "fire|minion|legendary": "assets/img/frames/unit/deck_fire_unit_legendary_frame.png",
   "fire|spell|legendary": "assets/img/frames/unit/deck_fire_unit_legendary_frame.png",
+  "fire|item|legendary": "assets/img/frames/item/deck_fire_item_legendary_frame.png",
   "wind|minion|common": "assets/img/frames/unit/deck_wind_unit_common_frame.png",
   "wind|spell|common": "assets/img/frames/unit/deck_wind_unit_common_frame.png",
+  "wind|item|common": "assets/img/frames/item/deck_wind_item_common_frame.png",
   "wind|minion|uncommon": "assets/img/frames/unit/deck_wind_unit_uncommon_frame.png",
   "wind|spell|uncommon": "assets/img/frames/unit/deck_wind_unit_uncommon_frame.png",
+  "wind|item|uncommon": "assets/img/frames/item/deck_wind_item_uncommon_frame.png",
   "wind|minion|rare": "assets/img/frames/unit/deck_wind_unit_rare_frame.png",
   "wind|spell|rare": "assets/img/frames/unit/deck_wind_unit_rare_frame.png",
+  "wind|item|rare": "assets/img/frames/item/deck_wind_item_rare_frame.png",
   "wind|minion|legendary": "assets/img/frames/unit/deck_wind_unit_legendary_frame.png",
   "wind|spell|legendary": "assets/img/frames/unit/deck_wind_unit_legendary_frame.png",
+  "wind|item|legendary": "assets/img/frames/item/deck_wind_item_legendary_frame.png",
   "water|minion|common": "assets/img/frames/unit/deck_water_unit_common_frame.png",
   "water|spell|common": "assets/img/frames/unit/deck_water_unit_common_frame.png",
+  "water|item|common": "assets/img/frames/item/deck_water_item_common_frame.png",
   "water|minion|uncommon": "assets/img/frames/unit/deck_water_unit_uncommon_frame.png",
   "water|spell|uncommon": "assets/img/frames/unit/deck_water_unit_uncommon_frame.png",
+  "water|item|uncommon": "assets/img/frames/item/deck_water_item_uncommon_frame.png",
   "water|minion|rare": "assets/img/frames/unit/deck_water_unit_rare_frame.png",
   "water|spell|rare": "assets/img/frames/unit/deck_water_unit_rare_frame.png",
+  "water|item|rare": "assets/img/frames/item/deck_water_item_rare_frame.png",
   "water|minion|legendary": "assets/img/frames/unit/deck_water_unit_legendary_frame.png",
   "water|spell|legendary": "assets/img/frames/unit/deck_water_unit_legendary_frame.png",
+  "water|item|legendary": "assets/img/frames/item/deck_water_item_legendary_frame.png",
   "light|minion|common": "assets/img/frames/unit/deck_light_unit_common_frame.png",
   "light|spell|common": "assets/img/frames/unit/deck_light_unit_common_frame.png",
+  "light|item|common": "assets/img/frames/item/deck_light_item_common_frame.png",
   "light|minion|uncommon": "assets/img/frames/unit/deck_light_unit_uncommon_frame.png",
   "light|spell|uncommon": "assets/img/frames/unit/deck_light_unit_uncommon_frame.png",
+  "light|item|uncommon": "assets/img/frames/item/deck_light_item_uncommon_frame.png",
   "light|minion|rare": "assets/img/frames/unit/deck_light_unit_rare_frame.png",
   "light|spell|rare": "assets/img/frames/unit/deck_light_unit_rare_frame.png",
+  "light|item|rare": "assets/img/frames/item/deck_light_item_rare_frame.png",
   "light|minion|legendary": "assets/img/frames/unit/deck_light_unit_legendary_frame.png",
   "light|spell|legendary": "assets/img/frames/unit/deck_light_unit_legendary_frame.png",
+  "light|item|legendary": "assets/img/frames/item/deck_light_item_legendary_frame.png",
   "dark|minion|common": "assets/img/frames/unit/deck_dark_unit_common_frame.png",
   "dark|spell|common": "assets/img/frames/unit/deck_dark_unit_common_frame.png",
+  "dark|item|common": "assets/img/frames/item/deck_dark_item_common_frame.png",
   "dark|minion|uncommon": "assets/img/frames/unit/deck_dark_unit_uncommon_frame.png",
   "dark|spell|uncommon": "assets/img/frames/unit/deck_dark_unit_uncommon_frame.png",
+  "dark|item|uncommon": "assets/img/frames/item/deck_dark_item_uncommon_frame.png",
   "dark|minion|rare": "assets/img/frames/unit/deck_dark_unit_rare_frame.png",
   "dark|spell|rare": "assets/img/frames/unit/deck_dark_unit_rare_frame.png",
+  "dark|item|rare": "assets/img/frames/item/deck_dark_item_rare_frame.png",
   "dark|minion|legendary": "assets/img/frames/unit/deck_dark_unit_legendary_frame.png",
   "dark|spell|legendary": "assets/img/frames/unit/deck_dark_unit_legendary_frame.png",
+  "dark|item|legendary": "assets/img/frames/item/deck_dark_item_legendary_frame.png",
   "metal|minion|common": "assets/img/frames/unit/deck_earth_unit_common_frame.png",
   "metal|spell|common": "assets/img/frames/unit/deck_earth_unit_common_frame.png",
+  "metal|item|common": "assets/img/frames/item/deck_earth_item_common_frame.png",
   "metal|minion|uncommon": "assets/img/frames/unit/deck_earth_unit_uncommon_frame.png",
   "metal|spell|uncommon": "assets/img/frames/unit/deck_earth_unit_uncommon_frame.png",
+  "metal|item|uncommon": "assets/img/frames/item/deck_earth_item_uncommon_frame.png",
   "metal|minion|rare": "assets/img/frames/unit/deck_earth_unit_rare_frame.png",
   "metal|spell|rare": "assets/img/frames/unit/deck_earth_unit_rare_frame.png",
+  "metal|item|rare": "assets/img/frames/item/deck_earth_item_rare_frame.png",
   "metal|minion|legendary": "assets/img/frames/unit/deck_earth_unit_legendary_frame.png",
-  "metal|spell|legendary": "assets/img/frames/unit/deck_earth_unit_legendary_frame.png"
+  "metal|spell|legendary": "assets/img/frames/unit/deck_earth_unit_legendary_frame.png",
+  "metal|item|legendary": "assets/img/frames/item/deck_earth_item_legendary_frame.png"
 };
 function frameOf(c) {
   const tribe = (typeof TRIBES !== "undefined" && TRIBES.find(x => x.id === (c && c.tribe))) || { id: "earth" };
   let tid = (tribe && tribe.id) || "earth";
   if (tid === "metal") tid = "earth";
-  // Spells/items temporarily share unit (minion) deck frames by tribe
+  // Fallback: unit deck frames by tribe (items use pickFrameUrl item keys)
   return (typeof DECK_FRAMES !== "undefined" && (DECK_FRAMES[tid] || DECK_FRAMES.earth)) || "";
 }
 function pickFrameUrl(c, tribe) {
   const t = tribe || (typeof TRIBES !== "undefined" && TRIBES.find(x => x.id === (c && c.tribe))) || { id: "earth" };
   let tid = (t && t.id) || "earth";
   if (tid === "metal") tid = "earth";
-  // Temporarily: spells AND items use unit/minion deck_* frames by tribe+rarity
-  // (items already shared minion; spells stop preferring SPELL_FRAMES webp)
-  const kind = "minion";
+  // Items: dedicated deck_*_item_* frames. Spells: still temporary unit frames until spell set lands.
+  const kind = (c && c.type === "item") ? "item" : "minion";
   const rarity = (c && c.rarity) || "common";
   const key = tid + "|" + kind + "|" + rarity;
   if (typeof RARITY_FRAMES !== "undefined" && RARITY_FRAMES[key]) return RARITY_FRAMES[key];
