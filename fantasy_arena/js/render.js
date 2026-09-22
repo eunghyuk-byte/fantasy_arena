@@ -14,7 +14,8 @@ function layoutBoardDecks() {
     const br = board.getBoundingClientRect();
     const w = Math.max(56, Math.min(84, br.width * 0.11));
     deck.style.position = "absolute";
-    deck.style.left = Math.max(4, br.left - mr.left + br.width * 0.015) + "px";
+    // Stage-left (not board-left): board is centered/narrower than parchment
+    deck.style.left = Math.max(6, Math.min(18, mr.width * 0.02)) + "px";
     deck.style.width = w + "px";
     deck.style.zIndex = "6";
     deck.style.display = "flex";

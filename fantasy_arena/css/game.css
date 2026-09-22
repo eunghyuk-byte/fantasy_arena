@@ -2515,13 +2515,11 @@ html.is-desktop, html.is-desktop body {
   background: transparent !important;
 }
 
-/* Units start inside parchment (left-fill), not past left frame */
+/* Units start inside parchment (left-fill); width/centering locked at v0.199 end block */
 #game.active .board,
 #game.active .board.opp,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  padding-left: max(88px, 9%) !important;
-  padding-right: max(96px, 11%) !important;
   box-sizing: border-box !important;
 }
 #game.active .board.opp {
@@ -3715,21 +3713,30 @@ body.dragging-card {
   grid-area: unset !important;
 }
 
-/* Board units: left-fill just past left deck (full-width stage; 17% looked like mid-parchment) */
+/* Field lane: 5-slot width, centered with slight right nudge (not full parchment / not 6-wide) */
 #game.active .board,
 #game.active .board.opp,
 #game.active #oppBoard,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  padding-left: max(88px, 9%) !important;
-  padding-right: max(96px, 11%) !important;
+  width: min(68%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important;
+  max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  /* a bit right of true center — was hugging left/decks */
+  transform: translateX(3.5%) !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
   box-sizing: border-box !important;
 }
 
-/* Drop-glow = myBoard rect must match play lane (no extra margin jump) */
+/* Drop-glow follows narrowed myBoard; keep the same centering nudge */
 #game.active.drop-ready #myBoard,
 #game.active #myBoard.drop-glow {
-  margin: 0 !important;
-  transform: none !important;
+  width: min(68%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important;
+  max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  transform: translateX(3.5%) !important;
 }
 
