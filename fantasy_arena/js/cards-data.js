@@ -40,7 +40,7 @@ const CARDS = [
   { id:"e9", tribe:"earth", name:"오크", cost:3, type:"minion", atk:3, def:0, hp:3, atkC:-1, defC:0, hpC:0, atkSkill:4, text:"연속공격" },
   { id:"e10", tribe:"earth", name:"드워프대장", cost:3, type:"minion", atk:2, def:1, hp:4, atkC:0, defC:0, hpC:1, text:"" },
   { id:"e12", tribe:"earth", name:"스톤골렘", cost:3, type:"minion", atk:2, def:0, hp:6, atkC:-1, defC:0, hpC:1, text:"" },
-  { id:"e13", tribe:"earth", name:"마운록", cost:3, type:"minion", atk:2, def:0, hp:4, atkC:0, defC:0, hpC:1, rarity:"uncommon", ability:"복수", text:"복수" },
+  { id:"e13", tribe:"earth", name:"마운록", cost:3, type:"minion", atk:3, def:0, hp:4, atkC:0, defC:0, hpC:1, rarity:"rare", ability:"복수", text:"복수" },
   { id:"e14", tribe:"earth", name:"마초", cost:10, type:"minion", atk:7, def:2, hp:11, atkC:-1, defC:-1, hpC:1, rarity:"legendary", atkSkill:10, ability:"복수", text:"돌파공격 · 복수" },
   { id:"e15", tribe:"earth", name:"암석창병", cost:1, type:"minion", atk:3, def:0, hp:1, atkC:0, defC:0, hpC:1, text:"" },
   { id:"e16", tribe:"earth", name:"켄타우로스", cost:3, type:"minion", atk:2, def:1, hp:3, atkC:-1, defC:-1, hpC:1, atkSkill:3, text:"돌진공격" },
