@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.180";
+const GAME_VERSION = "0.181";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1886,8 +1886,48 @@ function renderBuilder() {
   list.querySelectorAll(".deck-row").forEach(el => {
     el.onclick = () => removeFromDraft(el.dataset.id);
   });
+  updateDeckStats();
 }
 
+
+
+function updateDeckStats() {
+  const curveBox = document.getElementById("manaCurve");
+  const compBox = document.getElementById("deckComp");
+  const avgEl = document.getElementById("manaAvg");
+  if (!curveBox || !compBox || !avgEl) return;
+  const n = draftDeck.length;
+  const buckets = [0, 0, 0, 0, 0, 0, 0]; // 1,2,3,4,5,6,7+
+  let sumCost = 0;
+  const types = { minion: 0, spell: 0, item: 0 };
+  draftDeck.forEach(id => {
+    const c = CARD_MAP[id];
+    if (!c) return;
+    const cost = Math.max(0, c.cost | 0);
+    sumCost += cost;
+    const idx = cost >= 7 ? 6 : Math.max(0, cost - 1);
+    buckets[idx] += 1;
+    if (c.type === "minion") types.minion++;
+    else if (c.type === "spell") types.spell++;
+    else if (c.type === "item") types.item++;
+  });
+  const maxB = Math.max(1, ...buckets);
+  const labels = ["1", "2", "3", "4", "5", "6", "7+"];
+  curveBox.innerHTML = labels.map((lab, i) => {
+    const cnt = buckets[i];
+    const pct = n ? (cnt * 100 / n) : 0;
+    const w = Math.round((cnt / maxB) * 100);
+    return `<div class="deck-stat-row"><span class="lbl">${lab}</span><div class="deck-stat-bar"><i style="width:${w}%"></i></div><span class="val">${pct.toFixed(1)}% (${cnt}장)</span></div>`;
+  }).join("");
+  avgEl.textContent = n ? ("평균 비용: " + (sumCost / n).toFixed(1)) : "평균 비용: —";
+  const maxT = Math.max(1, types.minion, types.spell, types.item);
+  const comps = [["유닛", types.minion], ["스펠", types.spell], ["아이템", types.item]];
+  compBox.innerHTML = comps.map(([lab, cnt]) => {
+    const pct = n ? (cnt * 100 / n) : 0;
+    const w = Math.round((cnt / maxT) * 100);
+    return `<div class="deck-stat-row"><span class="lbl">${lab}</span><div class="deck-stat-bar comp"><i style="width:${w}%"></i></div><span class="val">${pct.toFixed(1)}% (${cnt}장)</span></div>`;
+  }).join("");
+}
 
 function renderHeroPicks() {
   const box = document.getElementById("heroPicks");

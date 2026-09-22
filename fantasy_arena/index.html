@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/game.css?v=0.158" />
+<link rel="stylesheet" href="css/game.css?v=0.181" />
 </head>
 <body>
 <button class="bgm-btn" id="bgmBtn" title="모험 BGM">♪</button>
@@ -136,13 +136,24 @@
         </div>
         <div class="pool-grid" id="cardPool"></div>
       </div>
-      <div class="builder-col">
+      <div class="builder-col deck-side">
         <div class="builder-top">
           <h2>내 덱</h2>
           <button class="menu-btn ghost" id="btnBackMenu" style="min-width:auto;margin:0;padding:8px 12px">메뉴</button>
         </div>
         <div class="deck-meta" id="deckMeta">0 / 30</div>
         <div class="deck-list" id="deckList"></div>
+        <div class="deck-stats" id="deckStats">
+          <div class="deck-stat-panel">
+            <h4>비용 분포 (마나 커브)</h4>
+            <div class="deck-stat-rows" id="manaCurve"></div>
+            <div class="deck-stat-avg" id="manaAvg">평균 비용: —</div>
+          </div>
+          <div class="deck-stat-panel">
+            <h4>덱 구성</h4>
+            <div class="deck-stat-rows" id="deckComp"></div>
+          </div>
+        </div>
         <button class="menu-btn" id="btnSaveDeck" style="width:100%;margin-top:12px">덱 저장</button>
         <button class="menu-btn" id="btnPlaySaved" style="width:100%">이 덱으로 플레이</button>
       </div>
@@ -220,6 +231,6 @@
 <script src="js/render.js?v=0.158"></script>
 <script src="js/combat.js?v=0.158"></script>
 <script src="js/spell-fx.js?v=0.102"></script>
-<script src="js/game.js?v=0.158"></script>
+<script src="js/game.js?v=0.181"></script>
 </body>
 </html>
