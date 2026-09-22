@@ -9,12 +9,12 @@ const TRIBES = [
 ];
 
 const TRIBE_ICONS = {
-  earth:"assets/img/icons/earth.jpg",
-  fire:"assets/img/icons/fire.jpg",
-  wind:"assets/img/icons/wind.jpg",
-  water:"assets/img/icons/water.jpg",
+  earth:"assets/img/icons/earth.png",
+  fire:"assets/img/icons/fire.png",
+  wind:"assets/img/icons/wind.png",
+  water:"assets/img/icons/water.png",
   light:"assets/img/icons/light.jpg",
-  dark:"assets/img/icons/dark.jpg",
+  dark:"assets/img/icons/dark.png",
   metal:"assets/img/frames/unit/metal.png"
 };
 const HUD_UI = {
