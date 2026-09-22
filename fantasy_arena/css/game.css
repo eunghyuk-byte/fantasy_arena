@@ -3558,12 +3558,21 @@ html.is-desktop #game.active .my-hand .card.playable,
 
 
 /* Board/hand peek: Hearthstone-style ability tips to the right */
+/* Base #cardPeek width (~260px) is for face-only; with tips, expand so Korean does not wrap per glyph */
+#cardPeek:has(.peek-tips) {
+  width: auto !important;
+  max-width: min(96vw, 920px);
+}
 #cardPeek .peek-face { box-shadow: 0 12px 40px rgba(0,0,0,.55); }
 #cardPeek .peek-tips {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: min(240px, 28vw);
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  min-width: 14ch;
+  width: min(240px, 28vw);
+  max-width: min(280px, 36vw);
 }
 #cardPeek .peek-tip {
   background: rgba(18, 14, 10, 0.94);
@@ -3571,6 +3580,11 @@ html.is-desktop #game.active .my-hand .card.playable,
   border-radius: 10px;
   padding: 10px 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  box-sizing: border-box;
+  min-width: 12ch;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 #cardPeek .peek-tip b {
   display: block;
@@ -3578,12 +3592,16 @@ html.is-desktop #game.active .my-hand .card.playable,
   font-size: 16px;
   font-weight: 800;
   margin-bottom: 4px;
+  white-space: normal;
+  word-break: keep-all;
 }
 #cardPeek .peek-tip span {
   display: block;
   color: #d8c9a4;
   font-size: 13px;
   line-height: 1.4;
+  white-space: normal;
+  word-break: keep-all;
 }
 
 /* Tablet: stop browser scroll/gesture from stealing hand→board card drags */

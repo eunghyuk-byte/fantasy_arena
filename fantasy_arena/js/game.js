@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.191";
+const GAME_VERSION = "0.192";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1286,7 +1286,7 @@ function showPeek(el, card) {
   const w = Math.min(300, window.innerHeight * 0.42);
   const hasTips = tips.length > 0;
   peek.style.cssText = hasTips
-    ? "position:fixed;left:36%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;display:flex;flex-direction:row;align-items:center;gap:14px;"
+    ? "position:fixed;left:36%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;display:flex;flex-direction:row;align-items:center;gap:14px;width:auto;max-width:min(96vw,920px);"
     : "position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;";
   const face = peek.querySelector(".peek-face");
   if (face) face.style.cssText = "width:"+w+"px;height:auto;display:block;border-radius:16px;flex-shrink:0;";
