@@ -3550,3 +3550,33 @@ html.is-desktop #game.active .my-hand .card.playable,
   z-index: 80 !important;
   filter: drop-shadow(0 14px 18px rgba(0,0,0,.45));
 }
+
+
+/* Board/hand peek: Hearthstone-style ability tips to the right */
+#cardPeek .peek-face { box-shadow: 0 12px 40px rgba(0,0,0,.55); }
+#cardPeek .peek-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(240px, 28vw);
+}
+#cardPeek .peek-tip {
+  background: rgba(18, 14, 10, 0.94);
+  border: 1px solid #a88848;
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.45);
+}
+#cardPeek .peek-tip b {
+  display: block;
+  color: #f3e2b0;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+#cardPeek .peek-tip span {
+  display: block;
+  color: #d8c9a4;
+  font-size: 13px;
+  line-height: 1.4;
+}

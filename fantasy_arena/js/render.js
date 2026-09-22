@@ -115,14 +115,15 @@ function render() {
       el.onclick = () => onMinionClick(me, unit, "me");
       if (typeof bindBoardMinion === "function" && unit) bindBoardMinion(el, unit);
       else {
-        el.onpointerenter = () => showPeek(el);
+        el.onpointerenter = () => showPeek(el, unit);
         el.onpointerleave = hidePeek;
       }
     });
   }
   document.querySelectorAll("#oppBoard .minion").forEach(el => {
-    el.onclick = () => onMinionClick(opp, findOn(opp, el.dataset.uid), "opp");
-    el.onpointerenter = () => showPeek(el);
+    const om = findOn(opp, el.dataset.uid);
+    el.onclick = () => onMinionClick(opp, om, "opp");
+    el.onpointerenter = () => showPeek(el, om);
     el.onpointerleave = hidePeek;
     // Never bind reorder on enemy board
   });
@@ -547,7 +548,7 @@ function enqueueCompose(fn) {
 }
 function faceCacheKey(c, opts) {
   const shield = (c.ability === "보호") || ((c.keywords || []).includes("shield")) ? "sh1" : "sh0";
-  return ["v105raceFix", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v106itemTipText", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);

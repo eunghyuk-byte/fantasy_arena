@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.188";
+const GAME_VERSION = "0.189";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -430,7 +430,21 @@ function equipItemOnUnit(p, card, unit) {
   unit._itemBonuses = bonuses;
   unit.itemWorn = true;
   if (unit._baseText == null) unit._baseText = unit.text || "";
-  unit.text = "아이템착용중" + (unit._baseText ? " · " + unit._baseText : "");
+  {
+    const itemBits = [];
+    if (card.ability) itemBits.push(String(card.ability).split(",")[0].trim());
+    else if (card.atkSkill != null && typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[card.atkSkill]) {
+      itemBits.push(ATK_SKILL_HELP[card.atkSkill][0]);
+    } else if (card.text) {
+      const raw = String(card.text).replace(/\s*부여\s*$/, "").trim();
+      if (raw) itemBits.push(raw);
+    }
+    const parts = ["아이템 착용중", ...itemBits];
+    if (unit._baseText) parts.push(unit._baseText);
+    const uniq = [];
+    parts.forEach(p => { if (p && !uniq.includes(p)) uniq.push(p); });
+    unit.text = uniq.join(" · ");
+  }
   if (card.id === "ni1") draw(p, 1);
   log(`${p.name}이(가) ${unit.name}에게 ${card.name} 장착`);
   return true;
@@ -1195,7 +1209,53 @@ function hidePeek() {
   const p = document.getElementById("cardPeek");
   if (p) p.remove();
 }
-function showPeek(el) {
+/** HS-style keyword tips for board/hand peek (unit + equipped item abilities). */
+function collectAbilityTips(c) {
+  const tips = [];
+  const seen = new Set();
+  const add = (title, desc) => {
+    const t = String(title || "").trim();
+    if (!t || t === "일반공격" || seen.has(t)) return;
+    seen.add(t);
+    tips.push({ title: t, desc: String(desc || "") });
+  };
+  if (!c) return tips;
+  if (c.atkSkill != null && typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[c.atkSkill]) {
+    const [nm, desc] = ATK_SKILL_HELP[c.atkSkill];
+    add(nm, desc);
+  }
+  String(c.ability || "").split(",").map(s => s.trim()).filter(Boolean).forEach(ab => {
+    add(ab, (typeof ABI_HELP !== "undefined" && ABI_HELP[ab]) || "");
+  });
+  const blob = [c.text, c._baseText].filter(Boolean).join(" · ");
+  if (typeof ATK_SKILL_HELP !== "undefined") {
+    Object.values(ATK_SKILL_HELP).forEach(([nm, desc]) => { if (blob.includes(nm)) add(nm, desc); });
+  }
+  if (typeof ABI_HELP !== "undefined") {
+    Object.keys(ABI_HELP).forEach(ab => { if (blob.includes(ab)) add(ab, ABI_HELP[ab]); });
+  }
+  if (c.equippedItem && typeof CARD_MAP !== "undefined") {
+    const it = CARD_MAP[c.equippedItem.id];
+    if (it) {
+      if (it.atkSkill != null && ATK_SKILL_HELP && ATK_SKILL_HELP[it.atkSkill]) {
+        const [nm, desc] = ATK_SKILL_HELP[it.atkSkill];
+        add(nm, desc);
+      }
+      String(it.ability || "").split(",").map(s => s.trim()).filter(Boolean).forEach(ab => {
+        add(ab, (ABI_HELP && ABI_HELP[ab]) || "");
+      });
+      const itx = String(it.text || "").trim();
+      if (itx) {
+        const stripped = itx.replace(/\s*부여\s*$/, "").trim();
+        const covered = (ATK_SKILL_HELP && Object.values(ATK_SKILL_HELP).some(([nm]) => stripped.includes(nm)))
+          || (ABI_HELP && Object.keys(ABI_HELP).some(ab => stripped.includes(ab)));
+        if (!covered && stripped) add(it.name || "아이템", stripped);
+      }
+    }
+  }
+  return tips;
+}
+function showPeek(el, card) {
   if (_drag || !el) return;
   // Never showcase during AI turn / busy — leftover center card after endTurn
   try {
@@ -1205,12 +1265,31 @@ function showPeek(el) {
   const img = el.querySelector("img.card-face, img");
   if (!img || !img.src) return;
   hidePeek();
+  let c = card || null;
+  if (!c) {
+    const uid = el.getAttribute("data-uid")
+      || (el.closest && el.closest("[data-uid]") && el.closest("[data-uid]").getAttribute("data-uid"));
+    if (uid && typeof state !== "undefined" && state) {
+      const boards = [].concat((state.p1 && state.p1.board) || [], (state.p2 && state.p2.board) || []);
+      const hit = boards.find(m => m && m.uid === uid);
+      if (hit) c = hit;
+    }
+  }
+  const tips = collectAbilityTips(c);
   const peek = document.createElement("div");
   peek.id = "cardPeek";
-  peek.innerHTML = `<img src="${img.src}" alt="">`;
+  const tipsHtml = tips.length
+    ? `<div class="peek-tips">${tips.map(t => `<div class="peek-tip"><b>${t.title}</b><span>${t.desc}</span></div>`).join("")}</div>`
+    : "";
+  peek.innerHTML = `<img class="peek-face" src="${img.src}" alt="">` + tipsHtml;
   document.body.appendChild(peek);
   const w = Math.min(300, window.innerHeight * 0.42);
-  peek.style.cssText = "position:fixed;left:50%;top:46%;width:"+w+"px;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;";
+  const hasTips = tips.length > 0;
+  peek.style.cssText = hasTips
+    ? "position:fixed;left:36%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;display:flex;flex-direction:row;align-items:center;gap:14px;"
+    : "position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;";
+  const face = peek.querySelector(".peek-face");
+  if (face) face.style.cssText = "width:"+w+"px;height:auto;display:block;border-radius:16px;flex-shrink:0;";
 }
 
 function placeDropGlow(on, x, y) {
@@ -1453,7 +1532,7 @@ function reorderOwnBoard(fromUid, toIdx) {
   return fromIdx !== dest;
 }
 function bindHandCard(el, card) {
-  el.onpointerenter = () => showPeek(el);
+  el.onpointerenter = () => showPeek(el, card);
   el.onpointerleave = hidePeek;
   // Prefer pointer events; also bind mouse* so headless/Electron drags never miss
   const startDrag = (ev) => {
@@ -1580,7 +1659,7 @@ function canReorderBoard() {
 
 function bindBoardMinion(el, minion) {
   if (!el || !minion) return;
-  el.onpointerenter = () => { if (!_drag) showPeek(el); };
+  el.onpointerenter = () => { if (!_drag) showPeek(el, minion); };
   el.onpointerleave = hidePeek;
   const startDrag = (ev) => {
     hidePeek();
