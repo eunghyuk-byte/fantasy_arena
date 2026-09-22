@@ -1,10 +1,1415 @@
 {
-  "count": 250,
+  "count": 705,
   "items": [
     {
-      "path": "assets/img/coins/plus.png",
-      "bytes": 108434,
-      "name": "plus"
+      "path": "assets/audio/bgm/BGM.md",
+      "bytes": 1335,
+      "name": "BGM"
+    },
+    {
+      "path": "assets/audio/bgm/battle.ogg",
+      "bytes": 5955883,
+      "name": "battle"
+    },
+    {
+      "path": "assets/audio/bgm/menu.ogg",
+      "bytes": 3691658,
+      "name": "menu"
+    },
+    {
+      "path": "assets/audio/sfx/SOUNDS.md",
+      "bytes": 1373,
+      "name": "SOUNDS"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_card_draw.ogg",
+      "bytes": 13416,
+      "name": "sfx_card_draw"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_card_play.ogg",
+      "bytes": 9691,
+      "name": "sfx_card_play"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_cast_charge.ogg",
+      "bytes": 11288,
+      "name": "sfx_cast_charge"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_coin.ogg",
+      "bytes": 24865,
+      "name": "sfx_coin"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_death.ogg",
+      "bytes": 12591,
+      "name": "sfx_death"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_hero_hit.ogg",
+      "bytes": 11658,
+      "name": "sfx_hero_hit"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_lose.ogg",
+      "bytes": 21792,
+      "name": "sfx_lose"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_parry.ogg",
+      "bytes": 13839,
+      "name": "sfx_parry"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_slash.ogg",
+      "bytes": 15473,
+      "name": "sfx_slash"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_slash_crit.ogg",
+      "bytes": 15255,
+      "name": "sfx_slash_crit"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_spell_dark.ogg",
+      "bytes": 20516,
+      "name": "sfx_spell_dark"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_spell_earth.ogg",
+      "bytes": 21067,
+      "name": "sfx_spell_earth"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_spell_fire.ogg",
+      "bytes": 20642,
+      "name": "sfx_spell_fire"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_spell_light.ogg",
+      "bytes": 20662,
+      "name": "sfx_spell_light"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_spell_water.ogg",
+      "bytes": 18698,
+      "name": "sfx_spell_water"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_spell_wind.ogg",
+      "bytes": 18128,
+      "name": "sfx_spell_wind"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_summon.ogg",
+      "bytes": 14596,
+      "name": "sfx_summon"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_turn.ogg",
+      "bytes": 9829,
+      "name": "sfx_turn"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_ui_click.ogg",
+      "bytes": 5285,
+      "name": "sfx_ui_click"
+    },
+    {
+      "path": "assets/audio/sfx/sfx_win.ogg",
+      "bytes": 26790,
+      "name": "sfx_win"
+    },
+    {
+      "path": "assets/img/art/a1.jpg",
+      "bytes": 307275,
+      "name": "a1"
+    },
+    {
+      "path": "assets/img/art/a10.jpg",
+      "bytes": 278626,
+      "name": "a10"
+    },
+    {
+      "path": "assets/img/art/a11.jpg",
+      "bytes": 256701,
+      "name": "a11"
+    },
+    {
+      "path": "assets/img/art/a12.jpg",
+      "bytes": 279243,
+      "name": "a12"
+    },
+    {
+      "path": "assets/img/art/a13.jpg",
+      "bytes": 266868,
+      "name": "a13"
+    },
+    {
+      "path": "assets/img/art/a14.jpg",
+      "bytes": 356910,
+      "name": "a14"
+    },
+    {
+      "path": "assets/img/art/a15.jpg",
+      "bytes": 286890,
+      "name": "a15"
+    },
+    {
+      "path": "assets/img/art/a16.jpg",
+      "bytes": 290189,
+      "name": "a16"
+    },
+    {
+      "path": "assets/img/art/a17.jpg",
+      "bytes": 314259,
+      "name": "a17"
+    },
+    {
+      "path": "assets/img/art/a18.jpg",
+      "bytes": 295483,
+      "name": "a18"
+    },
+    {
+      "path": "assets/img/art/a19.jpg",
+      "bytes": 273960,
+      "name": "a19"
+    },
+    {
+      "path": "assets/img/art/a2.jpg",
+      "bytes": 297729,
+      "name": "a2"
+    },
+    {
+      "path": "assets/img/art/a20.jpg",
+      "bytes": 352200,
+      "name": "a20"
+    },
+    {
+      "path": "assets/img/art/a21.jpg",
+      "bytes": 336101,
+      "name": "a21"
+    },
+    {
+      "path": "assets/img/art/a22.jpg",
+      "bytes": 306021,
+      "name": "a22"
+    },
+    {
+      "path": "assets/img/art/a23.jpg",
+      "bytes": 355634,
+      "name": "a23"
+    },
+    {
+      "path": "assets/img/art/a24.jpg",
+      "bytes": 152585,
+      "name": "a24"
+    },
+    {
+      "path": "assets/img/art/a25.jpg",
+      "bytes": 308384,
+      "name": "a25"
+    },
+    {
+      "path": "assets/img/art/a26.jpg",
+      "bytes": 361151,
+      "name": "a26"
+    },
+    {
+      "path": "assets/img/art/a27.jpg",
+      "bytes": 282697,
+      "name": "a27"
+    },
+    {
+      "path": "assets/img/art/a28.jpg",
+      "bytes": 298860,
+      "name": "a28"
+    },
+    {
+      "path": "assets/img/art/a3.jpg",
+      "bytes": 210400,
+      "name": "a3"
+    },
+    {
+      "path": "assets/img/art/a4.jpg",
+      "bytes": 330364,
+      "name": "a4"
+    },
+    {
+      "path": "assets/img/art/a5.jpg",
+      "bytes": 365349,
+      "name": "a5"
+    },
+    {
+      "path": "assets/img/art/a6.jpg",
+      "bytes": 236342,
+      "name": "a6"
+    },
+    {
+      "path": "assets/img/art/a7.jpg",
+      "bytes": 300739,
+      "name": "a7"
+    },
+    {
+      "path": "assets/img/art/a8.jpg",
+      "bytes": 365201,
+      "name": "a8"
+    },
+    {
+      "path": "assets/img/art/a9.jpg",
+      "bytes": 329121,
+      "name": "a9"
+    },
+    {
+      "path": "assets/img/art/ai1.jpg",
+      "bytes": 182284,
+      "name": "ai1"
+    },
+    {
+      "path": "assets/img/art/ai2.jpg",
+      "bytes": 250228,
+      "name": "ai2"
+    },
+    {
+      "path": "assets/img/art/ai3.jpg",
+      "bytes": 237808,
+      "name": "ai3"
+    },
+    {
+      "path": "assets/img/art/ai4.jpg",
+      "bytes": 223817,
+      "name": "ai4"
+    },
+    {
+      "path": "assets/img/art/ai5.jpg",
+      "bytes": 344423,
+      "name": "ai5"
+    },
+    {
+      "path": "assets/img/art/ai6.jpg",
+      "bytes": 344676,
+      "name": "ai6"
+    },
+    {
+      "path": "assets/img/art/as1.jpg",
+      "bytes": 274103,
+      "name": "as1"
+    },
+    {
+      "path": "assets/img/art/as2.jpg",
+      "bytes": 216908,
+      "name": "as2"
+    },
+    {
+      "path": "assets/img/art/as3.jpg",
+      "bytes": 320017,
+      "name": "as3"
+    },
+    {
+      "path": "assets/img/art/as4.jpg",
+      "bytes": 372388,
+      "name": "as4"
+    },
+    {
+      "path": "assets/img/art/as5.jpg",
+      "bytes": 289872,
+      "name": "as5"
+    },
+    {
+      "path": "assets/img/art/as6.jpg",
+      "bytes": 298208,
+      "name": "as6"
+    },
+    {
+      "path": "assets/img/art/as7.jpg",
+      "bytes": 314234,
+      "name": "as7"
+    },
+    {
+      "path": "assets/img/art/as8.jpg",
+      "bytes": 246457,
+      "name": "as8"
+    },
+    {
+      "path": "assets/img/art/coin.jpg",
+      "bytes": 172511,
+      "name": "coin"
+    },
+    {
+      "path": "assets/img/art/d1.jpg",
+      "bytes": 209150,
+      "name": "d1"
+    },
+    {
+      "path": "assets/img/art/d10.jpg",
+      "bytes": 243216,
+      "name": "d10"
+    },
+    {
+      "path": "assets/img/art/d11.jpg",
+      "bytes": 308158,
+      "name": "d11"
+    },
+    {
+      "path": "assets/img/art/d12.jpg",
+      "bytes": 220663,
+      "name": "d12"
+    },
+    {
+      "path": "assets/img/art/d13.jpg",
+      "bytes": 308735,
+      "name": "d13"
+    },
+    {
+      "path": "assets/img/art/d14.jpg",
+      "bytes": 286436,
+      "name": "d14"
+    },
+    {
+      "path": "assets/img/art/d15.jpg",
+      "bytes": 286995,
+      "name": "d15"
+    },
+    {
+      "path": "assets/img/art/d16.jpg",
+      "bytes": 228936,
+      "name": "d16"
+    },
+    {
+      "path": "assets/img/art/d17.jpg",
+      "bytes": 189390,
+      "name": "d17"
+    },
+    {
+      "path": "assets/img/art/d18.jpg",
+      "bytes": 241125,
+      "name": "d18"
+    },
+    {
+      "path": "assets/img/art/d19.jpg",
+      "bytes": 325933,
+      "name": "d19"
+    },
+    {
+      "path": "assets/img/art/d2.jpg",
+      "bytes": 243039,
+      "name": "d2"
+    },
+    {
+      "path": "assets/img/art/d20.jpg",
+      "bytes": 226533,
+      "name": "d20"
+    },
+    {
+      "path": "assets/img/art/d21.jpg",
+      "bytes": 194233,
+      "name": "d21"
+    },
+    {
+      "path": "assets/img/art/d22.jpg",
+      "bytes": 243417,
+      "name": "d22"
+    },
+    {
+      "path": "assets/img/art/d23.jpg",
+      "bytes": 295188,
+      "name": "d23"
+    },
+    {
+      "path": "assets/img/art/d24.jpg",
+      "bytes": 174513,
+      "name": "d24"
+    },
+    {
+      "path": "assets/img/art/d25.jpg",
+      "bytes": 270373,
+      "name": "d25"
+    },
+    {
+      "path": "assets/img/art/d26.jpg",
+      "bytes": 288765,
+      "name": "d26"
+    },
+    {
+      "path": "assets/img/art/d27.jpg",
+      "bytes": 245661,
+      "name": "d27"
+    },
+    {
+      "path": "assets/img/art/d28.jpg",
+      "bytes": 238332,
+      "name": "d28"
+    },
+    {
+      "path": "assets/img/art/d3.jpg",
+      "bytes": 209788,
+      "name": "d3"
+    },
+    {
+      "path": "assets/img/art/d4.jpg",
+      "bytes": 289607,
+      "name": "d4"
+    },
+    {
+      "path": "assets/img/art/d5.jpg",
+      "bytes": 218525,
+      "name": "d5"
+    },
+    {
+      "path": "assets/img/art/d6.jpg",
+      "bytes": 240943,
+      "name": "d6"
+    },
+    {
+      "path": "assets/img/art/d7.jpg",
+      "bytes": 295368,
+      "name": "d7"
+    },
+    {
+      "path": "assets/img/art/d8.jpg",
+      "bytes": 189257,
+      "name": "d8"
+    },
+    {
+      "path": "assets/img/art/d9.jpg",
+      "bytes": 250149,
+      "name": "d9"
+    },
+    {
+      "path": "assets/img/art/di1.jpg",
+      "bytes": 241586,
+      "name": "di1"
+    },
+    {
+      "path": "assets/img/art/di2.jpg",
+      "bytes": 169936,
+      "name": "di2"
+    },
+    {
+      "path": "assets/img/art/di3.jpg",
+      "bytes": 250924,
+      "name": "di3"
+    },
+    {
+      "path": "assets/img/art/di4.jpg",
+      "bytes": 236547,
+      "name": "di4"
+    },
+    {
+      "path": "assets/img/art/di5.jpg",
+      "bytes": 141734,
+      "name": "di5"
+    },
+    {
+      "path": "assets/img/art/di6.jpg",
+      "bytes": 264263,
+      "name": "di6"
+    },
+    {
+      "path": "assets/img/art/ds1.jpg",
+      "bytes": 242008,
+      "name": "ds1"
+    },
+    {
+      "path": "assets/img/art/ds2.jpg",
+      "bytes": 201597,
+      "name": "ds2"
+    },
+    {
+      "path": "assets/img/art/ds3.jpg",
+      "bytes": 309082,
+      "name": "ds3"
+    },
+    {
+      "path": "assets/img/art/ds4.jpg",
+      "bytes": 185318,
+      "name": "ds4"
+    },
+    {
+      "path": "assets/img/art/ds5.jpg",
+      "bytes": 285069,
+      "name": "ds5"
+    },
+    {
+      "path": "assets/img/art/ds6.jpg",
+      "bytes": 226498,
+      "name": "ds6"
+    },
+    {
+      "path": "assets/img/art/ds7.jpg",
+      "bytes": 215757,
+      "name": "ds7"
+    },
+    {
+      "path": "assets/img/art/ds8.jpg",
+      "bytes": 305362,
+      "name": "ds8"
+    },
+    {
+      "path": "assets/img/art/e1.jpg",
+      "bytes": 317155,
+      "name": "e1"
+    },
+    {
+      "path": "assets/img/art/e10.jpg",
+      "bytes": 270948,
+      "name": "e10"
+    },
+    {
+      "path": "assets/img/art/e11.jpg",
+      "bytes": 329080,
+      "name": "e11"
+    },
+    {
+      "path": "assets/img/art/e12.jpg",
+      "bytes": 289579,
+      "name": "e12"
+    },
+    {
+      "path": "assets/img/art/e13.jpg",
+      "bytes": 255348,
+      "name": "e13"
+    },
+    {
+      "path": "assets/img/art/e14.jpg",
+      "bytes": 290296,
+      "name": "e14"
+    },
+    {
+      "path": "assets/img/art/e15.jpg",
+      "bytes": 250402,
+      "name": "e15"
+    },
+    {
+      "path": "assets/img/art/e16.jpg",
+      "bytes": 261379,
+      "name": "e16"
+    },
+    {
+      "path": "assets/img/art/e17.jpg",
+      "bytes": 328636,
+      "name": "e17"
+    },
+    {
+      "path": "assets/img/art/e18.jpg",
+      "bytes": 289643,
+      "name": "e18"
+    },
+    {
+      "path": "assets/img/art/e19.jpg",
+      "bytes": 258774,
+      "name": "e19"
+    },
+    {
+      "path": "assets/img/art/e2.jpg",
+      "bytes": 350705,
+      "name": "e2"
+    },
+    {
+      "path": "assets/img/art/e20.jpg",
+      "bytes": 322806,
+      "name": "e20"
+    },
+    {
+      "path": "assets/img/art/e21.jpg",
+      "bytes": 322222,
+      "name": "e21"
+    },
+    {
+      "path": "assets/img/art/e22.jpg",
+      "bytes": 365385,
+      "name": "e22"
+    },
+    {
+      "path": "assets/img/art/e23.jpg",
+      "bytes": 291535,
+      "name": "e23"
+    },
+    {
+      "path": "assets/img/art/e24.jpg",
+      "bytes": 330417,
+      "name": "e24"
+    },
+    {
+      "path": "assets/img/art/e25.jpg",
+      "bytes": 319485,
+      "name": "e25"
+    },
+    {
+      "path": "assets/img/art/e26.jpg",
+      "bytes": 305827,
+      "name": "e26"
+    },
+    {
+      "path": "assets/img/art/e27.jpg",
+      "bytes": 261044,
+      "name": "e27"
+    },
+    {
+      "path": "assets/img/art/e28.jpg",
+      "bytes": 259257,
+      "name": "e28"
+    },
+    {
+      "path": "assets/img/art/e3.jpg",
+      "bytes": 294990,
+      "name": "e3"
+    },
+    {
+      "path": "assets/img/art/e4.jpg",
+      "bytes": 338135,
+      "name": "e4"
+    },
+    {
+      "path": "assets/img/art/e40.jpg",
+      "bytes": 196061,
+      "name": "e40"
+    },
+    {
+      "path": "assets/img/art/e5.jpg",
+      "bytes": 323876,
+      "name": "e5"
+    },
+    {
+      "path": "assets/img/art/e6.jpg",
+      "bytes": 291060,
+      "name": "e6"
+    },
+    {
+      "path": "assets/img/art/e7.jpg",
+      "bytes": 302972,
+      "name": "e7"
+    },
+    {
+      "path": "assets/img/art/e8.jpg",
+      "bytes": 300561,
+      "name": "e8"
+    },
+    {
+      "path": "assets/img/art/e9.jpg",
+      "bytes": 287289,
+      "name": "e9"
+    },
+    {
+      "path": "assets/img/art/ei1.jpg",
+      "bytes": 265276,
+      "name": "ei1"
+    },
+    {
+      "path": "assets/img/art/ei2.jpg",
+      "bytes": 278673,
+      "name": "ei2"
+    },
+    {
+      "path": "assets/img/art/ei3.jpg",
+      "bytes": 350049,
+      "name": "ei3"
+    },
+    {
+      "path": "assets/img/art/ei4.jpg",
+      "bytes": 326459,
+      "name": "ei4"
+    },
+    {
+      "path": "assets/img/art/ei5.jpg",
+      "bytes": 233602,
+      "name": "ei5"
+    },
+    {
+      "path": "assets/img/art/ei6.jpg",
+      "bytes": 353855,
+      "name": "ei6"
+    },
+    {
+      "path": "assets/img/art/es1.jpg",
+      "bytes": 387811,
+      "name": "es1"
+    },
+    {
+      "path": "assets/img/art/es2.jpg",
+      "bytes": 310594,
+      "name": "es2"
+    },
+    {
+      "path": "assets/img/art/es3.jpg",
+      "bytes": 284589,
+      "name": "es3"
+    },
+    {
+      "path": "assets/img/art/es4.jpg",
+      "bytes": 332406,
+      "name": "es4"
+    },
+    {
+      "path": "assets/img/art/es5.jpg",
+      "bytes": 301020,
+      "name": "es5"
+    },
+    {
+      "path": "assets/img/art/es6.jpg",
+      "bytes": 295357,
+      "name": "es6"
+    },
+    {
+      "path": "assets/img/art/es7.jpg",
+      "bytes": 300419,
+      "name": "es7"
+    },
+    {
+      "path": "assets/img/art/es8.jpg",
+      "bytes": 305041,
+      "name": "es8"
+    },
+    {
+      "path": "assets/img/art/f1.jpg",
+      "bytes": 330448,
+      "name": "f1"
+    },
+    {
+      "path": "assets/img/art/f10.jpg",
+      "bytes": 354095,
+      "name": "f10"
+    },
+    {
+      "path": "assets/img/art/f11.jpg",
+      "bytes": 325521,
+      "name": "f11"
+    },
+    {
+      "path": "assets/img/art/f12.jpg",
+      "bytes": 333521,
+      "name": "f12"
+    },
+    {
+      "path": "assets/img/art/f13.jpg",
+      "bytes": 304124,
+      "name": "f13"
+    },
+    {
+      "path": "assets/img/art/f14.jpg",
+      "bytes": 264426,
+      "name": "f14"
+    },
+    {
+      "path": "assets/img/art/f15.jpg",
+      "bytes": 330907,
+      "name": "f15"
+    },
+    {
+      "path": "assets/img/art/f16.jpg",
+      "bytes": 360368,
+      "name": "f16"
+    },
+    {
+      "path": "assets/img/art/f17.jpg",
+      "bytes": 277543,
+      "name": "f17"
+    },
+    {
+      "path": "assets/img/art/f18.jpg",
+      "bytes": 280483,
+      "name": "f18"
+    },
+    {
+      "path": "assets/img/art/f19.jpg",
+      "bytes": 354223,
+      "name": "f19"
+    },
+    {
+      "path": "assets/img/art/f2.jpg",
+      "bytes": 275321,
+      "name": "f2"
+    },
+    {
+      "path": "assets/img/art/f20.jpg",
+      "bytes": 343857,
+      "name": "f20"
+    },
+    {
+      "path": "assets/img/art/f21.jpg",
+      "bytes": 259775,
+      "name": "f21"
+    },
+    {
+      "path": "assets/img/art/f22.jpg",
+      "bytes": 281249,
+      "name": "f22"
+    },
+    {
+      "path": "assets/img/art/f23.jpg",
+      "bytes": 402409,
+      "name": "f23"
+    },
+    {
+      "path": "assets/img/art/f24.jpg",
+      "bytes": 280512,
+      "name": "f24"
+    },
+    {
+      "path": "assets/img/art/f25.jpg",
+      "bytes": 380500,
+      "name": "f25"
+    },
+    {
+      "path": "assets/img/art/f26.jpg",
+      "bytes": 403601,
+      "name": "f26"
+    },
+    {
+      "path": "assets/img/art/f27.jpg",
+      "bytes": 374115,
+      "name": "f27"
+    },
+    {
+      "path": "assets/img/art/f28.jpg",
+      "bytes": 395464,
+      "name": "f28"
+    },
+    {
+      "path": "assets/img/art/f3.jpg",
+      "bytes": 320097,
+      "name": "f3"
+    },
+    {
+      "path": "assets/img/art/f4.jpg",
+      "bytes": 309876,
+      "name": "f4"
+    },
+    {
+      "path": "assets/img/art/f5.jpg",
+      "bytes": 315067,
+      "name": "f5"
+    },
+    {
+      "path": "assets/img/art/f6.jpg",
+      "bytes": 221145,
+      "name": "f6"
+    },
+    {
+      "path": "assets/img/art/f7.jpg",
+      "bytes": 322955,
+      "name": "f7"
+    },
+    {
+      "path": "assets/img/art/f8.jpg",
+      "bytes": 366559,
+      "name": "f8"
+    },
+    {
+      "path": "assets/img/art/f9.jpg",
+      "bytes": 370712,
+      "name": "f9"
+    },
+    {
+      "path": "assets/img/art/fi1.jpg",
+      "bytes": 262698,
+      "name": "fi1"
+    },
+    {
+      "path": "assets/img/art/fi2.jpg",
+      "bytes": 334787,
+      "name": "fi2"
+    },
+    {
+      "path": "assets/img/art/fi3.jpg",
+      "bytes": 295869,
+      "name": "fi3"
+    },
+    {
+      "path": "assets/img/art/fi4.jpg",
+      "bytes": 171871,
+      "name": "fi4"
+    },
+    {
+      "path": "assets/img/art/fi5.jpg",
+      "bytes": 219504,
+      "name": "fi5"
+    },
+    {
+      "path": "assets/img/art/fi6.jpg",
+      "bytes": 258686,
+      "name": "fi6"
+    },
+    {
+      "path": "assets/img/art/fs1.jpg",
+      "bytes": 264713,
+      "name": "fs1"
+    },
+    {
+      "path": "assets/img/art/fs2.jpg",
+      "bytes": 425731,
+      "name": "fs2"
+    },
+    {
+      "path": "assets/img/art/fs3.jpg",
+      "bytes": 321316,
+      "name": "fs3"
+    },
+    {
+      "path": "assets/img/art/fs4.jpg",
+      "bytes": 297048,
+      "name": "fs4"
+    },
+    {
+      "path": "assets/img/art/fs5.jpg",
+      "bytes": 284109,
+      "name": "fs5"
+    },
+    {
+      "path": "assets/img/art/fs6.jpg",
+      "bytes": 395638,
+      "name": "fs6"
+    },
+    {
+      "path": "assets/img/art/fs7.jpg",
+      "bytes": 328841,
+      "name": "fs7"
+    },
+    {
+      "path": "assets/img/art/fs8.jpg",
+      "bytes": 357805,
+      "name": "fs8"
+    },
+    {
+      "path": "assets/img/art/l1.jpg",
+      "bytes": 271939,
+      "name": "l1"
+    },
+    {
+      "path": "assets/img/art/l10.jpg",
+      "bytes": 308416,
+      "name": "l10"
+    },
+    {
+      "path": "assets/img/art/l11.jpg",
+      "bytes": 366559,
+      "name": "l11"
+    },
+    {
+      "path": "assets/img/art/l12.jpg",
+      "bytes": 244357,
+      "name": "l12"
+    },
+    {
+      "path": "assets/img/art/l13.jpg",
+      "bytes": 245045,
+      "name": "l13"
+    },
+    {
+      "path": "assets/img/art/l14.jpg",
+      "bytes": 277713,
+      "name": "l14"
+    },
+    {
+      "path": "assets/img/art/l15.jpg",
+      "bytes": 243025,
+      "name": "l15"
+    },
+    {
+      "path": "assets/img/art/l16.jpg",
+      "bytes": 278906,
+      "name": "l16"
+    },
+    {
+      "path": "assets/img/art/l17.jpg",
+      "bytes": 256737,
+      "name": "l17"
+    },
+    {
+      "path": "assets/img/art/l18.jpg",
+      "bytes": 282886,
+      "name": "l18"
+    },
+    {
+      "path": "assets/img/art/l19.jpg",
+      "bytes": 294214,
+      "name": "l19"
+    },
+    {
+      "path": "assets/img/art/l2.jpg",
+      "bytes": 281014,
+      "name": "l2"
+    },
+    {
+      "path": "assets/img/art/l20.jpg",
+      "bytes": 244171,
+      "name": "l20"
+    },
+    {
+      "path": "assets/img/art/l21.jpg",
+      "bytes": 294190,
+      "name": "l21"
+    },
+    {
+      "path": "assets/img/art/l22.jpg",
+      "bytes": 304679,
+      "name": "l22"
+    },
+    {
+      "path": "assets/img/art/l23.jpg",
+      "bytes": 220967,
+      "name": "l23"
+    },
+    {
+      "path": "assets/img/art/l24.jpg",
+      "bytes": 208698,
+      "name": "l24"
+    },
+    {
+      "path": "assets/img/art/l25.jpg",
+      "bytes": 273431,
+      "name": "l25"
+    },
+    {
+      "path": "assets/img/art/l26.jpg",
+      "bytes": 380004,
+      "name": "l26"
+    },
+    {
+      "path": "assets/img/art/l27.jpg",
+      "bytes": 294783,
+      "name": "l27"
+    },
+    {
+      "path": "assets/img/art/l28.jpg",
+      "bytes": 311144,
+      "name": "l28"
+    },
+    {
+      "path": "assets/img/art/l3.jpg",
+      "bytes": 298534,
+      "name": "l3"
+    },
+    {
+      "path": "assets/img/art/l4.jpg",
+      "bytes": 264083,
+      "name": "l4"
+    },
+    {
+      "path": "assets/img/art/l5.jpg",
+      "bytes": 229893,
+      "name": "l5"
+    },
+    {
+      "path": "assets/img/art/l6.jpg",
+      "bytes": 281676,
+      "name": "l6"
+    },
+    {
+      "path": "assets/img/art/l7.jpg",
+      "bytes": 214549,
+      "name": "l7"
+    },
+    {
+      "path": "assets/img/art/l8.jpg",
+      "bytes": 310494,
+      "name": "l8"
+    },
+    {
+      "path": "assets/img/art/l9.jpg",
+      "bytes": 268370,
+      "name": "l9"
+    },
+    {
+      "path": "assets/img/art/li1.jpg",
+      "bytes": 295927,
+      "name": "li1"
+    },
+    {
+      "path": "assets/img/art/li2.jpg",
+      "bytes": 161862,
+      "name": "li2"
+    },
+    {
+      "path": "assets/img/art/li3.jpg",
+      "bytes": 225508,
+      "name": "li3"
+    },
+    {
+      "path": "assets/img/art/li4.jpg",
+      "bytes": 222149,
+      "name": "li4"
+    },
+    {
+      "path": "assets/img/art/li5.jpg",
+      "bytes": 205777,
+      "name": "li5"
+    },
+    {
+      "path": "assets/img/art/li6.jpg",
+      "bytes": 254291,
+      "name": "li6"
+    },
+    {
+      "path": "assets/img/art/ls1.jpg",
+      "bytes": 220057,
+      "name": "ls1"
+    },
+    {
+      "path": "assets/img/art/ls2.jpg",
+      "bytes": 275837,
+      "name": "ls2"
+    },
+    {
+      "path": "assets/img/art/ls3.jpg",
+      "bytes": 294812,
+      "name": "ls3"
+    },
+    {
+      "path": "assets/img/art/ls4.jpg",
+      "bytes": 342527,
+      "name": "ls4"
+    },
+    {
+      "path": "assets/img/art/ls5.jpg",
+      "bytes": 210536,
+      "name": "ls5"
+    },
+    {
+      "path": "assets/img/art/ls6.jpg",
+      "bytes": 243673,
+      "name": "ls6"
+    },
+    {
+      "path": "assets/img/art/ls7.jpg",
+      "bytes": 295387,
+      "name": "ls7"
+    },
+    {
+      "path": "assets/img/art/ls8.jpg",
+      "bytes": 292344,
+      "name": "ls8"
+    },
+    {
+      "path": "assets/img/art/n1.jpg",
+      "bytes": 276239,
+      "name": "n1"
+    },
+    {
+      "path": "assets/img/art/n10.jpg",
+      "bytes": 301881,
+      "name": "n10"
+    },
+    {
+      "path": "assets/img/art/n11.jpg",
+      "bytes": 360438,
+      "name": "n11"
+    },
+    {
+      "path": "assets/img/art/n12.jpg",
+      "bytes": 280555,
+      "name": "n12"
+    },
+    {
+      "path": "assets/img/art/n13.jpg",
+      "bytes": 288489,
+      "name": "n13"
+    },
+    {
+      "path": "assets/img/art/n14.jpg",
+      "bytes": 204380,
+      "name": "n14"
+    },
+    {
+      "path": "assets/img/art/n15.jpg",
+      "bytes": 324409,
+      "name": "n15"
+    },
+    {
+      "path": "assets/img/art/n16.jpg",
+      "bytes": 417594,
+      "name": "n16"
+    },
+    {
+      "path": "assets/img/art/n17.jpg",
+      "bytes": 251083,
+      "name": "n17"
+    },
+    {
+      "path": "assets/img/art/n18.jpg",
+      "bytes": 273994,
+      "name": "n18"
+    },
+    {
+      "path": "assets/img/art/n19.jpg",
+      "bytes": 230323,
+      "name": "n19"
+    },
+    {
+      "path": "assets/img/art/n2.jpg",
+      "bytes": 259820,
+      "name": "n2"
+    },
+    {
+      "path": "assets/img/art/n20.jpg",
+      "bytes": 309651,
+      "name": "n20"
+    },
+    {
+      "path": "assets/img/art/n21.jpg",
+      "bytes": 207495,
+      "name": "n21"
+    },
+    {
+      "path": "assets/img/art/n22.jpg",
+      "bytes": 239723,
+      "name": "n22"
+    },
+    {
+      "path": "assets/img/art/n23.jpg",
+      "bytes": 275248,
+      "name": "n23"
+    },
+    {
+      "path": "assets/img/art/n24.jpg",
+      "bytes": 300717,
+      "name": "n24"
+    },
+    {
+      "path": "assets/img/art/n25.jpg",
+      "bytes": 335715,
+      "name": "n25"
+    },
+    {
+      "path": "assets/img/art/n26.jpg",
+      "bytes": 215334,
+      "name": "n26"
+    },
+    {
+      "path": "assets/img/art/n27.jpg",
+      "bytes": 296278,
+      "name": "n27"
+    },
+    {
+      "path": "assets/img/art/n28.jpg",
+      "bytes": 280012,
+      "name": "n28"
+    },
+    {
+      "path": "assets/img/art/n3.jpg",
+      "bytes": 305451,
+      "name": "n3"
+    },
+    {
+      "path": "assets/img/art/n4.jpg",
+      "bytes": 288921,
+      "name": "n4"
+    },
+    {
+      "path": "assets/img/art/n5.jpg",
+      "bytes": 227350,
+      "name": "n5"
+    },
+    {
+      "path": "assets/img/art/n6.jpg",
+      "bytes": 254732,
+      "name": "n6"
+    },
+    {
+      "path": "assets/img/art/n7.jpg",
+      "bytes": 302908,
+      "name": "n7"
+    },
+    {
+      "path": "assets/img/art/n8.jpg",
+      "bytes": 289792,
+      "name": "n8"
+    },
+    {
+      "path": "assets/img/art/n9.jpg",
+      "bytes": 285343,
+      "name": "n9"
+    },
+    {
+      "path": "assets/img/art/ni1.jpg",
+      "bytes": 177526,
+      "name": "ni1"
+    },
+    {
+      "path": "assets/img/art/ni2.jpg",
+      "bytes": 228276,
+      "name": "ni2"
+    },
+    {
+      "path": "assets/img/art/ni3.jpg",
+      "bytes": 267113,
+      "name": "ni3"
+    },
+    {
+      "path": "assets/img/art/ni4.jpg",
+      "bytes": 122753,
+      "name": "ni4"
+    },
+    {
+      "path": "assets/img/art/ni5.jpg",
+      "bytes": 162350,
+      "name": "ni5"
+    },
+    {
+      "path": "assets/img/art/ni6.jpg",
+      "bytes": 209772,
+      "name": "ni6"
+    },
+    {
+      "path": "assets/img/art/ns1.jpg",
+      "bytes": 243774,
+      "name": "ns1"
+    },
+    {
+      "path": "assets/img/art/ns2.jpg",
+      "bytes": 285487,
+      "name": "ns2"
+    },
+    {
+      "path": "assets/img/art/ns3.jpg",
+      "bytes": 236296,
+      "name": "ns3"
+    },
+    {
+      "path": "assets/img/art/ns4.jpg",
+      "bytes": 223566,
+      "name": "ns4"
+    },
+    {
+      "path": "assets/img/art/ns5.jpg",
+      "bytes": 209553,
+      "name": "ns5"
+    },
+    {
+      "path": "assets/img/art/ns6.jpg",
+      "bytes": 276414,
+      "name": "ns6"
+    },
+    {
+      "path": "assets/img/art/ns7.jpg",
+      "bytes": 294280,
+      "name": "ns7"
+    },
+    {
+      "path": "assets/img/art/ns8.jpg",
+      "bytes": 308322,
+      "name": "ns8"
+    },
+    {
+      "path": "assets/img/badges/atk.svg",
+      "bytes": 1497,
+      "name": "atk"
+    },
+    {
+      "path": "assets/img/badges/def.svg",
+      "bytes": 688,
+      "name": "def"
+    },
+    {
+      "path": "assets/img/badges/hp.svg",
+      "bytes": 1139,
+      "name": "hp"
+    },
+    {
+      "path": "assets/img/badges/soul.svg",
+      "bytes": 776,
+      "name": "soul"
     },
     {
       "path": "assets/img/coins/minus.png",
@@ -12,464 +1417,194 @@
       "name": "minus"
     },
     {
-      "path": "assets/img/icons/earth.jpg",
-      "bytes": 87933,
-      "name": "earth"
+      "path": "assets/img/coins/plus.png",
+      "bytes": 108434,
+      "name": "plus"
     },
     {
-      "path": "assets/img/icons/fire.jpg",
-      "bytes": 97168,
-      "name": "fire"
-    },
-    {
-      "path": "assets/img/icons/wind.jpg",
-      "bytes": 89697,
-      "name": "wind"
-    },
-    {
-      "path": "assets/img/icons/water.jpg",
-      "bytes": 83530,
-      "name": "water"
-    },
-    {
-      "path": "assets/img/icons/light.jpg",
-      "bytes": 89108,
-      "name": "light"
-    },
-    {
-      "path": "assets/img/icons/dark.jpg",
-      "bytes": 77431,
+      "path": "assets/img/emblems/composites/dark.png",
+      "bytes": 959221,
       "name": "dark"
     },
     {
-      "path": "assets/img/hud/board.jpg",
-      "bytes": 5758278,
-      "name": "board"
+      "path": "assets/img/emblems/composites/earth.png",
+      "bytes": 1067088,
+      "name": "earth"
     },
     {
-      "path": "assets/img/hud/hp.jpg",
-      "bytes": 21383,
-      "name": "hp"
+      "path": "assets/img/emblems/composites/fire.png",
+      "bytes": 1031878,
+      "name": "fire"
     },
     {
-      "path": "assets/img/hud/soul.jpg",
-      "bytes": 21186,
-      "name": "soul"
+      "path": "assets/img/emblems/composites/light.png",
+      "bytes": 947935,
+      "name": "light"
     },
     {
-      "path": "assets/img/hud/deck.jpg",
-      "bytes": 87124,
-      "name": "deck"
+      "path": "assets/img/emblems/composites/water.png",
+      "bytes": 993931,
+      "name": "water"
     },
     {
-      "path": "assets/img/faces/e1.jpg",
-      "bytes": 59350,
-      "name": "e1"
+      "path": "assets/img/emblems/composites/wind.png",
+      "bytes": 945554,
+      "name": "wind"
     },
     {
-      "path": "assets/img/faces/e2.jpg",
-      "bytes": 55635,
-      "name": "e2"
+      "path": "assets/img/emblems/frame/ring.png",
+      "bytes": 394166,
+      "name": "ring"
     },
     {
-      "path": "assets/img/faces/e3.jpg",
-      "bytes": 56504,
-      "name": "e3"
+      "path": "assets/img/emblems/symbols/dark.png",
+      "bytes": 380755,
+      "name": "dark"
     },
     {
-      "path": "assets/img/faces/e4.jpg",
-      "bytes": 55578,
-      "name": "e4"
+      "path": "assets/img/emblems/symbols/earth.png",
+      "bytes": 551937,
+      "name": "earth"
     },
     {
-      "path": "assets/img/faces/e5.jpg",
-      "bytes": 55377,
-      "name": "e5"
+      "path": "assets/img/emblems/symbols/fire.png",
+      "bytes": 675628,
+      "name": "fire"
     },
     {
-      "path": "assets/img/faces/e6.jpg",
-      "bytes": 56759,
-      "name": "e6"
+      "path": "assets/img/emblems/symbols/water.png",
+      "bytes": 672204,
+      "name": "water"
     },
     {
-      "path": "assets/img/faces/e7.jpg",
-      "bytes": 54910,
-      "name": "e7"
+      "path": "assets/img/emblems/symbols/wind.png",
+      "bytes": 298616,
+      "name": "wind"
     },
     {
-      "path": "assets/img/faces/e8.jpg",
-      "bytes": 55987,
-      "name": "e8"
+      "path": "assets/img/frames/FRAMES.md",
+      "bytes": 1216,
+      "name": "FRAMES"
     },
     {
-      "path": "assets/img/faces/e9.jpg",
-      "bytes": 58426,
-      "name": "e9"
+      "path": "assets/img/frames/item/deck_dark_item_common_frame.png",
+      "bytes": 3359303,
+      "name": "deck_dark_item_common_frame"
     },
     {
-      "path": "assets/img/faces/e10.jpg",
-      "bytes": 56129,
-      "name": "e10"
+      "path": "assets/img/frames/item/deck_dark_item_legendary_frame.png",
+      "bytes": 2546194,
+      "name": "deck_dark_item_legendary_frame"
     },
     {
-      "path": "assets/img/faces/e11.jpg",
-      "bytes": 54343,
-      "name": "e11"
+      "path": "assets/img/frames/item/deck_dark_item_rare_frame.png",
+      "bytes": 2545548,
+      "name": "deck_dark_item_rare_frame"
     },
     {
-      "path": "assets/img/faces/e12.jpg",
-      "bytes": 54146,
-      "name": "e12"
+      "path": "assets/img/frames/item/deck_dark_item_uncommon_frame.png",
+      "bytes": 2545921,
+      "name": "deck_dark_item_uncommon_frame"
     },
     {
-      "path": "assets/img/faces/e13.jpg",
-      "bytes": 56734,
-      "name": "e13"
+      "path": "assets/img/frames/item/deck_earth_item_common_frame.png",
+      "bytes": 2487075,
+      "name": "deck_earth_item_common_frame"
     },
     {
-      "path": "assets/img/faces/e14.jpg",
-      "bytes": 58320,
-      "name": "e14"
+      "path": "assets/img/frames/item/deck_earth_item_legendary_frame.png",
+      "bytes": 2488206,
+      "name": "deck_earth_item_legendary_frame"
     },
     {
-      "path": "assets/img/faces/e15.jpg",
-      "bytes": 56955,
-      "name": "e15"
+      "path": "assets/img/frames/item/deck_earth_item_rare_frame.png",
+      "bytes": 2487781,
+      "name": "deck_earth_item_rare_frame"
     },
     {
-      "path": "assets/img/faces/e16.jpg",
-      "bytes": 55585,
-      "name": "e16"
+      "path": "assets/img/frames/item/deck_earth_item_uncommon_frame.png",
+      "bytes": 2487689,
+      "name": "deck_earth_item_uncommon_frame"
     },
     {
-      "path": "assets/img/faces/e17.jpg",
-      "bytes": 55452,
-      "name": "e17"
+      "path": "assets/img/frames/item/deck_fire_item_common_frame.png",
+      "bytes": 3700747,
+      "name": "deck_fire_item_common_frame"
     },
     {
-      "path": "assets/img/faces/e18.jpg",
-      "bytes": 55922,
-      "name": "e18"
+      "path": "assets/img/frames/item/deck_fire_item_legendary_frame.png",
+      "bytes": 2813143,
+      "name": "deck_fire_item_legendary_frame"
     },
     {
-      "path": "assets/img/faces/e19.jpg",
-      "bytes": 56223,
-      "name": "e19"
+      "path": "assets/img/frames/item/deck_fire_item_rare_frame.png",
+      "bytes": 2812719,
+      "name": "deck_fire_item_rare_frame"
     },
     {
-      "path": "assets/img/faces/e20.jpg",
-      "bytes": 54381,
-      "name": "e20"
+      "path": "assets/img/frames/item/deck_fire_item_uncommon_frame.png",
+      "bytes": 2813056,
+      "name": "deck_fire_item_uncommon_frame"
     },
     {
-      "path": "assets/img/faces/f1.jpg",
-      "bytes": 53704,
-      "name": "f1"
+      "path": "assets/img/frames/item/deck_light_item_common_frame.png",
+      "bytes": 3218888,
+      "name": "deck_light_item_common_frame"
     },
     {
-      "path": "assets/img/faces/f2.jpg",
-      "bytes": 59529,
-      "name": "f2"
+      "path": "assets/img/frames/item/deck_light_item_legendary_frame.png",
+      "bytes": 2345234,
+      "name": "deck_light_item_legendary_frame"
     },
     {
-      "path": "assets/img/faces/f3.jpg",
-      "bytes": 53321,
-      "name": "f3"
+      "path": "assets/img/frames/item/deck_light_item_rare_frame.png",
+      "bytes": 2344609,
+      "name": "deck_light_item_rare_frame"
     },
     {
-      "path": "assets/img/faces/f4.jpg",
-      "bytes": 58447,
-      "name": "f4"
+      "path": "assets/img/frames/item/deck_light_item_uncommon_frame.png",
+      "bytes": 2344880,
+      "name": "deck_light_item_uncommon_frame"
     },
     {
-      "path": "assets/img/faces/f5.jpg",
-      "bytes": 54306,
-      "name": "f5"
+      "path": "assets/img/frames/item/deck_water_item_common_frame.png",
+      "bytes": 3464133,
+      "name": "deck_water_item_common_frame"
     },
     {
-      "path": "assets/img/faces/f6.jpg",
-      "bytes": 56999,
-      "name": "f6"
+      "path": "assets/img/frames/item/deck_water_item_legendary_frame.png",
+      "bytes": 2563654,
+      "name": "deck_water_item_legendary_frame"
     },
     {
-      "path": "assets/img/faces/f7.jpg",
-      "bytes": 53914,
-      "name": "f7"
+      "path": "assets/img/frames/item/deck_water_item_rare_frame.png",
+      "bytes": 2563215,
+      "name": "deck_water_item_rare_frame"
     },
     {
-      "path": "assets/img/faces/f8.jpg",
-      "bytes": 58810,
-      "name": "f8"
+      "path": "assets/img/frames/item/deck_water_item_uncommon_frame.png",
+      "bytes": 2563321,
+      "name": "deck_water_item_uncommon_frame"
     },
     {
-      "path": "assets/img/faces/f9.jpg",
-      "bytes": 53057,
-      "name": "f9"
+      "path": "assets/img/frames/item/deck_wind_item_common_frame.png",
+      "bytes": 3277230,
+      "name": "deck_wind_item_common_frame"
     },
     {
-      "path": "assets/img/faces/f10.jpg",
-      "bytes": 59183,
-      "name": "f10"
+      "path": "assets/img/frames/item/deck_wind_item_legendary_frame.png",
+      "bytes": 2407877,
+      "name": "deck_wind_item_legendary_frame"
     },
     {
-      "path": "assets/img/faces/f11.jpg",
-      "bytes": 54457,
-      "name": "f11"
+      "path": "assets/img/frames/item/deck_wind_item_rare_frame.png",
+      "bytes": 2407198,
+      "name": "deck_wind_item_rare_frame"
     },
     {
-      "path": "assets/img/faces/f12.jpg",
-      "bytes": 57263,
-      "name": "f12"
-    },
-    {
-      "path": "assets/img/faces/f13.jpg",
-      "bytes": 53261,
-      "name": "f13"
-    },
-    {
-      "path": "assets/img/faces/f14.jpg",
-      "bytes": 57676,
-      "name": "f14"
-    },
-    {
-      "path": "assets/img/faces/f15.jpg",
-      "bytes": 54223,
-      "name": "f15"
-    },
-    {
-      "path": "assets/img/faces/f16.jpg",
-      "bytes": 56835,
-      "name": "f16"
-    },
-    {
-      "path": "assets/img/faces/f17.jpg",
-      "bytes": 54094,
-      "name": "f17"
-    },
-    {
-      "path": "assets/img/faces/f18.jpg",
-      "bytes": 56737,
-      "name": "f18"
-    },
-    {
-      "path": "assets/img/faces/f19.jpg",
-      "bytes": 54062,
-      "name": "f19"
-    },
-    {
-      "path": "assets/img/faces/f20.jpg",
-      "bytes": 58057,
-      "name": "f20"
-    },
-    {
-      "path": "assets/img/faces/n1.jpg",
-      "bytes": 52672,
-      "name": "n1"
-    },
-    {
-      "path": "assets/img/faces/n2.jpg",
-      "bytes": 53517,
-      "name": "n2"
-    },
-    {
-      "path": "assets/img/faces/n3.jpg",
-      "bytes": 52067,
-      "name": "n3"
-    },
-    {
-      "path": "assets/img/faces/n4.jpg",
-      "bytes": 52949,
-      "name": "n4"
-    },
-    {
-      "path": "assets/img/faces/n5.jpg",
-      "bytes": 53637,
-      "name": "n5"
-    },
-    {
-      "path": "assets/img/faces/n6.jpg",
-      "bytes": 52173,
-      "name": "n6"
-    },
-    {
-      "path": "assets/img/faces/n7.jpg",
-      "bytes": 53056,
-      "name": "n7"
-    },
-    {
-      "path": "assets/img/faces/n8.jpg",
-      "bytes": 52280,
-      "name": "n8"
-    },
-    {
-      "path": "assets/img/faces/n9.jpg",
-      "bytes": 53047,
-      "name": "n9"
-    },
-    {
-      "path": "assets/img/faces/n10.jpg",
-      "bytes": 51832,
-      "name": "n10"
-    },
-    {
-      "path": "assets/img/faces/n11.jpg",
-      "bytes": 53134,
-      "name": "n11"
-    },
-    {
-      "path": "assets/img/faces/n12.jpg",
-      "bytes": 51936,
-      "name": "n12"
-    },
-    {
-      "path": "assets/img/faces/n13.jpg",
-      "bytes": 52760,
-      "name": "n13"
-    },
-    {
-      "path": "assets/img/faces/n14.jpg",
-      "bytes": 52252,
-      "name": "n14"
-    },
-    {
-      "path": "assets/img/faces/n15.jpg",
-      "bytes": 53456,
-      "name": "n15"
-    },
-    {
-      "path": "assets/img/faces/n16.jpg",
-      "bytes": 52602,
-      "name": "n16"
-    },
-    {
-      "path": "assets/img/faces/n17.jpg",
-      "bytes": 52784,
-      "name": "n17"
-    },
-    {
-      "path": "assets/img/faces/n18.jpg",
-      "bytes": 52292,
-      "name": "n18"
-    },
-    {
-      "path": "assets/img/faces/n19.jpg",
-      "bytes": 53115,
-      "name": "n19"
-    },
-    {
-      "path": "assets/img/faces/n20.jpg",
-      "bytes": 52767,
-      "name": "n20"
-    },
-    {
-      "path": "assets/img/faces/a1.jpg",
-      "bytes": 56246,
-      "name": "a1"
-    },
-    {
-      "path": "assets/img/faces/a2.jpg",
-      "bytes": 55916,
-      "name": "a2"
-    },
-    {
-      "path": "assets/img/faces/a3.jpg",
-      "bytes": 53505,
-      "name": "a3"
-    },
-    {
-      "path": "assets/img/faces/a4.jpg",
-      "bytes": 54283,
-      "name": "a4"
-    },
-    {
-      "path": "assets/img/faces/a5.jpg",
-      "bytes": 53658,
-      "name": "a5"
-    },
-    {
-      "path": "assets/img/faces/a6.jpg",
-      "bytes": 55480,
-      "name": "a6"
-    },
-    {
-      "path": "assets/img/faces/a7.jpg",
-      "bytes": 54784,
-      "name": "a7"
-    },
-    {
-      "path": "assets/img/faces/a8.jpg",
-      "bytes": 53306,
-      "name": "a8"
-    },
-    {
-      "path": "assets/img/faces/a9.jpg",
-      "bytes": 54286,
-      "name": "a9"
-    },
-    {
-      "path": "assets/img/faces/a10.jpg",
-      "bytes": 55593,
-      "name": "a10"
-    },
-    {
-      "path": "assets/img/faces/a11.jpg",
-      "bytes": 53126,
-      "name": "a11"
-    },
-    {
-      "path": "assets/img/faces/a12.jpg",
-      "bytes": 53455,
-      "name": "a12"
-    },
-    {
-      "path": "assets/img/faces/a13.jpg",
-      "bytes": 54230,
-      "name": "a13"
-    },
-    {
-      "path": "assets/img/faces/a14.jpg",
-      "bytes": 53140,
-      "name": "a14"
-    },
-    {
-      "path": "assets/img/faces/a15.jpg",
-      "bytes": 54183,
-      "name": "a15"
-    },
-    {
-      "path": "assets/img/faces/a16.jpg",
-      "bytes": 54440,
-      "name": "a16"
-    },
-    {
-      "path": "assets/img/faces/a17.jpg",
-      "bytes": 56067,
-      "name": "a17"
-    },
-    {
-      "path": "assets/img/faces/a18.jpg",
-      "bytes": 53560,
-      "name": "a18"
-    },
-    {
-      "path": "assets/img/faces/a19.jpg",
-      "bytes": 54936,
-      "name": "a19"
-    },
-    {
-      "path": "assets/img/faces/a20.jpg",
-      "bytes": 54077,
-      "name": "a20"
-    },
-    {
-      "path": "assets/img/faces/coin.jpg",
-      "bytes": 41936,
-      "name": "coin"
-    },
-    {
-      "path": "assets/img/faces/recruit.jpg",
-      "bytes": 58599,
-      "name": "recruit"
+      "path": "assets/img/frames/item/deck_wind_item_uncommon_frame.png",
+      "bytes": 2407276,
+      "name": "deck_wind_item_uncommon_frame"
     },
     {
       "path": "assets/img/frames/rarity/earth_minion_common.png",
@@ -477,9 +1612,9 @@
       "name": "earth_minion_common"
     },
     {
-      "path": "assets/img/frames/rarity/earth_minion_uncommon.png",
-      "bytes": 1029260,
-      "name": "earth_minion_uncommon"
+      "path": "assets/img/frames/rarity/earth_minion_legendary.png",
+      "bytes": 1011328,
+      "name": "earth_minion_legendary"
     },
     {
       "path": "assets/img/frames/rarity/earth_minion_rare.png",
@@ -487,529 +1622,129 @@
       "name": "earth_minion_rare"
     },
     {
-      "path": "assets/img/frames/rarity/earth_minion_legendary.png",
-      "bytes": 1011328,
-      "name": "earth_minion_legendary"
+      "path": "assets/img/frames/rarity/earth_minion_uncommon.png",
+      "bytes": 1029260,
+      "name": "earth_minion_uncommon"
     },
     {
-      "path": "assets/img/art/e25.jpg",
-      "bytes": 91920,
-      "name": "e25"
+      "path": "assets/img/frames/spell/deck_dark_spell_common_frame.png",
+      "bytes": 2576579,
+      "name": "deck_dark_spell_common_frame"
     },
     {
-      "path": "assets/img/art/e26.jpg",
-      "bytes": 87813,
-      "name": "e26"
+      "path": "assets/img/frames/spell/deck_dark_spell_legendary_frame.png",
+      "bytes": 2687064,
+      "name": "deck_dark_spell_legendary_frame"
     },
     {
-      "path": "assets/img/art/e27.jpg",
-      "bytes": 90275,
-      "name": "e27"
+      "path": "assets/img/frames/spell/deck_dark_spell_rare_frame.png",
+      "bytes": 2687350,
+      "name": "deck_dark_spell_rare_frame"
     },
     {
-      "path": "assets/img/art/e28.jpg",
-      "bytes": 118627,
-      "name": "e28"
+      "path": "assets/img/frames/spell/deck_dark_spell_uncommon_frame.png",
+      "bytes": 2686876,
+      "name": "deck_dark_spell_uncommon_frame"
     },
     {
-      "path": "assets/img/art/e29.jpg",
-      "bytes": 99379,
-      "name": "e29"
+      "path": "assets/img/frames/spell/deck_earth_spell_common_frame.png",
+      "bytes": 2447078,
+      "name": "deck_earth_spell_common_frame"
     },
     {
-      "path": "assets/img/art/e30.jpg",
-      "bytes": 98462,
-      "name": "e30"
+      "path": "assets/img/frames/spell/deck_earth_spell_legendary_frame.png",
+      "bytes": 2539104,
+      "name": "deck_earth_spell_legendary_frame"
     },
     {
-      "path": "assets/img/art/e31.jpg",
-      "bytes": 91351,
-      "name": "e31"
+      "path": "assets/img/frames/spell/deck_earth_spell_rare_frame.png",
+      "bytes": 2539529,
+      "name": "deck_earth_spell_rare_frame"
     },
     {
-      "path": "assets/img/art/e32.jpg",
-      "bytes": 127708,
-      "name": "e32"
+      "path": "assets/img/frames/spell/deck_earth_spell_uncommon_frame.png",
+      "bytes": 2538927,
+      "name": "deck_earth_spell_uncommon_frame"
     },
     {
-      "path": "assets/img/art/e33.jpg",
-      "bytes": 91225,
-      "name": "e33"
+      "path": "assets/img/frames/spell/deck_fire_spell_common_frame.png",
+      "bytes": 2777422,
+      "name": "deck_fire_spell_common_frame"
     },
     {
-      "path": "assets/img/art/e34.jpg",
-      "bytes": 94999,
-      "name": "e34"
+      "path": "assets/img/frames/spell/deck_fire_spell_legendary_frame.png",
+      "bytes": 2797337,
+      "name": "deck_fire_spell_legendary_frame"
     },
     {
-      "path": "assets/img/art/e35.jpg",
-      "bytes": 110204,
-      "name": "e35"
+      "path": "assets/img/frames/spell/deck_fire_spell_rare_frame.png",
+      "bytes": 2797647,
+      "name": "deck_fire_spell_rare_frame"
     },
     {
-      "path": "assets/img/art/e36.jpg",
-      "bytes": 98528,
-      "name": "e36"
+      "path": "assets/img/frames/spell/deck_fire_spell_uncommon_frame.png",
+      "bytes": 2797151,
+      "name": "deck_fire_spell_uncommon_frame"
     },
     {
-      "path": "assets/img/art/e37.jpg",
-      "bytes": 99742,
-      "name": "e37"
+      "path": "assets/img/frames/spell/deck_light_spell_common_frame.png",
+      "bytes": 2390707,
+      "name": "deck_light_spell_common_frame"
     },
     {
-      "path": "assets/img/art/e38.jpg",
-      "bytes": 84221,
-      "name": "e38"
+      "path": "assets/img/frames/spell/deck_light_spell_legendary_frame.png",
+      "bytes": 2472593,
+      "name": "deck_light_spell_legendary_frame"
     },
     {
-      "path": "assets/img/art/e39.jpg",
-      "bytes": 92361,
-      "name": "e39"
+      "path": "assets/img/frames/spell/deck_light_spell_rare_frame.png",
+      "bytes": 2473130,
+      "name": "deck_light_spell_rare_frame"
     },
     {
-      "path": "assets/img/art/e24.jpg",
-      "bytes": 174669,
-      "name": "e24"
+      "path": "assets/img/frames/spell/deck_light_spell_uncommon_frame.png",
+      "bytes": 2472279,
+      "name": "deck_light_spell_uncommon_frame"
     },
     {
-      "path": "assets/img/art/e23.jpg",
-      "bytes": 169732,
-      "name": "e23"
+      "path": "assets/img/frames/spell/deck_water_spell_common_frame.png",
+      "bytes": 2816743,
+      "name": "deck_water_spell_common_frame"
     },
     {
-      "path": "assets/img/art/e22.jpg",
-      "bytes": 178170,
-      "name": "e22"
+      "path": "assets/img/frames/spell/deck_water_spell_legendary_frame.png",
+      "bytes": 2816192,
+      "name": "deck_water_spell_legendary_frame"
     },
     {
-      "path": "assets/img/art/d18.jpg",
-      "bytes": 141862,
-      "name": "d18"
+      "path": "assets/img/frames/spell/deck_water_spell_rare_frame.png",
+      "bytes": 2816512,
+      "name": "deck_water_spell_rare_frame"
     },
     {
-      "path": "assets/img/art/d14.jpg",
-      "bytes": 120880,
-      "name": "d14"
+      "path": "assets/img/frames/spell/deck_water_spell_uncommon_frame.png",
+      "bytes": 2815810,
+      "name": "deck_water_spell_uncommon_frame"
     },
     {
-      "path": "assets/img/art/d8.jpg",
-      "bytes": 125120,
-      "name": "d8"
+      "path": "assets/img/frames/spell/deck_wind_spell_common_frame.png",
+      "bytes": 2430712,
+      "name": "deck_wind_spell_common_frame"
     },
     {
-      "path": "assets/img/art/d3.jpg",
-      "bytes": 128568,
-      "name": "d3"
+      "path": "assets/img/frames/spell/deck_wind_spell_legendary_frame.png",
+      "bytes": 2520514,
+      "name": "deck_wind_spell_legendary_frame"
     },
     {
-      "path": "assets/img/art/l12.jpg",
-      "bytes": 150913,
-      "name": "l12"
+      "path": "assets/img/frames/spell/deck_wind_spell_rare_frame.png",
+      "bytes": 2520859,
+      "name": "deck_wind_spell_rare_frame"
     },
     {
-      "path": "assets/img/art/l18.jpg",
-      "bytes": 177895,
-      "name": "l18"
-    },
-    {
-      "path": "assets/img/art/l9.jpg",
-      "bytes": 139981,
-      "name": "l9"
-    },
-    {
-      "path": "assets/img/art/l5.jpg",
-      "bytes": 130449,
-      "name": "l5"
-    },
-    {
-      "path": "assets/img/art/l3.jpg",
-      "bytes": 113688,
-      "name": "l3"
-    },
-    {
-      "path": "assets/img/art/a18.jpg",
-      "bytes": 114899,
-      "name": "a18"
-    },
-    {
-      "path": "assets/img/art/a14.jpg",
-      "bytes": 78978,
-      "name": "a14"
-    },
-    {
-      "path": "assets/img/art/a12.jpg",
-      "bytes": 107142,
-      "name": "a12"
-    },
-    {
-      "path": "assets/img/art/a11.jpg",
-      "bytes": 139298,
-      "name": "a11"
-    },
-    {
-      "path": "assets/img/art/a8.jpg",
-      "bytes": 151979,
-      "name": "a8"
-    },
-    {
-      "path": "assets/img/art/a5.jpg",
-      "bytes": 117393,
-      "name": "a5"
-    },
-    {
-      "path": "assets/img/art/a3.jpg",
-      "bytes": 150854,
-      "name": "a3"
-    },
-    {
-      "path": "assets/img/art/n18.jpg",
-      "bytes": 116780,
-      "name": "n18"
-    },
-    {
-      "path": "assets/img/art/n14.jpg",
-      "bytes": 128203,
-      "name": "n14"
-    },
-    {
-      "path": "assets/img/art/n12.jpg",
-      "bytes": 126947,
-      "name": "n12"
-    },
-    {
-      "path": "assets/img/art/n10.jpg",
-      "bytes": 143057,
-      "name": "n10"
-    },
-    {
-      "path": "assets/img/art/n8.jpg",
-      "bytes": 113961,
-      "name": "n8"
-    },
-    {
-      "path": "assets/img/art/n6.jpg",
-      "bytes": 134549,
-      "name": "n6"
-    },
-    {
-      "path": "assets/img/art/n3.jpg",
-      "bytes": 96373,
-      "name": "n3"
-    },
-    {
-      "path": "assets/img/art/f18.jpg",
-      "bytes": 146176,
-      "name": "f18"
-    },
-    {
-      "path": "assets/img/art/f16.jpg",
-      "bytes": 102404,
-      "name": "f16"
-    },
-    {
-      "path": "assets/img/art/f13.jpg",
-      "bytes": 147855,
-      "name": "f13"
-    },
-    {
-      "path": "assets/img/art/f12.jpg",
-      "bytes": 144770,
-      "name": "f12"
-    },
-    {
-      "path": "assets/img/art/f9.jpg",
-      "bytes": 129515,
-      "name": "f9"
-    },
-    {
-      "path": "assets/img/art/f6.jpg",
-      "bytes": 165087,
-      "name": "f6"
-    },
-    {
-      "path": "assets/img/art/f3.jpg",
-      "bytes": 117634,
-      "name": "f3"
-    },
-    {
-      "path": "assets/img/art/e21.jpg",
-      "bytes": 323726,
-      "name": "e21"
-    },
-    {
-      "path": "assets/img/art/a21.jpg",
-      "bytes": 119283,
-      "name": "a21"
-    },
-    {
-      "path": "assets/img/art/f21.jpg",
-      "bytes": 113247,
-      "name": "f21"
-    },
-    {
-      "path": "assets/img/art/n21.jpg",
-      "bytes": 123690,
-      "name": "n21"
-    },
-    {
-      "path": "assets/img/art/l21.jpg",
-      "bytes": 99884,
-      "name": "l21"
-    },
-    {
-      "path": "assets/img/art/d21.jpg",
-      "bytes": 91378,
-      "name": "d21"
-    },
-    {
-      "path": "assets/img/art/e17.jpg",
-      "bytes": 126949,
-      "name": "e17"
-    },
-    {
-      "path": "assets/img/art/e5.jpg",
-      "bytes": 117609,
-      "name": "e5"
-    },
-    {
-      "path": "assets/img/art/n2.jpg",
-      "bytes": 126382,
-      "name": "n2"
-    },
-    {
-      "path": "assets/img/art/a2.jpg",
-      "bytes": 142495,
-      "name": "a2"
-    },
-    {
-      "path": "assets/img/art/f14.jpg",
-      "bytes": 139814,
-      "name": "f14"
-    },
-    {
-      "path": "assets/img/art/l1.jpg",
-      "bytes": 145986,
-      "name": "l1"
-    },
-    {
-      "path": "assets/img/art/l2.jpg",
-      "bytes": 175053,
-      "name": "l2"
-    },
-    {
-      "path": "assets/img/art/l4.jpg",
-      "bytes": 154797,
-      "name": "l4"
-    },
-    {
-      "path": "assets/img/art/l7.jpg",
-      "bytes": 128439,
-      "name": "l7"
-    },
-    {
-      "path": "assets/img/art/l10.jpg",
-      "bytes": 121281,
-      "name": "l10"
-    },
-    {
-      "path": "assets/img/art/l11.jpg",
-      "bytes": 124720,
-      "name": "l11"
-    },
-    {
-      "path": "assets/img/art/l15.jpg",
-      "bytes": 146767,
-      "name": "l15"
-    },
-    {
-      "path": "assets/img/art/l17.jpg",
-      "bytes": 133923,
-      "name": "l17"
-    },
-    {
-      "path": "assets/img/art/d1.jpg",
-      "bytes": 98535,
-      "name": "d1"
-    },
-    {
-      "path": "assets/img/art/d2.jpg",
-      "bytes": 145792,
-      "name": "d2"
-    },
-    {
-      "path": "assets/img/art/d6.jpg",
-      "bytes": 123330,
-      "name": "d6"
-    },
-    {
-      "path": "assets/img/art/d11.jpg",
-      "bytes": 123959,
-      "name": "d11"
-    },
-    {
-      "path": "assets/img/art/d13.jpg",
-      "bytes": 115109,
-      "name": "d13"
-    },
-    {
-      "path": "assets/img/art/d19.jpg",
-      "bytes": 112825,
-      "name": "d19"
-    },
-    {
-      "path": "assets/img/art/e1.jpg",
-      "bytes": 154599,
-      "name": "e1"
-    },
-    {
-      "path": "assets/img/art/e2.jpg",
-      "bytes": 124012,
-      "name": "e2"
-    },
-    {
-      "path": "assets/img/art/e3.jpg",
-      "bytes": 147357,
-      "name": "e3"
-    },
-    {
-      "path": "assets/img/art/e4.jpg",
-      "bytes": 149410,
-      "name": "e4"
-    },
-    {
-      "path": "assets/img/art/e6.jpg",
-      "bytes": 116750,
-      "name": "e6"
-    },
-    {
-      "path": "assets/img/art/e7.jpg",
-      "bytes": 168000,
-      "name": "e7"
-    },
-    {
-      "path": "assets/img/art/e8.jpg",
-      "bytes": 146052,
-      "name": "e8"
-    },
-    {
-      "path": "assets/img/art/e9.jpg",
-      "bytes": 149718,
-      "name": "e9"
-    },
-    {
-      "path": "assets/img/art/e10.jpg",
-      "bytes": 129589,
-      "name": "e10"
-    },
-    {
-      "path": "assets/img/art/e11.jpg",
-      "bytes": 122984,
-      "name": "e11"
-    },
-    {
-      "path": "assets/img/art/e12.jpg",
-      "bytes": 131996,
-      "name": "e12"
-    },
-    {
-      "path": "assets/img/art/e13.jpg",
-      "bytes": 141479,
-      "name": "e13"
-    },
-    {
-      "path": "assets/img/art/e14.jpg",
-      "bytes": 157724,
-      "name": "e14"
-    },
-    {
-      "path": "assets/img/art/e15.jpg",
-      "bytes": 144829,
-      "name": "e15"
-    },
-    {
-      "path": "assets/img/art/e16.jpg",
-      "bytes": 128784,
-      "name": "e16"
-    },
-    {
-      "path": "assets/img/art/e18.jpg",
-      "bytes": 153336,
-      "name": "e18"
-    },
-    {
-      "path": "assets/img/art/e19.jpg",
-      "bytes": 137192,
-      "name": "e19"
-    },
-    {
-      "path": "assets/img/art/e20.jpg",
-      "bytes": 153763,
-      "name": "e20"
-    },
-    {
-      "path": "assets/img/art/f1.jpg",
-      "bytes": 164015,
-      "name": "f1"
-    },
-    {
-      "path": "assets/img/art/f2.jpg",
-      "bytes": 133225,
-      "name": "f2"
-    },
-    {
-      "path": "assets/img/art/f4.jpg",
-      "bytes": 155054,
-      "name": "f4"
-    },
-    {
-      "path": "assets/img/art/f7.jpg",
-      "bytes": 158790,
-      "name": "f7"
-    },
-    {
-      "path": "assets/img/art/f10.jpg",
-      "bytes": 148387,
-      "name": "f10"
-    },
-    {
-      "path": "assets/img/art/f11.jpg",
-      "bytes": 150944,
-      "name": "f11"
-    },
-    {
-      "path": "assets/img/art/f19.jpg",
-      "bytes": 153552,
-      "name": "f19"
-    },
-    {
-      "path": "assets/img/art/f20.jpg",
-      "bytes": 188602,
-      "name": "f20"
-    },
-    {
-      "path": "assets/img/art/n1.jpg",
-      "bytes": 128194,
-      "name": "n1"
-    },
-    {
-      "path": "assets/img/art/n19.jpg",
-      "bytes": 117810,
-      "name": "n19"
-    },
-    {
-      "path": "assets/img/art/a1.jpg",
-      "bytes": 139413,
-      "name": "a1"
-    },
-    {
-      "path": "assets/img/art/a15.jpg",
-      "bytes": 142481,
-      "name": "a15"
-    },
-    {
-      "path": "assets/img/art/a17.jpg",
-      "bytes": 173554,
-      "name": "a17"
+      "path": "assets/img/frames/spell/deck_wind_spell_uncommon_frame.png",
+      "bytes": 2520393,
+      "name": "deck_wind_spell_uncommon_frame"
     },
     {
       "path": "assets/img/frames/unit/deck_dark_unit_common_frame.png",
@@ -1132,124 +1867,1664 @@
       "name": "deck_wind_unit_uncommon_frame"
     },
     {
-      "path": "assets/img/frames/spell/deck_dark_spell_common_frame.png",
-      "bytes": 2576579,
-      "name": "deck_dark_spell_common_frame"
+      "path": "assets/img/hud/board.jpg",
+      "bytes": 5758278,
+      "name": "board"
     },
     {
-      "path": "assets/img/frames/spell/deck_dark_spell_legendary_frame.png",
-      "bytes": 2687064,
-      "name": "deck_dark_spell_legendary_frame"
+      "path": "assets/img/hud/deck.jpg",
+      "bytes": 87124,
+      "name": "deck"
     },
     {
-      "path": "assets/img/frames/spell/deck_dark_spell_rare_frame.png",
-      "bytes": 2687350,
-      "name": "deck_dark_spell_rare_frame"
+      "path": "assets/img/hud/hp.jpg",
+      "bytes": 21383,
+      "name": "hp"
     },
     {
-      "path": "assets/img/frames/spell/deck_dark_spell_uncommon_frame.png",
-      "bytes": 2686876,
-      "name": "deck_dark_spell_uncommon_frame"
+      "path": "assets/img/hud/soul.jpg",
+      "bytes": 21186,
+      "name": "soul"
     },
     {
-      "path": "assets/img/frames/spell/deck_earth_spell_common_frame.png",
-      "bytes": 2447078,
-      "name": "deck_earth_spell_common_frame"
+      "path": "assets/img/icons/dark.png",
+      "bytes": 116037,
+      "name": "dark"
     },
     {
-      "path": "assets/img/frames/spell/deck_earth_spell_legendary_frame.png",
-      "bytes": 2539104,
-      "name": "deck_earth_spell_legendary_frame"
+      "path": "assets/img/icons/earth.png",
+      "bytes": 122421,
+      "name": "earth"
     },
     {
-      "path": "assets/img/frames/spell/deck_earth_spell_rare_frame.png",
-      "bytes": 2539529,
-      "name": "deck_earth_spell_rare_frame"
+      "path": "assets/img/icons/fire.png",
+      "bytes": 118854,
+      "name": "fire"
     },
     {
-      "path": "assets/img/frames/spell/deck_earth_spell_uncommon_frame.png",
-      "bytes": 2538927,
-      "name": "deck_earth_spell_uncommon_frame"
+      "path": "assets/img/icons/light.png",
+      "bytes": 111527,
+      "name": "light"
     },
     {
-      "path": "assets/img/frames/spell/deck_fire_spell_common_frame.png",
-      "bytes": 2657032,
-      "name": "deck_fire_spell_common_frame"
+      "path": "assets/img/icons/water.png",
+      "bytes": 116335,
+      "name": "water"
     },
     {
-      "path": "assets/img/frames/spell/deck_fire_spell_legendary_frame.png",
-      "bytes": 2797337,
-      "name": "deck_fire_spell_legendary_frame"
+      "path": "assets/img/icons/wind.png",
+      "bytes": 110869,
+      "name": "wind"
     },
     {
-      "path": "assets/img/frames/spell/deck_fire_spell_rare_frame.png",
-      "bytes": 2797647,
-      "name": "deck_fire_spell_rare_frame"
+      "path": "assets/img/logos/emblem_dark.png",
+      "bytes": 973460,
+      "name": "emblem_dark"
     },
     {
-      "path": "assets/img/frames/spell/deck_fire_spell_uncommon_frame.png",
-      "bytes": 2797151,
-      "name": "deck_fire_spell_uncommon_frame"
+      "path": "assets/img/logos/emblem_earth.png",
+      "bytes": 1076943,
+      "name": "emblem_earth"
     },
     {
-      "path": "assets/img/frames/spell/deck_light_spell_common_frame.png",
-      "bytes": 2390707,
-      "name": "deck_light_spell_common_frame"
+      "path": "assets/img/logos/emblem_fire.png",
+      "bytes": 1071748,
+      "name": "emblem_fire"
     },
     {
-      "path": "assets/img/frames/spell/deck_light_spell_legendary_frame.png",
-      "bytes": 2472593,
-      "name": "deck_light_spell_legendary_frame"
+      "path": "assets/img/logos/emblem_light.png",
+      "bytes": 963460,
+      "name": "emblem_light"
     },
     {
-      "path": "assets/img/frames/spell/deck_light_spell_rare_frame.png",
-      "bytes": 2473130,
-      "name": "deck_light_spell_rare_frame"
+      "path": "assets/img/logos/emblem_water.png",
+      "bytes": 1013433,
+      "name": "emblem_water"
     },
     {
-      "path": "assets/img/frames/spell/deck_light_spell_uncommon_frame.png",
-      "bytes": 2472279,
-      "name": "deck_light_spell_uncommon_frame"
+      "path": "assets/img/logos/emblem_wind.png",
+      "bytes": 958610,
+      "name": "emblem_wind"
     },
     {
-      "path": "assets/img/frames/spell/deck_water_spell_common_frame.png",
-      "bytes": 2816743,
-      "name": "deck_water_spell_common_frame"
+      "path": "assets/img/logos/logo_emblem.png",
+      "bytes": 5340727,
+      "name": "logo_emblem"
     },
     {
-      "path": "assets/img/frames/spell/deck_water_spell_legendary_frame.png",
-      "bytes": 2816192,
-      "name": "deck_water_spell_legendary_frame"
+      "path": "assets/img/logos/logo_final_product_sans.png",
+      "bytes": 2616923,
+      "name": "logo_final_product_sans"
     },
     {
-      "path": "assets/img/frames/spell/deck_water_spell_rare_frame.png",
-      "bytes": 2816512,
-      "name": "deck_water_spell_rare_frame"
+      "path": "assets/img/logos/logo_wordmark.png",
+      "bytes": 561555,
+      "name": "logo_wordmark"
     },
     {
-      "path": "assets/img/frames/spell/deck_water_spell_uncommon_frame.png",
-      "bytes": 2815810,
-      "name": "deck_water_spell_uncommon_frame"
+      "path": "assets/img/logos/logo_wordmark_stand.png",
+      "bytes": 825428,
+      "name": "logo_wordmark_stand"
     },
     {
-      "path": "assets/img/frames/spell/deck_wind_spell_common_frame.png",
-      "bytes": 2430712,
-      "name": "deck_wind_spell_common_frame"
+      "path": "assets/manifest.json",
+      "bytes": 27106,
+      "name": "manifest"
     },
     {
-      "path": "assets/img/frames/spell/deck_wind_spell_legendary_frame.png",
-      "bytes": 2520514,
-      "name": "deck_wind_spell_legendary_frame"
+      "path": "assets/vfx/coins/coin_burst_bad/cast.webp",
+      "bytes": 681062,
+      "name": "cast"
     },
     {
-      "path": "assets/img/frames/spell/deck_wind_spell_rare_frame.png",
-      "bytes": 2520859,
-      "name": "deck_wind_spell_rare_frame"
+      "path": "assets/vfx/coins/coin_burst_bad/cast_strip.png",
+      "bytes": 1449505,
+      "name": "cast_strip"
     },
     {
-      "path": "assets/img/frames/spell/deck_wind_spell_uncommon_frame.png",
-      "bytes": 2520393,
-      "name": "deck_wind_spell_uncommon_frame"
+      "path": "assets/vfx/coins/coin_burst_bad/impact.webp",
+      "bytes": 591658,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/coins/coin_burst_bad/impact_strip.png",
+      "bytes": 1266732,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_burst_bad/meta.json",
+      "bytes": 394,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/coins/coin_burst_good/cast.webp",
+      "bytes": 1080044,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/coins/coin_burst_good/cast_strip.png",
+      "bytes": 3455326,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_burst_good/impact.webp",
+      "bytes": 680744,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/coins/coin_burst_good/impact_strip.png",
+      "bytes": 2286315,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_burst_good/meta.json",
+      "bytes": 395,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_black/cast.webp",
+      "bytes": 1351858,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_black/cast_strip.png",
+      "bytes": 4188164,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_black/impact.webp",
+      "bytes": 902638,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_black/impact_strip.png",
+      "bytes": 2731065,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_black/meta.json",
+      "bytes": 393,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_gold/cast.webp",
+      "bytes": 1834068,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_gold/cast_strip.png",
+      "bytes": 6079112,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_gold/impact.webp",
+      "bytes": 1086318,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_gold/impact_strip.png",
+      "bytes": 4186039,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_land_gold/meta.json",
+      "bytes": 392,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/coins/coin_toss/cast.webp",
+      "bytes": 1133864,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/coins/coin_toss/cast_strip.png",
+      "bytes": 3357098,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_toss/impact.webp",
+      "bytes": 1096740,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/coins/coin_toss/impact_strip.png",
+      "bytes": 3887473,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/coins/coin_toss/meta.json",
+      "bytes": 401,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/combat/attack/cast.webp",
+      "bytes": 404338,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/combat/attack/cast_strip.png",
+      "bytes": 1699421,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/combat/attack/impact.webp",
+      "bytes": 266130,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/combat/attack/impact_strip.png",
+      "bytes": 602040,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/combat/attack/meta.json",
+      "bytes": 290,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/combat/counter/cast.webp",
+      "bytes": 670098,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/combat/counter/cast_strip.png",
+      "bytes": 1856868,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/combat/counter/impact.webp",
+      "bytes": 445680,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/combat/counter/impact_strip.png",
+      "bytes": 1407696,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/combat/counter/meta.json",
+      "bytes": 291,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/combat/death/cast.webp",
+      "bytes": 633910,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/combat/death/cast_strip.png",
+      "bytes": 1998312,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/combat/death/impact.webp",
+      "bytes": 273528,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/combat/death/impact_strip.png",
+      "bytes": 594046,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/combat/death/meta.json",
+      "bytes": 289,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/combat/defend/cast.webp",
+      "bytes": 765940,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/combat/defend/cast_strip.png",
+      "bytes": 2964218,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/combat/defend/impact.webp",
+      "bytes": 340284,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/combat/defend/impact_strip.png",
+      "bytes": 1144773,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/combat/defend/meta.json",
+      "bytes": 290,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_break/cast.webp",
+      "bytes": 1282126,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_break/cast_strip.png",
+      "bytes": 3784677,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_break/impact.webp",
+      "bytes": 800450,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_break/impact_strip.png",
+      "bytes": 2277902,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_break/meta.json",
+      "bytes": 404,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_equip/cast.webp",
+      "bytes": 1059622,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_equip/cast_strip.png",
+      "bytes": 3237607,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip/impact.webp",
+      "bytes": 1095752,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_equip/impact_strip.png",
+      "bytes": 3766981,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip/meta.json",
+      "bytes": 404,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_dark/cast.webp",
+      "bytes": 881582,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_dark/cast_strip.png",
+      "bytes": 2407876,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_dark/impact.webp",
+      "bytes": 917356,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_dark/impact_strip.png",
+      "bytes": 2549446,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_dark/meta.json",
+      "bytes": 435,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_earth/cast.webp",
+      "bytes": 1200366,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_earth/cast_strip.png",
+      "bytes": 4653980,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_earth/impact.webp",
+      "bytes": 1132904,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_earth/impact_strip.png",
+      "bytes": 4791985,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_earth/meta.json",
+      "bytes": 436,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_fire/cast.webp",
+      "bytes": 1215426,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_fire/cast_strip.png",
+      "bytes": 3403120,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_fire/impact.webp",
+      "bytes": 1541492,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_fire/impact_strip.png",
+      "bytes": 5347905,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_fire/meta.json",
+      "bytes": 435,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_light/cast.webp",
+      "bytes": 634734,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_light/cast_strip.png",
+      "bytes": 2156507,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_light/impact.webp",
+      "bytes": 864962,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_light/impact_strip.png",
+      "bytes": 3008104,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_light/meta.json",
+      "bytes": 436,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_water/cast.webp",
+      "bytes": 964838,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_water/cast_strip.png",
+      "bytes": 4031362,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_water/impact.webp",
+      "bytes": 861358,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_water/impact_strip.png",
+      "bytes": 3255561,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_water/meta.json",
+      "bytes": 444,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_wind/cast.webp",
+      "bytes": 865404,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_wind/cast_strip.png",
+      "bytes": 2809686,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_wind/impact.webp",
+      "bytes": 949730,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_wind/impact_strip.png",
+      "bytes": 3276767,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_equip_wind/meta.json",
+      "bytes": 443,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_hover/cast.webp",
+      "bytes": 556236,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_hover/cast_strip.png",
+      "bytes": 1494792,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_hover/impact.webp",
+      "bytes": 924580,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_hover/impact_strip.png",
+      "bytes": 2879236,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_hover/meta.json",
+      "bytes": 417,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/items/item_replace/cast.webp",
+      "bytes": 1023308,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/items/item_replace/cast_strip.png",
+      "bytes": 3361209,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_replace/impact.webp",
+      "bytes": 611368,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/items/item_replace/impact_strip.png",
+      "bytes": 1983949,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/items/item_replace/meta.json",
+      "bytes": 415,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/match/defeat/cast.webp",
+      "bytes": 989630,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/match/defeat/cast_strip.png",
+      "bytes": 2892227,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/match/defeat/impact.webp",
+      "bytes": 1355412,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/match/defeat/impact_strip.png",
+      "bytes": 3536900,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/match/defeat/meta.json",
+      "bytes": 404,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/match/match_start/cast.webp",
+      "bytes": 1160488,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/match/match_start/cast_strip.png",
+      "bytes": 3440025,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/match/match_start/impact.webp",
+      "bytes": 1283522,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/match/match_start/impact_strip.png",
+      "bytes": 3746327,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/match/match_start/meta.json",
+      "bytes": 418,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_enemy/cast.webp",
+      "bytes": 260850,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_enemy/cast_strip.png",
+      "bytes": 992788,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_enemy/impact.webp",
+      "bytes": 297872,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_enemy/impact_strip.png",
+      "bytes": 1062996,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_enemy/meta.json",
+      "bytes": 423,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/cast.webp",
+      "bytes": 794684,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/cast_strip.png",
+      "bytes": 2112829,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/impact.webp",
+      "bytes": 514176,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/impact_strip.png",
+      "bytes": 1976319,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/meta.json",
+      "bytes": 417,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/match/victory/cast.webp",
+      "bytes": 1701328,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/match/victory/cast_strip.png",
+      "bytes": 5933788,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/match/victory/impact.webp",
+      "bytes": 1688796,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/match/victory/impact_strip.png",
+      "bytes": 6161235,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/match/victory/meta.json",
+      "bytes": 412,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/as1/cast.webp",
+      "bytes": 787588,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/as1/impact.webp",
+      "bytes": 731356,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/as1/meta.json",
+      "bytes": 385,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/as2/cast.webp",
+      "bytes": 875286,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/as2/impact.webp",
+      "bytes": 484994,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/as2/meta.json",
+      "bytes": 372,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/as3/cast.webp",
+      "bytes": 1522594,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/as3/impact.webp",
+      "bytes": 762546,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/as3/meta.json",
+      "bytes": 382,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/as4/cast.webp",
+      "bytes": 1604560,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/as4/impact.webp",
+      "bytes": 434266,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/as4/meta.json",
+      "bytes": 394,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/as5/cast.webp",
+      "bytes": 1253062,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/as5/impact.webp",
+      "bytes": 648668,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/as5/meta.json",
+      "bytes": 379,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/as6/aoe.webp",
+      "bytes": 292360,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/as6/cast.webp",
+      "bytes": 735848,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/as6/meta.json",
+      "bytes": 372,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/as7/aoe.webp",
+      "bytes": 536478,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/as7/cast.webp",
+      "bytes": 604792,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/as7/meta.json",
+      "bytes": 389,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/as8/aoe.webp",
+      "bytes": 438836,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/as8/cast.webp",
+      "bytes": 729376,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/as8/meta.json",
+      "bytes": 381,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/coin/cast.webp",
+      "bytes": 1428100,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/coin/cast_strip.png",
+      "bytes": 4508707,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/coin/impact.webp",
+      "bytes": 258118,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/coin/impact_strip.png",
+      "bytes": 645370,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/coin/meta.json",
+      "bytes": 378,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ds1/cast.webp",
+      "bytes": 1238994,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ds1/impact.webp",
+      "bytes": 1070876,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ds1/meta.json",
+      "bytes": 368,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ds2/cast.webp",
+      "bytes": 2039650,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ds2/impact.webp",
+      "bytes": 701948,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ds2/meta.json",
+      "bytes": 400,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ds3/aoe.webp",
+      "bytes": 569168,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/ds3/cast.webp",
+      "bytes": 1115522,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ds3/meta.json",
+      "bytes": 374,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ds4/cast.webp",
+      "bytes": 1256948,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ds4/impact.webp",
+      "bytes": 946396,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ds4/meta.json",
+      "bytes": 392,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ds5/aoe.webp",
+      "bytes": 635248,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/ds5/cast.webp",
+      "bytes": 1145372,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ds5/meta.json",
+      "bytes": 376,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ds6/cast.webp",
+      "bytes": 1157028,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ds6/impact.webp",
+      "bytes": 885332,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ds6/meta.json",
+      "bytes": 381,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ds7/aoe.webp",
+      "bytes": 266302,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/ds7/cast.webp",
+      "bytes": 666644,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ds7/meta.json",
+      "bytes": 377,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ds8/cast.webp",
+      "bytes": 2527094,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ds8/impact.webp",
+      "bytes": 661004,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ds8/meta.json",
+      "bytes": 383,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/es1/cast.webp",
+      "bytes": 2076772,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/es1/impact.webp",
+      "bytes": 848928,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/es1/meta.json",
+      "bytes": 378,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/es2/aoe.webp",
+      "bytes": 321244,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/es2/cast.webp",
+      "bytes": 862850,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/es2/meta.json",
+      "bytes": 376,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/es3/cast.webp",
+      "bytes": 984880,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/es3/impact.webp",
+      "bytes": 746846,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/es3/meta.json",
+      "bytes": 389,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/es4/cast.webp",
+      "bytes": 855648,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/es4/impact.webp",
+      "bytes": 808728,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/es4/meta.json",
+      "bytes": 390,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/es5/cast.webp",
+      "bytes": 706954,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/es5/impact.webp",
+      "bytes": 237160,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/es5/meta.json",
+      "bytes": 378,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/es6/aoe.webp",
+      "bytes": 409528,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/es6/cast.webp",
+      "bytes": 365410,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/es6/meta.json",
+      "bytes": 366,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/es7/aoe.webp",
+      "bytes": 242482,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/es7/cast.webp",
+      "bytes": 973294,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/es7/meta.json",
+      "bytes": 377,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/es8/cast.webp",
+      "bytes": 1642686,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/es8/impact.webp",
+      "bytes": 884320,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/es8/meta.json",
+      "bytes": 376,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs1/cast.webp",
+      "bytes": 1033584,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/fs1/cast_strip.png",
+      "bytes": 1346417,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs1/impact.webp",
+      "bytes": 2249482,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/fs1/impact_strip.png",
+      "bytes": 1478840,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs1/meta.json",
+      "bytes": 540,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs2/aoe.webp",
+      "bytes": 2234622,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/fs2/aoe_strip.png",
+      "bytes": 940459,
+      "name": "aoe_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs2/cast.webp",
+      "bytes": 2128824,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/fs2/cast_strip.png",
+      "bytes": 1452384,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs2/meta.json",
+      "bytes": 503,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs3/cast.webp",
+      "bytes": 1080736,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/fs3/cast_strip.png",
+      "bytes": 3477122,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs3/impact.webp",
+      "bytes": 1296088,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/fs3/impact_strip.png",
+      "bytes": 5159641,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs3/meta.json",
+      "bytes": 469,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs4/cast.webp",
+      "bytes": 1391034,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/fs4/cast_strip.png",
+      "bytes": 3416824,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs4/impact.webp",
+      "bytes": 1271194,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/fs4/impact_strip.png",
+      "bytes": 3083480,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs4/meta.json",
+      "bytes": 445,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs5/aoe.webp",
+      "bytes": 136522,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/fs5/aoe_strip.png",
+      "bytes": 194651,
+      "name": "aoe_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs5/cast.webp",
+      "bytes": 846312,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/fs5/cast_strip.png",
+      "bytes": 1302299,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs5/meta.json",
+      "bytes": 375,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs6/cast.webp",
+      "bytes": 664896,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/fs6/cast_strip.png",
+      "bytes": 1022891,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs6/impact.webp",
+      "bytes": 744734,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/fs6/impact_strip.png",
+      "bytes": 560791,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs6/meta.json",
+      "bytes": 370,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs7/cast.webp",
+      "bytes": 1184616,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/fs7/cast_strip.png",
+      "bytes": 1295272,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs7/impact.webp",
+      "bytes": 153706,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/fs7/impact_strip.png",
+      "bytes": 256079,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs7/meta.json",
+      "bytes": 374,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs8/aoe.webp",
+      "bytes": 188656,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/fs8/aoe_strip.png",
+      "bytes": 385424,
+      "name": "aoe_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs8/cast.webp",
+      "bytes": 344324,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/fs8/cast_strip.png",
+      "bytes": 337158,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs8/meta.json",
+      "bytes": 371,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ls1/aoe.webp",
+      "bytes": 290490,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/ls1/cast.webp",
+      "bytes": 244880,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ls1/meta.json",
+      "bytes": 380,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ls2/cast.webp",
+      "bytes": 816552,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ls2/impact.webp",
+      "bytes": 260702,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ls2/meta.json",
+      "bytes": 374,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ls3/cast.webp",
+      "bytes": 2303000,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ls3/impact.webp",
+      "bytes": 679318,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ls3/meta.json",
+      "bytes": 377,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ls4/cast.webp",
+      "bytes": 1520656,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ls4/impact.webp",
+      "bytes": 264450,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ls4/meta.json",
+      "bytes": 393,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ls5/aoe.webp",
+      "bytes": 169434,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/ls5/cast.webp",
+      "bytes": 871560,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ls5/meta.json",
+      "bytes": 378,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ls6/cast.webp",
+      "bytes": 1411532,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ls6/impact.webp",
+      "bytes": 427910,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ls6/meta.json",
+      "bytes": 377,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ls7/cast.webp",
+      "bytes": 830748,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ls7/impact.webp",
+      "bytes": 699798,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ls7/meta.json",
+      "bytes": 395,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ls8/cast.webp",
+      "bytes": 837122,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ls8/impact.webp",
+      "bytes": 228754,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ls8/meta.json",
+      "bytes": 372,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ns1/cast.webp",
+      "bytes": 522280,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ns1/cast_strip.png",
+      "bytes": 1739424,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns1/impact.webp",
+      "bytes": 446372,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ns1/impact_strip.png",
+      "bytes": 1534768,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns1/meta.json",
+      "bytes": 381,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ns2/cast.webp",
+      "bytes": 200474,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ns2/cast_strip.png",
+      "bytes": 352151,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns2/impact.webp",
+      "bytes": 363224,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ns2/impact_strip.png",
+      "bytes": 1324361,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns2/meta.json",
+      "bytes": 382,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ns3/cast.webp",
+      "bytes": 159560,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ns3/cast_strip.png",
+      "bytes": 195769,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns3/impact.webp",
+      "bytes": 296434,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ns3/impact_strip.png",
+      "bytes": 207482,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns3/meta.json",
+      "bytes": 389,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ns4/cast.webp",
+      "bytes": 883304,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ns4/cast_strip.png",
+      "bytes": 2703555,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns4/impact.webp",
+      "bytes": 432390,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ns4/impact_strip.png",
+      "bytes": 864702,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns4/meta.json",
+      "bytes": 386,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ns5/aoe.webp",
+      "bytes": 359566,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/ns5/aoe_strip.png",
+      "bytes": 977071,
+      "name": "aoe_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns5/cast.webp",
+      "bytes": 363638,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ns5/cast_strip.png",
+      "bytes": 1285599,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns5/meta.json",
+      "bytes": 373,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ns6/cast.webp",
+      "bytes": 843308,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ns6/cast_strip.png",
+      "bytes": 3265856,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns6/impact.webp",
+      "bytes": 321088,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ns6/impact_strip.png",
+      "bytes": 335992,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns6/meta.json",
+      "bytes": 374,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ns7/cast.webp",
+      "bytes": 154996,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ns7/cast_strip.png",
+      "bytes": 85604,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns7/impact.webp",
+      "bytes": 330992,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/spells/ns7/impact_strip.png",
+      "bytes": 37237,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns7/meta.json",
+      "bytes": 392,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/ns8/aoe.webp",
+      "bytes": 101958,
+      "name": "aoe"
+    },
+    {
+      "path": "assets/vfx/spells/ns8/aoe_strip.png",
+      "bytes": 109247,
+      "name": "aoe_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns8/cast.webp",
+      "bytes": 431754,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/spells/ns8/cast_strip.png",
+      "bytes": 1615485,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/spells/ns8/meta.json",
+      "bytes": 375,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/ui/deck_draw/cast.webp",
+      "bytes": 1338656,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/ui/deck_draw/cast_strip.png",
+      "bytes": 5257167,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/ui/deck_draw/impact.webp",
+      "bytes": 979380,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/ui/deck_draw/impact_strip.png",
+      "bytes": 3860157,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/ui/deck_draw/meta.json",
+      "bytes": 394,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/ui/hero_intro/cast.webp",
+      "bytes": 2592800,
+      "name": "cast"
+    },
+    {
+      "path": "assets/vfx/ui/hero_intro/cast_strip.png",
+      "bytes": 9562523,
+      "name": "cast_strip"
+    },
+    {
+      "path": "assets/vfx/ui/hero_intro/impact.webp",
+      "bytes": 1550514,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/ui/hero_intro/impact_strip.png",
+      "bytes": 4391745,
+      "name": "impact_strip"
+    },
+    {
+      "path": "assets/vfx/ui/hero_intro/meta.json",
+      "bytes": 409,
+      "name": "meta"
     }
   ]
 }
