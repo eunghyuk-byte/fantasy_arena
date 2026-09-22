@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.158";
+const GAME_VERSION = "0.159";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -39,6 +39,13 @@ function cloneCard(id) {
     attacksLeft: 0,
     damaged: false,
   };
+}
+function cloneCoinFor(p) {
+  const c = cloneCard("coin");
+  let tid = (p && p.hero && p.hero.id) || "earth";
+  if (tid === "metal") tid = "earth";
+  c.tribe = tid;
+  return c;
 }
 function shuffle(a) {
   const x = a.slice();
@@ -183,7 +190,7 @@ function startGame(vsAI) {
   const second = p1First ? state.p2 : state.p1;
   draw(first, 3);
   draw(second, 4);
-  second.hand.push(cloneCard("coin"));
+  second.hand.push(cloneCoinFor(second));
   state.turn = p1First ? 1 : 2;
   beginTurn(first);
   showGame();
