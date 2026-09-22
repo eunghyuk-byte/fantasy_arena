@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.184";
+const GAME_VERSION = "0.185";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1906,7 +1906,7 @@ function updateDeckStats() {
   const avgEl = document.getElementById("manaAvg");
   if (!curveBox || !compBox || !avgEl) return;
   const n = draftDeck.length;
-  const buckets = [0, 0, 0, 0, 0, 0, 0]; // 1,2,3,4,5,6,7+
+  const buckets = [0, 0, 0, 0, 0, 0, 0, 0]; // 1,2,3,4,5,6,7,8+
   let sumCost = 0;
   const types = { minion: 0, spell: 0, item: 0 };
   draftDeck.forEach(id => {
@@ -1914,14 +1914,14 @@ function updateDeckStats() {
     if (!c) return;
     const cost = Math.max(0, c.cost | 0);
     sumCost += cost;
-    const idx = cost >= 7 ? 6 : Math.max(0, cost - 1);
+    const idx = cost >= 8 ? 7 : Math.max(0, cost - 1);
     buckets[idx] += 1;
     if (c.type === "minion") types.minion++;
     else if (c.type === "spell") types.spell++;
     else if (c.type === "item") types.item++;
   });
   const maxB = Math.max(1, ...buckets);
-  const labels = ["1", "2", "3", "4", "5", "6", "7+"];
+  const labels = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   curveBox.innerHTML = labels.map((lab, i) => {
     const cnt = buckets[i];
     const pct = n ? (cnt * 100 / n) : 0;
