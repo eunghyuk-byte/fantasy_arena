@@ -380,8 +380,8 @@ async function composeCardFace(c, opts={}) {
     const fy = FOCUS[c.id] != null ? FOCUS[c.id] : 0.42;
     const landscape = sw / sh >= 1.05;
     const FOCUS_X = { e22:0.38, e23:0.40, e24:0.42 };
-    // Uniform art zoom for unit/spell/item (same size). 1.10 = prior item 1.05 + ~5% more for crop.
-    const artZoom = 1.10;
+    // Uniform art zoom for unit/spell/item (same size, no stretch). 1.21 = prior 1.10 × +10%.
+    const artZoom = 1.21;
     if (landscape) {
       const fx = FOCUS_X[c.id] != null ? FOCUS_X[c.id] : 0.50;
       drawUniform("cover", fx, 0.50, 1 * artZoom);
@@ -556,7 +556,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  return ["v101artZoom110", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v102artZoom121", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
