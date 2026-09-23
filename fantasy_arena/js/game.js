@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.259";
+const GAME_VERSION = "0.260";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -132,49 +132,79 @@ function draw(p, n = 1) {
       log(`${p.name}의 손패가 가득 차 ${nm}이(가) 불탔다`);
     } else {
       p.hand.push(cloneCard(id));
-      if (!p.isAI) p._drew = true;
+      if (!p.isAI) p._drewCount = (p._drewCount || 0) + 1;
     }
   }
 }
 
+const DRAW_FLY_MS = 720;
 
+/** Fly a ghost from deck pile to a specific hand card element. Returns Promise. */
+function flyDrawCard(cardEl) {
+  return new Promise((resolve) => {
+    try { Sfx.playDraw && Sfx.playDraw(); } catch (e) {}
+    try { if (typeof SpellFx !== "undefined" && SpellFx.playUi) SpellFx.playUi("deck_draw"); } catch (e) {}
+    const pile = document.querySelector("#myDeck .pile-stack") || document.querySelector("#myDeck .deck-pile");
+    const hand = document.getElementById("myHand");
+    if (!pile || !hand) { resolve(); return; }
+    const cards = [...hand.querySelectorAll(".card")];
+    const target = cardEl || cards[cards.length - 1];
+    const a = pile.getBoundingClientRect();
+    const b = target ? target.getBoundingClientRect() : hand.getBoundingClientRect();
+    if (target) target.style.opacity = "0";
+    const ghost = document.createElement("div");
+    ghost.className = "draw-ghost";
+    // Always use live deck card-back (empty face → translucent rect ghost)
+    const backSrc = (typeof HUD_UI !== "undefined" && HUD_UI.deck)
+      ? HUD_UI.deck
+      : "assets/img/hud/back.png";
+    const v = (typeof GAME_VERSION !== "undefined" ? GAME_VERSION : (window.GAME_VERSION || "0"));
+    ghost.innerHTML = '<img src="'+backSrc+'?v='+v+'" alt="">';
+    const w = target ? b.width : 72;
+    const h = target ? b.height : 108;
+    ghost.style.cssText = "position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+w+"px;height:"+h+"px;z-index:120;pointer-events:none;transform-origin:center center;";
+    document.body.appendChild(ghost);
+    const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
+    const dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+    let finished = false;
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      try { ghost.remove(); } catch (e) {}
+      if (target) target.style.opacity = "";
+      resolve();
+    };
+    try {
+      const anim = ghost.animate([
+        { transform: "translate(0,0) rotate(-18deg) scale(.72)", offset: 0 },
+        { transform: "translate(" + (dx * 0.45) + "px," + (dy * 0.35 - 90) + "px) rotate(12deg) scale(.92)", offset: 0.45 },
+        { transform: "translate(" + dx + "px," + dy + "px) rotate(0deg) scale(1)", offset: 1 }
+      ], { duration: DRAW_FLY_MS, easing: "cubic-bezier(.2,.72,.12,1)", fill: "forwards" });
+      anim.onfinish = done;
+    } catch (e) {
+      done();
+      return;
+    }
+    setTimeout(done, DRAW_FLY_MS + 80);
+  });
+}
 
-function flyDrawCard() {
-  try { Sfx.playDraw && Sfx.playDraw(); } catch (e) {}
-  try { if (typeof SpellFx !== "undefined" && SpellFx.playUi) SpellFx.playUi("deck_draw"); } catch (e) {}
-  const pile = document.querySelector("#myDeck .pile-stack") || document.querySelector("#myDeck .deck-pile");
+/** Sequential deck→hand flies for the last N cards in #myHand. */
+async function playDrawSequence(n) {
   const hand = document.getElementById("myHand");
-  if (!pile || !hand) return;
+  if (!hand || n < 1) return;
   const cards = [...hand.querySelectorAll(".card")];
-  const last = cards[cards.length - 1];
-  const a = pile.getBoundingClientRect();
-  const b = last ? last.getBoundingClientRect() : hand.getBoundingClientRect();
-  if (last) last.style.opacity = "0";
-  const ghost = document.createElement("div");
-  ghost.className = "draw-ghost";
-  // Always use live deck card-back (empty face → translucent rect ghost)
-  const backSrc = (typeof HUD_UI !== "undefined" && HUD_UI.deck)
-    ? HUD_UI.deck
-    : "assets/img/hud/back.png";
-  const v = (typeof GAME_VERSION !== "undefined" ? GAME_VERSION : (window.GAME_VERSION || "0"));
-  ghost.innerHTML = '<img src="'+backSrc+'?v='+v+'" alt="">';
-  const w = last ? b.width : 72;
-  const h = last ? b.height : 108;
-  ghost.style.cssText = "position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+w+"px;height:"+h+"px;z-index:120;pointer-events:none;transform-origin:center center;";
-  document.body.appendChild(ghost);
-  const dx = (b.left + b.width/2) - (a.left + a.width/2);
-  const dy = (b.top + b.height/2) - (a.top + a.height/2);
-  const anim = ghost.animate([
-    { transform: "translate(0,0) rotate(-18deg) scale(.72)", offset: 0 },
-    { transform: "translate("+(dx*0.45)+"px,"+(dy*0.35-90)+"px) rotate(12deg) scale(.92)", offset: 0.45 },
-    { transform: "translate("+dx+"px,"+dy+"px) rotate(0deg) scale(1)", offset: 1 }
-  ], { duration: 720, easing: "cubic-bezier(.2,.72,.12,1)", fill: "forwards" });
-  const done = () => {
-    ghost.remove();
-    if (last) last.style.opacity = "";
-  };
-  anim.onfinish = done;
-  setTimeout(done, 800);
+  const handLen = cards.length;
+  if (!handLen) return;
+  const startIdx = Math.max(0, handLen - n);
+  for (let i = startIdx; i < handLen; i++) {
+    if (cards[i]) cards[i].style.opacity = "0";
+  }
+  for (let i = 0; i < n; i++) {
+    const el = cards[startIdx + i];
+    if (!el) continue;
+    await flyDrawCard(el);
+  }
 }
 
 

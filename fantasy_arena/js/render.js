@@ -275,9 +275,19 @@ function render() {
   if (mm) mm.textContent = me.soul + "/" + me.maxSoul;
   layoutHandFan();
   layoutOppFan();
-  if (me._drew) {
-    me._drew = false;
-    requestAnimationFrame(() => { try { flyDrawCard(); } catch (e) {} });
+  if ((me._drewCount || 0) > 0 && !me._drawingAnim) {
+    const n = me._drewCount;
+    me._drewCount = 0;
+    me._drawingAnim = true;
+    requestAnimationFrame(() => {
+      (async () => {
+        try {
+          if (typeof playDrawSequence === "function") await playDrawSequence(n);
+          else if (typeof flyDrawCard === "function") await flyDrawCard();
+        } catch (e) {}
+        me._drawingAnim = false;
+      })();
+    });
   }
 
   if (!(typeof _drag !== "undefined" && _drag)) {
