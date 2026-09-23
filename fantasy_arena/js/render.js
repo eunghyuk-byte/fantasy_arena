@@ -713,8 +713,9 @@ async function composeCardFace(c, opts={}) {
     }
     if (!lines.length && txt) lines.push(txt);
     const lh = tSize * 1.28;
-    // v0.237: vertical center of lore panel (~was 0.743, sat too high for 2+ lines)
-    const startY = H*0.778 - ((lines.length - 1) * lh) / 2;
+    // Multi-line: center around 0.778; single-line: nudge up 5px (v0.249)
+    let startY = H*0.778 - ((lines.length - 1) * lh) / 2;
+    if (lines.length === 1) startY -= 5;
     lines.forEach((ln, i) => ctx.fillText(ln, W*0.50, startY + i * lh));
     ctx.restore();
   }
