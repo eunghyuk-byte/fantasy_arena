@@ -559,6 +559,8 @@ async function composeCardFace(c, opts={}) {
         dx = Math.max(artX + artW - dw, Math.min(artX, dx));
         dy = Math.max(artY + artH - dh, Math.min(artY, dy));
       }
+      // Unit portrait: shift illustration down ~10px inside art window (position only; scale unchanged)
+      if (c.type === "minion") dy += 10;
       ctx.drawImage(art, sx, sy, sw, sh, dx, dy, dw, dh);
     };
     const FOCUS = {
