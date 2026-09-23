@@ -282,7 +282,7 @@ const CARDS = [
   { id:"fs7", tribe:"fire", name:"화염방패", cost:6, type:"spell", rarity:"uncommon", text:"아군 하나 방+3, 보호 부여", spell:{ type:"buff", target:"own_minion", def:3, kws:["shield"], ability:"보호" } },
   { id:"ls8", tribe:"light", name:"헌금", cost:3, type:"spell", rarity:"common", text:"드로우2. 이번 턴 유닛을 낼 수 없음", spell:{ type:"draw_ex", draw:2, noPlayMinion:true } },
   { id:"ds3", tribe:"dark", name:"헬게이트", cost:4, type:"spell", rarity:"common", text:"유닛 전체 체-3", spell:{ type:"aoe_pack", all:3 } },
-  { id:"ds4", tribe:"dark", name:"불길한예감", cost:2, type:"spell", rarity:"uncommon", text:"유닛 하나 코인을 전부 블랙으로, 공·방·체+3", spell:{ type:"own_black_buff", target:"any_minion", atk:3, def:3, hp:3 } },
+  { id:"ds4", tribe:"dark", name:"불길한예감", cost:2, type:"spell", rarity:"uncommon", text:"유닛 하나 코인을, 전부 블랙으로, 공·방·체+3", spell:{ type:"own_black_buff", target:"any_minion", atk:3, def:3, hp:3 } },
   { id:"ds5", tribe:"dark", name:"블랙홀", cost:7, type:"spell", rarity:"rare", text:"유닛 전체 파괴, 아군 최대소울-3", spell:{ type:"wipe_all", maxSoul:-3 } },
   { id:"ds6", tribe:"dark", name:"해골던지기", cost:3, type:"spell", rarity:"common", text:"공4 이하 적 하나 파괴", spell:{ type:"kill_if", maxAtk:4 } },
   { id:"ds7", tribe:"dark", name:"전염병", cost:4, type:"spell", rarity:"common", text:"4코 이상 유닛 전체 공=1 체=1", spell:{ type:"plague", minCost:4 } },
