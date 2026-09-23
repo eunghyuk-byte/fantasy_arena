@@ -3678,6 +3678,7 @@ html.is-desktop #game.active .my-hand .card.playable,
   color: #d8c9a4;
   font-size: 13px;
   line-height: 1.4;
+  white-space: pre-line; /* stats / blank / ability */
   white-space: normal;
   word-break: keep-all;
 }

@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.238";
+const GAME_VERSION = "0.239";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1294,14 +1294,15 @@ function collectAbilityTips(c) {
     || null;
   if (tokenId && typeof CARD_MAP !== "undefined" && CARD_MAP[tokenId]) {
     const tok = CARD_MAP[tokenId];
+    // Tip format (locked): line1 공/방/체, blank line, then ability(+help)
     const stats = "공" + (tok.atk || 0) + "/방" + (tok.def || 0) + "/체" + (tok.hp || 0);
     const ab = String(tok.ability || "").trim();
-    const descParts = [stats];
+    let body = stats;
     if (ab) {
       const abDesc = (typeof ABI_HELP !== "undefined" && ABI_HELP[ab]) || "";
-      descParts.push(abDesc ? (ab + " — " + abDesc) : ab);
+      body += "\n\n" + (abDesc ? (ab + " — " + abDesc) : ab);
     }
-    add(tok.name || "토큰", descParts.join(" · "));
+    add(tok.name || "토큰", body);
   }
   return tips;
 }
