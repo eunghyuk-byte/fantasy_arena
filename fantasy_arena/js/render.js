@@ -62,7 +62,8 @@ function layoutBoardDecks() {
       // Opp deck: sit low in opp lane (near unit row), not stuck to top frame
       const pileH = Math.max(96, Math.min(120, br.height * 0.42));
       const topPad = Math.max(8, br.height * 0.52);
-      deck.style.top = (br.top - mr.top + topPad) + "px";
+      // v0.225: nudge left opp deck pile UP ~20px
+      deck.style.top = (br.top - mr.top + topPad - 20) + "px";
       deck.style.bottom = "auto";
       deck.style.height = pileH + "px";
       deck.style.justifyContent = "flex-start";
@@ -100,7 +101,7 @@ function layoutBoardAlign() {
   // Rows: oppHand | oppBoard | myBoard | myHand | hint
   // HAND LAYOUT LOCK (see LAYOUT_HAND_LOCK.md) — do not shrink below 0.28; negative CSS margin forbidden
   const HAND_ROW_FRAC = 0.28; // LOCKED
-  const hand = HAND_ROW_FRAC, hint = 0.015, oppHand = 0.06;
+  const hand = HAND_ROW_FRAC, hint = 0.015, oppHand = 0.10; // v0.225: larger so backs half-visible
   const rest = 1 - hand - hint - oppHand; // boards total
   // Boundary after oppHand+oppBoard == midFrac (parchment center ornament)
   let oppBoard = midFrac - oppHand;
@@ -125,7 +126,7 @@ function layoutBoardSlots() {
     const bh = board.clientHeight || 0;
     const bw = board.clientWidth || 0;
     // Fit up to 5 units in board width; height ~88% of lane
-    let slotH = Math.floor(bh * 0.88);
+    let slotH = Math.floor(bh * 0.94); // v0.225: field lane a bit taller
     if (!slotH || slotH < 120) slotH = 160;
     if (slotH > 220) slotH = 220;
     let slotW = Math.floor(slotH * 2 / 3);
@@ -587,8 +588,10 @@ async function composeCardFace(c, opts={}) {
   const paintFrameStats = c.type === "minion" || (c.type === "item");
   if (paintFrameStats) {
     const hp = opts.hp != null ? opts.hp : c.hp;
-    paintNumber(ctx, String(c.atk ?? 0), W*0.1343, H*0.9032, Math.round(H*0.066));
-    paintNumber(ctx, String(c.def ?? 0), W*0.5008, H*0.9032, Math.round(H*0.066));
+    const atk = opts.atk != null ? opts.atk : c.atk;
+    const def = opts.def != null ? opts.def : c.def;
+    paintNumber(ctx, String(atk ?? 0), W*0.1343, H*0.9032, Math.round(H*0.066));
+    paintNumber(ctx, String(def ?? 0), W*0.5008, H*0.9032, Math.round(H*0.066));
     paintNumber(ctx, String(hp ?? 0), W*0.8745, H*0.9032, Math.round(H*0.066));
     if (c.type === "minion") await paintStatCoins(ctx, c, W, H);
   }
@@ -656,7 +659,7 @@ function faceCacheKey(c, opts) {
   const version = (typeof GAME_VERSION !== "undefined")
     ? GAME_VERSION
     : (typeof window !== "undefined" ? window.GAME_VERSION : "");
-  return ["v106itemTipText", version, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v106itemTipText", version, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
@@ -809,21 +812,35 @@ function renderMinion(m, side) {
     targetable ? "can-target" : "",
   ].join(" ");
   const uid = "mface_" + m.uid;
-  const cacheKey = faceCacheKey(m, { hp: m.hp });
+  // Combat FX: bake temp atk/def/hp on face; ±Δ overlays (blue+/red−), not 「공 N」
+  const faceOpts = {
+    atk: m._fxAtk != null ? m._fxAtk : m.atk,
+    def: m._fxDef != null ? m._fxDef : m.def,
+    hp:  m._fxHp  != null ? m._fxHp  : m.hp,
+  };
+  const cacheKey = faceCacheKey(m, faceOpts);
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
   setTimeout(() => {
     const el = document.getElementById(uid);
-    if (el) faceSrc(m, { hp: m.hp }, el);
+    if (el) faceSrc(m, faceOpts, el);
   }, 0);
   const hurt = m._hurt && m._hurt.dmg ? ` hurt` : "";
   const rip = m.dying ? " rip" : "";
   const tick = m._hurt && m._hurt.dmg ? `<div class="hp-tick">-${m._hurt.dmg}</div>` : "";
-  const stat = m._fxAtk != null ? `<div class="stat-pop">공 ${m._fxAtk}</div>` : "";
+  function deltaChip(d, kind) {
+    if (!d) return "";
+    const cls = d > 0 ? "stat-delta up" : "stat-delta down";
+    const txt = d > 0 ? ("+" + d) : String(d);
+    return `<div class="${cls} ${kind}">${txt}</div>`;
+  }
+  const deltas = (m._fxAtk != null || m._fxDef != null || m._fxHp != null)
+    ? (deltaChip(m._fxAtkD, "d-atk") + deltaChip(m._fxDefD, "d-def") + deltaChip(m._fxHpD, "d-hp"))
+    : "";
   const pending = cached ? "" : " face-pending";
   const srcAttr = cached ? ` src="${cached}"` : "";
   return `<div class="${cls}${hurt}${rip}" data-uid="${m.uid}">
     <img class="card-face${pending}${cached ? " face-ready" : ""}" id="${uid}" alt="${m.name}"${srcAttr}>
-    ${tick}${stat}
+    ${tick}${deltas}
   </div>`;
 }
 
@@ -889,6 +906,13 @@ function layoutHudGems() {
   const SOUL_H = Math.max(18, SOUL_W * 0.42);
   placeIn(document.getElementById("oppSoulGem"), mr, 0.828, 0.095, SOUL_W, SOUL_H);
   placeIn(document.getElementById("mySoulGem"), mr, 0.828, 0.841, SOUL_W, SOUL_H);
+  // v0.225: soul cost numbers LEFT ~30px
+  ["oppSoulGem", "mySoulGem"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.style.left) return;
+    const L = parseFloat(el.style.left);
+    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 30) + "px", "important");
+  });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
   if (hr && hr.width >= 8 && hr.height >= 8) {
@@ -916,8 +940,9 @@ function layoutHudGems() {
       if (sr.width < 4 || sr.height < 4) return;
       const vx = contentLeft + contentW * CX - HP_W / 2;
       const vy = contentTop + contentH * CY - HP_H / 2;
-      hp.style.setProperty("left", (vx - sr.left) + "px", "important");
-      hp.style.setProperty("top", (vy - sr.top) + "px", "important");
+      // v0.225: hero HP numbers DOWN ~5px and LEFT ~5px
+      hp.style.setProperty("left", (vx - sr.left - 5) + "px", "important");
+      hp.style.setProperty("top", (vy - sr.top + 5) + "px", "important");
       hp.style.setProperty("width", HP_W + "px", "important");
       hp.style.setProperty("height", HP_H + "px", "important");
       hp.style.setProperty("right", "auto", "important");
@@ -951,10 +976,10 @@ function layoutEndBtn() {
   const contentH = nh * scale;
   const contentLeft = br.left + (br.width - contentW) / 2;
   const contentTop = br.top + (br.height - contentH) / 2;
-  // 4000×3000 board art — empty oval in right gold frame between hero sockets
-  // Screen-measured empty well on v0.212 shot: fill cx≈0.92, cy≈0.45, fill≈0.088 board
-  const CX = 0.920;
-  const CY = 0.430;
+  // v0.225: button center = board mid horizontal ∩ right gold-frame vertical edge
+  // content-box: CY 0.5 = battlefield center divider; CX ≈ right edge of gold board frame
+  const CX = 0.968;
+  const CY = 0.500;
   // Final end-turn art is 700×700 transparent PNG — fill the board well as a square
   const WIDTH_FRAC = 0.088;
   const bw = contentW * WIDTH_FRAC;

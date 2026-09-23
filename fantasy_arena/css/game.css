@@ -469,10 +469,31 @@
     animation: cardRip .6s ease-in forwards;
     pointer-events: none;
   }
-  .stat-pop {
-    position:absolute; left:10px; bottom:18%;
-    z-index:8; font-weight:900; color:#ffe08a;
-    text-shadow: 0 0 6px #000; font-size: 16px;
+  /* Combat temp Δ overlays (replaces yellow 「공 N」 restatement) */
+  .stat-delta {
+    position: absolute;
+    bottom: 6%;
+    z-index: 8;
+    pointer-events: none;
+    font-weight: 900;
+    font-size: 13px;
+    line-height: 1;
+    text-shadow: 0 0 5px #000, 0 1px 0 #000;
+    animation: statDeltaIn .28s ease-out both;
+  }
+  .stat-delta.up { color: #5eb8ff; }
+  .stat-delta.down { color: #ff5a5a; }
+  .stat-delta.d-atk { left: 8%; }
+  .stat-delta.d-def { left: 50%; transform: translateX(-50%); }
+  .stat-delta.d-hp { right: 8%; left: auto; }
+  @keyframes statDeltaIn {
+    0% { opacity: 0; transform: translateY(6px) scale(.85); }
+    100% { opacity: 1; }
+  }
+  .stat-delta.d-def { animation-name: statDeltaInMid; }
+  @keyframes statDeltaInMid {
+    0% { opacity: 0; transform: translateX(-50%) translateY(6px) scale(.85); }
+    100% { opacity: 1; transform: translateX(-50%); }
   }
   @keyframes cardRip {
     0% { opacity: 1; filter: none; transform: none; }
@@ -2619,13 +2640,14 @@ html.is-desktop, html.is-desktop body {
 /* Center line stays; nudge rows away from it slightly */
 #game.active .board.opp {
   align-items: flex-end !important;
-  padding-bottom: clamp(10px, 2.2cqh, 22px) !important;
+  /* v0.225: less mid-gap → taller field lane */
+  padding-bottom: clamp(4px, 1.0cqh, 10px) !important;
   padding-top: 0 !important;
   box-sizing: border-box !important;
 }
 #game.active #myBoard {
   align-items: flex-start !important;
-  padding-top: clamp(10px, 2.2cqh, 22px) !important;
+  padding-top: clamp(4px, 1.0cqh, 10px) !important;
   padding-bottom: 0 !important;
   box-sizing: border-box !important;
 }
@@ -3730,31 +3752,37 @@ body.dragging-card {
   grid-area: unset !important;
 }
 
-/* Field lane: 5-slot width, slightly wider + left of prior right nudge (v0.222) */
+/* Field lane: narrower + taller (v0.225) — not full parchment; HAND LOCK untouched */
 #game.active .board,
 #game.active .board.opp,
 #game.active #oppBoard,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  width: min(76%, calc(5 * var(--slot-w, 112px) + 4 * 12px + 44px)) !important;
-  max-width: calc(5 * var(--slot-w, 112px) + 4 * 12px + 52px) !important;
+  width: min(70%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important;
+  max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
-  /* was translateX(3.5%) right — shift left a bit */
   transform: translateX(-1.5%) !important;
-  padding-left: 4px !important;
-  padding-right: 4px !important;
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+  /* taller lane: less vertical inset so frame grows toward mid divider / hand */
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
   box-sizing: border-box !important;
+  border-radius: 16px !important;
+  /* always-visible thin field border (play lane, not outer board art) */
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 140, .42) !important;
 }
 
-/* Drop-glow follows narrowed myBoard; keep the same centering nudge */
+/* Drop-glow follows narrowed+taller myBoard */
 #game.active.drop-ready #myBoard,
 #game.active #myBoard.drop-glow {
-  width: min(76%, calc(5 * var(--slot-w, 112px) + 4 * 12px + 44px)) !important;
-  max-width: calc(5 * var(--slot-w, 112px) + 4 * 12px + 52px) !important;
+  width: min(70%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important;
+  max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
   transform: translateX(-1.5%) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 140, .55) !important;
 }
 
 /* ===== v0.202: hand size OK but NO overlap onto board ===== */
@@ -4141,4 +4169,53 @@ html.is-desktop #game.active .my-hand .card.playable,
     /* keep fan z-index; do not promote to fullscreen overlay */
     z-index: auto !important;
   }
+}
+
+
+/* ===== v0.225 tablet HUD: opp-hand back = deck pile art; peek more down; no long-press menu ===== */
+#game.active .opp-hand {
+  overflow: hidden !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  /* push row content down so ~half of backs show */
+  padding: 10px 14% 2px !important;
+  margin-top: 6px !important;
+}
+#game.active .opp-hand .back {
+  height: min(78%, 9.5cqh) !important;
+  width: calc(min(78%, 9.5cqh) * 0.70) !important;
+  margin-left: -12px !important;
+  flex: 0 0 auto !important;
+  border: 1px solid #c9a24a !important;
+  border-radius: 6px !important;
+  box-shadow: 0 3px 6px #0008 !important;
+  background-color: #0c1830 !important;
+  background-image: url("../assets/img/hud/back.png") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+#game.active .opp-hand .back:first-child { margin-left: 0 !important; }
+
+/* Kill browser long-press callout/context menu on play surface (iPad/Chrome) */
+#game.active,
+#game.active * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+/* Keep selectable text in lore/modals/inputs */
+#game.active .modal,
+#game.active .modal *,
+#game.active .lore-box,
+#game.active .lore-box *,
+#game.active .lore-side,
+#game.active .lore-side *,
+#cardLorePop,
+#cardLorePop *,
+#cardMenuPop .card-menu,
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
 }

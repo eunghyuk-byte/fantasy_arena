@@ -97,7 +97,7 @@ function doAttack(p, attacker, target, auto) {
     });
   }
 
-  let dAtk = 0, def = null, dHpSnap = null;
+  let dAtk = 0, def = null, dHpSnap = null, dShared = null, defVal = 0;
   if (target.kind === "minion") {
     def = target.minion;
     // 광역(9): counter primary = board front (first living)
@@ -105,9 +105,9 @@ function doAttack(p, attacker, target, auto) {
       const front = opponent(p).board.find(m => m.hp > 0 && !m.dying);
       if (front) def = front;
     }
-    const dShared = rollSharedCoins(def);
+    dShared = rollSharedCoins(def);
     dAtk = clampAtk((Number(def.atk) || 0) + dShared.dAtk);
-    const defVal = clampDef((Number(def.def) || 0) + dShared.dDef);
+    defVal = clampDef((Number(def.def) || 0) + dShared.dDef);
     dHpSnap = beginCombatHpCoin(def, dShared.dHp);
     if (dShared.flips.length) {
       rows.push({
@@ -130,8 +130,20 @@ function doAttack(p, attacker, target, auto) {
     ? ATK_SKILL_HELP[atkSkillOf(attacker)][0] : "";
   log(`${attacker.name} 공유코인 N=${aShared.n} 앞면${aShared.heads} → 공 ${aAtk}` + (atkSkillOf(attacker) > 1 ? ` [${skLabel}]` : ""));
   showCoinResult("코인 배틀", rows, async () => {
-    attacker._fxAtk = aAtk;
-    if (target.kind === "minion" && def) def._fxAtk = dAtk;
+    // Temp combat presentation: bake rolled values on face numbers + ±Δ overlays (no 「공 N」)
+    function armFx(u, atkVal, defV, dA, dD, dH) {
+      if (!u) return;
+      u._fxAtk = atkVal;
+      u._fxDef = defV;
+      u._fxHp = u.hp; // beginCombatHpCoin already applied dHp
+      u._fxAtkD = dA || 0;
+      u._fxDefD = dD || 0;
+      u._fxHpD = dH || 0;
+    }
+    armFx(attacker, aAtk, aDefVal, aShared.dAtk, aShared.dDef, aShared.dHp);
+    if (target.kind === "minion" && def) {
+      armFx(def, dAtk, defVal, (dShared && dShared.dAtk) || 0, (dShared && dShared.dDef) || 0, (dShared && dShared.dHp) || 0);
+    }
     render();
     await waitMs(280);
     const atkEl = Vfx.elOf(attacker.uid);
@@ -376,9 +388,14 @@ function doAttack(p, attacker, target, auto) {
         destroyMinion(pl, mm, { fromSpell: false });
       });
       pl._hurt = null;
-      pl.board.forEach(mm => { mm._hurt = null; mm._fxAtk = null; });
+      pl.board.forEach(mm => {
+        mm._hurt = null;
+        mm._fxAtk = mm._fxDef = mm._fxHp = null;
+        mm._fxAtkD = mm._fxDefD = mm._fxHpD = null;
+      });
     });
-    attacker._fxAtk = null;
+    attacker._fxAtk = attacker._fxDef = attacker._fxHp = null;
+    attacker._fxAtkD = attacker._fxDefD = attacker._fxHpD = null;
     cleanupBoards();
     checkWin();
     render();

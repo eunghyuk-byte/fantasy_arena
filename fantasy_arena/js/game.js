@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.224";
+const GAME_VERSION = "0.226";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -2393,3 +2393,21 @@ document.addEventListener("click", (e) => {
     try { Sfx.playClick && Sfx.playClick(); } catch (err) {}
   }
 }, true);
+
+/* v0.225: suppress long-press browser context menu during play */
+(function bindNoContextMenu() {
+  const block = (e) => {
+    const g = document.getElementById("game");
+    if (!g || !g.classList.contains("active")) return;
+    const t = e.target;
+    if (t && t.closest && t.closest(".modal, .lore-box, .lore-side, #cardLorePop, #cardMenuPop, input, textarea, [contenteditable='true']")) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  document.addEventListener("contextmenu", block, { capture: true });
+  const g = document.getElementById("game");
+  if (g) g.addEventListener("contextmenu", block, { capture: true });
+})();
+
