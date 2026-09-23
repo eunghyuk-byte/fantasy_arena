@@ -897,17 +897,27 @@ function layoutOppFan() {
   if (!n) return;
   const mid = (n - 1) / 2;
   let w = cards[0].offsetWidth || 0;
-  if (w < 24) w = 48;
-  // Same overlap rule as ally hand fan
+  if (w < 24) {
+    if (!layoutOppFan._retrying) {
+      layoutOppFan._retrying = true;
+      requestAnimationFrame(() => { layoutOppFan._retrying = false; layoutOppFan(); });
+    }
+    w = 48;
+  }
+  // Mirror of ally fan: same overlap/arc, opposite side (edges up, origin top)
   const overlap = Math.min(Math.round(w * 0.62), Math.max(24, w - 16));
   cards.forEach((el, i) => {
     const t = n <= 1 ? 0 : (i - mid);
-    const y = Math.round(Math.abs(t) * 7); // edges lift toward top (opp side)
-    const rot = (t * 2.4).toFixed(2);
-    el.style.transform = "translateY(" + (-y) + "px) rotate(" + rot + "deg)";
+    const y = Math.round(Math.abs(t) * 7); // edges go UP
+    const rot = (-t * 2.4).toFixed(2); // mirrored rotation vs ally
+    el.style.setProperty("transform-origin", "top center", "important");
+    el.style.setProperty(
+      "transform",
+      "translateY(" + (-y) + "px) rotate(" + rot + "deg)",
+      "important"
+    );
     el.style.setProperty("margin-left", i ? ("-" + overlap + "px") : "0", "important");
     el.style.setProperty("z-index", String(5 + i), "important");
-    el.style.transformOrigin = "bottom center";
   });
 }
 function layoutHandFan() {
@@ -1071,7 +1081,7 @@ function layoutHudGems() {
     const el = document.getElementById(id);
     if (!el || !el.style.left) return;
     const L = parseFloat(el.style.left);
-    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 160) + "px", "important");
+    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 170) + "px", "important");
   });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
@@ -1152,7 +1162,7 @@ function layoutEndBtn() {
   // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
   if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
   // v0.236: end-turn LEFT 50, UP 22
-  btn.style.left = (left - 80) + "px";
+  btn.style.left = (left - 90) + "px";
   btn.style.top = (top - 24) + "px";
   btn.style.width = bw + "px";
   btn.style.height = bh + "px";
