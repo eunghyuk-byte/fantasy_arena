@@ -570,7 +570,8 @@ async function composeCardFace(c, opts={}) {
         dx = Math.max(artX + artW - dw, Math.min(artX, dx));
         dy = Math.max(artY + artH - dh, Math.min(artY, dy));
       }
-      // Unit portrait: shift illustration down ~20px inside art window (position only; scale unchanged)
+      // All types +10 (v0.265); minions keep prior +20 so total +30
+      dy += 10;
       if (c.type === "minion") dy += 20;
       ctx.drawImage(art, sx, sy, sw, sh, dx, dy, dw, dh);
     };
