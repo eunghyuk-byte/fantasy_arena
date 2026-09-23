@@ -4242,24 +4242,21 @@ input, textarea, [contenteditable="true"] {
 }
 
 
-/* v0.243: settings gear asset; button 48px; up 12px; glyph fills circle */
+/* v0.245: revert image gear — emoji ⚙, button 48px, glyph larger, keep up 12 */
 #settingsGearBtn.settings-gear-btn {
-  top: 2px !important; /* was 14 → up 12 */
+  top: 2px !important;
   right: 14px !important;
   width: 48px !important;
   height: 48px !important;
-  font-size: 0 !important;
-  color: transparent !important;
-  line-height: 0 !important;
+  font-size: 40px !important;
+  line-height: 1 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 0 !important;
-  overflow: hidden !important;
-  background-image: url("../assets/img/hud/settings_gear.png") !important;
-  background-size: 92% 92% !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
+  overflow: visible !important;
+  color: #e8d6a0;
+  background-image: none !important;
   transform: none;
 }
 #settingsGearBtn.settings-gear-btn.on {
