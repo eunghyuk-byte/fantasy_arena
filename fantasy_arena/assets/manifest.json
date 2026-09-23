@@ -1,5 +1,5 @@
 {
-  "count": 707,
+  "count": 699,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -32,11 +32,6 @@
       "name": "sfx_card_play"
     },
     {
-      "path": "assets/audio/sfx/sfx_cast_charge.ogg",
-      "bytes": 11288,
-      "name": "sfx_cast_charge"
-    },
-    {
       "path": "assets/audio/sfx/sfx_coin.ogg",
       "bytes": 24865,
       "name": "sfx_coin"
@@ -65,41 +60,6 @@
       "path": "assets/audio/sfx/sfx_slash.ogg",
       "bytes": 15473,
       "name": "sfx_slash"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_slash_crit.ogg",
-      "bytes": 15255,
-      "name": "sfx_slash_crit"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_spell_dark.ogg",
-      "bytes": 20516,
-      "name": "sfx_spell_dark"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_spell_earth.ogg",
-      "bytes": 21067,
-      "name": "sfx_spell_earth"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_spell_fire.ogg",
-      "bytes": 20642,
-      "name": "sfx_spell_fire"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_spell_light.ogg",
-      "bytes": 20662,
-      "name": "sfx_spell_light"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_spell_water.ogg",
-      "bytes": 18698,
-      "name": "sfx_spell_water"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_spell_wind.ogg",
-      "bytes": 18128,
-      "name": "sfx_spell_wind"
     },
     {
       "path": "assets/audio/sfx/sfx_summon.ogg",

@@ -2,7 +2,6 @@ const Sfx = (() => {
   const BASE = "assets/audio/sfx/";
   const FILES = {
     slash: "sfx_slash",
-    slashCrit: "sfx_slash_crit",
     parry: "sfx_parry",
     death: "sfx_death",
     cardDrop: "sfx_card_play",
@@ -13,14 +12,7 @@ const Sfx = (() => {
     win: "sfx_win",
     lose: "sfx_lose",
     click: "sfx_ui_click",
-    cast: "sfx_cast_charge",
-    coin: "sfx_coin",
-    spell_fire: "sfx_spell_fire",
-    spell_water: "sfx_spell_water",
-    spell_wind: "sfx_spell_wind",
-    spell_earth: "sfx_spell_earth",
-    spell_light: "sfx_spell_light",
-    spell_dark: "sfx_spell_dark"
+    coin: "sfx_coin"
   };
   const EXTS = [".ogg", ".mp3", ".wav"];
   let ctx = null, sfxGain = null, muted = false, vol = 0.85;
@@ -106,11 +98,11 @@ const Sfx = (() => {
     const g = envGain(c, t, 0.008, dur, peak);
     n.connect(f); f.connect(g); g.connect(sfxGain); n.start(t);
   }
-  function playSlash(crit) {
-    playKey(crit ? "slashCrit" : "slash", { duckMs: 220 }).then(ok => {
+  function playSlash() {
+    playKey("slash", { duckMs: 220 }).then(ok => {
       if (ok) return;
-      synthNoise(0.12, crit ? 0.12 : 0.08, 1200);
-      synthTone(crit ? [740, 420] : [520], 0.07, 0.16);
+      synthNoise(0.12, 0.08, 1200);
+      synthTone([520], 0.07, 0.16);
     });
   }
   function playParry() {
@@ -164,22 +156,8 @@ const Sfx = (() => {
       if (!ok) synthTone([880], 0.025, 0.05);
     });
   }
-  function playCast() {
-    playKey("cast", { duckMs: 200 }).then(ok => { if (!ok) synthTone([300, 480], 0.05, 0.25); });
-  }
   function playCoin() {
     playKey("coin", { duckMs: 120 }).then(ok => { if (!ok) synthTone([880, 240], 0.06, 0.16); });
-  }
-  function playSpell(kind) {
-    const map = {
-      fire: "spell_fire", water: "spell_water", wind: "spell_wind",
-      earth: "spell_earth", light: "spell_light", dark: "spell_dark",
-      earthquake: "spell_earth", burst: "spell_earth"
-    };
-    playCast();
-    playKey(map[kind] || "spell_earth", { duckMs: 500 }).then(ok => {
-      if (!ok) synthTone([240, 180], 0.05, 0.3);
-    });
   }
   function setVolume(v) {
     vol = Math.max(0, Math.min(1, +v || 0));
@@ -192,7 +170,7 @@ const Sfx = (() => {
   function warmup() { Object.values(FILES).forEach(stem => load(stem)); }
   return {
     playSlash, playParry, playDeath, playCardDrop, playDraw, playSummon,
-    playHeroHit, playTurn, playWin, playLose, playClick, playCast, playCoin,
-    playSpell, spell: playSpell, setVolume, setMuted, warmup, FILES
+    playHeroHit, playTurn, playWin, playLose, playClick, playCoin,
+    setVolume, setMuted, warmup, FILES
   };
 })();

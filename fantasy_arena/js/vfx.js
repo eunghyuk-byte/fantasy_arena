@@ -56,18 +56,18 @@ const Vfx = (() => {
     el.classList.remove("fx-recoil"); void el.offsetWidth; el.classList.add("fx-recoil");
     setTimeout(() => el.classList.remove("fx-recoil"), 480);
   }
-  function slash(from, to, crit) {
+  function slash(from, to) {
     if (!from || !to) return;
     const a = center(from), b = center(to);
     const ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
     const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-    spawn(crit ? "slash-arc crit" : "slash-arc", mx, my, { transform: "translate(-50%,-50%) rotate("+ang+"deg)" });
+    spawn("slash-arc", mx, my, { transform: "translate(-50%,-50%) rotate("+ang+"deg)" });
     spawn("slash-arc2", mx, my, { transform: "translate(-50%,-50%) rotate("+(ang+18)+"deg)" });
-    for (let i = 0; i < (crit ? 14 : 8); i++) {
+    for (let i = 0; i < 8; i++) {
       const dx = (Math.random()-0.5)*80, dy = (Math.random()-0.5)*80;
       spawn("spark", b.x+dx, b.y+dy, { animationDelay: (i*0.02)+"s" });
     }
-    spawn(crit ? "impact-flash crit" : "impact-flash", b.x, b.y);
+    spawn("impact-flash", b.x, b.y);
   }
   function dmgPop(el, n) {
     if (!el || !n) return;

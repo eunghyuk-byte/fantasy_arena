@@ -1730,10 +1730,6 @@
     animation: slashSweep .28s ease-out forwards;
     transform-origin: center;
   }
-  .vfx.slash-arc.crit {
-    height: 26px;
-    background: linear-gradient(90deg, transparent, #fff 15%, #ffef9a 50%, #ff9a3a 70%, transparent);
-  }
   .vfx.slash-arc2 {
     width: 180px; height: 8px;
     background: linear-gradient(90deg, transparent, #fff8, #fff0);
@@ -1759,7 +1755,6 @@
     transform: translate(-50%,-50%);
     animation: flashPop .32s ease-out forwards;
   }
-  .vfx.impact-flash.crit { width: 130px; height: 130px; }
   @keyframes flashPop {
     0% { opacity: 1; transform: translate(-50%,-50%) scale(.3); }
     100% { opacity: 0; transform: translate(-50%,-50%) scale(1.4); }

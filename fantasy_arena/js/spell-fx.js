@@ -838,7 +838,6 @@ const SpellFx = (() => {
           if ((kind === "aoe" || kind === "earthquake" || elem === "earth") && game) {
             game.classList.add("quake");
           }
-          try { Sfx.spell && Sfx.spell(kind); } catch (e) {}
           await new Promise(r => setTimeout(r, Math.max(900, T.vfx)));
           if (handle) handle.stop();
           if (game) game.classList.remove("quake");
