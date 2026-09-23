@@ -866,8 +866,9 @@ function layoutHudGems() {
     const HP_W = contentW * 0.032;
     const HP_H = HP_W;
     const hearts = [
-      { sel: "#oppStrip .hero-hp", CX: 0.984, CY: 0.336 },
-      { sel: "#myStrip .hero-hp", CX: 0.983, CY: 0.696 }
+      /* v0.219: nudge HP heart slightly left/down toward portrait bottom-left */
+      { sel: "#oppStrip .hero-hp", CX: 0.968, CY: 0.348 },
+      { sel: "#myStrip .hero-hp", CX: 0.967, CY: 0.708 }
     ];
     hearts.forEach(({ sel, CX, CY }) => {
       const hp = document.querySelector(sel);
@@ -936,22 +937,36 @@ function isHandCardPlayable(c, me) {
   return c.cost <= me.soul && (c.type !== "minion" || me.board.length < 5);
 }
 
+function endBtnHudSrcs() {
+  const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
+  return {
+    off: hud.endturnOff || "assets/img/hud/endturn_off.png",
+    glow: hud.endturnGlow || "assets/img/hud/endturn_glow.png",
+    pressed: hud.endturnPressed || "assets/img/hud/endturn_pressed.png",
+    v: (typeof GAME_VERSION !== "undefined" ? GAME_VERSION : (window.GAME_VERSION || "0"))
+  };
+}
+
+function setEndBtnBg(btn, src) {
+  if (!btn || !src) return;
+  btn.style.backgroundImage = "url('" + src + "?v=" + endBtnHudSrcs().v + "')";
+}
+
 function updateEndBtn(myTurn) {
   const btn = document.getElementById("endBtn");
   if (!btn) return;
   const { me } = meView();
   const label = btn.querySelector(".end-btn-label");
-  const v = (typeof GAME_VERSION !== "undefined" ? GAME_VERSION : (window.GAME_VERSION || "0"));
-  const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
-  const offSrc = hud.endturnOff || "assets/img/hud/endturn_off.png";
-  const glowSrc = hud.endturnGlow || "assets/img/hud/endturn_glow.png";
-  const pressedSrc = hud.endturnPressed || "assets/img/hud/endturn_pressed.png";
+  const { off: offSrc, glow: glowSrc, pressed: pressedSrc } = endBtnHudSrcs();
   btn.classList.remove("opp-turn", "my-turn", "glow", "go");
   if (!myTurn) {
     btn.classList.add("opp-turn");
     btn.disabled = true;
+    btn._endBtnHolding = false;
     if (label) label.textContent = "상대 턴";
-    btn.style.backgroundImage = "url('" + pressedSrc + "?v=" + v + "')";
+    // opp turn → off plate (disabled)
+    btn._endBtnDesiredSrc = offSrc;
+    setEndBtnBg(btn, offSrc);
     return;
   }
   const hasPlayable = me.hand.some(c => isHandCardPlayable(c, me));
@@ -963,11 +978,41 @@ function updateEndBtn(myTurn) {
     btn.classList.add("glow");
   }
   if (label) label.textContent = "턴 종료";
-  // playable → off plate; no playable → glow (prompt to end); never use endturn_my
-  const src = hasPlayable ? offSrc : glowSrc;
-  btn.style.backgroundImage = "url('" + src + "?v=" + v + "')";
+  // my turn + playable → pressed; my turn + none → glow
+  const src = hasPlayable ? pressedSrc : glowSrc;
+  btn._endBtnDesiredSrc = src;
+  // while pointer held, force off plate (visual only)
+  setEndBtnBg(btn, btn._endBtnHolding ? offSrc : src);
 }
 
+(function bindEndBtnPressVisual() {
+  function bind() {
+    const btn = document.getElementById("endBtn");
+    if (!btn || btn._endBtnPressBound) return;
+    btn._endBtnPressBound = true;
+    const release = () => {
+      if (!btn._endBtnHolding) return;
+      btn._endBtnHolding = false;
+      setEndBtnBg(btn, btn._endBtnDesiredSrc || endBtnHudSrcs().off);
+    };
+    btn.addEventListener("pointerdown", (e) => {
+      if (btn.disabled || !btn.classList.contains("my-turn")) return;
+      if (e.button != null && e.button !== 0) return;
+      btn._endBtnHolding = true;
+      setEndBtnBg(btn, endBtnHudSrcs().off);
+      try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    btn.addEventListener("pointerup", release);
+    btn.addEventListener("pointercancel", release);
+    btn.addEventListener("lostpointercapture", release);
+    btn.addEventListener("pointerleave", release);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bind);
+  } else {
+    bind();
+  }
+})();
 
 
 (function bindHandFanResize() {

@@ -3890,11 +3890,11 @@ html.is-desktop #game.active .my-hand .card.playable,
 #game.active .col-main > .corner-soul {
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
   position: absolute !important;
   z-index: 7 !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 0 0 0 14% !important;
   min-width: 0 !important;
   border: none !important;
   border-radius: 0 !important;
@@ -3903,9 +3903,9 @@ html.is-desktop #game.active .my-hand .card.playable,
   box-shadow: none !important;
   color: #fff8e8 !important;
   font-weight: 900 !important;
-  font-size: clamp(11px, 1.35cqh, 18px) !important;
+  font-size: clamp(16px, 1.85cqh, 23px) !important;
   line-height: 1 !important;
-  text-align: center !important;
+  text-align: left !important;
   white-space: nowrap !important;
   pointer-events: none !important;
   text-shadow:
@@ -3995,10 +3995,10 @@ html.is-desktop #game.active .my-hand .card.playable,
   position: absolute !important;
   z-index: 8 !important;
   display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 0 0 10% 18% !important;
   min-width: 0 !important;
   border: none !important;
   border-radius: 0 !important;
@@ -4007,9 +4007,9 @@ html.is-desktop #game.active .my-hand .card.playable,
   box-shadow: none !important;
   color: #fff8e8 !important;
   font-weight: 900 !important;
-  font-size: clamp(12px, 1.55cqh, 20px) !important;
+  font-size: clamp(17px, 2.05cqh, 25px) !important;
   line-height: 1 !important;
-  text-align: center !important;
+  text-align: left !important;
   pointer-events: none !important;
   text-shadow:
     0 0 2px #000,
@@ -4039,7 +4039,7 @@ html.is-desktop #game.active .my-hand .card.playable,
 }
 
 
-/* v0.218 HUD gem seat — neutralize legacy corner-soul !important pins; geometry owned by layoutHudGems() */
+/* v0.219 HUD gem seat — neutralize legacy corner-soul !important pins; geometry owned by layoutHudGems() */
 #game.active .col-main > .corner-soul.opp,
 #game.active .col-main > .corner-soul.me {
   top: unset !important;
