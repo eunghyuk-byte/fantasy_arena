@@ -1,5 +1,5 @@
 {
-  "count": 708,
+  "count": 707,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -1872,21 +1872,6 @@
       "name": "board"
     },
     {
-      "path": "assets/img/hud/deck.jpg",
-      "bytes": 87124,
-      "name": "deck"
-    },
-    {
-      "path": "assets/img/hud/hp.jpg",
-      "bytes": 21383,
-      "name": "hp"
-    },
-    {
-      "path": "assets/img/hud/soul.jpg",
-      "bytes": 21186,
-      "name": "soul"
-    },
-    {
       "path": "assets/img/icons/dark.png",
       "bytes": 116037,
       "name": "dark"
@@ -3540,6 +3525,16 @@
       "path": "assets/img/hud/endturn_pressed.png",
       "bytes": 434014,
       "name": "deck"
+    },
+    {
+      "path": "assets/img/frames/battlefield_concepts/deck_dark_battlefield_common_frame.png",
+      "bytes": 3494654,
+      "name": "deck_dark_battlefield_common_frame"
+    },
+    {
+      "path": "assets/img/hud/endturn_glow.png",
+      "bytes": 408320,
+      "name": "endturn_glow"
     }
   ]
 }

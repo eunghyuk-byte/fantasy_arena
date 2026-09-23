@@ -19,13 +19,12 @@ const TRIBE_ICONS = {
 };
 const HUD_UI = {
   board:"assets/img/hud/board.jpg",
-  hp:"assets/img/hud/hp.jpg",
-  soul:"assets/img/hud/soul.jpg",
   deck:"assets/img/hud/back.png",
   /* end-turn plates (v0.219): playable→pressed, none→glow, opp→off; hold→off visual */
   endturnOff:"assets/img/hud/endturn_off.png",
   endturnGlow:"assets/img/hud/endturn_glow.png",
   endturnPressed:"assets/img/hud/endturn_pressed.png"
+  /* hp.jpg/soul.jpg removed: seat soul/HP use board gems; deck.jpg unused (deck→back.png) */
 };
 const COIN_PLUS = "assets/img/coins/plus.png";
 const COIN_MINUS = "assets/img/coins/minus.png";
