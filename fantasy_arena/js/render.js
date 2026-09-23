@@ -151,8 +151,8 @@ function layoutBoardDecks() {
       deck.style.paddingBottom = "0";
     } else {
       deck.style.top = "auto";
-      // v0.236: ally deck UP ~30px
-      deck.style.bottom = (mr.bottom - br.bottom + 4 + 30) + "px";
+      // v0.236: ally deck UP ~50px
+      deck.style.bottom = (mr.bottom - br.bottom + 4 + 50) + "px";
       deck.style.height = Math.max(90, br.height * 0.85) + "px";
       deck.style.justifyContent = "flex-end";
       deck.style.paddingTop = "0";
@@ -1042,12 +1042,12 @@ function layoutHudGems() {
   const SOUL_H = Math.max(18, SOUL_W * 0.42);
   placeIn(document.getElementById("oppSoulGem"), mr, 0.828, 0.095, SOUL_W, SOUL_H);
   placeIn(document.getElementById("mySoulGem"), mr, 0.828, 0.841, SOUL_W, SOUL_H);
-  // v0.236: soul cost numbers LEFT ~100px total
+  // v0.236: soul cost numbers LEFT ~130px total
   ["oppSoulGem", "mySoulGem"].forEach(id => {
     const el = document.getElementById(id);
     if (!el || !el.style.left) return;
     const L = parseFloat(el.style.left);
-    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 100) + "px", "important");
+    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 130) + "px", "important");
   });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
@@ -1082,9 +1082,9 @@ function layoutHudGems() {
       if (sr.width < 4 || sr.height < 4) return;
       const vx = contentLeft + contentW * CX - HP_W / 2;
       const vy = contentTop + contentH * CY - HP_H / 2;
-      // v0.236: hero HP numbers DOWN ~10px and LEFT ~8px
-      hp.style.setProperty("left", (vx - sr.left - 8) + "px", "important");
-      hp.style.setProperty("top", (vy - sr.top + 10) + "px", "important");
+      // v0.236: hero HP numbers DOWN ~9px and LEFT ~7px
+      hp.style.setProperty("left", (vx - sr.left - 7) + "px", "important");
+      hp.style.setProperty("top", (vy - sr.top + 9) + "px", "important");
       hp.style.setProperty("width", HP_W + "px", "important");
       hp.style.setProperty("height", HP_H + "px", "important");
       hp.style.setProperty("right", "auto", "important");
@@ -1127,9 +1127,9 @@ function layoutEndBtn() {
   if (!Number.isFinite(left) || !Number.isFinite(top) || !Number.isFinite(bw)) return;
   // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
   if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
-  // v0.236: end-turn LEFT 30, UP 20
-  btn.style.left = (left - 30) + "px";
-  btn.style.top = (top - 20) + "px";
+  // v0.236: end-turn LEFT 50, UP 22
+  btn.style.left = (left - 50) + "px";
+  btn.style.top = (top - 22) + "px";
   btn.style.width = bw + "px";
   btn.style.height = bh + "px";
   btn.style.right = "auto";

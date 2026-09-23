@@ -3777,7 +3777,7 @@ body.dragging-card {
   margin-left: auto !important;
   margin-right: auto !important;
   /* v0.227: nudge field UP ~20px and RIGHT ~20px (was sitting low-left) */
-  transform: translate(calc(-1.5% + 20px), 20px) !important;
+  transform: translate(calc(-1.5% + 20px), 60px) !important;
   padding-left: 2px !important;
   padding-right: 2px !important;
   /* taller lane: less vertical inset so frame grows toward mid divider / hand */
@@ -3796,7 +3796,7 @@ body.dragging-card {
   max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
-  transform: translate(calc(-1.5% + 20px), 20px) !important;
+  transform: translate(calc(-1.5% + 20px), 60px) !important;
   box-shadow: inset 0 0 0 1px rgba(255, 224, 140, .55) !important;
 }
 
@@ -3910,11 +3910,9 @@ html.is-desktop #game.active .my-hand .card.playable,
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffe7a8;
   font-weight: 800;
   font-size: clamp(10px, 1.35cqi, 15px);
   letter-spacing: 0.06em;
-  text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 0, 0, 0.85);
   pointer-events: auto;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -3925,24 +3923,28 @@ html.is-desktop #game.active .my-hand .card.playable,
   z-index: 1;
   line-height: 1.1;
 }
+/* v0.240: label colors tuned per plate (off / pressed / glow) */
+/* opp + off plate (dark charcoal center) — muted brass, readable not loud */
 #game.active .col-main > #endBtn.end-btn.opp-turn {
   cursor: default;
-  color: #d8c9a0;
-  text-shadow: 0 1px 2px #000, 0 0 8px rgba(0, 0, 0, 0.9);
+  color: #c4b08a;
+  text-shadow: 0 1px 1px rgba(0,0,0,.85), 0 0 4px rgba(0,0,0,.55);
   pointer-events: none;
 }
 #game.active .col-main > #endBtn.end-btn:disabled {
   opacity: 1;
   cursor: default;
 }
+/* my-turn + pressed plate (dark) — warm antique gold */
 #game.active .col-main > #endBtn.end-btn.my-turn {
-  color: #fff6d0;
-  text-shadow: 0 1px 2px #2a1800, 0 0 8px rgba(60, 30, 0, 0.75);
+  color: #e0c88a;
+  text-shadow: 0 1px 1px rgba(20,10,0,.8), 0 0 5px rgba(40,20,0,.45);
   cursor: pointer;
 }
+/* my-turn + glow plate (bright lime) — deep forest, soft edge */
 #game.active .col-main > #endBtn.end-btn.my-turn.glow {
-  color: #eaffea;
-  text-shadow: 0 1px 2px #041808, 0 0 8px rgba(0, 60, 30, 0.8);
+  color: #1c3524;
+  text-shadow: 0 1px 0 rgba(220,255,200,.35), 0 0 3px rgba(255,255,200,.2);
 }
 
 
@@ -4239,20 +4241,19 @@ input, textarea, [contenteditable="true"] {
 }
 
 
-/* v0.237: corner gear 2× size, glyph centered */
+/* v0.240: gear button = original 48px; inner ⚙ glyph ~2× */
 #settingsGearBtn.settings-gear-btn {
-  width: 96px !important;
-  height: 96px !important;
-  font-size: 52px !important;
+  width: 48px !important;
+  height: 48px !important;
+  font-size: 40px !important; /* was ~20 — glyph only larger */
   line-height: 1 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 0 !important;
+  overflow: visible !important;
   color: #e8d6a0;
-  /* optical center for ⚙ (glyph sits slightly high) */
-  text-indent: 0;
-  transform: translateY(1px);
+  transform: none;
 }
 #settingsGearBtn.settings-gear-btn.on {
   border-color: rgba(201, 162, 74, 0.55);
