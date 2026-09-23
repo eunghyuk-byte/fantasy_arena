@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.222";
+const GAME_VERSION = "0.223";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1224,6 +1224,14 @@ function hidePeek() {
   const p = document.getElementById("cardPeek");
   if (p) p.remove();
 }
+/** Cap peek face so tablet never shows intrinsic 768×1152 canvas near-fullscreen. */
+function peekFaceSize() {
+  const vh = window.innerHeight || 800;
+  const vw = window.innerWidth || 600;
+  const maxH = Math.min(vh * 0.70, 480);
+  const maxW = Math.min(300, vw * 0.70, maxH * (768 / 1152));
+  return { w: Math.max(120, Math.round(maxW)), maxH: Math.round(maxH) };
+}
 /** HS-style keyword tips for board/hand peek (unit + equipped item abilities). */
 function collectAbilityTips(c) {
   const tips = [];
@@ -1298,13 +1306,16 @@ function showPeek(el, card) {
     : "";
   peek.innerHTML = `<img class="peek-face" src="${img.src}" alt="">` + tipsHtml;
   document.body.appendChild(peek);
-  const w = Math.min(300, window.innerHeight * 0.42);
+  const { w, maxH } = peekFaceSize();
   const hasTips = tips.length > 0;
   peek.style.cssText = hasTips
-    ? "position:fixed;left:36%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;display:flex;flex-direction:row;align-items:center;gap:14px;width:auto;max-width:min(96vw,920px);"
-    : "position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;";
+    ? "position:fixed;left:36%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;display:flex;flex-direction:row;align-items:center;gap:14px;width:auto;max-width:min(96vw,920px);max-height:70vh;"
+    : "position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;margin:0;max-width:min(70vw,320px);max-height:70vh;";
   const face = peek.querySelector(".peek-face");
-  if (face) face.style.cssText = "width:"+w+"px;height:auto;display:block;border-radius:16px;flex-shrink:0;";
+  if (face) {
+    face.width = w;
+    face.style.cssText = "width:"+w+"px;max-width:min(70vw,300px);height:auto;max-height:"+maxH+"px;display:block;border-radius:16px;flex-shrink:0;object-fit:contain;";
+  }
 }
 
 function placeDropGlow(on, x, y) {
@@ -1569,16 +1580,84 @@ function reorderOwnBoard(fromUid, toIdx) {
   me.board.splice(dest, 0, m);
   return fromIdx !== dest;
 }
+
+/** Touch/pen hold → #cardPeek (capped); move past threshold cancels peek and may start drag.
+ *  Desktop mouse uses pointerenter/leave separately. Does not steal click targeting. */
+function bindTouchPeekHold(el, card, opts) {
+  opts = opts || {};
+  let peekTimer = null;
+  let arm = null;
+  const MOVE_PX = opts.movePx != null ? opts.movePx : 14;
+  const HOLD_MS = opts.holdMs != null ? opts.holdMs : 200;
+  const clearArm = () => {
+    if (peekTimer) { clearTimeout(peekTimer); peekTimer = null; }
+    arm = null;
+  };
+  const onPointerDown = (ev) => {
+    if (ev.button != null && ev.button !== 0) return;
+    if (_drag) return;
+    const isTouch = ev.pointerType === "touch" || ev.pointerType === "pen";
+    if (!isTouch) {
+      if (typeof opts.onMouseDown === "function") opts.onMouseDown(ev);
+      return false; // not handled as touch
+    }
+    // Hand/ally reorder: prevent browser gesture steal. Opp/targeting peek: leave click alone.
+    if (opts.capture !== false) {
+      if (ev.preventDefault) ev.preventDefault();
+      if (ev.stopPropagation) ev.stopPropagation();
+    }
+    clearArm();
+    arm = { x0: ev.clientX, y0: ev.clientY, pid: ev.pointerId, pointerType: ev.pointerType || "touch" };
+    peekTimer = setTimeout(() => {
+      peekTimer = null;
+      if (!arm || _drag) return;
+      showPeek(el, card);
+    }, HOLD_MS);
+    const onMove = (e) => {
+      if (!arm) return;
+      const dx = e.clientX - arm.x0;
+      const dy = e.clientY - arm.y0;
+      if (dx * dx + dy * dy < MOVE_PX * MOVE_PX) return;
+      const a = arm;
+      clearArm();
+      hidePeek();
+      window.removeEventListener("pointermove", onMove, true);
+      window.removeEventListener("pointerup", onUp, true);
+      window.removeEventListener("pointercancel", onUp, true);
+      if (typeof opts.onDragStart === "function") {
+        opts.onDragStart({
+          button: 0,
+          pointerId: a.pid,
+          pointerType: a.pointerType,
+          clientX: e.clientX,
+          clientY: e.clientY,
+          preventDefault() {},
+          stopPropagation() {}
+        }, e);
+      }
+    };
+    const onUp = () => {
+      clearArm();
+      hidePeek();
+      window.removeEventListener("pointermove", onMove, true);
+      window.removeEventListener("pointerup", onUp, true);
+      window.removeEventListener("pointercancel", onUp, true);
+    };
+    window.addEventListener("pointermove", onMove, true);
+    window.addEventListener("pointerup", onUp, true);
+    window.addEventListener("pointercancel", onUp, true);
+    return true;
+  };
+  return { onPointerDown, clearArm };
+}
+
 function bindHandCard(el, card) {
   // Desktop mouse: hover shows center #cardPeek. Touch/pen: hold (no move) shows same peek.
   el.onpointerenter = (ev) => {
     if (ev && (ev.pointerType === "touch" || ev.pointerType === "pen")) return;
     showPeek(el, card);
   };
-  el.onpointerleave = (ev) => {
-    if (ev && (ev.pointerType === "touch" || ev.pointerType === "pen")) return;
-    hidePeek();
-  };
+  el.onpointerleave = () => { hidePeek(); };
   // Prefer pointer events; also bind mouse* so headless/Electron drags never miss
   const startDrag = (ev) => {
     hidePeek();
@@ -1701,69 +1780,19 @@ function bindHandCard(el, card) {
     window.addEventListener("mouseup", up, true);
   };
 
-  // Touch/pen: hold still → same #cardPeek as desktop hover; move past threshold → drag-to-play (no peek steal).
-  let _touchPeekTimer = null;
-  let _touchArm = null;
-  const clearTouchArm = () => {
-    if (_touchPeekTimer) { clearTimeout(_touchPeekTimer); _touchPeekTimer = null; }
-    _touchArm = null;
-  };
-  const onPointerDown = (ev) => {
-    if (ev.button != null && ev.button !== 0) return;
-    if (_drag) return;
-    const isTouch = ev.pointerType === "touch" || ev.pointerType === "pen";
-    if (!isTouch) {
-      startDrag(ev);
-      return;
-    }
-    // Touch path: arm peek + drag threshold (do not start drag immediately)
-    if (ev.preventDefault) ev.preventDefault();
-    if (ev.stopPropagation) ev.stopPropagation();
-    clearTouchArm();
-    _touchArm = { x0: ev.clientX, y0: ev.clientY, pid: ev.pointerId, pointerType: ev.pointerType || "touch" };
-    _touchPeekTimer = setTimeout(() => {
-      _touchPeekTimer = null;
-      if (!_touchArm || _drag) return;
-      showPeek(el, card);
-    }, 200);
-    const MOVE_PX = 14;
-    const onMove = (e) => {
-      if (!_touchArm) return;
-      const dx = e.clientX - _touchArm.x0;
-      const dy = e.clientY - _touchArm.y0;
-      if (dx * dx + dy * dy < MOVE_PX * MOVE_PX) return;
-      const arm = _touchArm;
-      clearTouchArm();
-      hidePeek();
-      window.removeEventListener("pointermove", onMove, true);
-      window.removeEventListener("pointerup", onUp, true);
-      window.removeEventListener("pointercancel", onUp, true);
+  const touch = bindTouchPeekHold(el, card, {
+    onDragStart(fakeEv) {
       if (!canDropCard(card)) return;
-      startDrag({
-        button: 0,
-        pointerId: arm.pid,
-        pointerType: arm.pointerType,
-        clientX: e.clientX,
-        clientY: e.clientY,
-        preventDefault() {},
-        stopPropagation() {}
-      });
-    };
-    const onUp = () => {
-      clearTouchArm();
-      hidePeek();
-      window.removeEventListener("pointermove", onMove, true);
-      window.removeEventListener("pointerup", onUp, true);
-      window.removeEventListener("pointercancel", onUp, true);
-    };
-    window.addEventListener("pointermove", onMove, true);
-    window.addEventListener("pointerup", onUp, true);
-    window.addEventListener("pointercancel", onUp, true);
+      startDrag(fakeEv);
+    },
+    onMouseDown(ev) { startDrag(ev); }
+  });
+  el.onpointerdown = (ev) => {
+    if (touch.onPointerDown(ev) === false) return; // mouse path already called onMouseDown
   };
-  el.onpointerdown = onPointerDown;
   // Mouse fallback for environments without PointerEvent; touch already handled above
   el.onmousedown = (ev) => {
-    if (window.PointerEvent) return; // pointerdown already ran
+    if (window.PointerEvent) return;
     startDrag(ev);
   };
 }
@@ -1778,16 +1807,19 @@ function canReorderBoard() {
 
 function bindBoardMinion(el, minion) {
   if (!el || !minion) return;
-  el.onpointerenter = () => { if (!_drag) showPeek(el, minion); };
-  el.onpointerleave = hidePeek;
+  el.onpointerenter = (ev) => {
+    if (ev && (ev.pointerType === "touch" || ev.pointerType === "pen")) return;
+    if (!_drag) showPeek(el, minion);
+  };
+  el.onpointerleave = () => { hidePeek(); };
   const startDrag = (ev) => {
     hidePeek();
     if (ev.button != null && ev.button !== 0) return;
     if (!canReorderBoard()) return;
     if (_drag) return;
     if (ui.targeting || ui.attacker) return;
-    ev.preventDefault();
-    ev.stopPropagation();
+    if (ev.preventDefault) ev.preventDefault();
+    if (ev.stopPropagation) ev.stopPropagation();
     clearDrag();
     clearInsertPreview();
     try { if (ev.pointerId != null && el.setPointerCapture) el.setPointerCapture(ev.pointerId); } catch (err) {}
@@ -1854,8 +1886,23 @@ function bindBoardMinion(el, minion) {
     window.addEventListener("mousemove", move, true);
     window.addEventListener("mouseup", up, true);
   };
-  el.onpointerdown = startDrag;
-  el.onmousedown = startDrag;
+  const touch = bindTouchPeekHold(el, minion, {
+    capture: false, // do not steal click targeting / attack selection
+    onDragStart(fakeEv) {
+      // Reorder drag only when allowed; otherwise peek already cleared by move.
+      if (!canReorderBoard()) return;
+      if (ui.targeting || ui.attacker) return;
+      startDrag(fakeEv);
+    },
+    onMouseDown(ev) { startDrag(ev); }
+  });
+  el.onpointerdown = (ev) => {
+    if (touch.onPointerDown(ev) === false) return;
+  };
+  el.onmousedown = (ev) => {
+    if (window.PointerEvent) return;
+    startDrag(ev);
+  };
 }
 
 function onHandClick(card) {
@@ -1924,6 +1971,11 @@ document.getElementById("game").addEventListener("click", (e) => {
     }
   }
 });
+
+// Stuck peek safety: clear on tab hide / window blur / any pointer cancel at doc level
+document.addEventListener("visibilitychange", () => { if (document.hidden) hidePeek(); });
+window.addEventListener("blur", () => { try { hidePeek(); } catch (e) {} });
+document.addEventListener("pointercancel", () => { try { if (!_drag) hidePeek(); } catch (e) {} }, true);
 
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") { ui.targeting = null; ui.attacker = null; render(); }

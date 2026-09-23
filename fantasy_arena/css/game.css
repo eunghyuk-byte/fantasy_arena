@@ -4097,3 +4097,48 @@ html.is-desktop #game.active .my-hand .card.playable,
   filter: brightness(1.08) saturate(1.2) !important;
   animation: playGlowBurn 0.9s ease-in-out infinite !important;
 }
+
+
+/* ===== v0.223: cardPeek size cap + no stuck fullscreen preview =====
+   Composed faces are 768×1152; width:auto + img width:100% could use intrinsic
+   size and fill the tablet viewport. Cap peek face; tip row may be wider.
+   Touch devices: disable hand :hover lift (sticky hover after tap). */
+#cardPeek {
+  max-width: min(96vw, 920px) !important;
+  max-height: 70vh !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+#cardPeek .peek-face,
+#cardPeek img.peek-face,
+#cardPeek > img {
+  width: min(300px, 42vh, 70vw) !important;
+  max-width: min(300px, 70vw) !important;
+  max-height: min(70vh, 480px) !important;
+  height: auto !important;
+  object-fit: contain !important;
+  flex-shrink: 0 !important;
+}
+#cardPeek:has(.peek-tips) {
+  width: auto !important;
+  max-width: min(96vw, 920px) !important;
+  max-height: 70vh !important;
+}
+/* Fine pointer only — avoid sticky :hover scale covering the board on tablet */
+@media (hover: hover) and (pointer: fine) {
+  #game.active .my-hand .card:hover:not(.dragging) {
+    transform: translateY(calc(var(--fan-y, 0px) - 36px)) rotate(var(--fan-r, 0deg)) scale(1.06) !important;
+    z-index: 80 !important;
+    filter: drop-shadow(0 14px 18px rgba(0,0,0,.45));
+  }
+}
+@media (hover: none), (pointer: coarse) {
+  #game.active .my-hand .card:hover:not(.dragging),
+  #game .my-hand .card:hover:not(.dragging),
+  #game.active .my-hand .card:hover {
+    transform: translateY(var(--fan-y, 0px)) rotate(var(--fan-r, 0deg)) !important;
+    filter: none !important;
+    /* keep fan z-index; do not promote to fullscreen overlay */
+    z-index: auto !important;
+  }
+}

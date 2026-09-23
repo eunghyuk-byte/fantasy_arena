@@ -215,9 +215,16 @@ function render() {
   document.querySelectorAll("#oppBoard .minion").forEach(el => {
     const om = findOn(opp, el.dataset.uid);
     el.onclick = () => onMinionClick(opp, om, "opp");
-    el.onpointerenter = () => showPeek(el, om);
-    el.onpointerleave = hidePeek;
-    // Never bind reorder on enemy board
+    el.onpointerenter = (ev) => {
+      if (ev && (ev.pointerType === "touch" || ev.pointerType === "pen")) return;
+      showPeek(el, om);
+    };
+    el.onpointerleave = () => { hidePeek(); };
+    // Tablet: hold to peek (same #cardPeek); move cancels. No reorder on enemy board.
+    if (typeof bindTouchPeekHold === "function") {
+      const touch = bindTouchPeekHold(el, om, { capture: false });
+      el.onpointerdown = (ev) => { touch.onPointerDown(ev); };
+    }
   });
 
   let hint = "";
