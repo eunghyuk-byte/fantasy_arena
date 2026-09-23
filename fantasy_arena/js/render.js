@@ -778,7 +778,7 @@ async function paintStatCoins(ctx, c, W, H) {
       if (x0 + total > W * 0.99) x0 = W * 0.99 - total;
       let cy = multi ? (cyBot - (rows.length - 1 - ri) * rowStep) : cyBot;
       // 5 coins: top row (behind 2) +1px up to slightly open the gap
-      if (multi && n === 5 && ri === 0) cy -= 1;
+      if (multi && n === 5 && ri === 0) cy -= 2; // v0.250: +1 more gap
       for (let i = 0; i < count; i++) {
         ctx.drawImage(img, x0 + i * (size + gap), cy - size / 2, size, size);
       }
