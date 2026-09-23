@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.229";
+const GAME_VERSION = "0.230";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -844,8 +844,8 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "summon_islands") {
     const slots = Math.max(0, 5 - p.board.length);
     for (let i = 0; i < slots; i++) {
-      const tok = cloneCard("e40");
-      // e40 공격불가: 턴 종료 전투에서 공격하지 않음
+      const tok = cloneCard("n40");
+      // n40 공격불가: 턴 종료 전투에서 공격하지 않음
       tok.canAttack = false; tok.attacksLeft = 0;
       p.board.push(tok);
     }
