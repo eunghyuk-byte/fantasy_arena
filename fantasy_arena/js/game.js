@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.236";
+const GAME_VERSION = "0.237";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1974,7 +1974,7 @@ function onMinionClick(owner, minion, side) {
 document.getElementById("game").addEventListener("click", (e) => {
   // #endBtn: endTurn only via pointerdown+pointerup both on button (see bindEndBtnPressVisual)
   if (e.target.id === "endBtn" || (e.target.closest && e.target.closest("#endBtn"))) return;
-  if (e.target.id === "giveBtn") { confirmGiveUp(); return; }
+  if (e.target.id === "btnSurrender") { confirmGiveUp(); return; }
   const portrait = e.target.closest(".hero-portrait, .hero-slot, .hud-hero");
   if (portrait) {
     const { me, opp } = meView();

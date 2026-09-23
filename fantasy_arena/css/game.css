@@ -4238,14 +4238,25 @@ input, textarea, [contenteditable="true"] {
 }
 
 
-/* v0.235: corner gear opens settings (was BGM note) */
+/* v0.237: corner gear 2× size, glyph centered */
 #settingsGearBtn.settings-gear-btn {
-  font-size: 22px;
-  line-height: 1;
+  width: 96px !important;
+  height: 96px !important;
+  font-size: 52px !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
   color: #e8d6a0;
+  /* optical center for ⚙ (glyph sits slightly high) */
+  text-indent: 0;
+  transform: translateY(1px);
 }
 #settingsGearBtn.settings-gear-btn.on {
-  /* unused — music state lives in settings panel */
   border-color: rgba(201, 162, 74, 0.55);
   box-shadow: none;
 }
+
+/* v0.237: combat give-up moved into settings */
+#game.active .give-btn { display: none !important; }

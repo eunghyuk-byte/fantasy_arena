@@ -16,7 +16,7 @@ function boardLayoutFingerprint() {
 }
 
 function cacheHudStyles() {
-  const ids = ["endBtn", "oppSoulGem", "mySoulGem", "giveBtn"];
+  const ids = ["endBtn", "oppSoulGem", "mySoulGem"];
   const sels = ["#oppStrip .hud-hero", "#myStrip .hud-hero", "#oppStrip .hero-hp", "#myStrip .hero-hp"];
   const out = { ids: {}, sels: {} };
   ids.forEach(id => {
@@ -700,7 +700,8 @@ async function composeCardFace(c, opts={}) {
     }
     if (!lines.length && txt) lines.push(txt);
     const lh = tSize * 1.28;
-    const startY = H*0.743 - ((lines.length - 1) * lh) / 2;
+    // v0.237: vertical center of lore panel (~was 0.743, sat too high for 2+ lines)
+    const startY = H*0.778 - ((lines.length - 1) * lh) / 2;
     lines.forEach((ln, i) => ctx.fillText(ln, W*0.50, startY + i * lh));
     ctx.restore();
   }
@@ -732,7 +733,7 @@ async function paintStatCoins(ctx, c, W, H) {
   const black = await loadImg((typeof COIN_BLACK !== "undefined" && COIN_BLACK) ? COIN_BLACK : "assets/img/coins/black.png");
   if (!gold && !black) return;
   // Larger coins (was ~3.9% W); cluster under each gem like 첨부 레퍼런스
-  const size = Math.round(W * 0.072 * 0.85); // v0.234: 15% smaller (~W*0.0612)
+  const size = Math.round(W * 0.072 * 0.85 * 0.80); // v0.237: another -20%
   const gap = Math.round(size * 0.08);
   // Vertical overlap between stacked rows (~45% of coin height)
   const rowStep = Math.round(size * 0.55);
@@ -1001,11 +1002,7 @@ function heroStrip(p, isMe, myTurn) {
   if (ui.targeting) canTarget = ui.targeting.targets.some(t => t.kind === "hero" && t.owner === p);
   if (ui.attacker && !isMe) canTarget = attackTargets(me, ui.attacker).some(t => t.kind === "hero");
   const hero = `<div class="hud-hero">${renderHeroSlot(p, isMe)}</div>`;
-  if (!isMe) return `<div class="side">${hero}</div>`;
-  return `<div class="side">
-      ${hero}
-      <button class="give-btn" id="giveBtn">게임 종료</button>
-    </div>`;
+  return `<div class="side">${hero}</div>`;
 }
 
 /** Seat soul gems, hero portraits, and HP on board-art wells (object-fit:contain content box). */
@@ -1095,12 +1092,6 @@ function layoutHudGems() {
       hp.style.setProperty("transform", "none", "important");
     });
 
-    const give = document.getElementById("giveBtn");
-    if (give) {
-      const gw = Math.max(72, contentW * 0.055);
-      const gh = Math.max(28, contentH * 0.028);
-      placeIn(give, hr, 0.955, 0.955, gw, gh);
-    }
   }
 }
 

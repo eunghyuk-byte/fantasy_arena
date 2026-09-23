@@ -169,8 +169,17 @@
     }
   }
 
+  function syncCombatSettings() {
+    const inCombat = !!(document.getElementById("game") && document.getElementById("game").classList.contains("active")
+      && typeof state !== "undefined" && state && !state.over);
+    const head = document.getElementById("settingsCombatHead");
+    const btn = document.getElementById("btnSurrender");
+    if (head) head.style.display = inCombat ? "" : "none";
+    if (btn) btn.style.display = inCombat ? "" : "none";
+  }
   function openSettings() {
     syncSettingsUI();
+    syncCombatSettings();
     const pop = document.getElementById("settingsPop");
     if (pop) pop.classList.add("show");
   }
@@ -192,6 +201,11 @@
     if (btn) btn.onclick = openSettings;
     if (gear) gear.onclick = (e) => { e.stopPropagation(); openSettings(); };
     if (close) close.onclick = closeSettings;
+    const surrender = document.getElementById("btnSurrender");
+    if (surrender) surrender.onclick = () => {
+      closeSettings();
+      try { if (typeof confirmGiveUp === "function") confirmGiveUp(); } catch (e) {}
+    };
     if (pop) pop.addEventListener("click", e => {
       if (e.target.id === "settingsPop") closeSettings();
     });
