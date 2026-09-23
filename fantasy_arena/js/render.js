@@ -837,20 +837,21 @@ function layoutHudGems() {
     if (!el || !parentRect) return;
     const left = contentLeft + contentW * CX - bw / 2 - parentRect.left;
     const top = contentTop + contentH * CY - bh / 2 - parentRect.top;
-    el.style.left = left + "px";
-    el.style.top = top + "px";
-    el.style.width = bw + "px";
-    el.style.height = bh + "px";
-    el.style.right = "auto";
-    el.style.bottom = "auto";
-    el.style.transform = "none";
+    // important: older corner-soul CSS used top/right !important and was pinning gems to the top rail
+    el.style.setProperty("left", left + "px", "important");
+    el.style.setProperty("top", top + "px", "important");
+    el.style.setProperty("width", bw + "px", "important");
+    el.style.setProperty("height", bh + "px", "important");
+    el.style.setProperty("right", "auto", "important");
+    el.style.setProperty("bottom", "auto", "important");
+    el.style.setProperty("transform", "none", "important");
   }
 
   // 4000×3000 board — purple pill gems on right frame rail; hearts at arch BR; arches on right
   const SOUL_W = contentW * 0.055;
   const SOUL_H = Math.max(18, SOUL_W * 0.42);
-  placeIn(document.getElementById("oppSoulGem"), mr, 0.809, 0.092, SOUL_W, SOUL_H);
-  placeIn(document.getElementById("mySoulGem"), mr, 0.809, 0.839, SOUL_W, SOUL_H);
+  placeIn(document.getElementById("oppSoulGem"), mr, 0.828, 0.095, SOUL_W, SOUL_H);
+  placeIn(document.getElementById("mySoulGem"), mr, 0.828, 0.841, SOUL_W, SOUL_H);
 
   const hr = hud ? hud.getBoundingClientRect() : null;
   if (hr && hr.width >= 8 && hr.height >= 8) {
@@ -858,15 +859,15 @@ function layoutHudGems() {
     const HERO_H = HERO_W * 1.28;
     const oppHero = document.querySelector("#oppStrip .hud-hero");
     const myHero = document.querySelector("#myStrip .hud-hero");
-    placeIn(oppHero, hr, 0.910, 0.300, HERO_W, HERO_H);
-    placeIn(myHero, hr, 0.910, 0.660, HERO_W, HERO_H);
+    placeIn(oppHero, hr, 0.928, 0.275, HERO_W, HERO_H);
+    placeIn(myHero, hr, 0.928, 0.635, HERO_W, HERO_H);
 
     // HP hearts — place relative to hero-slot after heroes are seated
     const HP_W = contentW * 0.032;
     const HP_H = HP_W;
     const hearts = [
-      { sel: "#oppStrip .hero-hp", CX: 0.966, CY: 0.361 },
-      { sel: "#myStrip .hero-hp", CX: 0.965, CY: 0.721 }
+      { sel: "#oppStrip .hero-hp", CX: 0.984, CY: 0.336 },
+      { sel: "#myStrip .hero-hp", CX: 0.983, CY: 0.696 }
     ];
     hearts.forEach(({ sel, CX, CY }) => {
       const hp = document.querySelector(sel);
@@ -877,13 +878,13 @@ function layoutHudGems() {
       if (sr.width < 4 || sr.height < 4) return;
       const vx = contentLeft + contentW * CX - HP_W / 2;
       const vy = contentTop + contentH * CY - HP_H / 2;
-      hp.style.left = (vx - sr.left) + "px";
-      hp.style.top = (vy - sr.top) + "px";
-      hp.style.width = HP_W + "px";
-      hp.style.height = HP_H + "px";
-      hp.style.right = "auto";
-      hp.style.bottom = "auto";
-      hp.style.transform = "none";
+      hp.style.setProperty("left", (vx - sr.left) + "px", "important");
+      hp.style.setProperty("top", (vy - sr.top) + "px", "important");
+      hp.style.setProperty("width", HP_W + "px", "important");
+      hp.style.setProperty("height", HP_H + "px", "important");
+      hp.style.setProperty("right", "auto", "important");
+      hp.style.setProperty("bottom", "auto", "important");
+      hp.style.setProperty("transform", "none", "important");
     });
 
     const give = document.getElementById("giveBtn");
@@ -916,9 +917,10 @@ function layoutEndBtn() {
   // Screen-measured empty well on v0.212 shot: fill cx≈0.92, cy≈0.45, fill≈0.088 board
   const CX = 0.920;
   const CY = 0.430;
-  const WIDTH_FRAC = 0.105;
+  // Final end-turn art is 700×700 transparent PNG — fill the board well as a square
+  const WIDTH_FRAC = 0.088;
   const bw = contentW * WIDTH_FRAC;
-  const bh = bw * (490 / 760);
+  const bh = bw;
   const left = contentLeft + contentW * CX - bw / 2 - mr.left;
   const top = contentTop + contentH * CY - bh / 2 - mr.top;
   btn.style.left = left + "px";
@@ -941,12 +943,15 @@ function updateEndBtn(myTurn) {
   const label = btn.querySelector(".end-btn-label");
   const v = (typeof GAME_VERSION !== "undefined" ? GAME_VERSION : (window.GAME_VERSION || "0"));
   const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
+  const offSrc = hud.endturnOff || "assets/img/hud/endturn_off.png";
+  const glowSrc = hud.endturnGlow || "assets/img/hud/endturn_glow.png";
+  const pressedSrc = hud.endturnPressed || "assets/img/hud/endturn_pressed.png";
   btn.classList.remove("opp-turn", "my-turn", "glow", "go");
   if (!myTurn) {
     btn.classList.add("opp-turn");
     btn.disabled = true;
     if (label) label.textContent = "상대 턴";
-    btn.style.backgroundImage = "none";
+    btn.style.backgroundImage = "url('" + pressedSrc + "?v=" + v + "')";
     return;
   }
   const hasPlayable = me.hand.some(c => isHandCardPlayable(c, me));
@@ -958,9 +963,8 @@ function updateEndBtn(myTurn) {
     btn.classList.add("glow");
   }
   if (label) label.textContent = "턴 종료";
-  const src = hasPlayable
-    ? (hud.endturnMy || "assets/img/hud/endturn_my.png")
-    : (hud.endturnGlow || "assets/img/hud/endturn_glow.png");
+  // playable → off plate; no playable → glow (prompt to end); never use endturn_my
+  const src = hasPlayable ? offSrc : glowSrc;
   btn.style.backgroundImage = "url('" + src + "?v=" + v + "')";
 }
 

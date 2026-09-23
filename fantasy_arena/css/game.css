@@ -3836,7 +3836,7 @@ html.is-desktop #game.active .my-hand .card.playable,
   transform: none;
   width: 8%;
   height: auto;
-  aspect-ratio: 850 / 550;
+  aspect-ratio: 1 / 1;
   min-width: 0;
   padding: 0;
   margin: 0;
@@ -3866,10 +3866,10 @@ html.is-desktop #game.active .my-hand .card.playable,
   line-height: 1.1;
 }
 #game.active .col-main > #endBtn.end-btn.opp-turn {
-  background-image: none !important;
   cursor: default;
   color: #d8c9a0;
   text-shadow: 0 1px 2px #000, 0 0 8px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
 }
 #game.active .col-main > #endBtn.end-btn:disabled {
   opacity: 1;
@@ -4036,4 +4036,14 @@ html.is-desktop #game.active .my-hand .card.playable,
 #game.active #myStrip {
   margin-top: 0 !important;
   padding-bottom: 0 !important;
+}
+
+
+/* v0.218 HUD gem seat — neutralize legacy corner-soul !important pins; geometry owned by layoutHudGems() */
+#game.active .col-main > .corner-soul.opp,
+#game.active .col-main > .corner-soul.me {
+  top: unset !important;
+  right: unset !important;
+  bottom: unset !important;
+  left: unset !important;
 }

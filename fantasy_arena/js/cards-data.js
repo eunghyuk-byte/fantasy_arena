@@ -21,9 +21,10 @@ const HUD_UI = {
   board:"assets/img/hud/board.jpg",
   hp:"assets/img/hud/hp.jpg",
   soul:"assets/img/hud/soul.jpg",
-  deck:"assets/img/hud/deck.jpg",
-  endturnMy:"assets/img/hud/endturn_my.png",
-  endturnGlow:"assets/img/hud/endturn_glow.png"
+  deck:"assets/img/hud/back.png",
+  endturnOff:"assets/img/hud/endturn_off.png",
+  endturnGlow:"assets/img/hud/endturn_glow.png",
+  endturnPressed:"assets/img/hud/endturn_pressed.png"
 };
 const COIN_PLUS = "assets/img/coins/plus.png";
 const COIN_MINUS = "assets/img/coins/minus.png";

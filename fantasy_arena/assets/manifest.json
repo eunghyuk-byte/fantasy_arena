@@ -1,5 +1,5 @@
 {
-  "count": 705,
+  "count": 708,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -3525,6 +3525,21 @@
       "path": "assets/vfx/ui/hero_intro/meta.json",
       "bytes": 409,
       "name": "meta"
+    },
+    {
+      "path": "assets/img/hud/back.png",
+      "bytes": 574604,
+      "name": "deck"
+    },
+    {
+      "path": "assets/img/hud/endturn_off.png",
+      "bytes": 391735,
+      "name": "deck"
+    },
+    {
+      "path": "assets/img/hud/endturn_pressed.png",
+      "bytes": 434014,
+      "name": "deck"
     }
   ]
 }
