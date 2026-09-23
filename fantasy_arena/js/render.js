@@ -569,6 +569,7 @@ async function composeCardFace(c, opts={}) {
         dx = Math.max(artX + artW - dw, Math.min(artX, dx));
         dy = Math.max(artY + artH - dh, Math.min(artY, dy));
       }
+      dy += 10; // all types: unit/spell/item same
       ctx.drawImage(art, sx, sy, sw, sh, dx, dy, dw, dh);
     };
     const FOCUS = {
