@@ -827,10 +827,10 @@ function layoutEndBtn() {
   // 4000×3000 board art — empty oval in right gold frame between hero sockets
   // Screen-measured empty well on v0.212 shot: fill cx≈0.92, cy≈0.45, fill≈0.088 board
   const CX = 0.920;
-  const CY = 0.450;
-  const WIDTH_FRAC = 0.100;
+  const CY = 0.430;
+  const WIDTH_FRAC = 0.105;
   const bw = contentW * WIDTH_FRAC;
-  const bh = bw * (550 / 850);
+  const bh = bw * (490 / 760);
   const left = contentLeft + contentW * CX - bw / 2 - mr.left;
   const top = contentTop + contentH * CY - bh / 2 - mr.top;
   btn.style.left = left + "px";
