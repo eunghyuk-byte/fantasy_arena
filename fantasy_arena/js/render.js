@@ -695,25 +695,41 @@ async function paintStatCoins(ctx, c, W, H) {
   const gold = await loadImg((typeof COIN_GOLD !== "undefined" && COIN_GOLD) ? COIN_GOLD : "assets/img/coins/gold.png");
   const black = await loadImg((typeof COIN_BLACK !== "undefined" && COIN_BLACK) ? COIN_BLACK : "assets/img/coins/black.png");
   if (!gold && !black) return;
-  const size = Math.round(W * 0.03872);
-  const gap = Math.round(size * 0.06);
-  const cy = H * 0.972;
+  // Larger coins (was ~3.9% W); cluster under each gem like 첨부 레퍼런스
+  const size = Math.round(W * 0.072);
+  const gap = Math.round(size * 0.08);
+  // Vertical overlap between stacked rows (~45% of coin height)
+  const rowStep = Math.round(size * 0.55);
+  const cyBot = H * 0.978; // bottom-row center
   const slots = [
     [W * 0.1343, parseCoin(c.atkC)],
     [W * 0.5008, parseCoin(c.defC)],
     [W * 0.8745, parseCoin(c.hpC)]
   ];
+  // 1~3: one row; 4: 2/2; 5: 2/3 (top/bottom)
+  function coinRows(n) {
+    if (n <= 3) return [n];
+    if (n === 4) return [2, 2];
+    return [2, 3];
+  }
   for (const [ax, raw] of slots) {
     if (!raw) continue;
     const img = raw > 0 ? gold : black;
     if (!img) continue;
     const n = Math.min(5, Math.abs(raw | 0));
-    const total = n * size + (n - 1) * gap;
-    let x0 = ax - total / 2;
-    if (x0 < W * 0.02) x0 = W * 0.02;
-    if (x0 + total > W * 0.98) x0 = W * 0.98 - total;
-    for (let i = 0; i < n; i++) {
-      ctx.drawImage(img, x0 + i * (size + gap), cy - size / 2, size, size);
+    const rows = coinRows(n);
+    const multi = rows.length > 1;
+    // draw bottom → top so upper coins sit slightly in front
+    for (let ri = rows.length - 1; ri >= 0; ri--) {
+      const count = rows[ri];
+      const total = count * size + (count - 1) * gap;
+      let x0 = ax - total / 2;
+      if (x0 < W * 0.01) x0 = W * 0.01;
+      if (x0 + total > W * 0.99) x0 = W * 0.99 - total;
+      const cy = multi ? (cyBot - (rows.length - 1 - ri) * rowStep) : cyBot;
+      for (let i = 0; i < count; i++) {
+        ctx.drawImage(img, x0 + i * (size + gap), cy - size / 2, size, size);
+      }
     }
   }
 }
