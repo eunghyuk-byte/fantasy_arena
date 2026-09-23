@@ -3470,7 +3470,7 @@ html.is-desktop, html.is-desktop body {
   right: auto !important;
   bottom: auto !important;
   transform: none !important;
-  width: min(42%, 320px) !important;
+  width: min(37.8%, 288px) !important;
   max-width: 42% !important;
   height: auto !important;
   max-height: 28% !important;
@@ -3514,7 +3514,7 @@ html.is-desktop, html.is-desktop body {
   right: auto !important;
   bottom: auto !important;
   transform: none !important;
-  width: min(42%, 320px) !important;
+  width: min(37.8%, 288px) !important;
   height: auto !important;
   z-index: 12 !important;
   pointer-events: none !important;
@@ -3778,7 +3778,7 @@ body.dragging-card {
   margin-left: auto !important;
   margin-right: auto !important;
   /* v0.227: nudge field UP ~20px and RIGHT ~20px (was sitting low-left) */
-  transform: translate(calc(-1.5% + 20px), 60px) !important;
+  transform: translate(calc(-1.5% + 20px), 55px) !important;
   padding-left: 2px !important;
   padding-right: 2px !important;
   /* taller lane: less vertical inset so frame grows toward mid divider / hand */
@@ -3797,7 +3797,7 @@ body.dragging-card {
   max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
-  transform: translate(calc(-1.5% + 20px), 60px) !important;
+  transform: translate(calc(-1.5% + 20px), 55px) !important;
   box-shadow: inset 0 0 0 1px rgba(255, 224, 140, .55) !important;
 }
 
@@ -4266,3 +4266,9 @@ input, textarea, [contenteditable="true"] {
 
 /* v0.237: combat give-up moved into settings */
 #game.active .give-btn { display: none !important; }
+
+
+/* v0.247: opp-hand fan — allow layoutOppFan transform */
+#game.active .opp-hand .back {
+  transform-origin: bottom center !important;
+}

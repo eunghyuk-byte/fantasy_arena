@@ -129,7 +129,8 @@ function layoutBoardDecks() {
     const w = Math.max(56, Math.min(84, br.width * 0.11));
     deck.style.position = "absolute";
     // Stage-left (not board-left): board is centered/narrower than parchment
-    deck.style.left = Math.max(6, Math.min(18, mr.width * 0.02)) + "px";
+    // v0.247: both piles LEFT 10
+    deck.style.left = Math.max(0, Math.max(6, Math.min(18, mr.width * 0.02)) - 10) + "px";
     deck.style.width = w + "px";
     deck.style.zIndex = "6";
     deck.style.display = "flex";
@@ -143,7 +144,8 @@ function layoutBoardDecks() {
       const pileH = Math.max(96, Math.min(120, br.height * 0.42));
       const topPad = Math.max(8, br.height * 0.52);
       // v0.225: nudge left opp deck pile UP ~20px
-      deck.style.top = (br.top - mr.top + topPad - 20) + "px";
+      // v0.247: opp deck UP +10 more
+      deck.style.top = (br.top - mr.top + topPad - 30) + "px";
       deck.style.bottom = "auto";
       deck.style.height = pileH + "px";
       deck.style.justifyContent = "flex-start";
@@ -891,11 +893,20 @@ function layoutOppFan() {
   if (!wrap) return;
   const cards = [...wrap.querySelectorAll(".back")];
   const n = cards.length;
+  if (!n) return;
+  const mid = (n - 1) / 2;
+  let w = cards[0].offsetWidth || 0;
+  if (w < 24) w = 48;
+  // Same overlap rule as ally hand fan
+  const overlap = Math.min(Math.round(w * 0.62), Math.max(24, w - 16));
   cards.forEach((el, i) => {
-    const t = n <= 1 ? 0 : (i - (n - 1) / 2);
-    el.style.transform = `translateY(${Math.abs(t)*2}px) rotate(${t*6}deg)`;
-    el.style.marginLeft = i ? "-16px" : "0";
-    el.style.zIndex = String(5 + i);
+    const t = n <= 1 ? 0 : (i - mid);
+    const y = Math.round(Math.abs(t) * 7); // edges lift toward top (opp side)
+    const rot = (t * 2.4).toFixed(2);
+    el.style.transform = "translateY(" + (-y) + "px) rotate(" + rot + "deg)";
+    el.style.setProperty("margin-left", i ? ("-" + overlap + "px") : "0", "important");
+    el.style.setProperty("z-index", String(5 + i), "important");
+    el.style.transformOrigin = "bottom center";
   });
 }
 function layoutHandFan() {
@@ -1059,7 +1070,7 @@ function layoutHudGems() {
     const el = document.getElementById(id);
     if (!el || !el.style.left) return;
     const L = parseFloat(el.style.left);
-    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 150) + "px", "important");
+    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 160) + "px", "important");
   });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
@@ -1140,7 +1151,7 @@ function layoutEndBtn() {
   // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
   if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
   // v0.236: end-turn LEFT 50, UP 22
-  btn.style.left = (left - 70) + "px";
+  btn.style.left = (left - 80) + "px";
   btn.style.top = (top - 24) + "px";
   btn.style.width = bw + "px";
   btn.style.height = bh + "px";
