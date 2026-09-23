@@ -713,9 +713,11 @@ async function composeCardFace(c, opts={}) {
     }
     if (!lines.length && txt) lines.push(txt);
     const lh = tSize * 1.28 + (lines.length >= 2 ? 1 : 0); // v0.251: 2+ lines gap +1px
-    // Multi-line: center around 0.778; single-line: nudge up 5px (v0.249)
-    let startY = H*0.778 - ((lines.length - 1) * lh) / 2;
-    if (lines.length === 1) startY -= 5;
+    // v0.254: first line Y = 2-line top (no center / no -5 for single line)
+    const lh2 = tSize * 1.28 + 1;
+    const startY = lines.length <= 1
+      ? H*0.778 - lh2 / 2
+      : H*0.778 - ((lines.length - 1) * lh) / 2;
     lines.forEach((ln, i) => ctx.fillText(ln, W*0.50, startY + i * lh));
     ctx.restore();
   }
