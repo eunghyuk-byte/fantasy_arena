@@ -182,7 +182,7 @@ function layoutBoardAlign() {
   // Rows: oppHand | oppBoard | myBoard | myHand | hint
   // HAND LAYOUT LOCK (see LAYOUT_HAND_LOCK.md) — do not shrink below 0.28; negative CSS margin forbidden
   const HAND_ROW_FRAC = 0.28; // LOCKED
-  const hand = HAND_ROW_FRAC, hint = 0.015, oppHand = 0.10; // v0.225: larger so backs half-visible
+  const hand = HAND_ROW_FRAC, hint = 0.015, oppHand = 0.14; // v0.243: room for 2× opp backs
   const rest = 1 - hand - hint - oppHand; // boards total
   // v0.234: equal field lanes (ignore parchment midFrac split)
   const oppBoard = rest / 2;
