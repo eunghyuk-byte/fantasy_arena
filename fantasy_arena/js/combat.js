@@ -89,8 +89,8 @@ function doAttack(p, attacker, target, auto) {
   const rows = [];
   if (aShared.flips.length) {
     rows.push({
-      label: attacker.name + " 공유코인",
-      modLabel: `N=${aShared.n}`,
+      label: attacker.name,
+      modLabel: "",
       flips: aShared.flips,
       delta: aShared.heads,
       detail: sharedDetail(attacker, aShared, aAtk, aDefVal, attacker.hp)
@@ -111,8 +111,8 @@ function doAttack(p, attacker, target, auto) {
     dHpSnap = beginCombatHpCoin(def, dShared.dHp);
     if (dShared.flips.length) {
       rows.push({
-        label: def.name + " 공유코인",
-        modLabel: `N=${dShared.n}`,
+        label: def.name,
+        modLabel: "",
         flips: dShared.flips,
         delta: dShared.heads,
         detail: sharedDetail(def, dShared, dAtk, defVal, def.hp)

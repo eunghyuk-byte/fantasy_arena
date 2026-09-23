@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.226";
+const GAME_VERSION = "0.227";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -152,8 +152,12 @@ function flyDrawCard() {
   if (last) last.style.opacity = "0";
   const ghost = document.createElement("div");
   ghost.className = "draw-ghost";
-  const face = last && last.querySelector(".card-face");
-  if (face && face.src) ghost.innerHTML = '<img src="'+face.src+'" alt="">';
+  // Always use live deck card-back (empty face → translucent rect ghost)
+  const backSrc = (typeof HUD_UI !== "undefined" && HUD_UI.deck)
+    ? HUD_UI.deck
+    : "assets/img/hud/back.png";
+  const v = (typeof GAME_VERSION !== "undefined" ? GAME_VERSION : (window.GAME_VERSION || "0"));
+  ghost.innerHTML = '<img src="'+backSrc+'?v='+v+'" alt="">';
   const w = last ? b.width : 72;
   const h = last ? b.height : 108;
   ghost.style.cssText = "position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+w+"px;height:"+h+"px;z-index:120;pointer-events:none;transform-origin:center center;";
@@ -1160,10 +1164,14 @@ function showCoinResult(title, rows, done) {
       const sign = r.delta >= 0 ? "+" + r.delta : String(r.delta);
       return `${r.base} → <b>${r.value}</b> (${sign})`;
     })();
-    return `<div>${r.label} ${r.modLabel || ""}</div><div class="coins">${coins}</div><div>${detail}</div>`;
+    // Unit name only — do not append 「공유코인 N=…」
+    return `<div>${r.label}</div><div class="coins">${coins}</div><div>${detail}</div>`;
   }).join("<hr style='border-color:#4a3a20'>");
   box.innerHTML += `<button class="menu-btn" id="coinOk" style="margin-top:14px;min-width:120px">OK</button>`;
   layer.classList.add("show");
+  // Coin modal can trip visualViewport/resize — reseat endBtn/heroes from boardBg box
+  try { if (typeof layoutHudChrome === "function") layoutHudChrome(); } catch (e) {}
+
   if (flipsN && window.Sfx && Sfx.playCoin) {
     for (let i = 0; i < flipsN; i++) setTimeout(() => Sfx.playCoin(), 80 + i * 280);
   }
@@ -1194,6 +1202,8 @@ function showCoinResult(title, rows, done) {
     if (settled) return;
     settled = true;
     layer.classList.remove("show");
+    try { if (typeof ensureBoardLayouts === "function") ensureBoardLayouts(true); } catch (e) {}
+    try { if (typeof layoutHudChrome === "function") layoutHudChrome(); } catch (e) {}
     if (done) done();
   };
   const btn = document.getElementById("coinOk");

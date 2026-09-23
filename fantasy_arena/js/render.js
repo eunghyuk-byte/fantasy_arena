@@ -1,22 +1,102 @@
 
-/** Run all board/HUD absolute layouts once geometry is measurable. */
-function runBoardLayouts() {
-  try { layoutBoardSlots(); } catch (e) {}
-  try { layoutBoardAlign(); } catch (e) {}
-  try { layoutBoardDecks(); } catch (e) {}
+/** Last successful board/HUD geometry fingerprint + inline style cache. */
+var _boardLayoutKey = "";
+var _hudStyleCache = null;
+
+function boardLayoutFingerprint() {
+  const bg = document.getElementById("boardBgLayer");
+  const main = document.querySelector("#game.active .col-main");
+  if (!bg || !main || !bg.naturalWidth) return "";
+  const br = bg.getBoundingClientRect();
+  const mr = main.getBoundingClientRect();
+  if (br.width < 8 || br.height < 8 || mr.width < 8 || mr.height < 8) return "";
+  // Round to 2px to ignore subpixel thrash / mobile chrome jitter
+  const q = (n) => Math.round(n * 2) / 2;
+  return [q(br.left), q(br.top), q(br.width), q(br.height), q(mr.left), q(mr.top), q(mr.width), q(mr.height), bg.naturalWidth, bg.naturalHeight].join("|");
+}
+
+function cacheHudStyles() {
+  const ids = ["endBtn", "oppSoulGem", "mySoulGem", "giveBtn"];
+  const sels = ["#oppStrip .hud-hero", "#myStrip .hud-hero", "#oppStrip .hero-hp", "#myStrip .hero-hp"];
+  const out = { ids: {}, sels: {} };
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    out.ids[id] = {
+      left: el.style.getPropertyValue("left"),
+      top: el.style.getPropertyValue("top"),
+      width: el.style.getPropertyValue("width"),
+      height: el.style.getPropertyValue("height")
+    };
+  });
+  sels.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    out.sels[sel] = {
+      left: el.style.getPropertyValue("left"),
+      top: el.style.getPropertyValue("top"),
+      width: el.style.getPropertyValue("width"),
+      height: el.style.getPropertyValue("height")
+    };
+  });
+  _hudStyleCache = out;
+}
+
+/** Re-apply last good absolute seats immediately after strip DOM rebuild (prevents top-left flash). */
+function restoreHudStyles() {
+  if (!_hudStyleCache) return;
+  const apply = (el, st) => {
+    if (!el || !st) return;
+    if (!st.left && !st.top) return;
+    if (st.left) el.style.setProperty("left", st.left, "important");
+    if (st.top) el.style.setProperty("top", st.top, "important");
+    if (st.width) el.style.setProperty("width", st.width, "important");
+    if (st.height) el.style.setProperty("height", st.height, "important");
+    el.style.setProperty("right", "auto", "important");
+    el.style.setProperty("bottom", "auto", "important");
+    el.style.setProperty("transform", "none", "important");
+  };
+  Object.keys(_hudStyleCache.ids || {}).forEach(id => apply(document.getElementById(id), _hudStyleCache.ids[id]));
+  Object.keys(_hudStyleCache.sels || {}).forEach(sel => apply(document.querySelector(sel), _hudStyleCache.sels[sel]));
+}
+
+/** Seat endBtn + hero/soul HUD from boardBg content box. Safe during coin modal. */
+function layoutHudChrome() {
   try { layoutEndBtn(); } catch (e) {}
   try { layoutHudGems(); } catch (e) {}
+  cacheHudStyles();
+}
+
+/** Run all board/HUD absolute layouts once geometry is measurable. */
+function runBoardLayouts(force) {
+  const key = boardLayoutFingerprint();
+  // Skip thrash when board geometry unchanged (resize spam / coin modal dimming)
+  if (!force && key && key === _boardLayoutKey) {
+    // Still reseat HUD in case strip DOM was rebuilt with same geometry
+    restoreHudStyles();
+    layoutHudChrome();
+    const g0 = document.getElementById("game");
+    const bg0 = document.getElementById("boardBgLayer");
+    if (g0 && bg0 && bg0.naturalWidth) g0.classList.add("hud-ready");
+    return;
+  }
+  // Align rows FIRST so slot/deck measurements use final lane heights
+  try { layoutBoardAlign(); } catch (e) {}
+  try { layoutBoardSlots(); } catch (e) {}
+  try { layoutBoardDecks(); } catch (e) {}
+  layoutHudChrome();
+  if (key) _boardLayoutKey = key;
   const g = document.getElementById("game");
   const bg = document.getElementById("boardBgLayer");
   if (g && bg && bg.naturalWidth) g.classList.add("hud-ready");
 }
 
 /** Wait until board art has naturalWidth (or error), then double-rAF layout. */
-function ensureBoardLayouts() {
+function ensureBoardLayouts(force) {
   const bg = document.getElementById("boardBgLayer");
   const kick = () => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => { runBoardLayouts(); });
+      requestAnimationFrame(() => { runBoardLayouts(!!force); });
     });
   };
   if (!bg) { kick(); return; }
@@ -179,6 +259,9 @@ function render() {
   if (myDeckEl) myDeckEl.innerHTML = renderDeckPile(me);
   document.getElementById("oppStrip").innerHTML = heroStrip(opp, false, myTurn);
   document.getElementById("myStrip").innerHTML = heroStrip(me, true, myTurn);
+  // Re-seat immediately — strip rebuild would otherwise flash heroes at top-left until rAF
+  restoreHudStyles();
+  layoutHudChrome();
   updateEndBtn(myTurn);
   const ohr = document.getElementById("oppHeroRow");
   const mhr = document.getElementById("myHeroRow");
@@ -879,11 +962,13 @@ function layoutHudGems() {
   if (!bg || !main || !bg.naturalWidth) return;
   const br = bg.getBoundingClientRect();
   const mr = main.getBoundingClientRect();
+  // Keep prior seats if unmeasurable (coin modal / viewport thrash)
   if (br.width < 8 || br.height < 8 || mr.width < 8 || mr.height < 8) return;
   const nw = bg.naturalWidth, nh = bg.naturalHeight;
   const scale = Math.min(br.width / nw, br.height / nh);
   const contentW = nw * scale;
   const contentH = nh * scale;
+  if (!(contentW > 8 && contentH > 8)) return;
   const contentLeft = br.left + (br.width - contentW) / 2;
   const contentTop = br.top + (br.height - contentH) / 2;
 
@@ -969,11 +1054,13 @@ function layoutEndBtn() {
   if (!btn || !bg || !main || !bg.naturalWidth) return;
   const br = bg.getBoundingClientRect();
   const mr = main.getBoundingClientRect();
+  // Keep prior seat if metrics are unusable (coin-modal / chrome thrash) — never zero mid-frame
   if (br.width < 8 || br.height < 8 || mr.width < 8 || mr.height < 8) return;
   const nw = bg.naturalWidth, nh = bg.naturalHeight;
   const scale = Math.min(br.width / nw, br.height / nh);
   const contentW = nw * scale;
   const contentH = nh * scale;
+  if (!(contentW > 8 && contentH > 8)) return;
   const contentLeft = br.left + (br.width - contentW) / 2;
   const contentTop = br.top + (br.height - contentH) / 2;
   // v0.225: button center = board mid horizontal ∩ right gold-frame vertical edge
@@ -986,6 +1073,9 @@ function layoutEndBtn() {
   const bh = bw;
   const left = contentLeft + contentW * CX - bw / 2 - mr.left;
   const top = contentTop + contentH * CY - bh / 2 - mr.top;
+  if (!Number.isFinite(left) || !Number.isFinite(top) || !Number.isFinite(bw)) return;
+  // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
+  if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
   btn.style.left = left + "px";
   btn.style.top = top + "px";
   btn.style.width = bw + "px";
@@ -1108,8 +1198,19 @@ function updateEndBtn(myTurn) {
   let t = 0;
   const kick = () => {
     clearTimeout(t);
-    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); ensureBoardLayouts(); } catch (e) {} }, 50);
+    // Debounce: mobile browser chrome / coin-modal can spam resize
+    t = setTimeout(() => {
+      try {
+        layoutHandFan();
+        layoutOppFan();
+        ensureBoardLayouts(true);
+      } catch (e) {}
+    }, 120);
   };
   window.addEventListener("resize", kick);
   window.addEventListener("orientationchange", kick);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", kick);
+    window.visualViewport.addEventListener("scroll", kick);
+  }
 })();

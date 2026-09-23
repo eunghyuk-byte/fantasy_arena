@@ -218,10 +218,25 @@
     clearTimeout(_resizeTimer);
     _resizeTimer = setTimeout(() => {
       applyStageResolution();
-      try { if (typeof layoutBoardSlots === "function") layoutBoardSlots(); } catch (e) {}
-      try { if (typeof layoutBoardDecks === "function") layoutBoardDecks(); } catch (e) {}
-    }, 50);
+      // Full HUD/board reseat — partial slots/decks left endBtn+heroes stranded after coin modal
+      try {
+        if (typeof ensureBoardLayouts === "function") ensureBoardLayouts(true);
+        else if (typeof runBoardLayouts === "function") runBoardLayouts(true);
+      } catch (e) {}
+    }, 120);
   });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => {
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(() => {
+        applyStageResolution();
+        try {
+          if (typeof ensureBoardLayouts === "function") ensureBoardLayouts(true);
+          else if (typeof runBoardLayouts === "function") runBoardLayouts(true);
+        } catch (e) {}
+      }, 120);
+    });
+  }
   document.addEventListener("fullscreenchange", () => {
     applyStageResolution();
     syncSettingsUI();
