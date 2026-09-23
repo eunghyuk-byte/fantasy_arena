@@ -13,11 +13,8 @@ const Bgm = (() => {
       const a = beds[k];
       if (a) a.volume = (k === track ? v : 0);
     });
-    const btn = document.getElementById("bgmBtn");
-    if (btn) {
-      btn.classList.toggle("on", wanted && unlocked);
-      btn.textContent = wanted ? "♪" : "♩";
-    }
+    const tog = document.getElementById("bgmToggle");
+    if (tog) tog.checked = !!wanted;
   }
 
   async function resolveUrl(stem) {
@@ -109,6 +106,7 @@ const Bgm = (() => {
   function setVolume(v) { vol = Math.max(0, Math.min(1, +v || 0)); applyVol(); }
   function isOn() { return wanted && unlocked; }
 
-  return { start, stop, toggle, to, duck, setVolume, isOn, track: () => track };
+  function isWanted() { return !!wanted; }
+  return { start, stop, toggle, to, duck, setVolume, isOn, isWanted, track: () => track };
 })();
 const TavernBgm = Bgm;

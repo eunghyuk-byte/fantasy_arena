@@ -163,6 +163,10 @@
       } catch (e) {}
     }
     if (fs) fs.checked = !!fsOn;
+    const bgm = document.getElementById("bgmToggle");
+    if (bgm && window.Bgm) {
+      try { bgm.checked = !!(Bgm.isWanted ? Bgm.isWanted() : Bgm.isOn()); } catch (e) {}
+    }
   }
 
   function openSettings() {
@@ -178,12 +182,15 @@
 
   function bindSettingsUI() {
     const btn = document.getElementById("btnSettings");
+    const gear = document.getElementById("settingsGearBtn");
     const close = document.getElementById("btnSettingsClose");
     const pop = document.getElementById("settingsPop");
     const sel = document.getElementById("resSelect");
     const fs = document.getElementById("fsToggle");
+    const bgm = document.getElementById("bgmToggle");
 
     if (btn) btn.onclick = openSettings;
+    if (gear) gear.onclick = (e) => { e.stopPropagation(); openSettings(); };
     if (close) close.onclick = closeSettings;
     if (pop) pop.addEventListener("click", e => {
       if (e.target.id === "settingsPop") closeSettings();
@@ -193,6 +200,13 @@
       await applyStageResolution();
     };
     if (fs) fs.onchange = () => { setFullscreen(fs.checked); };
+    if (bgm) bgm.onchange = () => {
+      try {
+        if (!window.Bgm) return;
+        if (bgm.checked) Bgm.start();
+        else Bgm.stop();
+      } catch (e) {}
+    };
   }
 
   window.StageSettings = {

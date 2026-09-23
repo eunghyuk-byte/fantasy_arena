@@ -4236,3 +4236,16 @@ input, textarea, [contenteditable="true"] {
   user-select: text !important;
   -webkit-touch-callout: default !important;
 }
+
+
+/* v0.235: corner gear opens settings (was BGM note) */
+#settingsGearBtn.settings-gear-btn {
+  font-size: 22px;
+  line-height: 1;
+  color: #e8d6a0;
+}
+#settingsGearBtn.settings-gear-btn.on {
+  /* unused — music state lives in settings panel */
+  border-color: rgba(201, 162, 74, 0.55);
+  box-shadow: none;
+}

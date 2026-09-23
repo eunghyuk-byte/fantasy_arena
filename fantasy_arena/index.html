@@ -7,10 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/game.css?v=0.234" />
+<link rel="stylesheet" href="css/game.css?v=0.235" />
 </head>
 <body>
-<button class="bgm-btn" id="bgmBtn" title="모험 BGM">♪</button>
+<button class="bgm-btn settings-gear-btn" id="settingsGearBtn" title="설정" aria-label="설정">⚙</button>
 <div id="app">
   <section id="title" class="screen active">
     <header class="title-brand" aria-label="Fantasy Arena">
@@ -23,7 +23,6 @@
         <button class="menu-btn" id="btnDeck">덱 구성</button>
         <button class="menu-btn" id="btnAi">플레이</button>
         <button class="menu-btn ghost" id="btnHelp">도움말</button>
-        <button class="menu-btn ghost" id="btnSettings">설정</button>
         <button class="menu-btn ghost" id="btnQuit">게임 종료</button>
         <div class="build-ver" id="buildVer">v0.196</div>
       </div>
@@ -46,6 +45,10 @@
     </label>
     <label class="settings-row settings-check" for="fsToggle">
       <input type="checkbox" id="fsToggle" /> 전체 화면
+    </label>
+    <h3>사운드</h3>
+    <label class="settings-row settings-check" for="bgmToggle">
+      <input type="checkbox" id="bgmToggle" /> 음악 (BGM)
     </label>
     <button class="menu-btn" id="btnSettingsClose" style="min-width:160px;margin-top:18px">닫기</button>
   </div>
@@ -225,14 +228,14 @@
 </div>
 
 
-<script src="js/cards-data.js?v=0.234"></script>
+<script src="js/cards-data.js?v=0.235"></script>
 <script src="js/vfx.js?v=0.102"></script>
 <script src="js/bgm.js?v=0.102"></script>
 <script src="js/sfx.js?v=0.102"></script>
-<script src="js/settings.js?v=0.234"></script>
-<script src="js/render.js?v=0.234"></script>
-<script src="js/combat.js?v=0.234"></script>
+<script src="js/settings.js?v=0.235"></script>
+<script src="js/render.js?v=0.235"></script>
+<script src="js/combat.js?v=0.235"></script>
 <script src="js/spell-fx.js?v=0.102"></script>
-<script src="js/game.js?v=0.234"></script>
+<script src="js/game.js?v=0.235"></script>
 </body>
 </html>

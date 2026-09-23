@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.234";
+const GAME_VERSION = "0.235";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -2384,9 +2384,10 @@ document.getElementById("helpPop").addEventListener("click", e => {
   if (e.target.id === "helpPop") closeHelp();
 });
 
-document.getElementById("bgmBtn").onclick = (e) => {
+const _gear = document.getElementById("settingsGearBtn");
+if (_gear) _gear.onclick = (e) => {
   e.stopPropagation();
-  Bgm.toggle();
+  try { if (window.StageSettings && StageSettings.open) StageSettings.open(); } catch (err) {}
 };
 document.body.addEventListener("click", () => {
   if (!Bgm.isOn()) Bgm.start();
