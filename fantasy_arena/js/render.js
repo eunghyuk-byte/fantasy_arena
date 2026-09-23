@@ -238,14 +238,20 @@ function artUrl(id) {
 const _imgCache = {};
 function loadImg(src) {
   if (!src) return Promise.resolve(null);
-  if (_imgCache[src]) return _imgCache[src];
-  _imgCache[src] = new Promise(res => {
+  const version = (typeof GAME_VERSION !== "undefined")
+    ? GAME_VERSION
+    : (typeof window !== "undefined" ? window.GAME_VERSION : "");
+  const cacheSrc = (typeof src === "string" && /^assets\//.test(src) && !src.includes("?") && version)
+    ? src + "?v=" + version
+    : src;
+  if (_imgCache[cacheSrc]) return _imgCache[cacheSrc];
+  _imgCache[cacheSrc] = new Promise(res => {
     const im = new Image();
     im.onload = () => res(im);
     im.onerror = () => res(null);
-    im.src = src;
+    im.src = cacheSrc;
   });
-  return _imgCache[src];
+  return _imgCache[cacheSrc];
 }
 function rr(ctx, x, y, w, h, r) {
   const R = Math.min(r, w/2, h/2);
@@ -609,7 +615,10 @@ function enqueueCompose(fn) {
 }
 function faceCacheKey(c, opts) {
   const shield = (c.ability === "보호") || ((c.keywords || []).includes("shield")) ? "sh1" : "sh0";
-  return ["v106itemTipText", c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  const version = (typeof GAME_VERSION !== "undefined")
+    ? GAME_VERSION
+    : (typeof window !== "undefined" ? window.GAME_VERSION : "");
+  return ["v106itemTipText", version, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
