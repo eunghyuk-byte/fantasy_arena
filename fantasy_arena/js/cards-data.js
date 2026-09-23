@@ -22,6 +22,7 @@ const HUD_UI = {
   hp:"assets/img/hud/hp.jpg",
   soul:"assets/img/hud/soul.jpg",
   deck:"assets/img/hud/back.png",
+  /* end-turn plates (v0.219): playable→pressed, none→glow, opp→off; hold→off visual */
   endturnOff:"assets/img/hud/endturn_off.png",
   endturnGlow:"assets/img/hud/endturn_glow.png",
   endturnPressed:"assets/img/hud/endturn_pressed.png"
