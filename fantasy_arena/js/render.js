@@ -712,7 +712,7 @@ async function composeCardFace(c, opts={}) {
       else lines.push(...widthWrap(clause));
     }
     if (!lines.length && txt) lines.push(txt);
-    const lh = tSize * 1.28;
+    const lh = tSize * 1.28 + (lines.length >= 2 ? 1 : 0); // v0.251: 2+ lines gap +1px
     // Multi-line: center around 0.778; single-line: nudge up 5px (v0.249)
     let startY = H*0.778 - ((lines.length - 1) * lh) / 2;
     if (lines.length === 1) startY -= 5;
