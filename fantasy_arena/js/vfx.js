@@ -71,8 +71,12 @@ const Vfx = (() => {
   }
   function dmgPop(el, n) {
     if (!el || !n) return;
-    const c = center(el);
-    const p = spawn("dmg-pop", c.x, c.y - 10);
+    const r = el.getBoundingClientRect();
+    // v0.253: above HP gem digit on minions (not covering baked face numbers)
+    const isMinion = el.classList && el.classList.contains("minion");
+    const x = isMinion ? (r.left + r.width * 0.78) : (r.left + r.width / 2);
+    const y = isMinion ? (r.top + r.height * 0.72) : (r.top + r.height / 2 - 10);
+    const p = spawn("dmg-pop", x, y);
     p.textContent = "-"+n;
   }
   async function attackSeq(atkEl, defEl, dmg, crit) {

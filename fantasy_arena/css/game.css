@@ -451,8 +451,34 @@
     position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%);
     z-index: 7; pointer-events: none;
     font-weight: 900; font-size: 28px; color: #ffefc0;
-    text-shadow: 0 0 8px #c00, 0 2px 0 #400;
+    /* v0.253: strong black rim like gem/HUD digits */
+    -webkit-text-stroke: 1.5px #000;
+    paint-order: stroke fill;
+    text-shadow:
+      0 0 2px #000,
+      1px 0 0 #000,
+      -1px 0 0 #000,
+      0 1px 0 #000,
+      0 -1px 0 #000,
+      1px 1px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      0 2px 4px #000,
+      0 0 8px #c00;
     animation: hpPop .55s ease-out forwards;
+  }
+  /* Minion hurt tick: sit ABOVE the heart gem digit (not covering it) */
+  .minion .hp-tick {
+    left: auto; right: 6%; top: auto; bottom: 20%;
+    transform: translate(0, 0);
+    font-size: 22px;
+    animation: hpPopGem .55s ease-out forwards;
+  }
+  @keyframes hpPopGem {
+    0% { opacity: 0; transform: translate(0, 6px) scale(.6); }
+    30% { opacity: 1; transform: translate(0, 0) scale(1.15); }
+    100% { opacity: 0; transform: translate(0, -14px) scale(.9); }
   }
   .hero-slot.hurt::before {
     content: "";
@@ -470,16 +496,30 @@
     animation: cardRip .6s ease-in forwards;
     pointer-events: none;
   }
-  /* Combat temp Δ overlays (replaces yellow 「공 N」 restatement) */
+  /* Combat temp Δ overlays — ABOVE base gem digits (not covering them). v0.253 */
   .stat-delta {
     position: absolute;
-    bottom: 6%;
+    bottom: 20%; /* was 6%: sat on top of baked atk/def/hp digits */
     z-index: 8;
     pointer-events: none;
     font-weight: 900;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1;
-    text-shadow: 0 0 5px #000, 0 1px 0 #000;
+    /* black rim matching .gem span / HUD numbers */
+    -webkit-text-stroke: 1.25px #000;
+    paint-order: stroke fill;
+    text-shadow:
+      0 0 2px #000,
+      1px 0 0 #1a0a00,
+      -1px 0 0 #1a0a00,
+      0 1px 0 #1a0a00,
+      0 -1px 0 #1a0a00,
+      1px 1px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      2px 2px 0 #000,
+      0 2px 4px #000;
     animation: statDeltaIn .28s ease-out both;
   }
   .stat-delta.up { color: #5eb8ff; }
@@ -1747,7 +1787,21 @@
   }
   .vfx.dmg-pop {
     font-weight: 900; font-size: 34px; color: #ffe9b0;
-    text-shadow: 0 0 10px #c00, 0 3px 0 #400;
+    /* v0.253: black rim like gem/HUD digits */
+    -webkit-text-stroke: 1.5px #000;
+    paint-order: stroke fill;
+    text-shadow:
+      0 0 2px #000,
+      1px 0 0 #000,
+      -1px 0 0 #000,
+      0 1px 0 #000,
+      0 -1px 0 #000,
+      1px 1px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      0 2px 4px #000,
+      0 0 10px #c00;
     transform: translate(-50%,-50%);
     animation: dmgBounce .7s cubic-bezier(.2,1.4,.3,1) forwards;
   }
@@ -4289,4 +4343,17 @@ input, textarea, [contenteditable="true"] {
 }
 #game.active .opp-hand .back {
   transform-origin: top center !important;
+}
+
+/* ===== v0.253: combat float ABOVE gems + ally↔enemy field gap +20px ===== */
+/* Float offset: .stat-delta bottom 6%→20% (~above sword/shield/heart digits). */
+/* Field gap via P0 parchment-center padding nudge (symmetric; HAND LOCK untouched). */
+#game.active .board.opp,
+#game.active #oppBoard {
+  /* enemy units nudge UP from center line */
+  padding-bottom: 10px !important;
+}
+#game.active #myBoard {
+  /* ally units nudge DOWN from center line → total gap +20px */
+  padding-top: 10px !important;
 }

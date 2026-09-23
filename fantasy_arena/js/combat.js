@@ -130,7 +130,7 @@ function doAttack(p, attacker, target, auto) {
     ? ATK_SKILL_HELP[atkSkillOf(attacker)][0] : "";
   log(`${attacker.name} 공유코인 N=${aShared.n} 앞면${aShared.heads} → 공 ${aAtk}` + (atkSkillOf(attacker) > 1 ? ` [${skLabel}]` : ""));
   showCoinResult("코인 배틀", rows, async () => {
-    // Temp combat presentation: bake rolled values on face numbers + ±Δ overlays (no 「공 N」)
+    // Temp combat presentation: bake rolled values on face numbers + ±Δ overlays ABOVE gems (no 「공 N」)
     function armFx(u, atkVal, defV, dA, dD, dH) {
       if (!u) return;
       u._fxAtk = atkVal;

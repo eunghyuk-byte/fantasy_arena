@@ -984,7 +984,7 @@ function renderMinion(m, side) {
     targetable ? "can-target" : "",
   ].join(" ");
   const uid = "mface_" + m.uid;
-  // Combat FX: bake temp atk/def/hp on face; ±Δ overlays (blue+/red−), not 「공 N」
+  // Combat FX: bake temp atk/def/hp on face; ±Δ overlays ABOVE gems (blue+/red−), not 「공 N」
   const faceOpts = {
     atk: m._fxAtk != null ? m._fxAtk : m.atk,
     def: m._fxDef != null ? m._fxDef : m.def,
