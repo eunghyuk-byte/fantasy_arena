@@ -138,7 +138,8 @@ function render() {
   layoutBoardSlots();
   layoutBoardAlign();
   layoutBoardDecks();
-  requestAnimationFrame(() => { layoutBoardSlots(); layoutBoardAlign(); layoutBoardDecks(); });
+  layoutEndBtn();
+  requestAnimationFrame(() => { layoutBoardSlots(); layoutBoardAlign(); layoutBoardDecks(); layoutEndBtn(); });
 
   const oppDeckEl = document.getElementById("oppDeck");
   const myDeckEl = document.getElementById("myDeck");
@@ -807,6 +808,40 @@ function heroStrip(p, isMe, myTurn) {
 }
 
 /** Board mid-right end-turn button (single #endBtn in .col-main). */
+
+/** Seat #endBtn on board-art mid-right well (object-fit:contain content box). */
+function layoutEndBtn() {
+  const btn = document.getElementById("endBtn");
+  const bg = document.getElementById("boardBgLayer");
+  const main = document.querySelector("#game.active .col-main");
+  if (!btn || !bg || !main || !bg.naturalWidth) return;
+  const br = bg.getBoundingClientRect();
+  const mr = main.getBoundingClientRect();
+  if (br.width < 8 || br.height < 8 || mr.width < 8 || mr.height < 8) return;
+  const nw = bg.naturalWidth, nh = bg.naturalHeight;
+  const scale = Math.min(br.width / nw, br.height / nh);
+  const contentW = nw * scale;
+  const contentH = nh * scale;
+  const contentLeft = br.left + (br.width - contentW) / 2;
+  const contentTop = br.top + (br.height - contentH) / 2;
+  // 4000×3000 board art — empty oval in right gold frame between hero sockets
+  // Screen-measured empty well on v0.212 shot: fill cx≈0.92, cy≈0.45, fill≈0.088 board
+  const CX = 0.920;
+  const CY = 0.430;
+  const WIDTH_FRAC = 0.105;
+  const bw = contentW * WIDTH_FRAC;
+  const bh = bw * (490 / 760);
+  const left = contentLeft + contentW * CX - bw / 2 - mr.left;
+  const top = contentTop + contentH * CY - bh / 2 - mr.top;
+  btn.style.left = left + "px";
+  btn.style.top = top + "px";
+  btn.style.width = bw + "px";
+  btn.style.height = bh + "px";
+  btn.style.right = "auto";
+  btn.style.bottom = "auto";
+  btn.style.transform = "none";
+}
+
 function isHandCardPlayable(c, me) {
   return c.cost <= me.soul && (c.type !== "minion" || me.board.length < 5);
 }
@@ -847,7 +882,7 @@ function updateEndBtn(myTurn) {
   let t = 0;
   const kick = () => {
     clearTimeout(t);
-    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); layoutBoardDecks(); } catch (e) {} }, 50);
+    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); layoutBoardDecks(); layoutEndBtn(); } catch (e) {} }, 50);
   };
   window.addEventListener("resize", kick);
   window.addEventListener("orientationchange", kick);
