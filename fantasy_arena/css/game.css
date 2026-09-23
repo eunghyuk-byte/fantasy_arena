@@ -4107,15 +4107,15 @@ html.is-desktop #game.active .my-hand .card.playable,
   pointer-events: none !important;
 }
 
-/* HP number centered in ruby heart gem — no red pill chrome */
+/* HP number centered in ruby heart gem — 1-digit and 2-digit both center (v0.261) */
 #game.active .hud-hero .hero-hp {
   position: absolute !important;
   z-index: 8 !important;
   display: flex !important;
-  align-items: flex-end !important;
-  justify-content: flex-start !important;
+  align-items: center !important;
+  justify-content: center !important;
   margin: 0 !important;
-  padding: 0 0 10% 18% !important;
+  padding: 6% 0 14% 0 !important; /* slight down bias in heart bowl; no left pad */
   min-width: 0 !important;
   border: none !important;
   border-radius: 0 !important;
@@ -4126,7 +4126,8 @@ html.is-desktop #game.active .my-hand .card.playable,
   font-weight: 900 !important;
   font-size: clamp(17px, 2.05cqh, 25px) !important;
   line-height: 1 !important;
-  text-align: left !important;
+  text-align: center !important;
+  font-variant-numeric: tabular-nums !important;
   pointer-events: none !important;
   text-shadow:
     0 0 2px #000,
