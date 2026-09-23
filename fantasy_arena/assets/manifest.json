@@ -1412,14 +1412,14 @@
       "name": "soul"
     },
     {
-      "path": "assets/img/coins/minus.png",
+      "path": "assets/img/coins/black.png",
       "bytes": 88561,
-      "name": "minus"
+      "name": "black"
     },
     {
-      "path": "assets/img/coins/plus.png",
+      "path": "assets/img/coins/gold.png",
       "bytes": 108434,
-      "name": "plus"
+      "name": "gold"
     },
     {
       "path": "assets/img/emblems/composites/dark.png",

@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.230";
+const GAME_VERSION = "0.231";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1150,15 +1150,15 @@ function showCoinResult(title, rows, done) {
   if (!rows.length) { if (done) done(); return; }
   const layer = document.getElementById("coinLayer");
   const box = document.getElementById("coinBox");
-  const plus = (typeof COIN_PLUS !== "undefined" && COIN_PLUS) ? COIN_PLUS : "assets/img/coins/plus.png";
-  const minus = (typeof COIN_MINUS !== "undefined" && COIN_MINUS) ? COIN_MINUS : "assets/img/coins/minus.png";
+  const gold = (typeof COIN_GOLD !== "undefined" && COIN_GOLD) ? COIN_GOLD : "assets/img/coins/gold.png";
+  const black = (typeof COIN_BLACK !== "undefined" && COIN_BLACK) ? COIN_BLACK : "assets/img/coins/black.png";
   let flipsN = 0;
   box.innerHTML = `<h3>${title}</h3>` + rows.map(r => {
     if (!r.flips.length) return "";
     const coins = r.flips.map((h, i) => {
       flipsN++;
       const delay = (flipsN - 1) * 0.28;
-      return `<div class="flip-coin" data-h="${h?1:0}"><img class="coin-flat flip-inner" src="${plus}" alt="" style="animation-delay:${delay}s"></div>`;
+      return `<div class="flip-coin" data-h="${h?1:0}"><img class="coin-flat flip-inner" src="${gold}" alt="" style="animation-delay:${delay}s"></div>`;
     }).join("");
     const detail = r.detail || (() => {
       const sign = r.delta >= 0 ? "+" + r.delta : String(r.delta);
@@ -1194,8 +1194,8 @@ function showCoinResult(title, rows, done) {
     const h = el.getAttribute("data-h") === "1";
     const img = el.querySelector("img");
     const delay = idx * 280 + 400;
-    setTimeout(() => { if (img) img.src = h ? plus : minus; }, delay);
-    setTimeout(() => { el.innerHTML = `<img class="coin-flat" src="${h ? plus : minus}" alt="">`; }, delay + 480);
+    setTimeout(() => { if (img) img.src = h ? gold : black; }, delay);
+    setTimeout(() => { el.innerHTML = `<img class="coin-flat" src="${h ? gold : black}" alt="">`; }, delay + 480);
   });
   let settled = false;
   const finishCoin = () => {

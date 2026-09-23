@@ -692,9 +692,9 @@ async function composeCardFace(c, opts={}) {
   }
 }
 async function paintStatCoins(ctx, c, W, H) {
-  const plus = await loadImg((typeof COIN_PLUS !== "undefined" && COIN_PLUS) ? COIN_PLUS : "assets/img/coins/plus.png");
-  const minus = await loadImg((typeof COIN_MINUS !== "undefined" && COIN_MINUS) ? COIN_MINUS : "assets/img/coins/minus.png");
-  if (!plus && !minus) return;
+  const gold = await loadImg((typeof COIN_GOLD !== "undefined" && COIN_GOLD) ? COIN_GOLD : "assets/img/coins/gold.png");
+  const black = await loadImg((typeof COIN_BLACK !== "undefined" && COIN_BLACK) ? COIN_BLACK : "assets/img/coins/black.png");
+  if (!gold && !black) return;
   const size = Math.round(W * 0.03872);
   const gap = Math.round(size * 0.06);
   const cy = H * 0.972;
@@ -705,7 +705,7 @@ async function paintStatCoins(ctx, c, W, H) {
   ];
   for (const [ax, raw] of slots) {
     if (!raw) continue;
-    const img = raw > 0 ? plus : minus;
+    const img = raw > 0 ? gold : black;
     if (!img) continue;
     const n = Math.min(5, Math.abs(raw | 0));
     const total = n * size + (n - 1) * gap;

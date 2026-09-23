@@ -26,8 +26,8 @@ const HUD_UI = {
   endturnPressed:"assets/img/hud/endturn_pressed.png"
   /* hp.jpg/soul.jpg removed: seat soul/HP use board gems; deck.jpg unused (deck→back.png) */
 };
-const COIN_PLUS = "assets/img/coins/plus.png";
-const COIN_MINUS = "assets/img/coins/minus.png";
+const COIN_GOLD = "assets/img/coins/gold.png";
+const COIN_BLACK = "assets/img/coins/black.png";
 
 const CARDS = [
 // === UNITS (source of truth: 판타지아레나_유닛목록.xlsx + art {id}.jpg; never add orphan e29+ units here) ===
