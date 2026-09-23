@@ -129,8 +129,8 @@ function layoutBoardDecks() {
     const w = Math.max(56, Math.min(84, br.width * 0.11));
     deck.style.position = "absolute";
     // Stage-left (not board-left): board is centered/narrower than parchment
-    // v0.247: both piles LEFT 10
-    deck.style.left = Math.max(0, Math.max(6, Math.min(18, mr.width * 0.02)) - 10) + "px";
+    // v0.247 LEFT10 → v0.263 LEFT20 more (cumul −30)
+    deck.style.left = Math.max(0, Math.max(6, Math.min(18, mr.width * 0.02)) - 30) + "px";
     deck.style.width = w + "px";
     deck.style.zIndex = "6";
     deck.style.display = "flex";
@@ -143,9 +143,8 @@ function layoutBoardDecks() {
       // Opp deck: sit low in opp lane (near unit row), not stuck to top frame
       const pileH = Math.max(96, Math.min(120, br.height * 0.42));
       const topPad = Math.max(8, br.height * 0.52);
-      // v0.225: nudge left opp deck pile UP ~20px
-      // v0.247: opp deck UP +10 more
-      deck.style.top = (br.top - mr.top + topPad - 30) + "px";
+      // v0.225…v0.247 UP30 → v0.263 UP +100 (cumul −130)
+      deck.style.top = (br.top - mr.top + topPad - 130) + "px";
       deck.style.bottom = "auto";
       deck.style.height = pileH + "px";
       deck.style.justifyContent = "flex-start";
