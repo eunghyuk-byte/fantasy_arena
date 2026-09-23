@@ -688,6 +688,17 @@ async function composeCardFace(c, opts={}) {
           continue;
         }
       }
+      // Sentence/effect break: ". " also starts a new lore line
+      if (ch === "." ) {
+        const next = txt[i + 1];
+        if (next === " " || next === undefined) {
+          buf += ch;
+          if (buf.trim()) clauses.push(buf.trim());
+          buf = "";
+          if (next === " ") i++;
+          continue;
+        }
+      }
       buf += ch;
     }
     if (buf.trim()) clauses.push(buf.trim());
