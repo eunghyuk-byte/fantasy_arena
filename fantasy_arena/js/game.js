@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.219";
+const GAME_VERSION = "0.221";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1827,8 +1827,8 @@ function onMinionClick(owner, minion, side) {
 }
 
 document.getElementById("game").addEventListener("click", (e) => {
-  const endBtnEl = e.target.id === "endBtn" ? e.target : e.target.closest("#endBtn");
-  if (endBtnEl && !endBtnEl.disabled) { Sfx.playTurn && Sfx.playTurn(); endTurn(); return; }
+  // #endBtn: endTurn only via pointerdown+pointerup both on button (see bindEndBtnPressVisual)
+  if (e.target.id === "endBtn" || (e.target.closest && e.target.closest("#endBtn"))) return;
   if (e.target.id === "giveBtn") { confirmGiveUp(); return; }
   const portrait = e.target.closest(".hero-portrait, .hero-slot, .hud-hero");
   if (portrait) {
@@ -1962,7 +1962,7 @@ const ATK_SKILL_HELP = {
   1: ["일반공격", "공격력만큼 공격합니다."],
   2: ["관통공격", "방어를 먼저 깎으며 공격합니다."],
   3: ["돌진공격", "내 방어력만큼 추가하여 공격합니다."],
-  4: ["연속공격", "두 번 공격합니다."],
+  4: ["연속공격", "두 번 공격합니다. 처치 시 다음 생존 적에게 이어집니다."],
   5: ["치명공격", "체력을 1 이상 깎으면 적이 바로 죽습니다."],
   6: ["흡혈공격", "준 피해의 절반만큼 체력을 회복합니다."],
   7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],

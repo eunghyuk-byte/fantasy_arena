@@ -203,15 +203,50 @@ function doAttack(p, attacker, target, auto) {
         await waitMs(hits > 1 ? 300 : 420);
       }
     } else {
-      // single minion: 연속(4)=two hits with counter each; 혼란(11)=no counter; 돌파(10)=overkill chain
+      // single minion: 연속(4)=two hits with counter each (kill→retarget next living);
+      // 혼란(11)=no counter; 돌파(10)=overkill chain
       const hits = (sk === 4) ? 2 : 1;
       let lastHpDmg = 0;
       let lastHpBefore = 0;
       let killedByHit = false;
       for (let hit = 1; hit <= hits; hit++) {
         if (attacker.hp <= 0 || attacker.dying) break;
-        if (!(def && def.hp > 0 && !def.dying)) break;
-        const blocked = (hit === 1) ? (window._pendingDef || 0) : Math.max(0, def.def || 0);
+        // 연속: 1타 처치 후 남은 타는 다음 생존 적(하수인→영웅)으로 재지정. 시체/스킵 금지.
+        if (!(def && def.hp > 0 && !def.dying)) {
+          if (sk !== 4) break;
+          const legalNext = attackTargets(p, attacker);
+          const nextM = legalNext.find(t => t.kind === "minion" && t.minion && t.minion.hp > 0 && !t.minion.dying);
+          const nextH = legalNext.find(t => t.kind === "hero" && t.owner && t.owner.hp > 0);
+          if (nextM) {
+            def = nextM.minion;
+            target = nextM;
+            dAtk = clampAtk(Number(def.atk) || 0);
+            log(`${attacker.name} 연속 재지정 → ${def.name}`);
+          } else if (nextH) {
+            log(`${attacker.name} 연속 재지정 → 영웅`);
+            const isMeHero = nextH.owner === meView().me;
+            const defElH = Vfx.heroOf(isMeHero);
+            const calcH = calcAtkSkillHpDamage(attacker, aAtk, 0, aDefNow, null);
+            let hpDmgH = calcH.hpDmg;
+            if (hits > 1) log(`${attacker.name} 연속 ${hit}/${hits}`);
+            const critH = hpDmgH >= attacker.atk + 3 || sk === 5;
+            try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { hero: isMeHero ? "me" : "opp" }); } catch (e) {}
+            await Vfx.attackSeq(atkEl, defElH, hpDmgH, critH);
+            if (sk === 5 && hpDmgH >= 1) {
+              dealHero(nextH.owner, Math.max(hpDmgH, nextH.owner.hp));
+              log(`${attacker.name} 치명공격 → 영웅 즉사급 피해`);
+            } else {
+              dealHero(nextH.owner, hpDmgH);
+            }
+            if (sk === 6) applyLifesteal(attacker, hpDmgH);
+            render();
+            await waitMs(hits > 1 ? 300 : 420);
+            continue;
+          } else {
+            break;
+          }
+        }
+        const blocked = (hit === 1 && def === (target && target.minion)) ? (window._pendingDef || 0) : Math.max(0, def.def || 0);
         const backBlock = window._pendingAtkDef || 0;
         const calc = calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefNow, def);
         let hpDmg = calc.hpDmg;
@@ -242,8 +277,10 @@ function doAttack(p, attacker, target, auto) {
         lastHpBefore = hpBefore;
         const survived = def && def.hp > 0 && !def.dying;
         killedByHit = !survived;
-        if (sk !== 11 && survived && dAtk && attacker.hp > 0 && !attacker.dying) {
-          const dmgBack = Math.max(0, dAtk - backBlock);
+        // counter uses this hit's defender current atk if retargeted mid-연속
+        const counterAtk = (hit === 1) ? dAtk : clampAtk(Number(def.atk) || 0);
+        if (sk !== 11 && survived && counterAtk && attacker.hp > 0 && !attacker.dying) {
+          const dmgBack = Math.max(0, counterAtk - backBlock);
           if (dmgBack > 0) {
             log(`${def.name} 반격`);
             const atkNow = Vfx.elOf(attacker.uid);
@@ -262,7 +299,8 @@ function doAttack(p, attacker, target, auto) {
           try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: def.uid }); } catch (e) {}
           Vfx.death(deadEl);
           await waitMs(520);
-          break;
+          // 연속: 남은 타가 있으면 break하지 않고 다음 루프에서 재지정
+          if (!(sk === 4 && hit < hits)) break;
         }
       }
 
@@ -405,7 +443,9 @@ function hideScreens() {
 }
 function showGame() {
   hideScreens();
-  document.getElementById("game").classList.add("active");
+  const g = document.getElementById("game");
+  g.classList.add("active");
+  g.classList.remove("hud-ready"); // wait for ensureBoardLayouts
   try { Bgm.to("battle", 900); } catch (e) {}
 }
 function backTitle() {

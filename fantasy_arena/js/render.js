@@ -1,5 +1,39 @@
 
+/** Run all board/HUD absolute layouts once geometry is measurable. */
+function runBoardLayouts() {
+  try { layoutBoardSlots(); } catch (e) {}
+  try { layoutBoardAlign(); } catch (e) {}
+  try { layoutBoardDecks(); } catch (e) {}
+  try { layoutEndBtn(); } catch (e) {}
+  try { layoutHudGems(); } catch (e) {}
+  const g = document.getElementById("game");
+  const bg = document.getElementById("boardBgLayer");
+  if (g && bg && bg.naturalWidth) g.classList.add("hud-ready");
+}
 
+/** Wait until board art has naturalWidth (or error), then double-rAF layout. */
+function ensureBoardLayouts() {
+  const bg = document.getElementById("boardBgLayer");
+  const kick = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { runBoardLayouts(); });
+    });
+  };
+  if (!bg) { kick(); return; }
+  if (bg.complete && bg.naturalWidth > 0) { kick(); return; }
+  if (bg._layoutWaitBound) { kick(); return; }
+  bg._layoutWaitBound = true;
+  const done = () => {
+    bg._layoutWaitBound = false;
+    bg.removeEventListener("load", done);
+    bg.removeEventListener("error", done);
+    kick();
+  };
+  bg.addEventListener("load", done);
+  bg.addEventListener("error", done);
+  // Fallback if load already raced
+  setTimeout(() => { if (bg.naturalWidth > 0 || bg.complete) done(); }, 0);
+}
 
 function layoutBoardDecks() {
   const main = document.querySelector("#game.active .col-main");
@@ -135,12 +169,8 @@ function render() {
   }
   document.getElementById("oppBoard").classList.toggle("empty", !opp.board.length);
   document.getElementById("myBoard").classList.toggle("empty", !me.board.length);
-  layoutBoardSlots();
-  layoutBoardAlign();
-  layoutBoardDecks();
-  layoutEndBtn();
-  layoutHudGems();
-  requestAnimationFrame(() => { layoutBoardSlots(); layoutBoardAlign(); layoutBoardDecks(); layoutEndBtn(); layoutHudGems(); });
+  // Board chrome: wait for boardBgLayer natural size, then double-rAF so first paint is correct
+  ensureBoardLayouts();
 
   const oppDeckEl = document.getElementById("oppDeck");
   const myDeckEl = document.getElementById("myDeck");
@@ -506,8 +536,8 @@ async function composeCardFace(c, opts={}) {
       ctx.strokeStyle = "#120800";
       ctx.fillStyle = "#fff8e8";
     }
-    ctx.strokeText(headerTxt, W*0.50, H*0.074);
-    ctx.fillText(headerTxt, W*0.50, H*0.074);
+    ctx.strokeText(headerTxt, W*0.50, H*0.0697);
+    ctx.fillText(headerTxt, W*0.50, H*0.0697);
     ctx.restore();
   }
 
@@ -546,7 +576,7 @@ async function composeCardFace(c, opts={}) {
     ctx.restore();
   }
 
-  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.1013, Math.round(H*0.070));
+  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996, Math.round(H*0.070));
   const paintFrameStats = c.type === "minion" || (c.type === "item");
   if (paintFrameStats) {
     const hp = opts.hp != null ? opts.hp : c.hp;
@@ -990,22 +1020,49 @@ function updateEndBtn(myTurn) {
     const btn = document.getElementById("endBtn");
     if (!btn || btn._endBtnPressBound) return;
     btn._endBtnPressBound = true;
-    const release = () => {
+    const clearHold = () => {
       if (!btn._endBtnHolding) return;
       btn._endBtnHolding = false;
       setEndBtnBg(btn, btn._endBtnDesiredSrc || endBtnHudSrcs().off);
+    };
+    const stillOverBtn = (e) => {
+      try {
+        const x = e.clientX, y = e.clientY;
+        if (typeof x === "number" && typeof y === "number") {
+          const top = document.elementFromPoint(x, y);
+          if (top && (top === btn || btn.contains(top))) return true;
+        }
+      } catch (err) {}
+      // fallback: event target still inside button
+      const t = e.target;
+      return !!(t && (t === btn || (btn.contains && btn.contains(t))));
     };
     btn.addEventListener("pointerdown", (e) => {
       if (btn.disabled || !btn.classList.contains("my-turn")) return;
       if (e.button != null && e.button !== 0) return;
       btn._endBtnHolding = true;
+      btn._endBtnArmed = true;
       setEndBtnBg(btn, endBtnHudSrcs().off);
       try { btn.setPointerCapture(e.pointerId); } catch (err) {}
     });
-    btn.addEventListener("pointerup", release);
-    btn.addEventListener("pointercancel", release);
-    btn.addEventListener("lostpointercapture", release);
-    btn.addEventListener("pointerleave", release);
+    const onUp = (e) => {
+      const armed = !!btn._endBtnArmed;
+      btn._endBtnArmed = false;
+      clearHold();
+      if (!armed) return;
+      if (btn.disabled || !btn.classList.contains("my-turn")) return;
+      // Cancel if release is not on #endBtn (drag-off)
+      if (!stillOverBtn(e)) return;
+      try { if (typeof Sfx !== "undefined" && Sfx.playTurn) Sfx.playTurn(); } catch (err) {}
+      try { if (typeof endTurn === "function") endTurn(); } catch (err) {}
+    };
+    btn.addEventListener("pointerup", onUp);
+    btn.addEventListener("pointercancel", () => { btn._endBtnArmed = false; clearHold(); });
+    btn.addEventListener("lostpointercapture", () => {
+      // capture lost without pointerup path — cancel arm, clear visual
+      if (btn._endBtnArmed) { btn._endBtnArmed = false; clearHold(); }
+    });
+    // Do not end turn on leave; keep pressed visual while captured/holding
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bind);
@@ -1019,7 +1076,7 @@ function updateEndBtn(myTurn) {
   let t = 0;
   const kick = () => {
     clearTimeout(t);
-    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); layoutBoardDecks(); layoutEndBtn(); layoutHudGems(); } catch (e) {} }, 50);
+    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); ensureBoardLayouts(); } catch (e) {} }, 50);
   };
   window.addEventListener("resize", kick);
   window.addEventListener("orientationchange", kick);
