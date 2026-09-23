@@ -215,15 +215,18 @@
     };
     if (fs) fs.onchange = () => { setFullscreen(fs.checked); };
     if (bgm) {
-      const applyBgm = () => {
+      const applyBgm = (ev) => {
         try {
-          if (!window.Bgm) return;
-          if (bgm.checked) Bgm.start();
-          else Bgm.stop(); // immediate mute+pause
-        } catch (e) {}
+          const api = (typeof Bgm !== "undefined") ? Bgm : window.Bgm;
+          if (!api) return;
+          // Read from the input itself (ev target) for reliability
+          const on = !!(ev && ev.target ? ev.target.checked : bgm.checked);
+          if (on) api.start();
+          else api.stop();
+        } catch (e) { console.warn("bgm toggle failed", e); }
       };
       bgm.addEventListener("change", applyBgm);
-      bgm.addEventListener("input", applyBgm);
+      bgm.addEventListener("click", applyBgm);
     }
   }
 

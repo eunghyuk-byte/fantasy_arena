@@ -20,7 +20,8 @@ const Bgm = (() => {
       if (a) a.volume = (k === track ? v : 0);
     });
     const tog = document.getElementById("bgmToggle");
-    if (tog) tog.checked = !!wanted;
+    // Don't overwrite while user is interacting with the checkbox
+    if (tog && document.activeElement !== tog) tog.checked = !!wanted;
   }
 
   async function resolveUrl(stem) {
@@ -139,4 +140,6 @@ const Bgm = (() => {
   function isWanted() { return !!wanted; }
   return { start, stop, toggle, to, duck, setVolume, isOn, isWanted, track: () => track };
 })();
+window.Bgm = Bgm;
 const TavernBgm = Bgm;
+window.TavernBgm = Bgm;
