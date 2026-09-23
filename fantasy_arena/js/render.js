@@ -1170,8 +1170,8 @@ function layoutEndBtn() {
   if (!Number.isFinite(left) || !Number.isFinite(top) || !Number.isFinite(bw)) return;
   // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
   if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
-  // v0.236… v0.255: end-turn LEFT cumulative −95
-  btn.style.left = (left - 95) + "px";
+  // v0.236… v0.258: end-turn LEFT cumulative −98
+  btn.style.left = (left - 98) + "px";
   btn.style.top = (top - 24) + "px";
   btn.style.width = bw + "px";
   btn.style.height = bh + "px";

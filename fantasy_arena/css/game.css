@@ -4358,15 +4358,15 @@ input, textarea, [contenteditable="true"] {
   padding-top: 10px !important;
 }
 
-/* ===== v0.255: yellow field borders gap 10 at center; end-turn left −5 more ===== */
+/* ===== v0.255→v0.258: yellow field borders gap ~20 at center ===== */
 #game.active .board.opp,
 #game.active #oppBoard {
-  transform: translate(calc(-1.5% + 20px), 40px) !important; /* was 45 → up 5 */
+  transform: translate(calc(-1.5% + 20px), 35px) !important; /* was 40 → up 5 more */
 }
 #game.active #myBoard {
-  transform: translate(calc(-1.5% + 20px), 50px) !important; /* was 45 → down 5 → gap 10 */
+  transform: translate(calc(-1.5% + 20px), 55px) !important; /* was 50 → down 5 → gap ~20 */
 }
 #game.active.drop-ready #myBoard,
 #game.active #myBoard.drop-glow {
-  transform: translate(calc(-1.5% + 20px), 50px) !important;
+  transform: translate(calc(-1.5% + 20px), 55px) !important;
 }
