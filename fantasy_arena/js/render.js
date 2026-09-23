@@ -1199,44 +1199,52 @@ function updateEndBtn(myTurn) {
       btn._endBtnHolding = false;
       setEndBtnBg(btn, btn._endBtnDesiredSrc || endBtnHudSrcs().off);
     };
+    // Hit-test by pointer coords (NOT e.target). setPointerCapture makes
+    // e.target stay #endBtn even when released outside — that was the drag-off bug.
     const stillOverBtn = (e) => {
-      try {
-        const x = e.clientX, y = e.clientY;
-        if (typeof x === "number" && typeof y === "number") {
-          const top = document.elementFromPoint(x, y);
-          if (top && (top === btn || btn.contains(top))) return true;
-        }
-      } catch (err) {}
-      // fallback: event target still inside button
-      const t = e.target;
-      return !!(t && (t === btn || (btn.contains && btn.contains(t))));
+      const x = e.clientX, y = e.clientY;
+      if (typeof x !== "number" || typeof y !== "number" || Number.isNaN(x) || Number.isNaN(y)) return false;
+      const r = btn.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
     };
     btn.addEventListener("pointerdown", (e) => {
       if (btn.disabled || !btn.classList.contains("my-turn")) return;
       if (e.button != null && e.button !== 0) return;
+      e.preventDefault();
       btn._endBtnHolding = true;
       btn._endBtnArmed = true;
+      btn._endBtnPtr = e.pointerId;
       setEndBtnBg(btn, endBtnHudSrcs().off);
       try { btn.setPointerCapture(e.pointerId); } catch (err) {}
     });
     const onUp = (e) => {
+      if (btn._endBtnPtr != null && e.pointerId != null && e.pointerId !== btn._endBtnPtr) return;
       const armed = !!btn._endBtnArmed;
+      const over = stillOverBtn(e);
       btn._endBtnArmed = false;
+      btn._endBtnPtr = null;
       clearHold();
+      try { if (e.pointerId != null) btn.releasePointerCapture(e.pointerId); } catch (err) {}
       if (!armed) return;
       if (btn.disabled || !btn.classList.contains("my-turn")) return;
-      // Cancel if release is not on #endBtn (drag-off)
-      if (!stillOverBtn(e)) return;
+      // Cancel if release point is outside #endBtn bounds
+      if (!over) return;
       try { if (typeof Sfx !== "undefined" && Sfx.playTurn) Sfx.playTurn(); } catch (err) {}
       try { if (typeof endTurn === "function") endTurn(); } catch (err) {}
     };
     btn.addEventListener("pointerup", onUp);
-    btn.addEventListener("pointercancel", () => { btn._endBtnArmed = false; clearHold(); });
-    btn.addEventListener("lostpointercapture", () => {
-      // capture lost without pointerup path — cancel arm, clear visual
-      if (btn._endBtnArmed) { btn._endBtnArmed = false; clearHold(); }
+    btn.addEventListener("pointercancel", (e) => {
+      btn._endBtnArmed = false;
+      btn._endBtnPtr = null;
+      clearHold();
     });
-    // Do not end turn on leave; keep pressed visual while captured/holding
+    // Do NOT clear armed on lostpointercapture before pointerup — some browsers
+    // fire lostcapture first; arm is cleared in onUp instead.
+    // Window capture as safety if button listener misses
+    window.addEventListener("pointerup", (e) => {
+      if (!btn._endBtnArmed) return;
+      onUp(e);
+    }, true);
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bind);
