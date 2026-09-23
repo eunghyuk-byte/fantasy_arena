@@ -201,7 +201,7 @@ const CARDS = [
   { id:"d19", tribe:"dark", name:"그림자요정", cost:3, type:"minion", atk:4, def:0, hp:2, atkC:-4, defC:0, hpC:4, ability:"출전", text:"출전" },
   { id:"l17", tribe:"light", name:"황월영", cost:3, type:"minion", atk:2, def:0, hp:3, atkC:1, defC:1, hpC:1, rarity:"rare", ability:"보호", text:"보호" },
   // --- tokens ---
-  { id:"e40", tribe:"earth", name:"섬의 파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", cannotAttack:true, ability:"공격불가", text:"공격불가" },
+  { id:"e40", tribe:"wind", name:"섬의 파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", cannotAttack:true, ability:"공격불가", text:"공격불가" },
   // --- spells / items ---
 { id:"fs1", tribe:"fire", name:"화염화살", cost:2, type:"spell", rarity:"common", text:"유닛 하나 체-3", spell:{ type:"dmg", value:3, target:"any_minion" } },
   { id:"fs2", tribe:"fire", name:"화염폭풍", cost:4, type:"spell", rarity:"common", text:"적 전체 체-2, 코인-1", spell:{ type:"aoe_pack", enemy:2, coin:-1 } },
@@ -684,7 +684,7 @@ const CARD_LORE = {
   "e26": "사이클롭스의 외눈이 적을 고른다. 한 번 노려본 자리는 돌이 되고, 돌이 된 자리는 다시 무기가 된다.",
   "e27": "샌드웜이 모래 밑을 가르면 사막이 강처럼 흐른다. 입을 벌린 순간, 전장은 한 줄기의 골짜기가 된다.",
   "e28": "이끼방패병은 이끼를 갑옷처럼 두른다. 방패에 닿은 칼날은 미끄러지고, 그 자리에 푸른 흔적만 남는다.",
-  "e40": "떠오른 섬에서 떨어진 한 조각. 작아도 흙의 기억이 남아, 빈 칸을 조용히 메운다.",
+  "e40": "떠오른 섬에서 떨어진 한 조각. 바람과 함께 떠 다니며, 빈 칸을 조용히 메운다.",
   "f1": "레드드래곤의 열기는 주문을 태우기 전에 먼저 삼킨다. 비늘 위에서는 마법도 재가 된다.",
   "f2": "불꽃궁수는 시위에 불씨를 매단다. 화살이 박힌 자리는 검게 남고, 연기가 적의 이름을 지운다.",
   "f3": "임프는 난로에서 튀어나온 장난. 커튼을 만나면 진지해지고, 진지해지면 이미 불길이다.",
