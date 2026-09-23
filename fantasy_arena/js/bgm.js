@@ -6,6 +6,12 @@ const Bgm = (() => {
   let vol = 0.36, duckMul = 1;
   const beds = { menu: null, battle: null };
   const urls = { menu: "", battle: "" };
+  let fadeTimers = [];
+
+  function clearFades() {
+    fadeTimers.forEach(id => { try { clearInterval(id); } catch (e) {} });
+    fadeTimers = [];
+  }
 
   function applyVol() {
     const v = wanted ? vol * duckMul : 0;
@@ -62,19 +68,37 @@ const Bgm = (() => {
     let i = 0;
     const id = setInterval(() => {
       i++;
+      // Stop mid-fade if user turned BGM off
+      if (!wanted && to > 0) {
+        audio.volume = 0;
+        try { audio.pause(); } catch (e) {}
+        clearInterval(id);
+        fadeTimers = fadeTimers.filter(x => x !== id);
+        return;
+      }
       audio.volume = Math.max(0, Math.min(1, from + (to - from) * (i / steps)));
-      if (i >= steps) clearInterval(id);
+      if (i >= steps) {
+        clearInterval(id);
+        fadeTimers = fadeTimers.filter(x => x !== id);
+      }
     }, 40);
+    fadeTimers.push(id);
   }
 
   async function to(kind, ms) {
     track = kind === "battle" ? "battle" : "menu";
     if (!unlocked || !wanted) { applyVol(); return; }
     const next = await ensure(track);
+    if (!wanted) { applyVol(); return; } // unchecked while loading
     const other = track === "battle" ? beds.menu : beds.battle;
     const fadeMs = ms == null ? 900 : ms;
     if (next) {
       try { await next.play(); } catch (e) {}
+      if (!wanted) {
+        try { next.pause(); next.volume = 0; } catch (e) {}
+        applyVol();
+        return;
+      }
       fade(next, vol * duckMul, fadeMs);
     }
     if (other && other !== next) fade(other, 0, fadeMs);
@@ -86,11 +110,17 @@ const Bgm = (() => {
     unlocked = true;
     await ensure("menu");
     await ensure("battle");
+    if (!wanted) { applyVol(); return; }
     await to(track, 400);
   }
   function stop() {
     wanted = false;
-    Object.values(beds).forEach(a => { if (a) { a.pause(); a.volume = 0; } });
+    clearFades();
+    Object.values(beds).forEach(a => {
+      if (!a) return;
+      try { a.pause(); } catch (e) {}
+      a.volume = 0;
+    });
     applyVol();
   }
   function toggle() {

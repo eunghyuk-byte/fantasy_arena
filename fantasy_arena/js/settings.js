@@ -214,13 +214,17 @@
       await applyStageResolution();
     };
     if (fs) fs.onchange = () => { setFullscreen(fs.checked); };
-    if (bgm) bgm.onchange = () => {
-      try {
-        if (!window.Bgm) return;
-        if (bgm.checked) Bgm.start();
-        else Bgm.stop();
-      } catch (e) {}
-    };
+    if (bgm) {
+      const applyBgm = () => {
+        try {
+          if (!window.Bgm) return;
+          if (bgm.checked) Bgm.start();
+          else Bgm.stop(); // immediate mute+pause
+        } catch (e) {}
+      };
+      bgm.addEventListener("change", applyBgm);
+      bgm.addEventListener("input", applyBgm);
+    }
   }
 
   window.StageSettings = {

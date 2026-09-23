@@ -3508,6 +3508,7 @@ html.is-desktop, html.is-desktop body {
   position: absolute !important;
   left: 10px !important;
   top: auto !important;
+  white-space: pre-line !important;
   /* sit just under log panel — JS sets --hint-top; fallback below */
   top: var(--hint-top, 118px) !important;
   right: auto !important;
@@ -3521,7 +3522,7 @@ html.is-desktop, html.is-desktop body {
   padding: 6px 10px !important;
   margin: 0 !important;
   border-radius: 8px !important;
-  background: rgba(12, 8, 4, 0.36) !important;
+  background: rgba(12, 8, 4, 0.56) !important; /* v0.243: +20% opacity */
   border: 1px solid rgba(228, 195, 106, 0.18) !important;
   color: #d8c8a4 !important;
   font-size: 11px !important;
@@ -4200,8 +4201,8 @@ html.is-desktop #game.active .my-hand .card.playable,
   margin-top: 6px !important;
 }
 #game.active .opp-hand .back {
-  /* v0.234: back.png 1333×2000 → aspect 2/3, height-driven */
-  height: min(78%, 9.5cqh) !important;
+  /* v0.243: 2× size vs prior 9.5cqh */
+  height: min(96%, 19cqh) !important;
   width: auto !important;
   aspect-ratio: 2 / 3 !important;
   margin-left: -12px !important;
@@ -4241,18 +4242,24 @@ input, textarea, [contenteditable="true"] {
 }
 
 
-/* v0.240: gear button = original 48px; inner ⚙ glyph ~2× */
+/* v0.243: settings gear asset; button 48px; up 12px; glyph fills circle */
 #settingsGearBtn.settings-gear-btn {
+  top: 2px !important; /* was 14 → up 12 */
+  right: 14px !important;
   width: 48px !important;
   height: 48px !important;
-  font-size: 40px !important; /* was ~20 — glyph only larger */
-  line-height: 1 !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  line-height: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 0 !important;
-  overflow: visible !important;
-  color: #e8d6a0;
+  overflow: hidden !important;
+  background-image: url("../assets/img/hud/settings_gear.png") !important;
+  background-size: 92% 92% !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
   transform: none;
 }
 #settingsGearBtn.settings-gear-btn.on {

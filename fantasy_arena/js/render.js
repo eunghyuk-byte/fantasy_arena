@@ -152,7 +152,7 @@ function layoutBoardDecks() {
     } else {
       deck.style.top = "auto";
       // v0.236: ally deck UP ~50px
-      deck.style.bottom = (mr.bottom - br.bottom + 4 + 50) + "px";
+      deck.style.bottom = (mr.bottom - br.bottom + 4 + 80) + "px";
       deck.style.height = Math.max(90, br.height * 0.85) + "px";
       deck.style.justifyContent = "flex-end";
       deck.style.paddingTop = "0";
@@ -314,12 +314,12 @@ function render() {
   let hint = "";
   if (ui.targeting) hint = "대상을 선택하세요. 빈 곳 클릭으로 취소.";
   else if (ui.battling) hint = "자동 전투 중…";
-  else if (myTurn) hint = "유닛·스펠 모두 전장으로 드래그. 스펠은 전장에 놓는 순간 시전됩니다.";
+  else if (myTurn) hint = "유닛·스펠 모두 전장으로 드래그.\n스펠은 전장에 놓는 순간 시전됩니다.";
   else if (current().isAI) hint = "상대가 생각 중…";
   else hint = "상대 턴입니다. (핫시트: 화면을 넘겨 주세요)";
   const hintEl = document.getElementById("hint");
   if (hintEl) {
-    hintEl.textContent = hint;
+    hintEl.textContent = hint; // may include \n
     const logEl = document.getElementById("log");
     if (logEl) {
       const top = Math.round(logEl.offsetTop + logEl.offsetHeight + 6);
@@ -1057,7 +1057,7 @@ function layoutHudGems() {
     const el = document.getElementById(id);
     if (!el || !el.style.left) return;
     const L = parseFloat(el.style.left);
-    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 130) + "px", "important");
+    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 150) + "px", "important");
   });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
@@ -1093,7 +1093,7 @@ function layoutHudGems() {
       const vx = contentLeft + contentW * CX - HP_W / 2;
       const vy = contentTop + contentH * CY - HP_H / 2;
       // v0.236: hero HP numbers DOWN ~9px and LEFT ~7px
-      hp.style.setProperty("left", (vx - sr.left - 7) + "px", "important");
+      hp.style.setProperty("left", (vx - sr.left - 6) + "px", "important");
       hp.style.setProperty("top", (vy - sr.top + 9) + "px", "important");
       hp.style.setProperty("width", HP_W + "px", "important");
       hp.style.setProperty("height", HP_H + "px", "important");
@@ -1138,8 +1138,8 @@ function layoutEndBtn() {
   // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
   if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
   // v0.236: end-turn LEFT 50, UP 22
-  btn.style.left = (left - 50) + "px";
-  btn.style.top = (top - 22) + "px";
+  btn.style.left = (left - 70) + "px";
+  btn.style.top = (top - 24) + "px";
   btn.style.width = bw + "px";
   btn.style.height = bh + "px";
   btn.style.right = "auto";
