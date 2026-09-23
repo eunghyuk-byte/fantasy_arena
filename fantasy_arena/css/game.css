@@ -4359,15 +4359,15 @@ input, textarea, [contenteditable="true"] {
   padding-top: 10px !important;
 }
 
-/* ===== v0.259: yellow field borders — opp up 10, my down 10 more ===== */
+/* ===== v0.262: yellow field borders — opp up 5, my down 5 more ===== */
 #game.active .board.opp,
 #game.active #oppBoard {
-  transform: translate(calc(-1.5% + 20px), 25px) !important; /* was 35 → up 10 */
+  transform: translate(calc(-1.5% + 20px), 20px) !important; /* was 25 → up 5 */
 }
 #game.active #myBoard {
-  transform: translate(calc(-1.5% + 20px), 65px) !important; /* was 55 → down 10 */
+  transform: translate(calc(-1.5% + 20px), 70px) !important; /* was 65 → down 5 */
 }
 #game.active.drop-ready #myBoard,
 #game.active #myBoard.drop-glow {
-  transform: translate(calc(-1.5% + 20px), 65px) !important;
+  transform: translate(calc(-1.5% + 20px), 70px) !important;
 }
