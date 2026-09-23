@@ -737,16 +737,15 @@ async function paintStatCoins(ctx, c, W, H) {
   const gap = Math.round(size * 0.08);
   // Vertical overlap between stacked rows (~45% of coin height)
   const rowStep = Math.round(size * 0.55);
-  const cyBot = H * 0.978; // bottom-row center
+  const cyBot = H * 0.978 - 1; // v0.241: up 1px
   const slots = [
     [W * 0.1343, parseCoin(c.atkC)],
     [W * 0.5008, parseCoin(c.defC)],
     [W * 0.8745, parseCoin(c.hpC)]
   ];
-  // 1~3: one row; 4: 2/2; 5: 2/3 (top/bottom)
+  // 1~4: one row; 5: 2/3 (top/bottom)
   function coinRows(n) {
-    if (n <= 3) return [n];
-    if (n === 4) return [2, 2];
+    if (n <= 4) return [n];
     return [2, 3];
   }
   for (const [ax, raw] of slots) {
