@@ -519,9 +519,8 @@ async function composeCardFace(c, opts={}) {
 
   ctx.fillStyle = "#1a1008";
   ctx.fillRect(0, 0, W, H);
-  // Portrait window for deck_* frames (opaque-bbox cropped). Sized to fully cover the
-  // transparent art hole so no #1a1008 bars show at top/bottom inside the arch.
-  const artX = W * 0.110, artY = H * 0.088, artW = W * 0.780, artH = H * 0.475;
+  // Shared unit/spell/item portrait rect extends below the wavy frame hole troughs.
+  const artX = W * 0.110, artY = H * 0.088, artW = W * 0.780, artH = H * 0.490;
   ctx.fillStyle = tribe.color || "#1a1008";
   ctx.fillRect(artX, artY, artW, artH);
   ctx.save();
@@ -570,9 +569,6 @@ async function composeCardFace(c, opts={}) {
         dx = Math.max(artX + artW - dw, Math.min(artX, dx));
         dy = Math.max(artY + artH - dh, Math.min(artY, dy));
       }
-      // All types +10 (v0.265); minions keep prior +20 so total +30
-      dy += 10;
-      if (c.type === "minion") dy += 20;
       ctx.drawImage(art, sx, sy, sw, sh, dx, dy, dw, dh);
     };
     const FOCUS = {
