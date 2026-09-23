@@ -4242,7 +4242,7 @@ input, textarea, [contenteditable="true"] {
 }
 
 
-/* v0.245: revert image gear — emoji ⚙, button 48px, glyph larger, keep up 12 */
+/* v0.248: no circle chrome — hover brightens the ⚙ itself */
 #settingsGearBtn.settings-gear-btn {
   top: 2px !important;
   right: 14px !important;
@@ -4255,13 +4255,27 @@ input, textarea, [contenteditable="true"] {
   justify-content: center !important;
   padding: 0 !important;
   overflow: visible !important;
-  color: #e8d6a0;
+  color: #c9b48a;
+  background: transparent !important;
   background-image: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   transform: none;
+  transition: color 0.15s ease, filter 0.15s ease, text-shadow 0.15s ease;
+}
+#settingsGearBtn.settings-gear-btn:hover,
+#settingsGearBtn.settings-gear-btn:focus-visible {
+  color: #ffe7a8 !important;
+  filter: brightness(1.35) !important;
+  text-shadow: 0 0 8px rgba(255, 220, 140, 0.65), 0 0 14px rgba(228, 195, 106, 0.4);
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 #settingsGearBtn.settings-gear-btn.on {
-  border-color: rgba(201, 162, 74, 0.55);
-  box-shadow: none;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* v0.237: combat give-up moved into settings */
