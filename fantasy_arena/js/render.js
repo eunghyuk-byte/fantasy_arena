@@ -559,8 +559,8 @@ async function composeCardFace(c, opts={}) {
         dx = Math.max(artX + artW - dw, Math.min(artX, dx));
         dy = Math.max(artY + artH - dh, Math.min(artY, dy));
       }
-      // Unit portrait: shift illustration down ~10px inside art window (position only; scale unchanged)
-      if (c.type === "minion") dy += 10;
+      // Unit portrait: shift illustration down ~20px inside art window (position only; scale unchanged)
+      if (c.type === "minion") dy += 20;
       ctx.drawImage(art, sx, sy, sw, sh, dx, dy, dw, dh);
     };
     const FOCUS = {
@@ -669,7 +669,7 @@ async function composeCardFace(c, opts={}) {
     ctx.restore();
   }
 
-  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996, Math.round(H*0.070));
+  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070));
   const paintFrameStats = c.type === "minion" || (c.type === "item");
   if (paintFrameStats) {
     const hp = opts.hp != null ? opts.hp : c.hp;
