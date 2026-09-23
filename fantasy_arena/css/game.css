@@ -1296,7 +1296,7 @@
   .board.opp { border: none !important; }
   #game.active.drop-ready .board { box-shadow: none !important; border: none !important; }
   #game.active.drop-ready #myBoard {
-    box-shadow: inset 0 0 0 3px rgba(255, 224, 140, .85), 0 0 22px rgba(255,210,100,.35);
+    box-shadow: inset 0 0 0 1px rgba(255, 224, 140, .55), 0 0 10px rgba(255,210,100,.22);
     border-radius: 18px;
   }
   .board-divider {
@@ -3178,8 +3178,8 @@ html.is-desktop, html.is-desktop body {
 }
 #game.active.drop-ready #myBoard,
 #game.active #myBoard.drop-glow {
-  /* subtle inset only — never full-stage stretch */
-  box-shadow: inset 0 0 0 2px rgba(255, 224, 140, .55) !important;
+  /* thinner field frame stroke (v0.222) — never full-stage stretch */
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 140, .48) !important;
   border: none !important;
   outline: none !important;
   background: transparent !important;
@@ -3730,31 +3730,31 @@ body.dragging-card {
   grid-area: unset !important;
 }
 
-/* Field lane: 5-slot width, centered with slight right nudge (not full parchment / not 6-wide) */
+/* Field lane: 5-slot width, slightly wider + left of prior right nudge (v0.222) */
 #game.active .board,
 #game.active .board.opp,
 #game.active #oppBoard,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  width: min(68%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important;
-  max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
+  width: min(76%, calc(5 * var(--slot-w, 112px) + 4 * 12px + 44px)) !important;
+  max-width: calc(5 * var(--slot-w, 112px) + 4 * 12px + 52px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
-  /* a bit right of true center — was hugging left/decks */
-  transform: translateX(3.5%) !important;
-  padding-left: 6px !important;
-  padding-right: 6px !important;
+  /* was translateX(3.5%) right — shift left a bit */
+  transform: translateX(-1.5%) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
   box-sizing: border-box !important;
 }
 
 /* Drop-glow follows narrowed myBoard; keep the same centering nudge */
 #game.active.drop-ready #myBoard,
 #game.active #myBoard.drop-glow {
-  width: min(68%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important;
-  max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
+  width: min(76%, calc(5 * var(--slot-w, 112px) + 4 * 12px + 44px)) !important;
+  max-width: calc(5 * var(--slot-w, 112px) + 4 * 12px + 52px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
-  transform: translateX(3.5%) !important;
+  transform: translateX(-1.5%) !important;
 }
 
 /* ===== v0.202: hand size OK but NO overlap onto board ===== */
@@ -4075,4 +4075,25 @@ html.is-desktop #game.active .my-hand .card.playable,
   right: unset !important;
   bottom: unset !important;
   left: unset !important;
+}
+
+
+/* ===== v0.222: playable glow INSIDE card (hand overflow stays locked hidden) =====
+   Outer box-shadow bloom was clipped by HAND LAYOUT LOCK overflow:hidden.
+   Keep HAND_ROW_FRAC / no negative .my-hand margins. */
+#game.active .my-hand .card.playable {
+  overflow: hidden !important;
+}
+#game.active .my-hand .card.playable > .play-glow {
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  border: 2px solid rgba(255, 220, 90, 0.92) !important;
+  border-radius: 10px 10px 16px 16px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 180, 40, 0.85),
+    inset 0 0 14px 2px rgba(255, 200, 60, 0.55),
+    inset 0 0 28px rgba(255, 150, 20, 0.35) !important;
+  filter: brightness(1.08) saturate(1.2) !important;
+  animation: playGlowBurn 0.9s ease-in-out infinite !important;
 }

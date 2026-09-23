@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.221";
+const GAME_VERSION = "0.222";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1570,16 +1570,23 @@ function reorderOwnBoard(fromUid, toIdx) {
   return fromIdx !== dest;
 }
 function bindHandCard(el, card) {
-  el.onpointerenter = () => showPeek(el, card);
-  el.onpointerleave = hidePeek;
+  // Desktop mouse: hover shows center #cardPeek. Touch/pen: hold (no move) shows same peek.
+  el.onpointerenter = (ev) => {
+    if (ev && (ev.pointerType === "touch" || ev.pointerType === "pen")) return;
+    showPeek(el, card);
+  };
+  el.onpointerleave = (ev) => {
+    if (ev && (ev.pointerType === "touch" || ev.pointerType === "pen")) return;
+    hidePeek();
+  };
   // Prefer pointer events; also bind mouse* so headless/Electron drags never miss
   const startDrag = (ev) => {
     hidePeek();
     if (ev.button != null && ev.button !== 0) return;
     if (!canDropCard(card)) return;
     if (_drag) return;
-    ev.preventDefault();
-    ev.stopPropagation();
+    if (ev.preventDefault) ev.preventDefault();
+    if (ev.stopPropagation) ev.stopPropagation();
     clearDrag();
     try { if (ev.pointerId != null && el.setPointerCapture) el.setPointerCapture(ev.pointerId); } catch (err) {}
     const r = el.getBoundingClientRect();
@@ -1693,8 +1700,72 @@ function bindHandCard(el, card) {
     window.addEventListener("mousemove", move, true);
     window.addEventListener("mouseup", up, true);
   };
-  el.onpointerdown = startDrag;
-  el.onmousedown = startDrag;
+
+  // Touch/pen: hold still → same #cardPeek as desktop hover; move past threshold → drag-to-play (no peek steal).
+  let _touchPeekTimer = null;
+  let _touchArm = null;
+  const clearTouchArm = () => {
+    if (_touchPeekTimer) { clearTimeout(_touchPeekTimer); _touchPeekTimer = null; }
+    _touchArm = null;
+  };
+  const onPointerDown = (ev) => {
+    if (ev.button != null && ev.button !== 0) return;
+    if (_drag) return;
+    const isTouch = ev.pointerType === "touch" || ev.pointerType === "pen";
+    if (!isTouch) {
+      startDrag(ev);
+      return;
+    }
+    // Touch path: arm peek + drag threshold (do not start drag immediately)
+    if (ev.preventDefault) ev.preventDefault();
+    if (ev.stopPropagation) ev.stopPropagation();
+    clearTouchArm();
+    _touchArm = { x0: ev.clientX, y0: ev.clientY, pid: ev.pointerId, pointerType: ev.pointerType || "touch" };
+    _touchPeekTimer = setTimeout(() => {
+      _touchPeekTimer = null;
+      if (!_touchArm || _drag) return;
+      showPeek(el, card);
+    }, 200);
+    const MOVE_PX = 14;
+    const onMove = (e) => {
+      if (!_touchArm) return;
+      const dx = e.clientX - _touchArm.x0;
+      const dy = e.clientY - _touchArm.y0;
+      if (dx * dx + dy * dy < MOVE_PX * MOVE_PX) return;
+      const arm = _touchArm;
+      clearTouchArm();
+      hidePeek();
+      window.removeEventListener("pointermove", onMove, true);
+      window.removeEventListener("pointerup", onUp, true);
+      window.removeEventListener("pointercancel", onUp, true);
+      if (!canDropCard(card)) return;
+      startDrag({
+        button: 0,
+        pointerId: arm.pid,
+        pointerType: arm.pointerType,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        preventDefault() {},
+        stopPropagation() {}
+      });
+    };
+    const onUp = () => {
+      clearTouchArm();
+      hidePeek();
+      window.removeEventListener("pointermove", onMove, true);
+      window.removeEventListener("pointerup", onUp, true);
+      window.removeEventListener("pointercancel", onUp, true);
+    };
+    window.addEventListener("pointermove", onMove, true);
+    window.addEventListener("pointerup", onUp, true);
+    window.addEventListener("pointercancel", onUp, true);
+  };
+  el.onpointerdown = onPointerDown;
+  // Mouse fallback for environments without PointerEvent; touch already handled above
+  el.onmousedown = (ev) => {
+    if (window.PointerEvent) return; // pointerdown already ran
+    startDrag(ev);
+  };
 }
 
 function canReorderBoard() {
@@ -1894,9 +1965,23 @@ function tribeCards() {
     .sort((a,b) => (a.cost||0) - (b.cost||0) || a.name.localeCompare(b.name, "ko"));
 }
 function copiesInDraft(id) { return draftDeck.filter(x => x === id).length; }
+/** Max copies allowed in a deck: rare/legendary = 1, else 2. Badge shows inDeck/maxAllowed. */
 function maxCopies(id) {
   const c = CARD_MAP[id];
   return (c && (c.rarity === "legendary" || c.rarity === "rare")) ? 1 : 2;
+}
+/** Drop illegal extras (e.g. rare saved as 2 before cap=1). Keeps first N of each id. */
+function sanitizeDraftDeck() {
+  const seen = Object.create(null);
+  const next = [];
+  for (const id of draftDeck) {
+    const n = seen[id] || 0;
+    if (n >= maxCopies(id)) continue;
+    seen[id] = n + 1;
+    next.push(id);
+  }
+  if (next.length !== draftDeck.length) draftDeck = next;
+  return draftDeck;
 }
 
 function addToDraft(id) {
@@ -2050,12 +2135,13 @@ function renderBuilder() {
   meta.textContent = draftDeck.length + " / 30  ·  커먼·언커먼 2장, 레어·레전드 1장";
   meta.className = "deck-meta " + (draftDeck.length === 30 ? "ok" : "bad");
   const pool = document.getElementById("cardPool");
+  sanitizeDraftDeck();
   pool.innerHTML = tribeCards().map(c => {
-    const n = copiesInDraft(c.id);
-    const cap = maxCopies(c.id);
-    return `<div class="pool-item ${n>=cap?"full":""}" data-id="${c.id}">
-      <span class="pool-count">${n}/${cap}</span>
-      ${renderCard(c, n < cap && draftDeck.length < 30)}
+    const inDeck = copiesInDraft(c.id);
+    const maxAllowed = maxCopies(c.id);
+    return `<div class="pool-item ${inDeck>=maxAllowed?"full":""}" data-id="${c.id}">
+      <span class="pool-count" title="덱에 ${inDeck}장 · 최대 ${maxAllowed}장">${inDeck}/${maxAllowed}</span>
+      ${renderCard(c, inDeck < maxAllowed && draftDeck.length < 30)}
     </div>`;
   }).join("");
   document.querySelectorAll("#typeBar button").forEach(btn => {
@@ -2164,7 +2250,7 @@ document.getElementById("btnPvp").onclick = () => {
   try { document.getElementById("settingsPop").classList.remove("show"); } catch (e) {}
   startGame(false);
 };
-document.getElementById("btnDeck").onclick = () => { draftDeck = (loadSavedDecks()[selectedHero.id] || []).slice(); showBuilder(); };
+document.getElementById("btnDeck").onclick = () => { draftDeck = (loadSavedDecks()[selectedHero.id] || []).slice(); sanitizeDraftDeck(); showBuilder(); };
 document.getElementById("btnBackMenu").onclick = () => backTitle();
 document.getElementById("btnClearDeck").onclick = () => { draftDeck = []; renderBuilder(); };
 document.getElementById("btnAutoFill").onclick = () => autoFillDraft();
