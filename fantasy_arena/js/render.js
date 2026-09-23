@@ -183,11 +183,10 @@ function layoutBoardAlign() {
   const HAND_ROW_FRAC = 0.28; // LOCKED
   const hand = HAND_ROW_FRAC, hint = 0.015, oppHand = 0.10; // v0.225: larger so backs half-visible
   const rest = 1 - hand - hint - oppHand; // boards total
-  // Boundary after oppHand+oppBoard == midFrac (parchment center ornament)
-  let oppBoard = midFrac - oppHand;
-  let myBoard = rest - oppBoard;
-  if (oppBoard < 0.18) { oppBoard = 0.18; myBoard = rest - oppBoard; }
-  if (myBoard < 0.16) { myBoard = 0.16; oppBoard = rest - myBoard; }
+  // v0.234: equal field lanes (ignore parchment midFrac split)
+  const oppBoard = rest / 2;
+  const myBoard = rest / 2;
+  void midFrac; // retained measurability; equal lanes override mid boundary
   const pct = (x) => (x * 100).toFixed(2) + "%";
   const rows = [oppHand, oppBoard, myBoard, hand, hint].map(pct).join(" ");
   main.style.setProperty("grid-template-rows", rows, "important");
@@ -599,9 +598,9 @@ async function composeCardFace(c, opts={}) {
   ctx.lineJoin = "round";
   ctx.lineWidth = Math.max(6, H*0.008);
   ctx.strokeStyle = "#120800";
-  ctx.strokeText(c.name || "", W*0.50, H*0.590);
+  ctx.strokeText(c.name || "", W*0.50, H*0.590 + 2);
   ctx.fillStyle = "#fff8e8";
-  ctx.fillText(c.name || "", W*0.50, H*0.590);
+  ctx.fillText(c.name || "", W*0.50, H*0.590 + 2);
   ctx.restore();
 
   // Item/spell frames are distinct — hide top type label. Units still show race/token.
@@ -629,8 +628,8 @@ async function composeCardFace(c, opts={}) {
       ctx.strokeStyle = "#120800";
       ctx.fillStyle = "#fff8e8";
     }
-    ctx.strokeText(headerTxt, W*0.50, H*0.0697);
-    ctx.fillText(headerTxt, W*0.50, H*0.0697);
+    ctx.strokeText(headerTxt, W*0.50, H*0.0697 - 3);
+    ctx.fillText(headerTxt, W*0.50, H*0.0697 - 3);
     ctx.restore();
   }
 
@@ -653,16 +652,52 @@ async function composeCardFace(c, opts={}) {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const maxW = W * 0.62;
-    const lines = [];
-    let line = "";
-    for (const ch of txt) {
-      const test = line + ch;
-      if (ctx.measureText(test).width > maxW && line) {
-        lines.push(line);
-        line = ch;
-      } else line = test;
+    // v0.234: prefer clause breaks at "、" / ", " so multi-effect text
+    // splits between clauses (e.g. "유닛 전체 파괴" / "아군 최대 소울-3"),
+    // not mid-clause. Width-wrap only when a single clause still exceeds maxW.
+    const widthWrap = (s) => {
+      const out = [];
+      let line = "";
+      for (const ch of s) {
+        const test = line + ch;
+        if (ctx.measureText(test).width > maxW && line) {
+          out.push(line);
+          line = ch;
+        } else line = test;
+      }
+      if (line) out.push(line);
+      return out;
+    };
+    const clauses = [];
+    let buf = "";
+    for (let i = 0; i < txt.length; i++) {
+      const ch = txt[i];
+      if (ch === "、") {
+        if (buf.trim()) clauses.push(buf.trim());
+        buf = "";
+        continue;
+      }
+      if (ch === ",") {
+        // Clause comma (not digit thousands): ", " or "," before non-digit
+        const next = txt[i + 1];
+        if (next === " " || next === undefined || (next && !/[0-9]/.test(next))) {
+          if (buf.trim()) clauses.push(buf.trim());
+          buf = "";
+          if (next === " ") i++;
+          continue;
+        }
+      }
+      buf += ch;
     }
-    if (line) lines.push(line);
+    if (buf.trim()) clauses.push(buf.trim());
+    const parts = clauses.length ? clauses : [txt];
+    const lines = [];
+    for (const clause of parts) {
+      if (!clause) continue;
+      if (ctx.measureText(clause).width <= maxW) lines.push(clause);
+      else lines.push(...widthWrap(clause));
+    }
+    if (!lines.length && txt) lines.push(txt);
     const lh = tSize * 1.28;
     const startY = H*0.743 - ((lines.length - 1) * lh) / 2;
     lines.forEach((ln, i) => ctx.fillText(ln, W*0.50, startY + i * lh));
@@ -696,7 +731,7 @@ async function paintStatCoins(ctx, c, W, H) {
   const black = await loadImg((typeof COIN_BLACK !== "undefined" && COIN_BLACK) ? COIN_BLACK : "assets/img/coins/black.png");
   if (!gold && !black) return;
   // Larger coins (was ~3.9% W); cluster under each gem like 첨부 레퍼런스
-  const size = Math.round(W * 0.072);
+  const size = Math.round(W * 0.072 * 0.85); // v0.234: 15% smaller (~W*0.0612)
   const gap = Math.round(size * 0.08);
   // Vertical overlap between stacked rows (~45% of coin height)
   const rowStep = Math.round(size * 0.55);
@@ -1009,12 +1044,12 @@ function layoutHudGems() {
   const SOUL_H = Math.max(18, SOUL_W * 0.42);
   placeIn(document.getElementById("oppSoulGem"), mr, 0.828, 0.095, SOUL_W, SOUL_H);
   placeIn(document.getElementById("mySoulGem"), mr, 0.828, 0.841, SOUL_W, SOUL_H);
-  // v0.225: soul cost numbers LEFT ~30px
+  // v0.234: soul cost numbers LEFT ~60px total
   ["oppSoulGem", "mySoulGem"].forEach(id => {
     const el = document.getElementById(id);
     if (!el || !el.style.left) return;
     const L = parseFloat(el.style.left);
-    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 30) + "px", "important");
+    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 60) + "px", "important");
   });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
@@ -1025,6 +1060,12 @@ function layoutHudGems() {
     const myHero = document.querySelector("#myStrip .hud-hero");
     placeIn(oppHero, hr, 0.928, 0.275, HERO_W, HERO_H);
     placeIn(myHero, hr, 0.928, 0.635, HERO_W, HERO_H);
+    // v0.234: hero icons +10px right
+    [oppHero, myHero].forEach(el => {
+      if (!el || !el.style.left) return;
+      const L = parseFloat(el.style.left);
+      if (!Number.isNaN(L)) el.style.setProperty("left", (L + 10) + "px", "important");
+    });
 
     // HP hearts — place relative to hero-slot after heroes are seated
     const HP_W = contentW * 0.032;
@@ -1043,8 +1084,8 @@ function layoutHudGems() {
       if (sr.width < 4 || sr.height < 4) return;
       const vx = contentLeft + contentW * CX - HP_W / 2;
       const vy = contentTop + contentH * CY - HP_H / 2;
-      // v0.225: hero HP numbers DOWN ~5px and LEFT ~5px
-      hp.style.setProperty("left", (vx - sr.left - 5) + "px", "important");
+      // v0.234: hero HP numbers DOWN ~5px and LEFT ~8px
+      hp.style.setProperty("left", (vx - sr.left - 8) + "px", "important");
       hp.style.setProperty("top", (vy - sr.top + 5) + "px", "important");
       hp.style.setProperty("width", HP_W + "px", "important");
       hp.style.setProperty("height", HP_H + "px", "important");

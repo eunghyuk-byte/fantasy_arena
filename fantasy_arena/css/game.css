@@ -236,7 +236,8 @@
   .opp-hand .card, .opp-hand .back {
     transform: none !important;
     height: min(6.5cqh, 52px) !important;
-    width: calc(min(6.5cqh, 52px) * 0.70) !important;
+    width: auto !important;
+    aspect-ratio: 2 / 3 !important;
     padding: 0 !important;
     flex: 0 0 auto;
   }
@@ -1375,8 +1376,9 @@
     gap: 0;
   }
   #game.active .opp-hand .back {
-    width: calc(min(9cqh, 52px) * 0.70) !important;
     height: min(9cqh, 52px) !important;
+    width: auto !important;
+    aspect-ratio: 2 / 3 !important;
     margin-left: -10px;
     transform-origin: bottom center;
     background:
@@ -2604,7 +2606,8 @@ html.is-desktop, html.is-desktop body {
 }
 #game.active .opp-hand .back {
   height: min(68%, 6.5cqh) !important;
-  width: calc(min(68%, 6.5cqh) * 0.70) !important;
+  width: auto !important;
+  aspect-ratio: 2 / 3 !important;
   margin-left: -10px !important;
   flex: 0 0 auto !important;
 }
@@ -2647,16 +2650,17 @@ html.is-desktop, html.is-desktop body {
 
 /* ===== P0 gap from parchment center line ===== */
 /* Center line stays; nudge rows away from it slightly */
-#game.active .board.opp {
+#game.active .board.opp,
+#game.active #oppBoard {
   align-items: flex-end !important;
-  /* v0.225: less mid-gap → taller field lane */
-  padding-bottom: clamp(4px, 1.0cqh, 10px) !important;
+  /* v0.234: equal field frames — matched vertical inset */
   padding-top: 0 !important;
+  padding-bottom: 0 !important;
   box-sizing: border-box !important;
 }
 #game.active #myBoard {
   align-items: flex-start !important;
-  padding-top: clamp(4px, 1.0cqh, 10px) !important;
+  padding-top: 0 !important;
   padding-bottom: 0 !important;
   box-sizing: border-box !important;
 }
@@ -3841,22 +3845,23 @@ html.is-desktop #game.active .my-hand .card.playable,
     min-height: 150px !important;
   }
 }
-/* myBoard: keep units clear of hand row */
+/* myBoard: z only — v0.234 equal field lanes (no asymmetric padding) */
 #game.active #myBoard {
-  padding-bottom: clamp(8px, 1.5cqh, 16px) !important;
   z-index: 4 !important;
 }
 
 /* =====================================================================
-   HAND LAYOUT LOCK v0.204 — DO NOT OVERRIDE BELOW THIS LINE
+   HAND LAYOUT LOCK v0.234 — DO NOT OVERRIDE BELOW THIS LINE
    See LAYOUT_HAND_LOCK.md. Negative margin-bottom on .my-hand is FORBIDDEN.
+   v0.234 user explicit: ally hand ~+20px down (padding-bottom 12→0 + translateY(8px)).
    ===================================================================== */
 #game.active .col-main > .my-hand#myHand,
 #game.active .col-main > .my-hand {
   margin-bottom: 0 !important;
   margin-top: 0 !important;
   padding-top: 6px !important;
-  padding-bottom: 12px !important;
+  padding-bottom: 0 !important;
+  transform: translateY(8px);
   overflow: hidden !important;
   z-index: 8 !important;
   align-items: flex-end !important;
@@ -4192,8 +4197,10 @@ html.is-desktop #game.active .my-hand .card.playable,
   margin-top: 6px !important;
 }
 #game.active .opp-hand .back {
+  /* v0.234: back.png 1333×2000 → aspect 2/3, height-driven */
   height: min(78%, 9.5cqh) !important;
-  width: calc(min(78%, 9.5cqh) * 0.70) !important;
+  width: auto !important;
+  aspect-ratio: 2 / 3 !important;
   margin-left: -12px !important;
   flex: 0 0 auto !important;
   border: 1px solid #c9a24a !important;

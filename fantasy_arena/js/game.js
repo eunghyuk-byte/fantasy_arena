@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.233";
+const GAME_VERSION = "0.234";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1285,6 +1285,23 @@ function collectAbilityTips(c) {
         if (!covered && stripped) add(it.name || "아이템", stripped);
       }
     }
+  }
+  // Token summon peek tip (ns4 떠오르는섬 → n40 섬의 파편)
+  const SUMMON_TOKEN_BY_FX = { summon_islands: "n40" };
+  const spell = c.spell || null;
+  const tokenId = (spell && spell.summonId)
+    || (spell && spell.type && SUMMON_TOKEN_BY_FX[spell.type])
+    || null;
+  if (tokenId && typeof CARD_MAP !== "undefined" && CARD_MAP[tokenId]) {
+    const tok = CARD_MAP[tokenId];
+    const stats = "공" + (tok.atk || 0) + "/방" + (tok.def || 0) + "/체" + (tok.hp || 0);
+    const ab = String(tok.ability || "").trim();
+    const descParts = [stats];
+    if (ab) {
+      const abDesc = (typeof ABI_HELP !== "undefined" && ABI_HELP[ab]) || "";
+      descParts.push(abDesc ? (ab + " — " + abDesc) : ab);
+    }
+    add(tok.name || "토큰", descParts.join(" · "));
   }
   return tips;
 }

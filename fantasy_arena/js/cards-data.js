@@ -215,7 +215,7 @@ const CARDS = [
   { id:"as2", tribe:"water", name:"물거울", cost:6, type:"spell", rarity:"rare", text:"아군 하나 복사, 보호 부여", spell:{ type:"copy_own", ability:"보호", kw:"shield" } },
   { id:"as3", tribe:"water", name:"익사", cost:3, type:"spell", rarity:"common", text:"5코 이하 적 하나 파괴", spell:{ type:"kill_if", maxCost:5 } },
   { id:"es1", tribe:"earth", name:"거인의봉인", cost:3, type:"spell", rarity:"uncommon", text:"공7 이상 적 하나 파괴", spell:{ type:"kill_if", minAtk:7 } },
-  { id:"ns4", tribe:"wind", name:"떠오르는섬", cost:3, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 섬의 파편을 소환합니다.", spell:{ type:"summon_islands" } },
+  { id:"ns4", tribe:"wind", name:"떠오르는섬", cost:3, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 섬의 파편을 소환합니다.", spell:{ type:"summon_islands", summonId:"n40" } },
   { id:"es2", tribe:"earth", name:"어스퀘이크", cost:6, type:"spell", rarity:"rare", text:"적 전체 체력을 내 최대소울 절반만큼 깎음", spell:{ type:"earthquake" } },
   { id:"es3", tribe:"earth", name:"샌드트랩", cost:4, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 적 체-3", spell:{ type:"sandtrap" } },
   { id:"es4", tribe:"earth", name:"미로생성", cost:3, type:"spell", rarity:"common", text:"아군 전체 복수 부여", spell:{ type:"grant_kw", ability:"복수", kw:"revenge" } },
