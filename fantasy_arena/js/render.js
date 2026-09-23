@@ -151,7 +151,8 @@ function layoutBoardDecks() {
       deck.style.paddingBottom = "0";
     } else {
       deck.style.top = "auto";
-      deck.style.bottom = (mr.bottom - br.bottom + 4) + "px";
+      // v0.236: ally deck UP ~30px
+      deck.style.bottom = (mr.bottom - br.bottom + 4 + 30) + "px";
       deck.style.height = Math.max(90, br.height * 0.85) + "px";
       deck.style.justifyContent = "flex-end";
       deck.style.paddingTop = "0";
@@ -1044,27 +1045,27 @@ function layoutHudGems() {
   const SOUL_H = Math.max(18, SOUL_W * 0.42);
   placeIn(document.getElementById("oppSoulGem"), mr, 0.828, 0.095, SOUL_W, SOUL_H);
   placeIn(document.getElementById("mySoulGem"), mr, 0.828, 0.841, SOUL_W, SOUL_H);
-  // v0.234: soul cost numbers LEFT ~60px total
+  // v0.236: soul cost numbers LEFT ~100px total
   ["oppSoulGem", "mySoulGem"].forEach(id => {
     const el = document.getElementById(id);
     if (!el || !el.style.left) return;
     const L = parseFloat(el.style.left);
-    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 60) + "px", "important");
+    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 100) + "px", "important");
   });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
   if (hr && hr.width >= 8 && hr.height >= 8) {
-    const HERO_W = contentW * 0.070;
+    const HERO_W = contentW * 0.056; // v0.236: 20% smaller (was 0.070)
     const HERO_H = HERO_W * 1.28;
     const oppHero = document.querySelector("#oppStrip .hud-hero");
     const myHero = document.querySelector("#myStrip .hud-hero");
     placeIn(oppHero, hr, 0.928, 0.275, HERO_W, HERO_H);
     placeIn(myHero, hr, 0.928, 0.635, HERO_W, HERO_H);
-    // v0.234: hero icons +10px right
+    // v0.236: hero icons +15px right
     [oppHero, myHero].forEach(el => {
       if (!el || !el.style.left) return;
       const L = parseFloat(el.style.left);
-      if (!Number.isNaN(L)) el.style.setProperty("left", (L + 10) + "px", "important");
+      if (!Number.isNaN(L)) el.style.setProperty("left", (L + 15) + "px", "important");
     });
 
     // HP hearts — place relative to hero-slot after heroes are seated
@@ -1084,9 +1085,9 @@ function layoutHudGems() {
       if (sr.width < 4 || sr.height < 4) return;
       const vx = contentLeft + contentW * CX - HP_W / 2;
       const vy = contentTop + contentH * CY - HP_H / 2;
-      // v0.234: hero HP numbers DOWN ~5px and LEFT ~8px
+      // v0.236: hero HP numbers DOWN ~10px and LEFT ~8px
       hp.style.setProperty("left", (vx - sr.left - 8) + "px", "important");
-      hp.style.setProperty("top", (vy - sr.top + 5) + "px", "important");
+      hp.style.setProperty("top", (vy - sr.top + 10) + "px", "important");
       hp.style.setProperty("width", HP_W + "px", "important");
       hp.style.setProperty("height", HP_H + "px", "important");
       hp.style.setProperty("right", "auto", "important");
@@ -1135,8 +1136,9 @@ function layoutEndBtn() {
   if (!Number.isFinite(left) || !Number.isFinite(top) || !Number.isFinite(bw)) return;
   // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
   if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
-  btn.style.left = left + "px";
-  btn.style.top = top + "px";
+  // v0.236: end-turn LEFT 30, UP 20
+  btn.style.left = (left - 30) + "px";
+  btn.style.top = (top - 20) + "px";
   btn.style.width = bw + "px";
   btn.style.height = bh + "px";
   btn.style.right = "auto";
