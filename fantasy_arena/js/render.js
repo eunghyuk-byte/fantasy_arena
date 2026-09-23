@@ -139,7 +139,8 @@ function render() {
   layoutBoardAlign();
   layoutBoardDecks();
   layoutEndBtn();
-  requestAnimationFrame(() => { layoutBoardSlots(); layoutBoardAlign(); layoutBoardDecks(); layoutEndBtn(); });
+  layoutHudGems();
+  requestAnimationFrame(() => { layoutBoardSlots(); layoutBoardAlign(); layoutBoardDecks(); layoutEndBtn(); layoutHudGems(); });
 
   const oppDeckEl = document.getElementById("oppDeck");
   const myDeckEl = document.getElementById("myDeck");
@@ -816,6 +817,84 @@ function heroStrip(p, isMe, myTurn) {
     </div>`;
 }
 
+/** Seat soul gems, hero portraits, and HP on board-art wells (object-fit:contain content box). */
+function layoutHudGems() {
+  const bg = document.getElementById("boardBgLayer");
+  const main = document.querySelector("#game.active .col-main");
+  const hud = document.querySelector("#game.active .col-hud");
+  if (!bg || !main || !bg.naturalWidth) return;
+  const br = bg.getBoundingClientRect();
+  const mr = main.getBoundingClientRect();
+  if (br.width < 8 || br.height < 8 || mr.width < 8 || mr.height < 8) return;
+  const nw = bg.naturalWidth, nh = bg.naturalHeight;
+  const scale = Math.min(br.width / nw, br.height / nh);
+  const contentW = nw * scale;
+  const contentH = nh * scale;
+  const contentLeft = br.left + (br.width - contentW) / 2;
+  const contentTop = br.top + (br.height - contentH) / 2;
+
+  function placeIn(el, parentRect, CX, CY, bw, bh) {
+    if (!el || !parentRect) return;
+    const left = contentLeft + contentW * CX - bw / 2 - parentRect.left;
+    const top = contentTop + contentH * CY - bh / 2 - parentRect.top;
+    el.style.left = left + "px";
+    el.style.top = top + "px";
+    el.style.width = bw + "px";
+    el.style.height = bh + "px";
+    el.style.right = "auto";
+    el.style.bottom = "auto";
+    el.style.transform = "none";
+  }
+
+  // 4000×3000 board — purple pill gems on right frame rail; hearts at arch BR; arches on right
+  const SOUL_W = contentW * 0.055;
+  const SOUL_H = Math.max(18, SOUL_W * 0.42);
+  placeIn(document.getElementById("oppSoulGem"), mr, 0.809, 0.092, SOUL_W, SOUL_H);
+  placeIn(document.getElementById("mySoulGem"), mr, 0.809, 0.839, SOUL_W, SOUL_H);
+
+  const hr = hud ? hud.getBoundingClientRect() : null;
+  if (hr && hr.width >= 8 && hr.height >= 8) {
+    const HERO_W = contentW * 0.070;
+    const HERO_H = HERO_W * 1.28;
+    const oppHero = document.querySelector("#oppStrip .hud-hero");
+    const myHero = document.querySelector("#myStrip .hud-hero");
+    placeIn(oppHero, hr, 0.910, 0.300, HERO_W, HERO_H);
+    placeIn(myHero, hr, 0.910, 0.660, HERO_W, HERO_H);
+
+    // HP hearts — place relative to hero-slot after heroes are seated
+    const HP_W = contentW * 0.032;
+    const HP_H = HP_W;
+    const hearts = [
+      { sel: "#oppStrip .hero-hp", CX: 0.966, CY: 0.361 },
+      { sel: "#myStrip .hero-hp", CX: 0.965, CY: 0.721 }
+    ];
+    hearts.forEach(({ sel, CX, CY }) => {
+      const hp = document.querySelector(sel);
+      if (!hp) return;
+      const slot = hp.closest(".hero-slot") || hp.parentElement;
+      if (!slot) return;
+      const sr = slot.getBoundingClientRect();
+      if (sr.width < 4 || sr.height < 4) return;
+      const vx = contentLeft + contentW * CX - HP_W / 2;
+      const vy = contentTop + contentH * CY - HP_H / 2;
+      hp.style.left = (vx - sr.left) + "px";
+      hp.style.top = (vy - sr.top) + "px";
+      hp.style.width = HP_W + "px";
+      hp.style.height = HP_H + "px";
+      hp.style.right = "auto";
+      hp.style.bottom = "auto";
+      hp.style.transform = "none";
+    });
+
+    const give = document.getElementById("giveBtn");
+    if (give) {
+      const gw = Math.max(72, contentW * 0.055);
+      const gh = Math.max(28, contentH * 0.028);
+      placeIn(give, hr, 0.955, 0.955, gw, gh);
+    }
+  }
+}
+
 /** Board mid-right end-turn button (single #endBtn in .col-main). */
 
 /** Seat #endBtn on board-art mid-right well (object-fit:contain content box). */
@@ -891,7 +970,7 @@ function updateEndBtn(myTurn) {
   let t = 0;
   const kick = () => {
     clearTimeout(t);
-    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); layoutBoardDecks(); layoutEndBtn(); } catch (e) {} }, 50);
+    t = setTimeout(() => { try { layoutHandFan(); layoutOppFan(); layoutBoardDecks(); layoutEndBtn(); layoutHudGems(); } catch (e) {} }, 50);
   };
   window.addEventListener("resize", kick);
   window.addEventListener("orientationchange", kick);
