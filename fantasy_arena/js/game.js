@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.256";
+const GAME_VERSION = "0.257";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -430,7 +430,12 @@ function equipItemOnUnit(p, card, unit) {
     }
   }
   if (card.id === "di4") {
+    // 조작된주화: 블랙(−) 코인을 즉시 골드(+)로 전환 + 전투 시 앞면 고정
     if ((unit.atkC || 0) || (unit.defC || 0) || (unit.hpC || 0)) {
+      bonuses.savedCoins = { atkC: unit.atkC || 0, defC: unit.defC || 0, hpC: unit.hpC || 0 };
+      unit.atkC = Math.abs(unit.atkC || 0);
+      unit.defC = Math.abs(unit.defC || 0);
+      unit.hpC = Math.abs(unit.hpC || 0);
       unit.coinBlack = false;
       unit.coinGold = true;
       bonuses.clearedCoinGold = true;
@@ -782,7 +787,11 @@ function applyFx(p, fx, target) {
       const m = target.minion;
       if (isImmune(m)) { log(`${m.name} 면역 · 스펠 효과 무시`); }
       else {
+        // 불길한예감: 골드(+)도 즉시 블랙(−)으로 전환
         if ((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0)) {
+          m.atkC = -Math.abs(m.atkC || 0);
+          m.defC = -Math.abs(m.defC || 0);
+          m.hpC = -Math.abs(m.hpC || 0);
           m.coinGold = false;
           m.coinBlack = true;
         }
