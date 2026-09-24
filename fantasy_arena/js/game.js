@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.274";
+const GAME_VERSION = "0.275";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -904,6 +904,17 @@ function applyFx(p, fx, target) {
     };
     if (fx.where === "hand") p.hand.filter(c => c.type === "minion").forEach(add);
     else p.board.forEach(add);
+  } else if (fx.type === "hand_cost") {
+    const delta = fx.delta || 0;
+    const pool = (fx.where === "hand" || !fx.where) ? p.hand : p.hand;
+    let n = 0;
+    pool.forEach(c => {
+      if (fx.filter === "minion" && c.type !== "minion") return;
+      if (fx.filter && fx.filter !== "minion" && c.type !== fx.filter) return;
+      c.cost = Math.max(0, (c.cost | 0) + delta);
+      n++;
+    });
+    log(`바람망토 · 손패 유닛 ${n}장 소울${delta >= 0 ? "+" : ""}${delta}`);
   } else if (fx.type === "double_def") {
     if (target && target.kind === "minion") {
       if (isImmune(target.minion)) log(`${target.minion.name} 면역 · 스펠 효과 무시`);
@@ -1031,6 +1042,19 @@ function applyFx(p, fx, target) {
       p.board.push(tok);
       log(`${tok.name} 소환`);
     } else log("전장이 가득 차 토큰을 소환할 수 없습니다");
+  } else if (fx.type === "summon_n") {
+    const sid = fx.summonId || "e42";
+    const count = fx.count || 1;
+    let n = 0;
+    for (let i = 0; i < count && p.board.length < 5; i++) {
+      const tok = cloneCard(sid);
+      if (unitCannotAttack(tok)) { tok.canAttack = false; tok.attacksLeft = 0; }
+      else { tok.canAttack = true; tok.attacksLeft = 1; }
+      p.board.push(tok);
+      n++;
+    }
+    if (n) log(`${(CARD_MAP[sid] && CARD_MAP[sid].name) || sid} ${n}개 소환`);
+    else log("전장이 가득 차 토큰을 소환할 수 없습니다");
   } else if (fx.type === "silence_enemy_board") {
     [...e.board].forEach(m => {
       if (isImmune(m)) return;
@@ -1041,10 +1065,25 @@ function applyFx(p, fx, target) {
       m.text = "침묵";
     });
     log("적 전체 침묵 (능력 제거)");
-  } else if (fx.type === "draw_board_both") {
-    const n = (p.board || []).length + (e.board || []).length;
-    draw(p, n);
-    log(`동남풍 · 전장 ${n}장만큼 드로우`);
+  } else if (fx.type === "bounce_enemy_board") {
+    // 동남풍: 적 전장 → 핸드. 손패 10장 초과분은 파괴(유언 등 발동)
+    let bounced = 0, burned = 0;
+    const victims = [...(e.board || [])];
+    for (const m of victims) {
+      e.board = e.board.filter(x => x.uid !== m.uid);
+      if (e.hand.length >= 10) {
+        // destroyMinion은 전장 존재를 요구 → 잠깐 재배치 후 파괴
+        e.board.push(m);
+        log(`${e.name}의 손패가 가득 차 ${m.name}이(가) 파괴되었다`);
+        destroyMinion(e, m, { fromSpell: true });
+        burned++;
+      } else {
+        e.hand.push(cloneCard(m.id));
+        log(`${m.name} 핸드로 이동`);
+        bounced++;
+      }
+    }
+    log(`동남풍 · 핸드 ${bounced} · 파괴 ${burned}`);
   } else if (fx.type === "duel_keep_one") {
     const keepOwn = target && target.kind === "minion" && target.owner === p ? target.minion : null;
     const keepEnemy = (e.board && e.board[0]) || null;
@@ -1504,7 +1543,7 @@ function collectAbilityTips(c) {
     }
   }
   // Token summon peek tip (ns4 떠오르는섬 → n40 섬의 파편)
-  const SUMMON_TOKEN_BY_FX = { summon_islands: "n40" };
+  const SUMMON_TOKEN_BY_FX = { summon_islands: "n40", summon_n: "e42" };
   const spell = c.spell || null;
   const tokenId = (spell && spell.summonId)
     || (spell && spell.type && SUMMON_TOKEN_BY_FX[spell.type])
