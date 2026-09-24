@@ -187,7 +187,7 @@ function doAttack(p, attacker, target, auto) {
       }
       const primary = victims[0];
       const primarySurvived = primary && primary.hp > 0 && !primary.dying;
-      if (sk !== 11 && primarySurvived && dAtk && attacker.hp > 0 && !attacker.dying) {
+      if (primarySurvived && dAtk && attacker.hp > 0 && !attacker.dying) {
         const dmgBack = Math.max(0, dAtk - aDefNow);
         if (dmgBack > 0) {
           log(`${primary.name} 반격`);
@@ -229,8 +229,7 @@ function doAttack(p, attacker, target, auto) {
         await waitMs(hits > 1 ? 300 : 420);
       }
     } else {
-      // single minion: 연속(4)=two hits with counter each (kill→retarget next living);
-      // 혼란(11)=no counter (ai6 인어의하프 부여)
+      // single minion: 연속(4)=two hits with counter each (kill→retarget next living)
       const hits = (sk === 4) ? 2 : 1;
       for (let hit = 1; hit <= hits; hit++) {
         if (attacker.hp <= 0 || attacker.dying) break;
@@ -301,7 +300,7 @@ function doAttack(p, attacker, target, auto) {
         const survived = def && def.hp > 0 && !def.dying;
         // counter uses this hit's defender current atk if retargeted mid-연속
         const counterAtk = (hit === 1) ? dAtk : clampAtk(Number(def.atk) || 0);
-        if (sk !== 11 && survived && counterAtk && attacker.hp > 0 && !attacker.dying) {
+        if (survived && counterAtk && attacker.hp > 0 && !attacker.dying) {
           const dmgBack = Math.max(0, counterAtk - backBlock);
           if (dmgBack > 0) {
             log(`${def.name} 반격`);
@@ -313,8 +312,6 @@ function doAttack(p, attacker, target, auto) {
             render();
             await waitMs(360);
           }
-        } else if (sk === 11 && survived) {
-          log(`${attacker.name} 혼란공격 · 반격 없음`);
         } else if (!survived) {
           log(`${def.name} 격파 · 반격 없음`);
           const deadEl = Vfx.elOf(def.uid);
