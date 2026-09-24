@@ -3,6 +3,19 @@ function atkSkillOf(m) {
   return (v >= 2 && v <= 11) ? (v | 0) : 1;
 }
 
+
+/** 서량백마 등: 공격할 때마다 체력 +N */
+function applyItemAttackHooks(attacker) {
+  if (!attacker || attacker.hp <= 0 || attacker.dying) return;
+  const n = attacker._onAttackHeal | 0;
+  if (n <= 0) return;
+  const cap = (attacker.maxHp != null && attacker.maxHp > 0) ? attacker.maxHp + n : attacker.hp + n;
+  // permanent growth: raise maxHp too
+  attacker.maxHp = Math.max(attacker.maxHp || attacker.hp, attacker.hp) + n;
+  attacker.hp += n;
+  if (typeof log === "function") log(`${attacker.name} 서량백마 · 체+${n}`);
+}
+
 function applyLifesteal(attacker, hpDealt) {
   if (!attacker || hpDealt <= 0 || attacker.hp <= 0 || attacker.dying) return 0;
   const heal = Math.ceil(hpDealt / 2);
@@ -211,6 +224,7 @@ function doAttack(p, attacker, target, auto) {
           dealHero(target.owner, hpDmg);
         }
         if (sk === 6) applyLifesteal(attacker, hpDmg);
+        applyItemAttackHooks(attacker);
         render();
         await waitMs(hits > 1 ? 300 : 420);
       }
@@ -251,6 +265,7 @@ function doAttack(p, attacker, target, auto) {
               dealHero(nextH.owner, hpDmgH);
             }
             if (sk === 6) applyLifesteal(attacker, hpDmgH);
+            applyItemAttackHooks(attacker);
             render();
             await waitMs(hits > 1 ? 300 : 420);
             continue;
@@ -283,6 +298,7 @@ function doAttack(p, attacker, target, auto) {
         }
         const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
         if (sk === 6) applyLifesteal(attacker, hpDealt);
+        applyItemAttackHooks(attacker);
         render();
         await waitMs(360);
         lastHpDmg = hpDmg;
