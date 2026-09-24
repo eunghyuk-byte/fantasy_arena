@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.271";
+const GAME_VERSION = "0.273";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -755,9 +755,9 @@ function applyFx(p, fx, target) {
     if (fx.payHp) dealHero(p, fx.payHp);
     if (fx.healHero) p.hp = Math.min(p.maxHp, p.hp + fx.healHero);
     if (fx.soulNext) p.soulNext = (p.soulNext || 0) + fx.soulNext;
-    if (fx.ownAllHp) [...p.board].forEach(m => damageMinion(p, m, fx.ownAllHp, { fromSpell: true }));
+    if (fx.ownAllHp) [...p.board].forEach(m => spellDamageMinion(p, m, fx.ownAllHp, { fromSpell: true }));
     if (fx.enemyDef) [...e.board].forEach(m => { m.def = Math.max(0, (m.def || 0) + fx.enemyDef); });
-    if (fx.enemyDmg && target && target.kind === "minion") damageMinion(target.owner, target.minion, fx.enemyDmg, { fromSpell: true });
+    if (fx.enemyDmg && target && target.kind === "minion") spellDamageMinion(target.owner, target.minion, fx.enemyDmg, { fromSpell: true });
     if (fx.noPlayMinion) p.noPlayMinion = true;
     if ((fx.sacOwn || fx.bounceOwn) && target && target.kind === "minion" && target.owner === p) {
       const m = target.minion;
@@ -773,7 +773,7 @@ function applyFx(p, fx, target) {
     if (n > 0) draw(p, n);
   } else if (fx.type === "aoe_pack") {
     const hit = (pl, m, dmg) => {
-      if (dmg) damageMinion(pl, m, dmg, { fromSpell: true });
+      if (dmg) spellDamageMinion(pl, m, dmg, { fromSpell: true });
       if (fx.coin) {
         adjustSharedCoinN(m, fx.coin);
       }
@@ -790,14 +790,14 @@ function applyFx(p, fx, target) {
       [...e.board].forEach(m => hit(e, m, both));
     } else {
       [...e.board].forEach(m => hit(e, m, edmg));
-      if (odmg) [...p.board].forEach(m => damageMinion(p, m, odmg, { fromSpell: true }));
+      if (odmg) [...p.board].forEach(m => spellDamageMinion(p, m, odmg, { fromSpell: true }));
       if (fx.ownHp) [...p.board].forEach(m => { m.hp += fx.ownHp; m.maxHp = (m.maxHp || m.hp) + fx.ownHp; });
     }
   } else if (fx.type === "aoe_enemy") {
-    [...e.board].forEach(m => damageMinion(e, m, fx.value, { fromSpell: true }));
+    [...e.board].forEach(m => spellDamageMinion(e, m, fx.value, { fromSpell: true }));
   } else if (fx.type === "aoe_all_enemy") {
     dealHero(e, fx.value);
-    [...e.board].forEach(m => damageMinion(e, m, fx.value, { fromSpell: true }));
+    [...e.board].forEach(m => spellDamageMinion(e, m, fx.value, { fromSpell: true }));
   } else if (fx.type === "kill") {
     if (target && target.kind === "minion") destroyMinion(target.owner, target.minion, { fromSpell: true });
   } else if (fx.type === "kill_if") {
@@ -936,10 +936,10 @@ function applyFx(p, fx, target) {
     });
   } else if (fx.type === "earthquake") {
     const n = Math.floor((p.maxSoul || 0) / 2);
-    [...e.board].forEach(m => damageMinion(e, m, n, { fromSpell: true }));
+    [...e.board].forEach(m => spellDamageMinion(e, m, n, { fromSpell: true }));
   } else if (fx.type === "sandtrap") {
     const n = Math.max(0, 5 - p.board.length);
-    e.board.slice(0, n).forEach(m => damageMinion(e, m, 3, { fromSpell: true }));
+    e.board.slice(0, n).forEach(m => spellDamageMinion(e, m, 3, { fromSpell: true }));
   } else if (fx.type === "maze") {
     [...e.board].forEach(m => { if ((m.cost || 0) > (p.maxSoul || 0)) m.dying = true; });
     e.board.filter(m => m.dying).forEach(m => destroyMinion(e, m, { fromSpell: true }));
@@ -960,9 +960,10 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "sandhell") {
     const n = fx.value || 1;
     [...e.board].forEach(m => {
+      // 피해 먼저(현재 방어로 흡수), 그다음 공·방 감소
+      spellDamageMinion(e, m, n, { fromSpell: true });
       m.atk = Math.max(0, (m.atk || 0) - n);
       m.def = Math.max(0, (m.def || 0) - n);
-      damageMinion(e, m, n, { fromSpell: true });
     });
   } else if (fx.type === "plague") {
     const minC = fx.minCost != null ? fx.minCost : 0;
@@ -1096,6 +1097,23 @@ function applyFx(p, fx, target) {
   cleanupBoards();
 }
 
+
+/** 「피해」: DEF blocks without reducing DEF stat; remainder → HP via damageMinion. */
+function spellDamageMinion(owner, m, dmg, ctx) {
+  if (!m || m.dying) return;
+  ctx = ctx || { fromSpell: true };
+  dmg = Math.max(0, Number(dmg) || 0);
+  if (!dmg) return;
+  if (ctx.fromSpell && isImmune(m)) {
+    log(`${m.name} 면역 · 스펠 효과 무시`);
+    return;
+  }
+  const blocked = Math.min(dmg, Math.max(0, Number(m.def) || 0));
+  const hpDmg = Math.max(0, dmg - blocked);
+  if (blocked) log(`${m.name} 스펠 피해 ${dmg} (방어 ${blocked} 흡수) → 체력 −${hpDmg}`);
+  damageMinion(owner, m, hpDmg, ctx);
+}
+
 function dealToTarget(srcOwner, target, n, ctx) {
   ctx = ctx || { fromSpell: true };
   if (!target) {
@@ -1103,6 +1121,7 @@ function dealToTarget(srcOwner, target, n, ctx) {
     return;
   }
   if (target.kind === "hero") dealHero(target.owner, n);
+  else if (ctx.fromSpell) spellDamageMinion(target.owner, target.minion, n, ctx);
   else damageMinion(target.owner, target.minion, n, ctx);
 }
 
