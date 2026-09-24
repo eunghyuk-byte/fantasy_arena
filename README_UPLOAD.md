@@ -2,16 +2,9 @@
 
 업로드 루트: fantasy_arena/
 
-## 유닛
-- fantasy_arena/js/cards-minions.js
-- 속성당 28장, ID e1-e28 / f1-f28 / n1-n28 / a1-a28 / l1-l28 / d1-d28
+카드 ID 접두·밸런스·제작 규칙은 **`fantasy_arena/BALANCE_RULES_LOCK.md`** 만 따른다.
 
-## 주문
-- fantasy_arena/js/cards-data.js  (CARDS 배열 안 type:spell)
-- ID 규칙 {속성}s{n} : es / fs / ns / as / ls / ds
-- 대지19 불19 바람19 물19 빛18 암흑18 = 112장
-- 목록: 판타지아레나_주문목록.xlsx
-
-## 일러스트
-게임 경로: fantasy_arena/assets/img/art/{id}.jpg
-이 패키지에는 JPG 없음.
+## 패키지 내용
+- 유닛·주문·아이템 데이터: `fantasy_arena/js/cards-data.js` (및 레거시 `cards-minions.js`)
+- 목록 참고(xlsx): 저장소 루트 `판타지아레나_유닛목록.xlsx`, `판타지아레나_주문목록.xlsx`
+- 일러스트 경로: `fantasy_arena/assets/img/art/{id}.jpg` — 이 업로드 패키지에는 JPG 없음.

@@ -230,11 +230,8 @@ function doAttack(p, attacker, target, auto) {
       }
     } else {
       // single minion: 연속(4)=two hits with counter each (kill→retarget next living);
-      // 혼란(11)=no counter; 돌파(10)=overkill chain
+      // 혼란(11)=no counter (ai6 인어의하프 부여)
       const hits = (sk === 4) ? 2 : 1;
-      let lastHpDmg = 0;
-      let lastHpBefore = 0;
-      let killedByHit = false;
       for (let hit = 1; hit <= hits; hit++) {
         if (attacker.hp <= 0 || attacker.dying) break;
         // 연속: 1타 처치 후 남은 타는 다음 생존 적(하수인→영웅)으로 재지정. 시체/스킵 금지.
@@ -301,10 +298,7 @@ function doAttack(p, attacker, target, auto) {
         applyItemAttackHooks(attacker);
         render();
         await waitMs(360);
-        lastHpDmg = hpDmg;
-        lastHpBefore = hpBefore;
         const survived = def && def.hp > 0 && !def.dying;
-        killedByHit = !survived;
         // counter uses this hit's defender current atk if retargeted mid-연속
         const counterAtk = (hit === 1) ? dAtk : clampAtk(Number(def.atk) || 0);
         if (sk !== 11 && survived && counterAtk && attacker.hp > 0 && !attacker.dying) {
@@ -332,63 +326,6 @@ function doAttack(p, attacker, target, auto) {
         }
       }
 
-      // —— 10 돌파공격: leftover HP dmg (overkill) trampling next ——
-      if (sk === 10 && killedByHit && attacker.hp > 0 && !attacker.dying) {
-        let leftover = Math.max(0, lastHpDmg - lastHpBefore);
-        const boardCap = Math.max(1, foe.board.length + 1);
-        let hops = 0;
-        let lastUid = def.uid;
-        while (leftover > 0 && hops < boardCap && attacker.hp > 0 && !attacker.dying) {
-          const living = foe.board.filter(m => m.hp > 0 && !m.dying && m.uid !== lastUid);
-          let next = null;
-          const all = foe.board;
-          const idx = all.findIndex(m => m.uid === lastUid);
-          if (idx >= 0) {
-            for (let i = idx + 1; i < all.length; i++) {
-              if (all[i].hp > 0 && !all[i].dying) { next = all[i]; break; }
-            }
-          }
-          if (!next) next = living[0] || null;
-          if (!next) {
-            if (!foe.board.some(m => m.hp > 0 && !m.dying)) {
-              log(`${attacker.name} 돌파 → 영웅 (잔여 ${leftover})`);
-              const isMeHero = foe === meView().me;
-              const hEl = Vfx.heroOf(isMeHero);
-              try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { hero: isMeHero ? "me" : "opp" }); } catch (e) {}
-              await Vfx.attackSeq(Vfx.elOf(attacker.uid), hEl, leftover, false);
-              dealHero(foe, leftover);
-              render();
-              await waitMs(300);
-            }
-            break;
-          }
-          const nBlocked = Math.max(0, next.def || 0);
-          if (leftover <= nBlocked) {
-            log(`${attacker.name} 돌파 → ${next.name} 잔여 ${leftover} ≤ 방어 ${nBlocked} · 돌파 종료`);
-            break;
-          }
-          hops++;
-          const nDmg = Math.max(0, leftover - nBlocked);
-          log(`${attacker.name} 돌파 → ${next.name} (${hops}) 잔여ATK ${leftover}`);
-          log(`${next.name} 방어 ${nBlocked} → 체력피해 ${nDmg}`);
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { uid: next.uid }); } catch (e) {}
-          await Vfx.attackSeq(Vfx.elOf(attacker.uid), Vfx.elOf(next.uid), nDmg, false);
-          const nb = next.hp;
-          damageMinion(foe, next, nDmg, combatKillCtx(attacker, p));
-          render();
-          await waitMs(280);
-          if (next.hp > 0 && !next.dying) {
-            log(`${next.name} 생존 · 돌파 종료`);
-            break;
-          }
-          log(`${next.name} 격파`);
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: next.uid }); } catch (e) {}
-          Vfx.death(Vfx.elOf(next.uid));
-          await waitMs(400);
-          leftover = Math.max(0, nDmg - nb);
-          lastUid = next.uid;
-        }
-      }
     }
     // Fantasy Masters: strip remaining gold HP coin bonus; black/damage already stuck
     settleCombatHpCoin(aHpSnap);

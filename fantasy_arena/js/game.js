@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.268";
+const GAME_VERSION = "0.269";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -2291,9 +2291,9 @@ const ATK_SKILL_HELP = {
   6: ["흡혈공격", "준 피해의 절반만큼 체력을 회복합니다."],
   7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],
   8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다."],
-  9: ["광역공격", "적 전체를 한 번에 공격합니다."],
-  10: ["돌파공격", "적 처치 후 남은 공격력으로 다음 적을 공격합니다."],
-  11: ["혼란공격", "반격을 받지 않습니다."]
+  9: ["광역공격", "적 하수인 전체를 공격합니다. 반격은 맨 앞 유닛만 합니다."],
+  // 10 돌파: 유닛 배정 삭제 (도움말·로직 제거)
+  11: ["혼란공격", "반격을 받지 않습니다."] // ai6 인어의하프 부여만
 };
 const ABI_HELP = {
   "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",
@@ -2325,7 +2325,7 @@ function buildLoreSkillsHtml(c) {
     if (desc) rows.push(`<div class="lore-skill"><b>${ab}</b><span>${desc}</span></div>`);
     else if (ab) rows.push(`<div class="lore-skill"><b>${ab}</b><span></span></div>`);
   });
-  // also surface second atk from text like "돌파공격 · 관통공격" when only first is in atkSkill
+  // also surface second atk from text like "관통공격 · 흡혈공격" when only first is in atkSkill
   const t = String(c.text || "");
   Object.values(ATK_SKILL_HELP).forEach(([nm, desc]) => {
     if (t.includes(nm) && !(c.atkSkill != null && ATK_SKILL_HELP[c.atkSkill] && ATK_SKILL_HELP[c.atkSkill][0] === nm)) {
