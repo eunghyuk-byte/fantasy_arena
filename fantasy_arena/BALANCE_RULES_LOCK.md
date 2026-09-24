@@ -280,7 +280,6 @@
 | `as` / `ds` / `es` / `fs` / `ls` / `ns` | 주문 |
 | `ai` / `di` / `ei` / `fi` / `li` / `ni` | 아이템(장비) |
 | `e41`, `n40`, `coin` | 토큰 (예: 바람 토큰 「섬의 파편」=`n40`) |
-| SGZ(삼국) | 동일 접두 내 영웅 유닛 (예: a1 관우, e14 마초, f15 장비, n2 조운, l4 제갈량, d7 여포, d2 사마의) — 별도 접두 없음. live `cards-data.js`가 정본 |
 
 유닛·주문 이름↔id 맵(참고): 저장소 루트 `cards-minions-id-map.md`, `cards-spells-id-map.md`.
 
