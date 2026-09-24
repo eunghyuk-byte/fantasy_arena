@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.273";
+const GAME_VERSION = "0.274";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -960,10 +960,10 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "sandhell") {
     const n = fx.value || 1;
     [...e.board].forEach(m => {
-      // 피해 먼저(현재 방어로 흡수), 그다음 공·방 감소
-      spellDamageMinion(e, m, n, { fromSpell: true });
+      // 공·방·체 직접 감소(방어 미경유)
       m.atk = Math.max(0, (m.atk || 0) - n);
       m.def = Math.max(0, (m.def || 0) - n);
+      damageMinion(e, m, n, { fromSpell: true });
     });
   } else if (fx.type === "plague") {
     const minC = fx.minCost != null ? fx.minCost : 0;

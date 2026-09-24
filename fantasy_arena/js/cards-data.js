@@ -222,7 +222,7 @@ const CARDS = [
   { id:"es5", tribe:"earth", name:"땅굴숨기", cost:2, type:"spell", rarity:"common", text:"내 유닛 수만큼 드로우", spell:{ type:"draw_ex", drawBoard:true } },
   { id:"ns5", tribe:"wind", name:"토네이도", cost:4, type:"spell", rarity:"uncommon", text:"2코 이하 유닛 전체 파괴", spell:{ type:"tornado" } },
   { id:"es6", tribe:"earth", name:"낙석", cost:2, type:"spell", rarity:"common", text:"유닛 전체 피해 2", spell:{ type:"aoe_pack", all:2 } },
-  { id:"es7", tribe:"earth", name:"모래지옥", cost:4, type:"spell", rarity:"common", text:"적 전체 공·방-2, 피해 2", spell:{ type:"sandhell", value:2 } },
+  { id:"es7", tribe:"earth", name:"모래지옥", cost:4, type:"spell", rarity:"common", text:"적 전체 공·방·체-2", spell:{ type:"sandhell", value:2 } },
   { id:"ls1", tribe:"light", name:"치유의빛", cost:2, type:"spell", rarity:"common", text:"아군 전체 체+3", spell:{ type:"buff_all", hp:3 } },
   { id:"ls2", tribe:"light", name:"축복", cost:7, type:"spell", rarity:"rare", text:"아군 하나 공·체+8, 연속공격 부여", spell:{ type:"grant_extra", atk:8, hp:8 } },
   { id:"ls3", tribe:"light", name:"정화", cost:3, type:"spell", rarity:"common", text:"유닛 하나 공=0 방=0 체=7", spell:{ type:"set_one", atk:0, def:0, hp:7, target:"any_minion" } },
