@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.270";
+const GAME_VERSION = "0.271";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -980,9 +980,48 @@ function applyFx(p, fx, target) {
       if ((m.atk || 0) <= 3) { m.atk = 0; m.def = (m.def || 0) + 1; }
     });
   } else if (fx.type === "aoe_by_def") {
+    // 「피해」: 대상 방어가 막고, 방어 스탯은 줄지 않음. 나머지→체력.
     const dmg = fx.value || 0;
-    [...e.board].forEach(m => damageMinion(e, m, dmg, { fromSpell: true }));
-    if (dmg) log(`소환 · 방어 ${dmg}만큼 적 전체 피해`);
+    let hit = 0;
+    [...e.board].forEach(m => {
+      if (isImmune(m)) { log(`${m.name} 면역 · 소환 피해 무시`); return; }
+      const blocked = Math.max(0, Number(m.def) || 0);
+      const hpDmg = Math.max(0, dmg - blocked);
+      if (hpDmg > 0) damageMinion(e, m, hpDmg, { fromSpell: true });
+      hit++;
+      log(`${m.name} 소환 피해 ${dmg} (방어 ${blocked} 흡수) → 체력 −${hpDmg}`);
+    });
+    if (dmg) log(`소환 · 방어 ${dmg}만큼 적 전체 피해` + (hit ? ` (${hit}체)` : ""));
+  } else if (fx.type === "reduce_by_coins") {
+    // 「체력·방어 감소」: 방어를 거치지 않고 직접 감소. N=coinPoolN. 영웅 제외.
+    let touched = 0;
+    [...e.board].forEach(m => {
+      if (isImmune(m)) { log(`${m.name} 면역 · 소환 감소 무시`); return; }
+      const n = coinPoolN(m);
+      if (!n) return;
+      const prevDef = Math.max(0, Number(m.def) || 0);
+      const prevHp = Number(m.hp) || 0;
+      m.def = Math.max(0, prevDef - n);
+      m.hp = prevHp - n;
+      m.damaged = true;
+      m._hurt = { from: prevHp, to: m.hp, dmg: n };
+      if (m.hp <= 0) {
+        m.dying = true;
+        m._deathCtx = Object.assign({}, m._deathCtx || {}, { fromSpell: true });
+      }
+      touched++;
+      log(`${m.name} 코인 N=${n} → 방어 ${prevDef}→${m.def}, 체력 ${prevHp}→${m.hp}`);
+    });
+    log(touched ? `소환 · 적 ${touched}체 코인 수만큼 체력·방어 감소` : "소환 · 감소 대상 없음");
+  } else if (fx.type === "destroy_atk_ge") {
+    const thr = fx.value != null ? fx.value : 5;
+    const victims = e.board.filter(m => (Number(m.atk) || 0) >= thr);
+    victims.forEach(m => {
+      if (isImmune(m)) { log(`${m.name} 면역 · 소환 파괴 무시`); return; }
+      log(`${m.name} 공격 ${m.atk} ≥ ${thr} · 파괴`);
+      destroyMinion(e, m, { fromSpell: true });
+    });
+    log(victims.length ? `소환 · 공격력 ${thr} 이상 적 ${victims.length}체 파괴` : `소환 · 공격력 ${thr} 이상 적 없음`);
   } else if (fx.type === "summon_token") {
     if (p.board.length < 5) {
       const tok = cloneCard(fx.summonId || "e41");
@@ -2291,7 +2330,7 @@ const ATK_SKILL_HELP = {
   6: ["흡혈공격", "준 피해의 절반만큼 체력을 회복합니다."],
   7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],
   8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다."],
-  9: ["광역공격", "적 하수인 전체를 공격합니다. 반격은 맨 앞 유닛만 합니다."]
+  9: ["광역공격", "적 하수인 전체를 공격합니다. 반격을 받지 않습니다."]
 };
 const ABI_HELP = {
   "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",

@@ -164,7 +164,7 @@ function doAttack(p, attacker, target, auto) {
     const sk = atkSkillOf(attacker);
     const foe = opponent(p);
 
-    // —— 9 광역공격: shared roll → all enemy board minions; counter = front only ——
+    // —— 9 광역공격: shared roll → all enemy board minions; no counter ——
     if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
       const victims = foe.board.filter(m => m.hp > 0 && !m.dying).slice();
       log(`${attacker.name} 광역공격 → 적 하수인 ${victims.length}체`);
@@ -185,23 +185,7 @@ function doAttack(p, attacker, target, auto) {
         render();
         await waitMs(220);
       }
-      const primary = victims[0];
-      const primarySurvived = primary && primary.hp > 0 && !primary.dying;
-      if (primarySurvived && dAtk && attacker.hp > 0 && !attacker.dying) {
-        const dmgBack = Math.max(0, dAtk - aDefNow);
-        if (dmgBack > 0) {
-          log(`${primary.name} 반격`);
-          const atkNow = Vfx.elOf(attacker.uid);
-          const defNow = Vfx.elOf(primary.uid);
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter", { uid: attacker.uid }); } catch (e) {}
-          await Vfx.parrySeq(defNow, atkNow, dmgBack);
-          damageMinion(p, attacker, dmgBack, combatKillCtx(primary, foe));
-          render();
-          await waitMs(360);
-        }
-      } else if (primary && !primarySurvived) {
-        log(`${primary.name} 격파 · 반격 없음`);
-      }
+      log(`${attacker.name} 광역공격 · 반격 없음`);
       render();
       await waitMs(360);
     } else if (target.kind === "hero") {
