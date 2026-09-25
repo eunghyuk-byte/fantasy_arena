@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.292";
+const GAME_VERSION = "0.293";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1155,7 +1155,16 @@ function applyFx(p, fx, target) {
       adjustSharedCoinN(m, goal - cur);
       n++;
     });
-    log(n ? `소환 · 코인 있는 아군 ${n}체 코인 수 ${goal}` : "소환 · 코인 있는 아군 없음");
+    log(n ? `소환 · 코인 있는 아군 ${n}기 코인 수 ${goal}` : "소환 · 코인 있는 아군 없음");
+  } else if (fx.type === "set_enemy_hp") {
+    // 황충: 적 전체 유닛 체력을 value로 (면역 제외)
+    const v = fx.value != null ? fx.value : 1;
+    let n = 0;
+    e.board.forEach(m => {
+      if (isImmune(m)) return;
+      m.hp = v; n++;
+    });
+    log(n ? `소환 · 적 ${n}기 체력 ${v}` : "소환 · 대상 적 없음");
   }
   cleanupBoards();
 }
