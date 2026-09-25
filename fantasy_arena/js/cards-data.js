@@ -227,7 +227,7 @@ const CARDS = [
   { id:"ls2", tribe:"light", name:"축복", cost:7, type:"spell", rarity:"rare", text:"아군 하나 공·체+8, 연속공격 부여", spell:{ type:"grant_extra", atk:8, hp:8 } },
   { id:"ls3", tribe:"light", name:"정화", cost:3, type:"spell", rarity:"common", text:"유닛 하나 공=0 방=0 체=7", spell:{ type:"set_one", atk:0, def:0, hp:7, target:"any_minion" } },
   { id:"ds1", tribe:"dark", name:"파멸", cost:3, type:"spell", rarity:"common", text:"공4 이상 적 하나 파괴", spell:{ type:"kill_if", minAtk:4 } },
-  { id:"coin", name:"동전", cost:0, type:"spell", text:"이번 턴 소울 +1", spell:{ type:"soul", value:1 }, token:true },
+  { id:"coin", name:"동전", cost:0, type:"spell", rarity:"common", text:"이번 턴 소울 +1", spell:{ type:"soul", value:1 }, token:true },
   { id:"ei1", tribe:"earth", name:"골렘의심장", cost:1, type:"item", rarity:"common", atk:0, def:0, hp:2, ability:"보호", text:"보호 부여" },
   { id:"ei2", tribe:"earth", name:"돌도끼", cost:2, type:"item", rarity:"common", atk:3, def:-1, hp:0, atkSkill:2, text:"관통공격 부여" },
   { id:"ei3", tribe:"earth", name:"바실리스크눈", cost:3, type:"item", rarity:"common", ability:"면역", atk:2, def:0, hp:2, text:"면역 부여" },
