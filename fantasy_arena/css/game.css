@@ -4366,3 +4366,9 @@ input, textarea, [contenteditable="true"] {
 #game.active #myBoard.drop-glow {
   transform: translate(calc(-1.5% + 20px), 70px) !important;
 }
+
+/* 한글 줄 바꿈: 단어 중간이 아니라 띄어쓰기 자리에서만 (9/25) */
+html, body, body * {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
