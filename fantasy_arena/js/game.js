@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.282";
+const GAME_VERSION = "0.283";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1061,6 +1061,7 @@ function applyFx(p, fx, target) {
       m.ability = null;
       m.atkSkill = null;
       m.keywords = [];
+      m.deathrattle = null;
       m.silenced = true;
       m.text = "침묵";
     });
@@ -1132,6 +1133,29 @@ function applyFx(p, fx, target) {
     stolen.canAttack = false; stolen.attacksLeft = 0;
     p.board.push(stolen);
     log(`미인계 · ${stolen.name} 탈취`);
+  } else if (fx.type === "steal_random") {
+    // 초선: 소환 시 랜덤 적 유닛 1체 영구 탈취 (steal_minion과 같은 이동 규칙, 면역 제외)
+    const pool = (e.board || []).filter(m => !isImmune(m) && m.hp > 0 && !m.dying);
+    if (!pool.length) { log("소환 · 탈취할 적 유닛 없음"); }
+    else if (p.board.length >= 5) { log("소환 · 전장 가득 참 · 탈취 미발동"); }
+    else {
+      const stolen = pool[Math.floor(Math.random() * pool.length)];
+      e.board = e.board.filter(x => x.uid !== stolen.uid);
+      stolen.canAttack = false; stolen.attacksLeft = 0;
+      p.board.push(stolen);
+      log(`소환 · ${stolen.name} 탈취`);
+    }
+  } else if (fx.type === "set_coin_n") {
+    // 황월영: 코인 링크가 있는 아군만 공유 코인 N을 value로 (부호 유지, 코인 0 스탯 유지)
+    const goal = fx.value != null ? fx.value : 5;
+    let n = 0;
+    p.board.forEach(m => {
+      const cur = coinPoolN(m);
+      if (!cur) return;
+      adjustSharedCoinN(m, goal - cur);
+      n++;
+    });
+    log(n ? `소환 · 코인 있는 아군 ${n}체 코인 수 ${goal}` : "소환 · 코인 있는 아군 없음");
   }
   cleanupBoards();
 }
