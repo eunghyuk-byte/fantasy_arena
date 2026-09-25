@@ -134,7 +134,7 @@ const CARDS = [
   { id:"a19", tribe:"water", name:"켈피", cost:4, type:"minion", atk:3, def:2, hp:1, atkC:0, defC:0, hpC:0, rarity:"common", atkSkill:7, text:"약화공격" },
   { id:"a20", tribe:"water", name:"시서펜트", cost:6, type:"minion", atk:3, def:2, hp:3, atkC:-1, defC:1, hpC:-1, rarity:"uncommon", atkSkill:3, text:"돌진공격" },
   { id:"a22", tribe:"water", name:"강가무녀", cost:5, type:"minion", atk:3, def:2, hp:3, atkC:-1, defC:1, hpC:-1, rarity:"common", text:"" },
-  { id:"a23", tribe:"water", name:"주유", cost:8, type:"minion", atk:2, def:2, hp:3, atkC:-1, defC:1, hpC:0, rarity:"rare", atkSkill:9, text:"광역공격" },
+  { id:"a23", tribe:"water", name:"주유", cost:8, type:"minion", atk:4, def:1, hp:4, atkC:0, defC:0, hpC:0, rarity:"rare", atkSkill:9, text:"광역공격" },
   { id:"a24", tribe:"water", name:"심해상어", cost:5, type:"minion", atk:2, def:2, hp:2, atkC:-2, defC:2, hpC:0, rarity:"uncommon", atkSkill:2, text:"관통공격" },
   { id:"a25", tribe:"water", name:"얼음궁수", cost:2, type:"minion", atk:1, def:0, hp:3, atkC:1, defC:1, hpC:-1, rarity:"common", atkSkill:2, text:"관통공격" },
   { id:"a26", tribe:"water", name:"바다자이언트", cost:6, type:"minion", atk:5, def:2, hp:3, atkC:0, defC:1, hpC:-1, rarity:"common", text:"" },
