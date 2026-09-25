@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.283";
+const GAME_VERSION = "0.284";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1134,7 +1134,7 @@ function applyFx(p, fx, target) {
     p.board.push(stolen);
     log(`미인계 · ${stolen.name} 탈취`);
   } else if (fx.type === "steal_random") {
-    // 초선: 소환 시 랜덤 적 유닛 1체 영구 탈취 (steal_minion과 같은 이동 규칙, 면역 제외)
+    // 초선: 소환 시 랜덤 적 유닛 1기 영구 탈취 (steal_minion과 같은 이동 규칙, 면역 제외)
     const pool = (e.board || []).filter(m => !isImmune(m) && m.hp > 0 && !m.dying);
     if (!pool.length) { log("소환 · 탈취할 적 유닛 없음"); }
     else if (p.board.length >= 5) { log("소환 · 전장 가득 참 · 탈취 미발동"); }

@@ -176,7 +176,7 @@ const CARDS = [
   { id:"d8", tribe:"dark", name:"암흑창병", cost:1, type:"minion", atk:2, def:0, hp:1, atkC:1, defC:0, hpC:0, atkSkill:2, text:"관통공격" },
   { id:"d9", tribe:"dark", name:"스켈레톤", cost:2, type:"minion", atk:2, def:0, hp:3, atkC:0, defC:1, hpC:0, text:"" },
   { id:"d10", tribe:"dark", name:"심연술사", cost:4, type:"minion", atk:3, def:0, hp:2, atkC:5, defC:0, hpC:5, text:"" },
-  { id:"d11", tribe:"dark", name:"초선", cost:4, type:"minion", atk:1, def:0, hp:3, atkC:0, defC:0, hpC:0, rarity:"rare", text:"소환: 랜덤 적 유닛 1체 영구 탈취", battlecry:{ type:"steal_random" } },
+  { id:"d11", tribe:"dark", name:"초선", cost:4, type:"minion", atk:1, def:0, hp:3, atkC:0, defC:0, hpC:0, rarity:"rare", text:"소환: 랜덤 적 유닛 1기 영구 탈취", battlecry:{ type:"steal_random" } },
   { id:"d12", tribe:"dark", name:"다크골렘", cost:3, type:"minion", atk:2, def:0, hp:4, atkC:0, defC:3, hpC:-3, text:"" },
   { id:"d13", tribe:"dark", name:"미라", cost:3, type:"minion", atk:4, def:0, hp:5, atkC:-4, defC:0, hpC:-4, ability:"환생", text:"환생" },
   { id:"d14", tribe:"dark", name:"서큐버스", cost:6, type:"minion", atk:5, def:0, hp:6, atkC:3, defC:0, hpC:3, rarity:"uncommon", atkSkill:6, text:"흡혈공격" },
