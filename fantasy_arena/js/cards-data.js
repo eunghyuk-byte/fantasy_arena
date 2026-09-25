@@ -301,7 +301,7 @@ const CARDS = [
   { id:"fs9", tribe:"fire", name:"일기토", cost:5, type:"spell", rarity:"rare", text:"아군 하나·적 하나만 남기고 나머지 처치", spell:{ type:"duel_keep_one", target:"own_minion" } },
   { id:"as9", tribe:"water", name:"연환계", cost:4, type:"spell", rarity:"rare", text:"적 전체에게 적 유닛 수만큼 피해", spell:{ type:"aoe_by_enemy_count" } },
   { id:"es9", tribe:"earth", name:"팔진도", cost:3, type:"spell", rarity:"rare", text:"적 전체, 다음 턴 공격 불가", spell:{ type:"enemy_skip_attack" } },
-  { id:"ls9", tribe:"light", name:"허허실실", cost:4, type:"spell", rarity:"rare", text:"아군 하나 파괴. 손패 유닛 무작위 소환", spell:{ type:"sac_summon_hand", target:"own_minion" } },
+  { id:"ls9", tribe:"light", name:"허허실실", cost:3, type:"spell", rarity:"rare", text:"아군 하나 파괴. 손패 유닛 무작위 소환", spell:{ type:"sac_summon_hand", target:"own_minion" } },
   { id:"ds9", tribe:"dark", name:"미인계", cost:9, type:"spell", rarity:"rare", text:"적 유닛 하나 탈취", spell:{ type:"steal_minion", target:"enemy_minion" } }
 
 ];
