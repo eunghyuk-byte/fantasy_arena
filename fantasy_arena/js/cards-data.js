@@ -201,7 +201,7 @@ const CARDS = [
   { id:"d19", tribe:"dark", name:"그림자요정", cost:3, type:"minion", atk:3, def:0, hp:1, atkC:-3, defC:0, hpC:3, rarity:"common", ability:"출전", text:"소환: 드로우 1" },
   { id:"l17", tribe:"light", name:"황월영", cost:3, type:"minion", atk:2, def:0, hp:2, atkC:1, defC:0, hpC:0, rarity:"rare", text:"소환: 코인이 있는 아군 전체의 코인 수를 5로", battlecry:{ type:"set_coin_n", value:5 } },
   // --- tokens ---
-  { id:"n40", tribe:"wind", name:"섬의 파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", cannotAttack:true, ability:"공격불가", text:"공격불가" },
+  { id:"n40", tribe:"wind", name:"섬의 파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"uncommon", cannotAttack:true, ability:"공격불가", text:"공격불가" },
   // --- spells / items ---
 { id:"fs1", tribe:"fire", name:"화염화살", cost:2, type:"spell", rarity:"common", text:"유닛 하나 피해 3", spell:{ type:"dmg", value:3, target:"any_minion" } },
   { id:"fs2", tribe:"fire", name:"화염폭풍", cost:4, type:"spell", rarity:"common", text:"적 전체 피해 2, 코인-1", spell:{ type:"aoe_pack", enemy:2, coin:-1 } },
@@ -288,8 +288,8 @@ const CARDS = [
   { id:"ds7", tribe:"dark", name:"전염병", cost:4, type:"spell", rarity:"common", text:"4코 이상 유닛 전체 공=1 체=1", spell:{ type:"plague", minCost:4 } },
   { id:"ds8", tribe:"dark", name:"13시의저주", cost:1, type:"spell", rarity:"uncommon", text:"유닛 하나 코인=0", spell:{ type:"set_one", coinZero:true, target:"any_minion" } },
   { id:"fs8", tribe:"fire", name:"메테오", cost:7, type:"spell", rarity:"rare", text:"적 전체 피해 4, 코인-1", spell:{ type:"aoe_pack", enemy:4, coin:-1 } },
-  { id:"e41", tribe:"earth", name:"마대", cost:1, type:"minion", token:true, atk:5, def:1, hp:5, atkC:0, defC:0, hpC:0, rarity:"common", text:"토큰" },
-  { id:"a40", tribe:"water", name:"소교", cost:1, type:"minion", token:true, atk:1, def:1, hp:1, atkC:0, defC:0, hpC:0, rarity:"common", text:"토큰" },
+  { id:"e41", tribe:"earth", name:"마대", cost:1, type:"minion", token:true, atk:5, def:1, hp:5, atkC:0, defC:0, hpC:0, rarity:"legendary", text:"토큰" },
+  { id:"a40", tribe:"water", name:"소교", cost:1, type:"minion", token:true, atk:1, def:1, hp:1, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
   { id:"e42", tribe:"earth", name:"미로", cost:1, type:"minion", token:true, atk:0, def:2, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", cannotAttack:true, ability:"공격불가", text:"공격불가" },
   { id:"di7", tribe:"dark", name:"적토마", cost:3, type:"item", rarity:"legendary", atk:0, def:1, hp:2, ability:"면역", text:"면역. 장착 유닛의 모든 코인→골드", itemFx:"coins_to_gold" },
   { id:"li7", tribe:"light", name:"백우선", cost:3, type:"item", rarity:"legendary", atk:0, def:1, hp:2, ability:"면역", text:"면역. 모든 스펠 소울 −1 (최소 0)", itemFx:"spell_discount" },
