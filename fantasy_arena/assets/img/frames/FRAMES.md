@@ -8,7 +8,7 @@
 - 설명: y ≈ 68%–82%
 - 공/방/체: y ≈ 90.3%
 
-# 부족 × 희귀도
+# 부족 × 등급
 - Tribes: dark, earth, fire, water, wind, light (`deck_*_{unit|item|spell}_*`)
 - Rarities: common, uncommon, rare, legendary
 - metal: 새 세트 없음 → earth 프레임으로 폴백
