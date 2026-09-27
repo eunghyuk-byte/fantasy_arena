@@ -426,13 +426,14 @@ function aiTurn() {
         const ts = validTargets(p, fx);
         if (!ts.length) {
           if (card.type === "item") continue;
+          if (card.type === "spell") continue; // 대상 필수 스펠: 대상 없으면 사용 불가
           if (fx && fx.target) continue;
         }
         if (fx && fx._itemEquip) target = ts[0] || null;
         else target = pickAiTarget(p, fx, ts);
         if (!target && ((fx && fx.target) || (fx && fx._itemEquip))) continue;
       }
-      playCard(p, card, target);
+      if (!playCard(p, card, target)) continue; // 거부된 카드로 무한 재시도 방지
       render();
       return true;
     }
@@ -468,6 +469,9 @@ function scorePlay(p, card) {
 function pickAiTarget(p, fx, ts) {
   const e = opponent(p);
   if (fx.type === "kill" || fx.type === "dmg") {
+    // 유닛 하나(any_minion) 대상이면 적 유닛 우선
+    const foes = ts.filter(t => t.kind === "minion" && t.owner === e);
+    if (foes.length && foes.length < ts.length) ts = foes;
     const lethalHero = ts.find(t => t.kind === "hero" && t.owner.hp <= (fx.value || 99));
     if (lethalHero && fx.type === "dmg") return lethalHero;
     const kill = ts.filter(t => t.kind === "minion").sort((a, b) => (b.minion.atk + b.minion.hp) - (a.minion.atk + a.minion.hp));
@@ -475,6 +479,8 @@ function pickAiTarget(p, fx, ts) {
     return ts.find(t => t.kind === "hero") || ts[0];
   }
   if (fx.type === "buff") {
+    const mine = ts.filter(t => t.kind === "minion" && t.owner === p);
+    if (mine.length) ts = mine;
     return ts.sort((a, b) => b.minion.atk - a.minion.atk)[0] || null;
   }
   return ts[0] || null;

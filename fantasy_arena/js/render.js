@@ -674,7 +674,8 @@ async function composeCardFace(c, opts={}) {
     // v0.234: prefer clause breaks at "、" / ", " so multi-effect text
     // splits between clauses (e.g. "유닛 전체 파괴" / "아군 최대 소울-3"),
     // not mid-clause. Width-wrap only when a single clause still exceeds maxW.
-    // v0.256: "4코 이상 유닛 전체 공=1 체=1" → prefix / "공=1 체=1"
+    // v0.256: "소울 4 이상 유닛 전체 공=1 체=1" → prefix / "공=1 체=1"
+    // v0.309: "2소울 이하 유닛 전체 파괴" → prefix / "파괴" (소울 접두 분할)
     const widthWrap = (s) => {
       const out = [];
       let line = "";
@@ -688,10 +689,15 @@ async function composeCardFace(c, opts={}) {
       if (line) out.push(line);
       return out;
     };
+    const soulHeadRe = /^((?:소울\s*\d+\s*(?:이상|이하)|\d+\s*소울\s*(?:이상|이하))\s+유닛\s+전체)\s+(.*)$/;
+    const soulHeadM = txt.match(soulHeadRe);
     const setStatRe = /^(.*?)\s+((?:공|방|체|코인)=\d+(?:\s*,?\s*(?:공|방|체|코인)=\d+)*)\s*$/;
     const setStatM = txt.match(setStatRe);
     let clauses = [];
-    if (setStatM && setStatM[1].trim()) {
+    if (soulHeadM && soulHeadM[2] && soulHeadM[2].trim()) {
+      clauses.push(soulHeadM[1].trim());
+      clauses.push(soulHeadM[2].trim().replace(/\s*,\s*/g, " "));
+    } else if (setStatM && setStatM[1].trim()) {
       clauses.push(setStatM[1].trim());
       clauses.push(setStatM[2].trim().replace(/\s*,\s*/g, " "));
     }

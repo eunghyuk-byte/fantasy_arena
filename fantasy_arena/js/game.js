@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.308";
+const GAME_VERSION = "0.309";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -549,6 +549,12 @@ function playCard(p, card, target) {
     log("전장이 가득 찼습니다 (최대 5장)");
     return false;
   }
+  if (card.type === "spell" && needsTarget(card)) {
+    // 스펠 개편 규칙: 대상 필수 스펠은 유효한 대상이 없으면 사용 불가 (소울 미차감)
+    const ts = validTargets(p, card.spell);
+    const ok = target && target.kind === "minion" && ts.some(t => t.minion && t.minion.uid === target.minion.uid);
+    if (!ts.length || !ok) { log("마땅한 대상이 없습니다"); return false; }
+  }
   if (card.type === "item" && isEquipItem(card)) {
     const unit = target && target.kind === "minion" && target.owner === p ? target.minion : null;
     if (!unit || !p.board.includes(unit)) {
@@ -640,7 +646,9 @@ function validTargets(p, fx) {
     e.board.forEach(m => {
       if (fx.minAtk != null && (m.atk || 0) < fx.minAtk) return;
       if (fx.maxAtk != null && (m.atk || 0) > fx.maxAtk) return;
-      if (fx.maxCost != null && (m.cost || 0) > fx.maxCost) return;
+      // 공격 조건 = 현재 공격력 · 소울 조건 = 기본(인쇄) 소울
+      if (fx.maxCost != null && printedSoul(m) > fx.maxCost) return;
+      if (fx.minCost != null && printedSoul(m) < fx.minCost) return;
       if (fx.anyCoin && !((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0))) return;
       list.push({ kind: "minion", owner: e, minion: m });
     });
@@ -672,6 +680,12 @@ function findOn(p, uid) { return p.board.find(m => m.uid === uid); }
 
 function abilityOf(m) {
   return (m && m.ability) || null;
+}
+/** 기본(인쇄) 소울: 손패 할인 등으로 바뀐 cost가 아니라 카드 원본 소울 */
+function printedSoul(m) {
+  if (!m) return 0;
+  const b = (typeof CARD_MAP !== "undefined" && CARD_MAP[m.id]) || null;
+  return (b && b.cost != null) ? (b.cost | 0) : ((m.cost | 0) || 0);
 }
 /** Permanent: skip dealing attack in end-of-turn combat / no attack rights. Still takes damage. */
 function unitCannotAttack(m) {
@@ -800,6 +814,13 @@ function applyFx(p, fx, target) {
     [...e.board].forEach(m => spellDamageMinion(e, m, fx.value, { fromSpell: true }));
   } else if (fx.type === "kill") {
     if (target && target.kind === "minion") destroyMinion(target.owner, target.minion, { fromSpell: true });
+    if (fx.enemyDef) {
+      // 지각균열: 적 전체 방 감소 (방어 직접 감소 · 면역 제외)
+      [...e.board].forEach(m => {
+        if (m.dying || isImmune(m)) return;
+        m.def = Math.max(0, (m.def || 0) + fx.enemyDef);
+      });
+    }
   } else if (fx.type === "kill_if") {
     if (target && target.kind === "minion") destroyMinion(target.owner, target.minion, { fromSpell: true });
   } else if (fx.type === "set_one") {
@@ -845,6 +866,15 @@ function applyFx(p, fx, target) {
           m.keywords = Array.from(new Set([...(m.keywords || []), ...fx.kws]));
         }
         if (fx.ability) m.ability = fx.ability;
+        if (fx.addDeathrattle) {
+          // 성흔: 기존 파괴: 효과와 병행 · 중첩 (침묵으로 제거)
+          if (!m.deathrattles) m.deathrattles = [];
+          m.deathrattles = m.deathrattles.concat([fx.addDeathrattle]);
+          if (fx.deathText) {
+            const cur = String(m.text || "").trim();
+            m.text = cur ? (cur + "\n" + fx.deathText) : fx.deathText;
+          }
+        }
       }
     }
   } else if (fx.type === "wipe_all") {
@@ -877,6 +907,11 @@ function applyFx(p, fx, target) {
       if (fx.atk) m.atk += fx.atk;
       if (fx.def) m.def = (m.def || 0) + fx.def;
       if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
+      if (fx.atkSkill != null) {
+        // 인어의노래: 돌진 부여 (기존 공격 능력 덮어씀)
+        m.atkSkill = fx.atkSkill;
+        if (fx.atkSkill === 3) m.keywords = Array.from(new Set([...(m.keywords || []), "charge"]));
+      }
     });
   } else if (fx.type === "grant_extra") {
     if (target && target.kind === "minion") {
@@ -933,13 +968,18 @@ function applyFx(p, fx, target) {
       if ((m.hp || 0) >= 6) { m.atk = 0; m.atkC = 0; }
     });
   } else if (fx.type === "summon_islands") {
+    // 빈칸 수만큼만 (0칸이어도 스펠은 사용됨)
+    const sid = fx.summonId || "n40";
     const slots = Math.max(0, 5 - p.board.length);
+    let n = 0;
     for (let i = 0; i < slots; i++) {
-      const tok = cloneCard("n40");
-      // n40 공격불가: 턴 종료 전투에서 공격하지 않음
-      tok.canAttack = false; tok.attacksLeft = 0;
+      const tok = cloneCard(sid);
+      if (unitCannotAttack(tok)) { tok.canAttack = false; tok.attacksLeft = 0; }
+      else { tok.canAttack = true; tok.attacksLeft = 1; }
       p.board.push(tok);
+      n++;
     }
+    log(n ? `${(CARD_MAP[sid] && CARD_MAP[sid].name) || sid} ${n}기 소환` : "전장이 가득 차 소환할 수 없습니다");
   } else if (fx.type === "magnet") {
     e.board.forEach(m => {
       if (isImmune(m)) return;
@@ -959,7 +999,8 @@ function applyFx(p, fx, target) {
       if ((m.cost || 0) <= 2) { m.atk = Math.max(0, m.atk - 2); m.def = (m.def || 0) + 3; }
     });
   } else if (fx.type === "tornado") {
-    [...p.board, ...e.board].forEach(m => { if ((m.cost || 0) <= 2) m.dying = true; });
+    const cap = fx.maxCost != null ? fx.maxCost : 2;
+    [...p.board, ...e.board].forEach(m => { if (!isImmune(m) && printedSoul(m) <= cap) m.dying = true; });
     [p, e].forEach(pl => pl.board.filter(m => m.dying).forEach(m => destroyMinion(pl, m, { fromSpell: true })));
   } else if (fx.type === "smash") {
     p.board.forEach(m => {
@@ -979,7 +1020,7 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "plague") {
     const minC = fx.minCost != null ? fx.minCost : 0;
     [...p.board, ...e.board].forEach(m => {
-      if ((m.cost || 0) < minC) return;
+      if (printedSoul(m) < minC) return;
       if (isImmune(m)) return;
       if (fx.atk != null) m.atk = fx.atk;
       else m.atk = 1;
@@ -1061,7 +1102,9 @@ function applyFx(p, fx, target) {
       m.ability = null;
       m.atkSkill = null;
       m.keywords = [];
+      m.battlecry = null;
       m.deathrattle = null;
+      m.deathrattles = [];
       m.silenced = true;
       m.text = "침묵";
     });
@@ -1105,7 +1148,7 @@ function applyFx(p, fx, target) {
     log(`연환계 · 적 ${n}체에게 ${n} 피해`);
   } else if (fx.type === "enemy_skip_attack") {
     [...e.board].forEach(m => { if (!isImmune(m)) m.skipAttack = true; });
-    log("팔진도 · 적 전체 다음 턴 공격 불가");
+    log("적 전체 다음 턴 공격 불가");
   } else if (fx.type === "sac_summon_hand") {
     const sac = target && target.kind === "minion" && target.owner === p ? target.minion : null;
     if (!sac) { log("허허실실 · 아군 대상을 선택하세요"); return; }
@@ -1293,7 +1336,9 @@ function resolveDeath(owner, m) {
     draw(ctx.killerOwner, ctx.killer._onKillDraw | 0);
     log(`${ctx.killer.name} 청강검 · 처치 드로우`);
   }
-  if (m.deathrattle) applyFx(owner, m.deathrattle, null);
+  // 기존 파괴: 효과 + 성흔 등 부여된 파괴: 효과 (중첩)
+  const drs = [].concat(m.deathrattle ? [m.deathrattle] : [], m.deathrattles || []);
+  drs.forEach(dfx => applyFx(owner, dfx, null));
 
   if (ab === "강탈") {
     const killer = ctx.killer;
