@@ -751,16 +751,16 @@ async function composeCardFace(c, opts={}) {
   }
 
   const baseCard = (typeof CARD_MAP !== "undefined" && c && CARD_MAP[c.id]) || null;
-  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070),
+  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070) + 12,
     baseCard ? statColor(c.cost, baseCard.cost, true) : STAT_WHITE);
   const paintFrameStats = c.type === "minion" || (c.type === "item");
   if (paintFrameStats) {
     const hp = opts.hp != null ? opts.hp : c.hp;
     const atk = opts.atk != null ? opts.atk : c.atk;
     const def = opts.def != null ? opts.def : c.def;
-    paintNumber(ctx, String(atk ?? 0), W*0.1343, H*0.9032, Math.round(H*0.066), baseCard ? statColor(atk, baseCard.atk) : STAT_WHITE);
-    paintNumber(ctx, String(def ?? 0), W*0.5008, H*0.9032, Math.round(H*0.066), baseCard ? statColor(def, baseCard.def) : STAT_WHITE);
-    paintNumber(ctx, String(hp ?? 0), W*0.8745, H*0.9032, Math.round(H*0.066), baseCard ? statColor(hp, baseCard.hp) : STAT_WHITE);
+    paintNumber(ctx, String(atk ?? 0), W*0.1343, H*0.9032, Math.round(H*0.066) + 12, baseCard ? statColor(atk, baseCard.atk) : STAT_WHITE);
+    paintNumber(ctx, String(def ?? 0), W*0.5008, H*0.9032, Math.round(H*0.066) + 12, baseCard ? statColor(def, baseCard.def) : STAT_WHITE);
+    paintNumber(ctx, String(hp ?? 0), W*0.8745, H*0.9032, Math.round(H*0.066) + 12, baseCard ? statColor(hp, baseCard.hp) : STAT_WHITE);
     if (c.type === "minion") await paintStatCoins(ctx, c, W, H);
   }
   try {
