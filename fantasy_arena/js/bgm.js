@@ -3,7 +3,7 @@ const Bgm = (() => {
   const STEMS = { menu: "menu", battle: "battle" };
   const EXTS = [".ogg", ".mp3", ".m4a", ".wav"];
   let unlocked = false, wanted = true, track = "menu";
-  let vol = 0.36, duckMul = 1;
+  let vol = 0.5, duckMul = 1;
   try { const sv = localStorage.getItem("fa_bgm_vol"); if (sv !== null && !isNaN(+sv)) vol = Math.max(0, Math.min(1, +sv / 100)); } catch (e) {}
   const beds = { menu: null, battle: null };
   const urls = { menu: "", battle: "" };

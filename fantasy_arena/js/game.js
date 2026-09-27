@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.300";
+const GAME_VERSION = "0.301";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -502,7 +502,7 @@ function equipItemOnUnit(p, card, unit) {
   if (unit._baseText == null) unit._baseText = unit.text || "";
   {
     const itemBits = [];
-    if (card.ability) itemBits.push(String(card.ability).split(",")[0].trim());
+    if (card.ability) itemBits.push(abiName(String(card.ability).split(",")[0].trim()));
     else if (card.atkSkill != null && typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[card.atkSkill]) {
       itemBits.push(ATK_SKILL_HELP[card.atkSkill][0]);
     } else if (card.text) {
@@ -1544,14 +1544,14 @@ function collectAbilityTips(c) {
     add(nm, desc);
   }
   String(c.ability || "").split(",").map(s => s.trim()).filter(Boolean).forEach(ab => {
-    add(ab, (typeof ABI_HELP !== "undefined" && ABI_HELP[ab]) || "");
+    add(abiName(ab), (typeof ABI_HELP !== "undefined" && ABI_HELP[ab]) || "");
   });
   const blob = [c.text, c._baseText].filter(Boolean).join(" · ");
   if (typeof ATK_SKILL_HELP !== "undefined") {
     Object.values(ATK_SKILL_HELP).forEach(([nm, desc]) => { if (blob.includes(nm)) add(nm, desc); });
   }
   if (typeof ABI_HELP !== "undefined") {
-    Object.keys(ABI_HELP).forEach(ab => { if (blob.includes(ab)) add(ab, ABI_HELP[ab]); });
+    Object.keys(ABI_HELP).forEach(ab => { if (!ABI_LABEL[ab] && blob.includes(ab)) add(ab, ABI_HELP[ab]); });
   }
   if (c.equippedItem && typeof CARD_MAP !== "undefined") {
     const it = CARD_MAP[c.equippedItem.id];
@@ -1561,7 +1561,7 @@ function collectAbilityTips(c) {
         add(nm, desc);
       }
       String(it.ability || "").split(",").map(s => s.trim()).filter(Boolean).forEach(ab => {
-        add(ab, (ABI_HELP && ABI_HELP[ab]) || "");
+        add(abiName(ab), (ABI_HELP && ABI_HELP[ab]) || "");
       });
       const itx = String(it.text || "").trim();
       if (itx) {
@@ -1586,7 +1586,7 @@ function collectAbilityTips(c) {
     let body = stats;
     if (ab) {
       const abDesc = (typeof ABI_HELP !== "undefined" && ABI_HELP[ab]) || "";
-      body += "\n\n" + (abDesc ? (ab + " — " + abDesc) : ab);
+      body += "\n\n" + (abDesc ? (abiName(ab) + " — " + abDesc) : abiName(ab));
     }
     add(tok.name || "토큰", body);
   }
@@ -2413,20 +2413,23 @@ const ATK_SKILL_HELP = {
   1: ["일반공격", "공격력만큼 공격합니다."],
   2: ["관통공격", "방어를 먼저 깎으며 공격합니다."],
   3: ["돌진공격", "내 방어력만큼 추가하여 공격합니다."],
-  4: ["연속공격", "두 번 공격합니다. 처치 시 다음 생존 적 유닛에게 이어집니다."],
+  4: ["연속공격", "두 번 공격합니다. 처치 시 다음 생존 적에게 이어집니다."],
   5: ["치명공격", "체력을 1 이상 깎으면 적이 바로 죽습니다."],
   6: ["흡혈공격", "준 피해의 절반만큼 체력을 회복합니다."],
   7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],
   8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다."],
   9: ["광역공격", "적 유닛 전체를 공격합니다(영웅 제외). 반격을 받지 않습니다."]
 };
+/* 옛 키워드(복수·강탈·출전·유언)는 내부 키로만 남기고 화면에는 「소환:」「파괴:」 문장으로 표시 (9/27) */
+const ABI_LABEL = { "복수": "파괴: 나를 파괴한 적을 제거", "강탈": "파괴: 나를 파괴한 적을 탈취", "출전": "소환: 드로우 1", "유언": "파괴: 드로우 1" };
+function abiName(ab) { return (typeof ABI_LABEL !== "undefined" && ABI_LABEL[ab]) || ab; }
 const ABI_HELP = {
   "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",
-  "복수": "파괴: 나를 파괴한 적을 제거합니다.",
+  "복수": "파괴될 때 나를 파괴한 적을 제거합니다.",
   "환생": "죽으면 체력 1로 한 번 다시 살아납니다.",
-  "강탈": "파괴: 나를 파괴한 적을 탈취합니다.",
-  "출전": "소환: 드로우 1",
-  "유언": "파괴: 드로우 1",
+  "강탈": "파괴될 때 나를 파괴한 적을 탈취합니다.",
+  "출전": "낼 때 카드 1장을 뽑습니다.",
+  "유언": "파괴될 때 카드 1장을 뽑습니다.",
   "면역": "스펠 효과를 받지 않습니다.",
   "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다."
 };
@@ -2447,8 +2450,8 @@ function buildLoreSkillsHtml(c) {
   // if text lists extra atk names not in atkSkill, still show ability only here
   abs.forEach(ab => {
     const desc = ABI_HELP[ab];
-    if (desc) rows.push(`<div class="lore-skill"><b>${ab}</b><span>${desc}</span></div>`);
-    else if (ab) rows.push(`<div class="lore-skill"><b>${ab}</b><span></span></div>`);
+    if (desc) rows.push(`<div class="lore-skill"><b>${abiName(ab)}</b><span>${desc}</span></div>`);
+    else if (ab) rows.push(`<div class="lore-skill"><b>${abiName(ab)}</b><span></span></div>`);
   });
   // also surface second atk from text like "관통공격 · 흡혈공격" when only first is in atkSkill
   const t = String(c.text || "");
