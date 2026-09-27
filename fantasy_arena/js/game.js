@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.310";
+const GAME_VERSION = "0.311";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1444,7 +1444,7 @@ function rollSharedCoins(m) {
 }
 function clampAtk(v) { return Math.max(0, v | 0); }
 function clampDef(v) { return Math.max(0, Math.min(5, v | 0)); }
-/** After coin: HP floor 1 (coin alone cannot kill). */
+/** Gold/positive HP coin floor 1. Black HP coin to ≤0 destroys before the exchange (beginCombatHpCoin). */
 function clampHp(v) { return Math.max(1, v | 0); }
 /**
  * Fantasy Masters–style HP coin for one attack exchange.
@@ -1455,7 +1455,15 @@ function clampHp(v) { return Math.max(1, v | 0); }
 function beginCombatHpCoin(unit, dHp) {
   if (!unit || !dHp) return null;
   const pre = Number(unit.hp) || 0;
-  const start = clampHp(pre + dHp);
+  const raw = pre + (dHp | 0);
+  // v0.311: 블랙 체 코인으로 0 이하 → 전투 전 파괴 (hp 0 + dying; doAttack skips the exchange)
+  if (dHp < 0 && raw <= 0) {
+    unit.hp = 0;
+    unit.dying = true;
+    unit._deathCtx = Object.assign({}, unit._deathCtx || {}, { fromSpell: false, fromCoin: true });
+    return { unit, pre, dHp, start: 0, coinKilled: true };
+  }
+  const start = clampHp(raw);
   unit.hp = start;
   return { unit, pre, dHp, start };
 }

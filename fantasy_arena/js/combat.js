@@ -87,11 +87,12 @@ function doAttack(p, attacker, target, auto) {
     applyAtkSkillOnStart(attacker, target.minion);
   }
 
-  function sharedDetail(unit, roll, atkVal, defVal, hpVal) {
+  function sharedDetail(unit, roll, atkVal, defVal, hpVal, hpFrom) {
     const bits = [];
+    if (hpFrom == null) hpFrom = hpVal - roll.dHp;
     if (unit.atkC) bits.push(`공 ${unit.atk}→<b>${atkVal}</b> (${roll.dAtk >= 0 ? "+" : ""}${roll.dAtk})`);
     if (unit.defC) bits.push(`방 ${unit.def || 0}→<b>${defVal}</b> (${roll.dDef >= 0 ? "+" : ""}${roll.dDef})`);
-    if (unit.hpC) bits.push(`체 ${hpVal - roll.dHp}→<b>${hpVal}</b> (${roll.dHp >= 0 ? "+" : ""}${roll.dHp})`);
+    if (unit.hpC) bits.push(`체 ${hpFrom}→<b>${hpVal}</b> (${roll.dHp >= 0 ? "+" : ""}${roll.dHp})`);
     return bits.join(" · ") || `앞면 ${roll.heads}/${roll.n}`;
   }
 
@@ -106,7 +107,7 @@ function doAttack(p, attacker, target, auto) {
       modLabel: "",
       flips: aShared.flips,
       delta: aShared.heads,
-      detail: sharedDetail(attacker, aShared, aAtk, aDefVal, attacker.hp)
+      detail: sharedDetail(attacker, aShared, aAtk, aDefVal, attacker.hp, aHpSnap ? aHpSnap.pre : null)
     });
   }
 
@@ -128,7 +129,7 @@ function doAttack(p, attacker, target, auto) {
         modLabel: "",
         flips: dShared.flips,
         delta: dShared.heads,
-        detail: sharedDetail(def, dShared, dAtk, defVal, def.hp)
+        detail: sharedDetail(def, dShared, dAtk, defVal, def.hp, dHpSnap ? dHpSnap.pre : null)
       });
     }
     window._pendingDef = defVal;
@@ -164,8 +165,18 @@ function doAttack(p, attacker, target, auto) {
     const sk = atkSkillOf(attacker);
     const foe = opponent(p);
 
-    // —— 9 광역공격: shared roll → all enemy board minions; no counter ——
-    if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
+    // v0.311: 체 코인으로 0 이하 → 공격·방어 피해 교환 전에 파괴 (공격은 사용됨, 반격·영웅 피해 없음)
+    const coinDead = [aHpSnap, dHpSnap].filter(sn => sn && sn.coinKilled).map(sn => sn.unit);
+    if (coinDead.length) {
+      for (const cu of coinDead) {
+        log(`${cu.name} 코인으로 체력 0 · 전투 전 파괴`);
+        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: cu.uid }); } catch (e) {}
+        Vfx.death(Vfx.elOf(cu.uid));
+      }
+      render();
+      await waitMs(520);
+    } else if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
+      // —— 9 광역공격: shared roll → all enemy board minions; no counter ——
       const victims = foe.board.filter(m => m.hp > 0 && !m.dying).slice();
       log(`${attacker.name} 광역공격 → 적 유닛 ${victims.length}체`);
       for (const vic of victims) {
