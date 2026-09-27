@@ -4,6 +4,7 @@ const Bgm = (() => {
   const EXTS = [".ogg", ".mp3", ".m4a", ".wav"];
   let unlocked = false, wanted = true, track = "menu";
   let vol = 0.36, duckMul = 1;
+  try { const sv = localStorage.getItem("fa_bgm_vol"); if (sv !== null && !isNaN(+sv)) vol = Math.max(0, Math.min(1, +sv / 100)); } catch (e) {}
   const beds = { menu: null, battle: null };
   const urls = { menu: "", battle: "" };
   let fadeTimers = [];
@@ -134,11 +135,17 @@ const Bgm = (() => {
     if (!a) return;
     fade(a, wanted ? vol * duckMul : 0, ms || 80);
   }
-  function setVolume(v) { vol = Math.max(0, Math.min(1, +v || 0)); applyVol(); }
+  function setVolume(v) {
+    vol = Math.max(0, Math.min(1, +v || 0));
+    try { localStorage.setItem("fa_bgm_vol", String(Math.round(vol * 100))); } catch (e) {}
+    clearFades();
+    applyVol();
+  }
+  function getVolume() { return vol; }
   function isOn() { return wanted && unlocked; }
 
   function isWanted() { return !!wanted; }
-  return { start, stop, toggle, to, duck, setVolume, isOn, isWanted, track: () => track };
+  return { start, stop, toggle, to, duck, setVolume, getVolume, isOn, isWanted, track: () => track };
 })();
 window.Bgm = Bgm;
 const TavernBgm = Bgm;

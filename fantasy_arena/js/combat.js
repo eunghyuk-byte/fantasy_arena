@@ -167,7 +167,7 @@ function doAttack(p, attacker, target, auto) {
     // —— 9 광역공격: shared roll → all enemy board minions; no counter ——
     if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
       const victims = foe.board.filter(m => m.hp > 0 && !m.dying).slice();
-      log(`${attacker.name} 광역공격 → 적 하수인 ${victims.length}체`);
+      log(`${attacker.name} 광역공격 → 적 유닛 ${victims.length}체`);
       for (const vic of victims) {
         if (attacker.hp <= 0 || attacker.dying) break;
         const blocked = Math.max(0, vic.def || 0);
@@ -189,40 +189,29 @@ function doAttack(p, attacker, target, auto) {
       render();
       await waitMs(360);
     } else if (target.kind === "hero") {
-      const hits = (sk === 4) ? 2 : 1;
-      for (let hit = 1; hit <= hits; hit++) {
-        if (attacker.hp <= 0 || attacker.dying) break;
-        if (target.owner.hp <= 0) break;
+      // 영웅에게는 모든 능력이 통하지 않음: 기본공격 1회만 (연속·치명·돌진·흡혈 등 무시)
+      if (attacker.hp > 0 && !attacker.dying && target.owner.hp > 0) {
         const isMeHero = target.owner === meView().me;
         const defEl = Vfx.heroOf(isMeHero);
-        const calc = calcAtkSkillHpDamage(attacker, aAtk, 0, aDefNow, null);
-        let hpDmg = calc.hpDmg;
-        if (hits > 1) log(`${attacker.name} 연속 ${hit}/${hits}`);
-        const crit = hpDmg >= attacker.atk + 3 || sk === 5;
+        const hpDmg = Math.max(0, aAtk);
         try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { hero: isMeHero ? "me" : "opp" }); } catch (e) {}
-        await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
-        if (sk === 5 && hpDmg >= 1) {
-          dealHero(target.owner, Math.max(hpDmg, target.owner.hp));
-          log(`${attacker.name} 치명공격 → 영웅 즉사급 피해`);
-        } else {
-          dealHero(target.owner, hpDmg);
-        }
-        if (sk === 6) applyLifesteal(attacker, hpDmg);
+        await Vfx.attackSeq(atkEl, defEl, hpDmg, false);
+        dealHero(target.owner, hpDmg);
         applyItemAttackHooks(attacker);
         render();
-        await waitMs(hits > 1 ? 300 : 420);
+        await waitMs(420);
       }
     } else {
       // single minion: 연속(4)=two hits with counter each (kill→retarget next living)
       const hits = (sk === 4) ? 2 : 1;
       for (let hit = 1; hit <= hits; hit++) {
         if (attacker.hp <= 0 || attacker.dying) break;
-        // 연속: 1타 처치 후 남은 타는 다음 생존 적(하수인→영웅)으로 재지정. 시체/스킵 금지.
+        // 연속: 1타 처치 후 남은 타는 다음 생존 적 유닛으로 재지정(영웅 제외). 시체/스킵 금지.
         if (!(def && def.hp > 0 && !def.dying)) {
           if (sk !== 4) break;
           const legalNext = attackTargets(p, attacker);
           const nextM = legalNext.find(t => t.kind === "minion" && t.minion && t.minion.hp > 0 && !t.minion.dying);
-          const nextH = legalNext.find(t => t.kind === "hero" && t.owner && t.owner.hp > 0);
+          const nextH = null; // 연속공격은 영웅에게 통하지 않음: 재지정은 유닛만
           if (nextM) {
             def = nextM.minion;
             target = nextM;
@@ -285,14 +274,31 @@ function doAttack(p, attacker, target, auto) {
         // counter uses this hit's defender current atk if retargeted mid-연속
         const counterAtk = (hit === 1) ? dAtk : clampAtk(Number(def.atk) || 0);
         if (survived && counterAtk && attacker.hp > 0 && !attacker.dying) {
-          const dmgBack = Math.max(0, counterAtk - backBlock);
+          // 반격: 연속(4)·광역(9)은 발동 안 함, 나머지 능력은 반격에도 발동
+          const csk = atkSkillOf(def);
+          const cAbil = (csk !== 4 && csk !== 9) ? csk : 1;
+          const cDefVal = (hit === 1) ? (window._pendingDef || 0) : Math.max(0, def.def || 0);
+          if (cAbil === 7 || cAbil === 8) applyAtkSkillOnStart(def, attacker);
+          let dmgBack;
+          if (cAbil === 2 || cAbil === 3) {
+            dmgBack = calcAtkSkillHpDamage(def, counterAtk, backBlock, cDefVal, attacker).hpDmg;
+          } else {
+            dmgBack = Math.max(0, counterAtk - backBlock);
+          }
           if (dmgBack > 0) {
-            log(`${def.name} 반격`);
+            log(`${def.name} 반격` + (cAbil > 1 && typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[cAbil] ? ` [${ATK_SKILL_HELP[cAbil][0]}]` : ""));
             const atkNow = Vfx.elOf(attacker.uid);
             const defNow = Vfx.elOf(def.uid);
             try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter", { uid: attacker.uid }); } catch (e) {}
             await Vfx.parrySeq(defNow, atkNow, dmgBack);
-            damageMinion(p, attacker, dmgBack, combatKillCtx(def, target.owner));
+            const aHpBefore = attacker.hp;
+            if (cAbil === 5) {
+              damageMinion(p, attacker, Math.max(dmgBack, attacker.hp), combatKillCtx(def, target.owner));
+              log(`${def.name} 치명 반격 → ${attacker.name} 즉사`);
+            } else {
+              damageMinion(p, attacker, dmgBack, combatKillCtx(def, target.owner));
+            }
+            if (cAbil === 6) applyLifesteal(def, Math.max(0, aHpBefore - Math.max(0, attacker.hp)));
             render();
             await waitMs(360);
           }

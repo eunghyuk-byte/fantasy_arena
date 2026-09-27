@@ -167,6 +167,11 @@
     if (bgm && window.Bgm) {
       try { bgm.checked = !!(Bgm.isWanted ? Bgm.isWanted() : Bgm.isOn()); } catch (e) {}
     }
+    const vs = document.getElementById("bgmVol"), vv = document.getElementById("bgmVolVal");
+    if (vs && window.Bgm && Bgm.getVolume) {
+      const p = Math.round(Bgm.getVolume() * 100);
+      vs.value = p; if (vv) vv.textContent = p;
+    }
   }
 
   function syncCombatSettings() {
@@ -228,6 +233,12 @@
       bgm.addEventListener("change", applyBgm);
       bgm.addEventListener("click", applyBgm);
     }
+    const vs = document.getElementById("bgmVol"), vv = document.getElementById("bgmVolVal");
+    if (vs) vs.addEventListener("input", () => {
+      const p = Math.max(0, Math.min(100, +vs.value || 0));
+      if (vv) vv.textContent = p;
+      try { const api = (typeof Bgm !== "undefined") ? Bgm : window.Bgm; if (api) api.setVolume(p / 100); } catch (e) {}
+    });
   }
 
   window.StageSettings = {

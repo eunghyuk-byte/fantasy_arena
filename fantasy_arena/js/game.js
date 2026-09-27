@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.299";
+const GAME_VERSION = "0.300";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -656,7 +656,7 @@ function validTargets(p, fx) {
     return list;
   }
   if (fx.target === "any_enemy") {
-    list.push({ kind: "hero", owner: e });
+    // 적 하나 = 적 유닛 하나 (영웅 제외)
     e.board.forEach(m => list.push({ kind: "minion", owner: e, minion: m }));
   } else if (fx.target === "any_minion") {
     p.board.concat(e.board).forEach(m => list.push({ kind: "minion", owner: m === findOn(p, m.uid) ? p : e, minion: m }));
@@ -796,7 +796,7 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "aoe_enemy") {
     [...e.board].forEach(m => spellDamageMinion(e, m, fx.value, { fromSpell: true }));
   } else if (fx.type === "aoe_all_enemy") {
-    dealHero(e, fx.value);
+    // 적 전체 = 적 유닛 전체 (영웅 제외)
     [...e.board].forEach(m => spellDamageMinion(e, m, fx.value, { fromSpell: true }));
   } else if (fx.type === "kill") {
     if (target && target.kind === "minion") destroyMinion(target.owner, target.minion, { fromSpell: true });
@@ -1188,10 +1188,7 @@ function spellDamageMinion(owner, m, dmg, ctx) {
 
 function dealToTarget(srcOwner, target, n, ctx) {
   ctx = ctx || { fromSpell: true };
-  if (!target) {
-    dealHero(opponent(srcOwner), n);
-    return;
-  }
+  if (!target) return; // 유닛 대상 없음: 영웅으로 넘기지 않음
   if (target.kind === "hero") dealHero(target.owner, n);
   else if (ctx.fromSpell) spellDamageMinion(target.owner, target.minion, n, ctx);
   else damageMinion(target.owner, target.minion, n, ctx);
@@ -2416,12 +2413,12 @@ const ATK_SKILL_HELP = {
   1: ["일반공격", "공격력만큼 공격합니다."],
   2: ["관통공격", "방어를 먼저 깎으며 공격합니다."],
   3: ["돌진공격", "내 방어력만큼 추가하여 공격합니다."],
-  4: ["연속공격", "두 번 공격합니다. 처치 시 다음 생존 적에게 이어집니다."],
+  4: ["연속공격", "두 번 공격합니다. 처치 시 다음 생존 적 유닛에게 이어집니다."],
   5: ["치명공격", "체력을 1 이상 깎으면 적이 바로 죽습니다."],
   6: ["흡혈공격", "준 피해의 절반만큼 체력을 회복합니다."],
   7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],
   8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다."],
-  9: ["광역공격", "적 하수인 전체를 공격합니다. 반격을 받지 않습니다."]
+  9: ["광역공격", "적 유닛 전체를 공격합니다(영웅 제외). 반격을 받지 않습니다."]
 };
 const ABI_HELP = {
   "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",
