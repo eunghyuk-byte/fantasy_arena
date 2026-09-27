@@ -166,6 +166,8 @@ function doAttack(p, attacker, target, auto) {
     const foe = opponent(p);
 
     // v0.311: 체 코인으로 0 이하 → 공격·방어 피해 교환 전에 파괴 (공격은 사용됨, 반격·영웅 피해 없음)
+    // v0.312: 광역(9)은 맨 앞 방어자만 코인 사망이면 나머지 적에게 그대로 발동 (공격자 코인 사망이면 전부 취소)
+    const aCoinDead = !!(aHpSnap && aHpSnap.coinKilled);
     const coinDead = [aHpSnap, dHpSnap].filter(sn => sn && sn.coinKilled).map(sn => sn.unit);
     if (coinDead.length) {
       for (const cu of coinDead) {
@@ -175,6 +177,10 @@ function doAttack(p, attacker, target, auto) {
       }
       render();
       await waitMs(520);
+    }
+    const aoeAfterCoin = coinDead.length && !aCoinDead && sk === 9;
+    if (coinDead.length && !aoeAfterCoin) {
+      // exchange skipped; cleanup below resolves the coin deaths
     } else if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
       // —— 9 광역공격: shared roll → all enemy board minions; no counter ——
       const victims = foe.board.filter(m => m.hp > 0 && !m.dying).slice();
