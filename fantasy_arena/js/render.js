@@ -689,6 +689,11 @@ async function composeCardFace(c, opts={}) {
     let buf = "";
     if (!clauses.length) for (let i = 0; i < txt.length; i++) {
       const ch = txt[i];
+      if (ch === "\n") { // v0.302: 카드 설명 줄바꿈
+        if (buf.trim()) clauses.push(buf.trim());
+        buf = "";
+        continue;
+      }
       if (ch === "、") {
         if (buf.trim()) clauses.push(buf.trim());
         buf = "";
