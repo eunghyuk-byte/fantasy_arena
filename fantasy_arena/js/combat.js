@@ -459,7 +459,7 @@ function scorePlay(p, card) {
   }
   if (card.type === "item") {
     if (typeof isEquipItem === "function" && isEquipItem(card)) {
-      if (!p.board.length) s -= 100;
+      if (!p.board.some(m => !m.equippedItem)) s -= 100;
       else s += 4 + (card.atk || 0) + (card.def || 0) + (card.hp || 0);
     } else s += 5;
   }

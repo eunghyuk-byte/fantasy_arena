@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.309";
+const GAME_VERSION = "0.310";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -392,13 +392,9 @@ function unequipItem(m) {
 }
 function equipItemOnUnit(p, card, unit) {
   if (!unit || !p || !p.board.includes(unit)) return false;
-  const replacing = !!(unit.equippedItem);
-  if (replacing) {
-    try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_replace"); } catch (e) {}
-  } else {
-    try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_equip"); } catch (e) {}
-  }
-  unequipItem(unit);
+  // 규칙: 유닛당 아이템 1개만 — 이미 장착한 유닛에는 더 끼거나 교체할 수 없다
+  if (unit.equippedItem) return false;
+  try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_equip"); } catch (e) {}
   let dAtk = Number(card.atk) || 0;
   let dDef = Number(card.def) || 0;
   let dHp = Number(card.hp) || 0;
@@ -561,6 +557,10 @@ function playCard(p, card, target) {
       log("장착할 아군 유닛이 없습니다");
       return false;
     }
+    if (unit.equippedItem) {
+      log("이미 아이템을 장착한 유닛입니다 (유닛당 1개)");
+      return false;
+    }
   }
   p.soul -= payCost;
   p.hand = p.hand.filter(c => c.uid !== card.uid);
@@ -630,7 +630,8 @@ function validTargets(p, fx) {
   const e = opponent(p);
   const list = [];
   if (fx && fx._itemEquip) {
-    p.board.forEach(m => list.push({ kind: "minion", owner: p, minion: m }));
+    // 유닛당 아이템 1개: 이미 장착한 유닛은 대상 아님
+    p.board.forEach(m => { if (!m.equippedItem) list.push({ kind: "minion", owner: p, minion: m }); });
     return list;
   }
   if (!fx) return list;
@@ -1107,6 +1108,9 @@ function applyFx(p, fx, target) {
       m.deathrattles = [];
       m.silenced = true;
       m.text = "침묵";
+      // 장착 아이템 해제 시 침묵 전 능력/문구로 되돌아가지 않게
+      if (m._itemBonuses) { m._itemBonuses.prevAbility = null; m._itemBonuses.prevAtkSkill = null; }
+      if (m._baseText != null) m._baseText = "침묵";
     });
     log("적 전체 침묵 (능력 제거)");
   } else if (fx.type === "bounce_enemy_board") {
@@ -1292,11 +1296,12 @@ function damageMinion(owner, m, n, ctx) {
  */
 function resolveDeath(owner, m) {
   if (!m || !owner || !owner.board.some(x => x.uid === m.uid)) return;
-  if (typeof unequipItem === "function") unequipItem(m);
+  // 능력 판정은 아이템 해제 전에 한다 (아이템으로 받은 환생·강탈도 발동, 침묵으로 지운 능력은 되살아나지 않음)
   const ctx = m._deathCtx || {};
   const ab = abilityOf(m);
   const fromSpell = !!ctx.fromSpell;
   const hasRebirth = (ab && String(ab).includes("환생")) || (m.keywords || []).includes("rebirth");
+  if (typeof unequipItem === "function") unequipItem(m);
 
   if (ab === "유언") {
     log(`${m.name} 파괴: 드로우 1`);
@@ -1793,7 +1798,7 @@ function highlightEquipHover(x, y, allowed) {
   });
   if (!allowed) { _equipHoverUid = null; return; }
   const hit = unitFromPoint(x, y);
-  if (!hit) { _equipHoverUid = null; return; }
+  if (!hit || hit.minion.equippedItem) { _equipHoverUid = null; return; }
   const el = document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
   if (el) el.classList.add("equip-glow");
   if (hit.minion.uid !== _equipHoverUid) {
@@ -1837,7 +1842,7 @@ function canDropCard(card) {
   if (state.over || current() !== me || me.isAI) return false;
   if (me.soul < effectiveCardCost(me, card)) return false;
   if (card.type === "minion" && me.board.length >= 5) return false;
-  if (card.type === "item" && isEquipItem(card) && !me.board.length) return false;
+  if (card.type === "item" && isEquipItem(card) && !me.board.some(m => !m.equippedItem)) return false;
   return true;
 }
 function overBoard(x, y) {
@@ -2087,7 +2092,9 @@ function bindHandCard(el, card) {
         const hit = unitFromPoint(x, y);
         clearEquipHover();
         clearDrag();
-        if (hit && canDropCard(cardRef)) {
+        if (hit && hit.minion && hit.minion.equippedItem) {
+          log("이미 아이템을 장착한 유닛입니다 (유닛당 1개)");
+        } else if (hit && canDropCard(cardRef)) {
           try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
           playCard(meView().me, cardRef, hit);
           render();
