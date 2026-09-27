@@ -396,7 +396,16 @@ function rr(ctx, x, y, w, h, r) {
   ctx.arcTo(x, y, x+w, y, R);
   ctx.closePath();
 }
-function paintNumber(ctx, text, x, y, size) {
+const STAT_WHITE = "#ffffff";
+const STAT_UP = "#3dff3d";
+const STAT_DOWN = "#ff3b3b";
+function statColor(cur, base, invert) {
+  cur = Number(cur) || 0; base = Number(base);
+  if (!Number.isFinite(base) || cur === base) return STAT_WHITE;
+  const up = cur > base;
+  return (invert ? !up : up) ? STAT_UP : STAT_DOWN;
+}
+function paintNumber(ctx, text, x, y, size, color) {
   ctx.save();
   ctx.font = `900 ${size}px "Noto Sans KR", Arial, sans-serif`;
   ctx.textAlign = "center";
@@ -406,7 +415,7 @@ function paintNumber(ctx, text, x, y, size) {
   ctx.lineWidth = Math.max(4, size*0.18);
   ctx.strokeStyle = "#120800";
   ctx.strokeText(text, x, y);
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = color || STAT_WHITE;
   ctx.fillText(text, x, y);
   ctx.restore();
 }
@@ -741,15 +750,17 @@ async function composeCardFace(c, opts={}) {
     ctx.restore();
   }
 
-  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070));
+  const baseCard = (typeof CARD_MAP !== "undefined" && c && CARD_MAP[c.id]) || null;
+  paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070),
+    baseCard ? statColor(c.cost, baseCard.cost, true) : STAT_WHITE);
   const paintFrameStats = c.type === "minion" || (c.type === "item");
   if (paintFrameStats) {
     const hp = opts.hp != null ? opts.hp : c.hp;
     const atk = opts.atk != null ? opts.atk : c.atk;
     const def = opts.def != null ? opts.def : c.def;
-    paintNumber(ctx, String(atk ?? 0), W*0.1343, H*0.9032, Math.round(H*0.066));
-    paintNumber(ctx, String(def ?? 0), W*0.5008, H*0.9032, Math.round(H*0.066));
-    paintNumber(ctx, String(hp ?? 0), W*0.8745, H*0.9032, Math.round(H*0.066));
+    paintNumber(ctx, String(atk ?? 0), W*0.1343, H*0.9032, Math.round(H*0.066), baseCard ? statColor(atk, baseCard.atk) : STAT_WHITE);
+    paintNumber(ctx, String(def ?? 0), W*0.5008, H*0.9032, Math.round(H*0.066), baseCard ? statColor(def, baseCard.def) : STAT_WHITE);
+    paintNumber(ctx, String(hp ?? 0), W*0.8745, H*0.9032, Math.round(H*0.066), baseCard ? statColor(hp, baseCard.hp) : STAT_WHITE);
     if (c.type === "minion") await paintStatCoins(ctx, c, W, H);
   }
   try {
@@ -833,7 +844,7 @@ function faceCacheKey(c, opts) {
   const version = (typeof GAME_VERSION !== "undefined")
     ? GAME_VERSION
     : (typeof window !== "undefined" ? window.GAME_VERSION : "");
-  return ["v106itemTipText", version, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v107statColor", version, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
