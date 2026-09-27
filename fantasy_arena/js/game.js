@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.312";
+const GAME_VERSION = "0.313";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1449,8 +1449,8 @@ function clampHp(v) { return Math.max(1, v | 0); }
 /**
  * Fantasy Masters–style HP coin for one attack exchange.
  * Apply dHp temporarily; after the exchange call settleCombatHpCoin.
- * Gold (+): bonus evaporates; only net damage (minus heals during fight) sticks vs pre-HP.
- * Black (−): keep resulting HP (cut + damage stick).
+ * v0.313: gold AND black are combat-only — settle undoes dHp, only real combat damage/heal stays.
+ * Black to ≤0 destroys before the exchange (v0.311).
  */
 function beginCombatHpCoin(unit, dHp) {
   if (!unit || !dHp) return null;
@@ -1465,17 +1465,18 @@ function beginCombatHpCoin(unit, dHp) {
   }
   const start = clampHp(raw);
   unit.hp = start;
-  return { unit, pre, dHp, start };
+  return { unit, pre, dHp: start - pre, start };
 }
 function settleCombatHpCoin(snap) {
-  if (!snap || !snap.unit) return;
+  if (!snap || !snap.unit || snap.coinKilled) return;
   const u = snap.unit;
-  if (!(u.hp > 0) || u.dying) return;
-  if (snap.dHp > 0) {
-    const lost = Math.max(0, snap.start - (Number(u.hp) || 0));
-    u.hp = clampHp(snap.pre - lost);
-  }
-  // dHp < 0: leave u.hp as-is (already includes black cut + damage/heal)
+  if (!(u.hp > 0) || u.dying) return; // died in combat → stays dead
+  // undo coin delta; survivor never dies from coin removal (floor 1, as pre-v0.313 gold)
+  let hp = clampHp((Number(u.hp) || 0) - snap.dHp);
+  // cap: max HP (or pre-combat HP if that was higher, e.g. buffed without maxHp)
+  const cap = Math.max(Number(u.maxHp) || 0, snap.pre);
+  if (cap > 0) hp = Math.min(hp, cap);
+  u.hp = hp;
 }
 /** Legacy single-mod roll (non-combat). */
 function rollCoins(mod, unit) {
