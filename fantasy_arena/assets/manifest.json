@@ -1567,26 +1567,6 @@
       "name": "deck_wind_item_uncommon_frame"
     },
     {
-      "path": "assets/img/frames/rarity/earth_minion_common.png",
-      "bytes": 1018957,
-      "name": "earth_minion_common"
-    },
-    {
-      "path": "assets/img/frames/rarity/earth_minion_legendary.png",
-      "bytes": 1011328,
-      "name": "earth_minion_legendary"
-    },
-    {
-      "path": "assets/img/frames/rarity/earth_minion_rare.png",
-      "bytes": 1025172,
-      "name": "earth_minion_rare"
-    },
-    {
-      "path": "assets/img/frames/rarity/earth_minion_uncommon.png",
-      "bytes": 1029260,
-      "name": "earth_minion_uncommon"
-    },
-    {
       "path": "assets/img/frames/spell/deck_dark_spell_common_frame.png",
       "bytes": 2576579,
       "name": "deck_dark_spell_common_frame"
