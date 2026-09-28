@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.344";
+const GAME_VERSION = "0.345";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -2332,11 +2332,7 @@ function bindHandCard(el, card) {
     if (ev.stopPropagation) ev.stopPropagation();
     clearDrag();
     try { if (ev.pointerId != null && el.setPointerCapture) el.setPointerCapture(ev.pointerId); } catch (err) {}
-    const r = el.getBoundingClientRect();
-    const ghost = el.cloneNode(true);
-    ghost.classList.add("drag-ghost");
-    ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
-    document.body.appendChild(ghost);
+    const ghost = makeDragGhost(el, ev.clientX, ev.clientY);
     el.classList.add("dragging");
     document.body.classList.add("dragging-card");
     _drag = {
@@ -2471,6 +2467,34 @@ function canReorderBoard() {
   return true;
 }
 
+/** v0.345: 드래그 고스트 — .minion/.card CSS(--slot-w)가 body에서 깨져 원본 아트(예:768×1152)로 커지는 버그 방지 */
+function makeDragGhost(srcEl, clientX, clientY) {
+  const r = srcEl.getBoundingClientRect();
+  const ghost = srcEl.cloneNode(true);
+  ghost.className = "drag-ghost"; // minion/card 클래스 제거 → slot 크기 CSS 미적용
+  ghost.style.cssText = "";
+  ghost.style.setProperty("position", "fixed", "important");
+  ghost.style.setProperty("left", clientX + "px", "important");
+  ghost.style.setProperty("top", clientY + "px", "important");
+  ghost.style.setProperty("width", Math.round(r.width) + "px", "important");
+  ghost.style.setProperty("height", Math.round(r.height) + "px", "important");
+  ghost.style.setProperty("margin", "0", "important");
+  ghost.style.setProperty("transform", "translate(-50%, -60%)", "important");
+  ghost.style.setProperty("z-index", "200", "important");
+  ghost.style.setProperty("pointer-events", "none", "important");
+  ghost.style.setProperty("box-sizing", "border-box", "important");
+  ghost.style.setProperty("overflow", "hidden", "important");
+  ghost.querySelectorAll("img").forEach(img => {
+    img.style.setProperty("width", "100%", "important");
+    img.style.setProperty("height", "100%", "important");
+    img.style.setProperty("object-fit", "contain", "important");
+    img.style.setProperty("max-width", "100%", "important");
+    img.style.setProperty("max-height", "100%", "important");
+  });
+  document.body.appendChild(ghost);
+  return ghost;
+}
+
 function bindBoardMinion(el, minion) {
   if (!el || !minion) return;
   el.onpointerenter = (ev) => {
@@ -2489,11 +2513,7 @@ function bindBoardMinion(el, minion) {
     clearDrag();
     clearInsertPreview();
     try { if (ev.pointerId != null && el.setPointerCapture) el.setPointerCapture(ev.pointerId); } catch (err) {}
-    const r = el.getBoundingClientRect();
-    const ghost = el.cloneNode(true);
-    ghost.classList.add("drag-ghost");
-    ghost.style.cssText = "position:fixed;left:"+ev.clientX+"px;top:"+ev.clientY+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;transform:translate(-50%,-60%);z-index:200;pointer-events:none;";
-    document.body.appendChild(ghost);
+    const ghost = makeDragGhost(el, ev.clientX, ev.clientY);
     el.classList.add("dragging");
     document.body.classList.add("dragging-card");
     const slot = el.closest(".slot");
