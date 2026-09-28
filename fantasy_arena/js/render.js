@@ -1095,9 +1095,14 @@ function renderMinion(m, side) {
     : "";
   const pending = cached ? "" : " face-pending";
   const srcAttr = cached ? ` src="${cached}"` : "";
+  // v0.318: 이번 턴에 굴린 코인 결과 (앞면 H/N) — 카드 위쪽 가장자리 작은 배지, 클릭 통과
+  const tr = (typeof storedTurnCoins === "function") ? storedTurnCoins(m) : null;
+  const turnCoin = (tr && tr.n > 0)
+    ? `<div class="turn-coin${tr.heads > 0 ? " has-heads" : ""}" title="이번 턴 코인: 앞면 ${tr.heads}/${tr.n}"><i class="tc-g"></i>${tr.heads}<span>/${tr.n}</span></div>`
+    : "";
   return `<div class="${cls}${hurt}${rip}" data-uid="${m.uid}">
     <img class="card-face${pending}${cached ? " face-ready" : ""}" id="${uid}" alt="${m.name}"${srcAttr}>
-    ${tick}${deltas}
+    ${tick}${deltas}${turnCoin}
   </div>`;
 }
 

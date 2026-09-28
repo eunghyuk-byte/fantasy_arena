@@ -101,12 +101,12 @@ function doAttack(p, attacker, target, auto) {
     return bits.join(" · ") || `앞면 ${roll.heads}/${roll.n}`;
   }
 
-  const aShared = rollSharedCoins(attacker);
+  const aShared = turnCoinRoll(attacker);
   const aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
   const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef, attacker.def);
   const aHpSnap = beginCombatHpCoin(attacker, aShared.dHp);
   const rows = [];
-  if (aShared.flips.length) {
+  if (aShared.flips.length && !aShared.reused) {
     rows.push({
       label: attacker.name,
       modLabel: "",
@@ -124,11 +124,11 @@ function doAttack(p, attacker, target, auto) {
       const front = opponent(p).board.find(m => m.hp > 0 && !m.dying);
       if (front) def = front;
     }
-    dShared = rollSharedCoins(def);
+    dShared = turnCoinRoll(def);
     dAtk = clampAtk((Number(def.atk) || 0) + dShared.dAtk);
     defVal = clampDef((Number(def.def) || 0) + dShared.dDef, def.def);
     dHpSnap = beginCombatHpCoin(def, dShared.dHp);
-    if (dShared.flips.length) {
+    if (dShared.flips.length && !dShared.reused) {
       rows.push({
         label: def.name,
         modLabel: "",
@@ -147,7 +147,7 @@ function doAttack(p, attacker, target, auto) {
 
   const skLabel = (typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[atkSkillOf(attacker)])
     ? ATK_SKILL_HELP[atkSkillOf(attacker)][0] : "";
-  log(`${attacker.name} 공유코인 N=${aShared.n} 앞면${aShared.heads} → 공 ${aAtk}` + (atkSkillOf(attacker) > 1 ? ` [${skLabel}]` : ""));
+  log(`${attacker.name} 공유코인 N=${aShared.n} 앞면${aShared.heads}` + (aShared.reused ? " (이번 턴 결과)" : "") + ` → 공 ${aAtk}` + (atkSkillOf(attacker) > 1 ? ` [${skLabel}]` : ""));
   showCoinResult("코인 배틀", rows, async () => {
     // Temp combat presentation: bake rolled values on face numbers + ±Δ overlays ABOVE gems (no 「공 N」)
     function armFx(u, atkVal, defV, dA, dD, dH) {

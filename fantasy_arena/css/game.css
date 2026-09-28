@@ -3901,6 +3901,32 @@ html.is-desktop #game.active .my-hand .card.playable,
   z-index: 4 !important;
 }
 
+/* v0.318: 이번 턴 코인 결과 배지 (전장 유닛 · 숫자/클릭 가리지 않음 · 핸드 무관) */
+.minion .turn-coin {
+  position: absolute;
+  top: 65%;        /* 카드 효과 칸 오른쪽 위 모서리 (공/방/체 숫자·코인 점과 겹치지 않음) */
+  right: 7%;
+  z-index: 7;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 5px 1px 2px;
+  border-radius: 9px;
+  background: rgba(18, 8, 0, .78);
+  border: 1px solid rgba(201, 161, 91, .8);
+  color: #f3e3b3;
+  font: 900 11px/1 "Noto Sans KR", Arial, sans-serif;
+  white-space: nowrap;
+}
+.minion .turn-coin span { opacity: .7; font-weight: 700; }
+.minion .turn-coin .tc-g {
+  width: 12px; height: 12px;
+  background: url("../assets/img/coins/gold.png") center / contain no-repeat;
+  filter: grayscale(1) brightness(.75);
+}
+.minion .turn-coin.has-heads .tc-g { filter: none; }
+
 /* =====================================================================
    HAND LAYOUT LOCK v0.234 — DO NOT OVERRIDE BELOW THIS LINE
    See LAYOUT_HAND_LOCK.md. Negative margin-bottom on .my-hand is FORBIDDEN.

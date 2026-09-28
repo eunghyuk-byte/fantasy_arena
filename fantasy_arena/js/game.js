@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.317";
+const GAME_VERSION = "0.318";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -255,6 +255,12 @@ function startGame(vsAI) {
   if (first.isAI) aiTurn();
 }
 
+/** v0.318: 턴이 끝나면 모든 유닛의 이번 턴 코인 결과를 지운다. */
+function clearTurnCoins() {
+  if (!state) return;
+  state.turnSerial = (state.turnSerial | 0) + 1;
+  [state.p1, state.p2].forEach(pl => (pl && pl.board || []).forEach(m => { if (m) delete m._turnRoll; }));
+}
 function beginTurn(p) {
   try { hidePeek(); } catch (e) {}
   try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
@@ -336,6 +342,7 @@ function endTurn() {
 
 function passTurn() {
   if (state.over) return;
+  clearTurnCoins();
   try { hidePeek(); } catch (e) {}
   try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   state.turn = state.turn === 1 ? 2 : 1;
@@ -612,6 +619,7 @@ function playCard(p, card, target) {
   if (card.type === "minion") {
     try { Sfx.playSummon && Sfx.playSummon(); } catch (e) {}
     const m = card;
+    delete m._turnRoll; // 새로 나온 유닛은 이번 턴 코인 결과 없음
     // 판마: 소환 수면 없음 — 이번 턴에 낸 유닛도 공격 가능 (공격불가 제외)
     if (unitCannotAttack(m)) { m.canAttack = false; m.attacksLeft = 0; }
     else { m.canAttack = true; m.attacksLeft = 1; }
@@ -1363,6 +1371,7 @@ function resolveDeath(owner, m) {
     m.dying = false;
     m.damaged = true;
     m._deathCtx = null;
+    delete m._turnRoll; // 환생 = 새 유닛: 이번 턴 코인 결과 없음
     log(`${m.name}이(가) 환생했다 (체력 1)`);
     return;
   }
@@ -1463,6 +1472,27 @@ function coinPoolN(m) {
  * Flip N coins once. Heads H applies ±H to every linked stat (sign of atkC/defC/hpC).
  * Respects turn luck (coinP) and coinGold (forced heads).
  */
+/**
+ * v0.318: 코인은 한 턴에 한 번. 그 턴의 첫 전투(공격·방어 무관)에서 굴리고 같은 턴 다음 전투는 같은 결과(reused).
+ * 코인 아이템·확률 보정은 굴릴 때만 적용되고, 저장된 결과는 그대로 재사용한다.
+ */
+function turnCoinRoll(m) {
+  const key = state ? (state.turnSerial | 0) : 0;
+  const st = m && m._turnRoll;
+  if (st && st.turnKey === key) {
+    return { flips: st.flips.slice(), heads: st.heads, n: st.n, dAtk: st.dAtk, dDef: st.dDef, dHp: st.dHp, reused: true };
+  }
+  const r = rollSharedCoins(m);
+  if (m) m._turnRoll = { flips: r.flips.slice(), heads: r.heads, n: r.n, dAtk: r.dAtk, dDef: r.dDef, dHp: r.dHp, turnKey: key };
+  r.reused = false;
+  return r;
+}
+/** 이번 턴에 저장된 코인 결과 (없으면 null) — 표시·AI 예측용 */
+function storedTurnCoins(m) {
+  const st = m && m._turnRoll;
+  if (!st || !state || st.turnKey !== (state.turnSerial | 0)) return null;
+  return st;
+}
 function rollSharedCoins(m) {
   // v0.317 코인 아이템: 매 코인 판정마다 적용 (장착 시 코인 링크는 그대로). 코인 없는 유닛은 스탯만.
   const fx = m && m._itemFx;
