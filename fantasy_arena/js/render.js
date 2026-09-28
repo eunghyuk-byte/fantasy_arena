@@ -756,6 +756,10 @@ async function composeCardFace(c, opts={}) {
     ctx.restore();
   }
 
+  // v0.316: 「보호」 전장 오버레이 — 아트/프레임/텍스트 위, 소울·공/방/체 숫자·배지 아래.
+  // opts.fieldShield 는 renderMinion(전장)에서만 켜짐 (핸드/덱/상세/도감은 절대 없음).
+  if (opts.fieldShield) await paintProtectOverlay(ctx, W, H);
+
   const baseCard = (typeof CARD_MAP !== "undefined" && c && CARD_MAP[c.id]) || null;
   paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070) + 12,
     baseCard ? statColor(c.cost, baseCard.cost, true) : STAT_WHITE);
@@ -779,6 +783,41 @@ async function composeCardFace(c, opts={}) {
     if (typeof CARD_FACE !== "undefined" && CARD_FACE[c.id]) return CARD_FACE[c.id];
     return canvas.toDataURL();
   }
+}
+let PROTECT_OVERLAY_BLEND = "source-over"; // v0.316: normal — screen washed out on light/gold frames
+const PROTECT_OVERLAY_SRC = "assets/img/fx/protect_overlay.webp?v=0.316";
+/** Live shield state (same rule the engine uses to consume a hit in game.js damage path). */
+function unitHasActiveShield(m) {
+  if (!m) return false;
+  return m.ability === "보호" || (m.keywords || []).includes("shield");
+}
+async function paintProtectOverlay(ctx, W, H) {
+  const img = await loadImg(PROTECT_OVERLAY_SRC);
+  if (!img) return;
+  // Offscreen: overlay minus soft holes over the soul-cost gem and ATK/DEF/HP gems,
+  // so badges + numbers stay fully readable (numbers are painted afterwards).
+  const oc = document.createElement("canvas");
+  oc.width = W; oc.height = H;
+  const o = oc.getContext("2d");
+  o.drawImage(img, 0, 0, W, H);
+  o.globalCompositeOperation = "destination-out";
+  const holes = [
+    [W * 0.1386, H * 0.0996, W * 0.115],
+    [W * 0.1343, H * 0.9032, W * 0.108],
+    [W * 0.5008, H * 0.9032, W * 0.108],
+    [W * 0.8745, H * 0.9032, W * 0.108],
+  ];
+  for (const [x, y, r] of holes) {
+    const g = o.createRadialGradient(x, y, r * 0.55, x, y, r);
+    g.addColorStop(0, "rgba(0,0,0,1)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    o.fillStyle = g;
+    o.beginPath(); o.arc(x, y, r, 0, Math.PI * 2); o.fill();
+  }
+  ctx.save();
+  ctx.globalCompositeOperation = (typeof window !== "undefined" && window.PROTECT_OVERLAY_BLEND) || PROTECT_OVERLAY_BLEND;
+  ctx.drawImage(oc, 0, 0);
+  ctx.restore();
 }
 async function paintStatCoins(ctx, c, W, H) {
   const gold = await loadImg((typeof COIN_GOLD !== "undefined" && COIN_GOLD) ? COIN_GOLD : "assets/img/coins/gold.png");
@@ -850,7 +889,8 @@ function faceCacheKey(c, opts) {
   const version = (typeof GAME_VERSION !== "undefined")
     ? GAME_VERSION
     : (typeof window !== "undefined" ? window.GAME_VERSION : "");
-  return ["v107statColor", version, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  const fsh = opts && opts.fieldShield ? "fsh1" : "fsh0";
+  return ["v107statColor", version, fsh, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
@@ -1027,6 +1067,8 @@ function renderMinion(m, side) {
     atk: m._fxAtk != null ? m._fxAtk : m.atk,
     def: m._fxDef != null ? m._fxDef : m.def,
     hp:  m._fxHp  != null ? m._fxHp  : m.hp,
+    // v0.316: 전장 유닛 현재 보호막 상태로만 오버레이 (인쇄 텍스트 X)
+    fieldShield: unitHasActiveShield(m),
   };
   const cacheKey = faceCacheKey(m, faceOpts);
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
