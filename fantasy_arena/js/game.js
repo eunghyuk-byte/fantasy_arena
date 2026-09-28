@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.342";
+const GAME_VERSION = "0.343";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -345,7 +345,6 @@ function beginTurn(p) {
   p._soulDrawUsed = false;
   const _serial = (state.turnSerial | 0);
   p.board.forEach(m => {
-    m._readyTurn = _serial; // v0.342: 턴 시작 때 전장에 있던 유닛 (소환 수면 아님)
     if (m.skipAttack || unitCannotAttack(m)) { if (m.skipAttack) m._frozenTurn = _serial; m.canAttack = false; m.attacksLeft = 0; m.skipAttack = false; }
     else { m.canAttack = true; m.attacksLeft = 1; }
   });
@@ -847,8 +846,9 @@ function printedSoul(m) {
   return (b && b.cost != null) ? (b.cost | 0) : ((m.cost | 0) || 0);
 }
 /** v0.341: 침묵 — 능력·키워드·유언 제거. 공격불가(인쇄/효과: cannotAttack·skipAttack)도 지운다.
- *  v0.342(하스스톤식): 주인의 턴이고, 이번 턴 시작 때부터 전장에 있었고(소환 수면 아님),
- *  이번 턴 아직 공격하지 않았다면 → 바로 공격 가능. 그 밖(상대 턴 침묵 등)은 주인의 다음 턴부터. */
+ *  v0.343: 주인의 턴에 침묵되면 바로 공격 가능 — 이번 턴 낸/소환된 유닛도 (이 게임은 낸 턴에 공격 가능).
+ *  예외: 이번 턴 이미 공격한 유닛, 원래 규칙으로 이번 턴 공격 못 하는 유닛(허허실실 비돌진 소환·탈취 = _sickTurn).
+ *  상대 턴 침묵은 주인의 다음 턴부터. */
 function silenceMinion(m, owner) {
   if (!m) return;
   let wasBlocked = !!(m.skipAttack || unitCannotAttack(m));
@@ -868,7 +868,7 @@ function silenceMinion(m, owner) {
   if (m._baseText != null) m._baseText = "침묵";
   try {
     const serial = (state.turnSerial | 0);
-    if (wasBlocked && owner && owner === current() && m._readyTurn === serial && m._atkTurn !== serial && !(m.attacksLeft > 0)) {
+    if (wasBlocked && owner && owner === current() && m._sickTurn !== serial && m._atkTurn !== serial && !(m.attacksLeft > 0)) {
       m.canAttack = true;
       m.attacksLeft = 1;
     }
@@ -1331,6 +1331,7 @@ function applyFx(p, fx, target) {
     if (unitCannotAttack(summoned)) { summoned.canAttack = false; summoned.attacksLeft = 0; }
     else if (hasCharge) { summoned.canAttack = true; summoned.attacksLeft = 1; }
     else { summoned.canAttack = false; summoned.attacksLeft = 0; }
+    if (!hasCharge) summoned._sickTurn = (state.turnSerial | 0); // v0.343: 허허실실 소환(돌진 아님)은 이번 턴 공격 불가 — 침묵으로도 안 풀림
     p.board.push(summoned);
     log(`허허실실 · ${sac.name} 파괴 후 ${summoned.name} 소환`);
     resolveBattlecry(p, summoned, null);
@@ -1339,7 +1340,7 @@ function applyFx(p, fx, target) {
     const stolen = target.minion;
     if (p.board.length >= 5) { log("전장 가득 참"); return; }
     e.board = e.board.filter(x => x.uid !== stolen.uid);
-    stolen.canAttack = false; stolen.attacksLeft = 0;
+    stolen.canAttack = false; stolen.attacksLeft = 0; stolen._sickTurn = (state.turnSerial | 0); // v0.343: 탈취 턴 공격 불가
     p.board.push(stolen);
     log(`미인계 · ${stolen.name} 탈취`);
   } else if (fx.type === "steal_random") {
@@ -1350,7 +1351,7 @@ function applyFx(p, fx, target) {
     else {
       const stolen = pool[Math.floor(Math.random() * pool.length)];
       e.board = e.board.filter(x => x.uid !== stolen.uid);
-      stolen.canAttack = false; stolen.attacksLeft = 0;
+      stolen.canAttack = false; stolen.attacksLeft = 0; stolen._sickTurn = (state.turnSerial | 0);
       p.board.push(stolen);
       log(`소환 · ${stolen.name} 탈취`);
     }
@@ -2739,7 +2740,7 @@ const ABI_HELP = {
   "출전": "낼 때 카드 1장을 뽑습니다.",
   "유언": "파괴될 때 카드 1장을 뽑습니다.",
   "면역": "스펠·효과의 단일 대상으로 지정되지 않습니다. 전체 효과는 받습니다.",
-  "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다. 침묵되면 공격할 수 있습니다 (내 턴에 침묵되면 바로, 이번 턴 소환된 유닛은 다음 턴부터)."
+  "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다. 침묵되면 공격할 수 있습니다 (내 턴에 침묵되면 바로 · 이번 턴 이미 공격했다면 다음 턴부터)."
 };
 function fmtCoinLinks(c) {
   const parts = [];
