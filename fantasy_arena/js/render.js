@@ -1174,15 +1174,15 @@ function layoutHudGems() {
     const L = parseFloat(el.style.left);
     if (!Number.isNaN(L)) el.style.setProperty("left", (L - 170) + "px", "important");
   });
-  // v0.320 소울 드로우 버튼 (~68px @1280×800). 내 버튼: 소울 표시 바로 아래(핸드 10장 오른쪽 끝 바깥 · 5번째 유닛 칸 아래).
+  // v0.321 소울 드로우 버튼 (~92px @1280×800, v0.319의 2배). 내 버튼: 소울 표시 바로 아래(핸드 10장 오른쪽 끝 바깥 · 5번째 유닛 칸 아래).
   // 소울 표시 왼쪽은 핸드 10장 오른쪽 카드와, 위쪽은 5번째 유닛 칸과 겹쳐 빈 자리가 없다. 상대 버튼: 상대 소울 왼쪽, 비율 축소.
-  [["mySoulDraw", "mySoulGem", 1.0, "below"], ["oppSoulDraw", "oppSoulGem", 0.72, "left"]].forEach(([bid, gid, k, mode]) => {
+  [["mySoulDraw", "mySoulGem", 1.0, "below"], ["oppSoulDraw", "oppSoulGem", 0.6, "left"]].forEach(([bid, gid, k, mode]) => {
     const b = document.getElementById(bid);
     const g = document.getElementById(gid);
     if (!b || !g || !g.style.left) return;
     const gl = parseFloat(g.style.left), gt = parseFloat(g.style.top);
     if (Number.isNaN(gl) || Number.isNaN(gt)) return;
-    const D = Math.round(Math.max(44, SOUL_W * 1.15) * k);
+    const D = Math.round(Math.max(60, SOUL_W * 1.56) * k);
     // 보이는 소울 숫자(텍스트) 기준으로 붙인다 — #…SoulGem 상자는 숫자보다 넓다
     let textL = null, textCY = null, textB = null;
     try {
@@ -1258,18 +1258,20 @@ function layoutHudGems() {
 /** v0.319 소울 드로우 버튼 상태 (내 버튼: 클릭 · 상대 버튼: 표시만). 아이콘은 assets/img/ui/soul_draw.webp */
 const SOUL_DRAW_ICON = "assets/img/ui/soul_draw.webp";
 /** 아이콘(1024 기준)의 소울 보석 중심·반지름 — 아이콘 교체 시 여기만 맞춘다 */
-const SOUL_DRAW_GEM = { cx: 238, cy: 176, r: 104 };
-function paintSoulDrawCost(btn) {
+const SOUL_DRAW_GEM = { cx: 195, cy: 170, r: 90 };
+function paintSoulDrawCost(btn, cost) {
   const cv = btn && btn.querySelector("canvas.sd-cost");
-  if (!cv || cv._painted) return;
-  // 캔버스 = 아이콘 전체(1024 기준 좌표 비율). 파란 소울 보석 중심 (238,176) r104 → 숫자 크기 ≈ 1.3r
+  if (!cv) return;
+  const txt = String(cost != null ? cost : (typeof SOUL_DRAW_COST !== "undefined" ? SOUL_DRAW_COST : 3));
+  if (cv._painted && cv._txt === txt) return;   // v0.321: 비용 값이 바뀌면 다시 그림
+  cv._txt = txt;
+  // 캔버스 = 아이콘 전체(1024 기준 좌표 비율). v0.321 보라 소울 보석 중심 (195,170) → 숫자 크기 ≈ 1.3r
   const S = 256;
   cv.width = S; cv.height = S;
   const c2 = cv.getContext && cv.getContext("2d");
   if (!c2) return;
   const G = SOUL_DRAW_GEM;
   const cx = S * G.cx / 1024, cy = S * G.cy / 1024, size = Math.round(S * G.r * 1.3 / 1024);
-  const txt = String(typeof SOUL_DRAW_COST !== "undefined" ? SOUL_DRAW_COST : 3);
   // 카드 소울 숫자와 같은 글꼴·색 (900 Noto Sans KR · #120800 외곽선 · 흰색), 외곽선만 얇게
   c2.clearRect(0, 0, S, S);
   c2.save();
@@ -1297,7 +1299,7 @@ function initSoulDrawBtn(btn, clickable) {
   btn.innerHTML = `<img class="sd-icon" src="${SOUL_DRAW_ICON}?v=${v}" alt="" draggable="false"><canvas class="sd-cost" aria-hidden="true"></canvas>`;
   paintSoulDrawCost(btn);
   // 웹폰트 로드 후 다시 그림 (첫 그림이 Arial 대체 글꼴일 수 있음)
-  try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const cv = btn.querySelector("canvas.sd-cost"); if (cv) { cv._painted = false; paintSoulDrawCost(btn); } }); } catch (e) {}
+  try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const cv = btn.querySelector("canvas.sd-cost"); if (cv) { cv._painted = false; paintSoulDrawCost(btn, cv._txt); } }); } catch (e) {}
   if (clickable) {
     btn.addEventListener("pointerdown", () => { if (!btn.disabled) btn.classList.add("pressed"); });
     ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, () => btn.classList.remove("pressed")));
@@ -1309,6 +1311,13 @@ function updateSoulDrawBtns(me, opp) {
   const ob = document.getElementById("oppSoulDraw");
   initSoulDrawBtn(mb, true);
   initSoulDrawBtn(ob, false);
+  const costOf = (p) => (typeof soulDrawCost === "function") ? soulDrawCost(p) : 3;
+  if (mb) {
+    paintSoulDrawCost(mb, costOf(me));
+    const t = `소울 드로우\n${costOf(me)}소울: 카드 1장을 뽑는다 (한 턴에 한 번)`;
+    if (mb.title !== t) mb.title = t;
+  }
+  if (ob) paintSoulDrawCost(ob, costOf(opp));
   if (mb) {
     const can = typeof canSoulDraw === "function" && !me.isAI && canSoulDraw(me);
     mb.disabled = !can;

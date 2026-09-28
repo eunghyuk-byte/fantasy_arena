@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.320";
+const GAME_VERSION = "0.321";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -260,20 +260,31 @@ function startGame(vsAI) {
  * 스펠이 아니다 (올빼미의눈·맹덕신서와 무관). 드로우는 일반 draw() 경로 (손패 10장 소각·빈 덱 피로 동일).
  */
 const SOUL_DRAW_COST = 3;
+/**
+ * v0.321: 소울 드로우 비용 — 규칙 판정·차감·버튼 숫자가 모두 이 값을 읽는다.
+ * 스펠 등으로 바꿀 때: p.soulDrawCost (해당 플레이어) 또는 state.soulDrawCost (양쪽 공통).
+ */
+function soulDrawCost(p) {
+  const v = (p && p.soulDrawCost != null) ? p.soulDrawCost
+    : (typeof state !== "undefined" && state && state.soulDrawCost != null) ? state.soulDrawCost
+    : SOUL_DRAW_COST;
+  return Math.max(0, v | 0);
+}
 function canSoulDraw(p) {
   if (!state || state.over || !p) return false;
   if (p !== current()) return false;
   if (p._soulDrawUsed) return false;
-  if ((p.soul | 0) < SOUL_DRAW_COST) return false;
+  if ((p.soul | 0) < soulDrawCost(p)) return false;
   if (state.busy) return false;
   if (typeof ui !== "undefined" && ui && ui.battling) return false;
   return true;
 }
 function useSoulDraw(p) {
   if (!canSoulDraw(p)) return false;
-  p.soul -= SOUL_DRAW_COST;
+  const cost = soulDrawCost(p);
+  p.soul -= cost;
   p._soulDrawUsed = true;
-  log(p.isAI ? "상대가 소울 드로우 사용" : "소울 드로우 사용 (3소울 · 드로우 1)");
+  log(p.isAI ? "상대가 소울 드로우 사용" : `소울 드로우 사용 (${cost}소울 · 드로우 1)`);
   draw(p, 1);
   checkWin();
   return true;
