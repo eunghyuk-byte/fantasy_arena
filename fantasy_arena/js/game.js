@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.334";
+const GAME_VERSION = "0.335";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -2939,10 +2939,7 @@ function openShop() {
 }
 document.getElementById("btnShop").onclick = openShop;
 document.getElementById("btnShopBack").onclick = () => backTitle();
-document.getElementById("btnPvp").onclick = () => {
-  try { document.getElementById("settingsPop").classList.remove("show"); } catch (e) {}
-  openTribeSelect("pvp");
-};
+// v0.335: 설정의 「플레이 방식」(핫시트 버튼) 제거 — 핫시트 로직(startGame(false)·속성 선택 "pvp")은 유지
 document.getElementById("btnBackMenu").onclick = () => backTitle();
 document.getElementById("btnClearDeck").onclick = () => { draftDeck = []; renderBuilder(); };
 document.getElementById("btnAutoFill").onclick = () => autoFillDraft();
