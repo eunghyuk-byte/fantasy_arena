@@ -151,12 +151,13 @@ function layoutBoardDecks() {
   // v0.328: 덱 더미는 보드 배경(4:3 코어) 기준 비율로 — 배경 확대(1.15)와 같이 스케일·이동.
   // 값은 v0.327 1920×1080(코어 1440×1080, 확대 없음)에서의 자리: 왼쪽 32px · 상대 덱 top 346 h 238 · 내 덱 top 464 h 324 · 폭 84
   const u = core.h / 1080;
+  // v0.340: 덱 더미 2배 (폭 84→168, 스택 72×104→144×208, 숫자 13→26px) — 금테 바깥 화면 왼쪽으로
   const place = (deck, top, h, justify) => {
     deck.style.setProperty("position", "absolute", "important");
-    deck.style.setProperty("left", (core.left + core.w * (32 / 1440) - mr.left) + "px", "important");
+    deck.style.setProperty("left", Math.max(core.left + core.w * (-62 / 1440), 8) - mr.left + "px", "important");
     deck.style.setProperty("top", (core.top + top * u - mr.top) + "px", "important");
     deck.style.setProperty("bottom", "auto", "important");
-    deck.style.setProperty("width", (84 * u) + "px", "important");
+    deck.style.setProperty("width", (168 * u) + "px", "important");
     deck.style.setProperty("height", (h * u) + "px", "important");
     deck.style.setProperty("z-index", "6", "important");
     deck.style.setProperty("display", "flex", "important");
@@ -170,8 +171,8 @@ function layoutBoardDecks() {
     deck.style.setProperty("padding-bottom", justify === "flex-end" ? (6 * u) + "px" : "0", "important");
     deck.style.setProperty("--deck-u", String(u));
   };
-  place(oppD, 346, 238, "flex-start");
-  place(myD, 464, 324, "flex-end");
+  place(oppD, 262, 262, "flex-start");
+  place(myD, 540, 300, "flex-end");
 }
 
 function layoutBoardAlign() {
@@ -356,6 +357,14 @@ function render() {
     hintEl.textContent = hint; // may include \n
     const logEl = document.getElementById("log");
     if (logEl) {
+      // v0.340: 로그/힌트 패널을 화면 맨 왼쪽 끝(6px)에 붙임 — 부모 오프셋만큼 음수 left
+      const lr = logEl.getBoundingClientRect();
+      if (lr.width > 0) {
+        const cur = parseFloat(getComputedStyle(logEl).left) || 0;
+        const left = Math.round((cur - lr.left + 6) * 10) / 10;
+        const g = document.getElementById("game");
+        if (g && g.style.getPropertyValue("--edge-left") !== left + "px") g.style.setProperty("--edge-left", left + "px");
+      }
       const top = Math.round(logEl.offsetTop + logEl.offsetHeight + 6);
       hintEl.style.setProperty("--hint-top", top + "px");
     }

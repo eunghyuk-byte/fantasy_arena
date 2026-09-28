@@ -4589,3 +4589,49 @@ html, body, body * {
 #tribeSelect .tsel-back {
   min-width: 18cqw; margin: 0; padding: 1.4cqh 2cqw; font-size: 2cqh;
 }
+
+/* ===== v0.340: 드래그 중 적 전장 이동 버그 / 로그 왼쪽 끝 / 덱 2배 / 상대 손패 2배 / 상대 소울 드로우 숨김 ===== */
+/* Bug: #game.drop-ready(카드 집는 순간)에서 3259행 `transform:none` 이 적 전장 자리(4.167cqh)를 지워
+   적 유닛이 위로 45px·오른쪽 18px 튐. 평소 자리 그대로 고정. */
+#game.active.drop-ready .board.opp,
+#game.active.drop-ready #oppBoard {
+  transform: translate(calc(-1.5% - 1px), 4.167cqh) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 140, .42) !important; /* 적 레인 테두리도 그대로 */
+}
+/* 1) 전투 기록·힌트: 화면 맨 왼쪽 끝 (JS가 --edge-left 계산) */
+#game.active #log,
+#game.active .log,
+#game.active .col-main > .log,
+#game.active #hint,
+#game.active .hint,
+#game.active .col-main > .hint {
+  left: var(--edge-left, -8.7cqh) !important;
+}
+/* 2) 덱 더미 2배 (위치·폭은 layoutBoardDecks) */
+#game.active #oppDeck .deck-pile,
+#game.active #myDeck .deck-pile {
+  width: 100% !important;
+}
+#game.active #oppDeck .pile-stack,
+#game.active #myDeck .pile-stack {
+  width: calc(144px * var(--deck-u, 1)) !important;
+  height: calc(208px * var(--deck-u, 1)) !important;
+  margin: 0 auto !important;
+}
+#game.active #oppDeck .pile-count,
+#game.active #myDeck .pile-count {
+  font-size: 26px !important;
+  margin-top: 6px !important;
+}
+/* 3) 상대 손패 뒷면 2배 — 화면 위로 일부 잘리게 (하스스톤식) */
+#game.active .opp-hand .back {
+  height: 18.9cqh !important;
+  max-height: none !important;
+  position: relative !important;
+  top: -6.2cqh !important;
+}
+/* 4) 상대 소울 드로우 아이콘·비용 숨김 */
+#game.active #oppSoulDraw,
+#oppSoulDraw {
+  display: none !important;
+}
