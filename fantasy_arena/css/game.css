@@ -1054,6 +1054,7 @@
   .lore-side .lore-skill b { display: block; color: #f3e2b0; font-size: 16px; margin-bottom: 4px; }
   .lore-side .lore-skill span { display: block; color: #d8c9a4; font-size: 14px; line-height: 1.45; }
   .lore-side p { line-height: 1.55; font-size: 16px; margin: 0 0 12px; color: #cbb58a; font-style: italic; }
+  #loreText { white-space: pre-line; } /* v0.325: 카드 설명 줄바꿈(\n) 표시 */
   .lore-side .lore-actions {
     margin-top: 10px; /* sit under content, not pushed to card bottom */
     display: flex; flex-direction: column; gap: 8px; padding-top: 0;
