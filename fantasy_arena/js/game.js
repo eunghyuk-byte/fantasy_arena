@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.340";
+const GAME_VERSION = "0.341";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -844,6 +844,24 @@ function printedSoul(m) {
   const b = (typeof CARD_MAP !== "undefined" && CARD_MAP[m.id]) || null;
   return (b && b.cost != null) ? (b.cost | 0) : ((m.cost | 0) || 0);
 }
+/** v0.341: 침묵 — 능력·키워드·유언 제거. 공격불가(인쇄/효과: cannotAttack·skipAttack)도 지워
+ *  주인의 다음 턴 시작부터 공격 가능. 소환 수면(이번 턴 canAttack=false)은 그대로 둔다. */
+function silenceMinion(m) {
+  if (!m) return;
+  m.ability = null;
+  m.atkSkill = null;
+  m.keywords = [];
+  m.battlecry = null;
+  m.deathrattle = null;
+  m.deathrattles = [];
+  m.cannotAttack = false;
+  m.skipAttack = false;
+  m.silenced = true;
+  m.text = "침묵";
+  // 장착 아이템 해제 시 침묵 전 능력/문구로 되돌아가지 않게
+  if (m._itemBonuses) { m._itemBonuses.prevAbility = null; m._itemBonuses.prevAtkSkill = null; m._itemBonuses.extraAbility = null; }
+  if (m._baseText != null) m._baseText = "침묵";
+}
 /** Permanent: skip dealing attack in end-of-turn combat / no attack rights. Still takes damage. */
 function unitCannotAttack(m) {
   if (!m) return false;
@@ -1246,19 +1264,7 @@ function applyFx(p, fx, target) {
     if (n) log(`${(CARD_MAP[sid] && CARD_MAP[sid].name) || sid} ${n}개 소환`);
     else log("전장이 가득 차 토큰을 소환할 수 없습니다");
   } else if (fx.type === "silence_enemy_board") {
-    [...e.board].forEach(m => {
-      m.ability = null;
-      m.atkSkill = null;
-      m.keywords = [];
-      m.battlecry = null;
-      m.deathrattle = null;
-      m.deathrattles = [];
-      m.silenced = true;
-      m.text = "침묵";
-      // 장착 아이템 해제 시 침묵 전 능력/문구로 되돌아가지 않게
-      if (m._itemBonuses) { m._itemBonuses.prevAbility = null; m._itemBonuses.prevAtkSkill = null; m._itemBonuses.extraAbility = null; }
-      if (m._baseText != null) m._baseText = "침묵";
-    });
+    [...e.board].forEach(m => silenceMinion(m));
     log("적 전체 침묵 (능력 제거)");
   } else if (fx.type === "bounce_enemy_board") {
     // 동남풍: 적 전장 → 핸드. 손패 10장 초과분은 파괴(유언 등 발동)
@@ -2721,7 +2727,7 @@ const ABI_HELP = {
   "출전": "낼 때 카드 1장을 뽑습니다.",
   "유언": "파괴될 때 카드 1장을 뽑습니다.",
   "면역": "스펠·효과의 단일 대상으로 지정되지 않습니다. 전체 효과는 받습니다.",
-  "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다."
+  "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다. 침묵되면 다음 턴부터 공격할 수 있습니다."
 };
 function fmtCoinLinks(c) {
   const parts = [];
