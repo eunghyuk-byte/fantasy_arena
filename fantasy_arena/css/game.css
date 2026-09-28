@@ -3927,6 +3927,49 @@ html.is-desktop #game.active .my-hand .card.playable,
 }
 .minion .turn-coin.has-heads .tc-g { filter: none; }
 
+/* v0.319: 소울 드로우 버튼 — 소울 표시 바로 왼쪽 (위치는 layoutHudChrome이 JS로 지정 · 핸드와 무관) */
+#game .col-main > .soul-draw-btn {
+  position: absolute;
+  z-index: 9; /* 핸드 레이어(8) 위: 클릭 보장 · 위치는 핸드 오른쪽 끝 바깥 */
+  width: 44px; height: 44px;
+  padding: 0; margin: 0;
+  border: 0; border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: filter .15s ease, transform .1s ease, opacity .15s ease;
+}
+#game .col-main > .soul-draw-btn .sd-icon {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  pointer-events: none;
+  user-select: none;
+}
+/* 아이콘 왼쪽 위 소울 보석 위에 코드로 그린 숫자 3 */
+#game .col-main > .soul-draw-btn .sd-cost {
+  position: absolute;
+  left: -6%; top: 0%;   /* 아이콘 왼쪽 위 보석(약 15%, 21%) 중심 */
+  width: 42%; height: 42%;
+  pointer-events: none;
+}
+#game .col-main > .soul-draw-btn.ready:hover {
+  filter: drop-shadow(0 0 6px rgba(190, 120, 255, .95)) drop-shadow(0 0 12px rgba(150, 80, 255, .6)) brightness(1.08);
+}
+#game .col-main > .soul-draw-btn.ready.pressed,
+#game .col-main > .soul-draw-btn.ready:active {
+  transform: scale(.92);
+  filter: brightness(.85) drop-shadow(0 0 4px rgba(190, 120, 255, .9));
+}
+#game .col-main > .soul-draw-btn:disabled,
+#game .col-main > .soul-draw-btn.opp:not(.ready),
+#game .col-main > .soul-draw-btn.used {
+  filter: grayscale(1) brightness(.6);
+  opacity: .75;
+  cursor: default;
+}
+#game .col-main > .soul-draw-btn.opp { cursor: default; pointer-events: auto; }
+
 /* =====================================================================
    HAND LAYOUT LOCK v0.234 — DO NOT OVERRIDE BELOW THIS LINE
    See LAYOUT_HAND_LOCK.md. Negative margin-bottom on .my-hand is FORBIDDEN.

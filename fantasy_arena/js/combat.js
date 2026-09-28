@@ -465,6 +465,14 @@ function aiTurn() {
   const step = () => {
     if (state.over) return;
     if (tryPlay()) { setTimeout(step, 420); return; }
+    // v0.319 소울 드로우: 낼 카드가 없고 3소울 이상 남았고 손패가 가득 차지 않았으면 사용 → 뽑은 카드로 다시 시도
+    // (덱이 비었으면 피로 피해만 받으므로 쓰지 않음)
+    if (typeof canSoulDraw === "function" && canSoulDraw(p) && p.hand.length < 10 && p.deck.length > 0) {
+      useSoulDraw(p);
+      render();
+      setTimeout(step, 420);
+      return;
+    }
     runAutoCombat(p).then(() => passTurn());
   };
   setTimeout(step, 280);

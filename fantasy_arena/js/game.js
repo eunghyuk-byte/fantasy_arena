@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.318";
+const GAME_VERSION = "0.319";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -255,6 +255,36 @@ function startGame(vsAI) {
   if (first.isAI) aiTurn();
 }
 
+/**
+ * v0.319 소울 드로우: 모든 영웅 공통. 3소울 · 카드 1장 드로우 · 한 턴에 한 번 · 내 턴에만.
+ * 스펠이 아니다 (올빼미의눈·맹덕신서와 무관). 드로우는 일반 draw() 경로 (손패 10장 소각·빈 덱 피로 동일).
+ */
+const SOUL_DRAW_COST = 3;
+function canSoulDraw(p) {
+  if (!state || state.over || !p) return false;
+  if (p !== current()) return false;
+  if (p._soulDrawUsed) return false;
+  if ((p.soul | 0) < SOUL_DRAW_COST) return false;
+  if (state.busy) return false;
+  if (typeof ui !== "undefined" && ui && ui.battling) return false;
+  return true;
+}
+function useSoulDraw(p) {
+  if (!canSoulDraw(p)) return false;
+  p.soul -= SOUL_DRAW_COST;
+  p._soulDrawUsed = true;
+  log(p.isAI ? "상대가 소울 드로우 사용" : "소울 드로우 사용 (3소울 · 드로우 1)");
+  draw(p, 1);
+  checkWin();
+  return true;
+}
+function onSoulDrawClick() {
+  if (!state) return;
+  const me = meView().me;
+  if (me.isAI || current() !== me) return;
+  try { Sfx.playClick && Sfx.playClick(); } catch (e) {}
+  if (useSoulDraw(me)) render();
+}
 /** v0.318: 턴이 끝나면 모든 유닛의 이번 턴 코인 결과를 지운다. */
 function clearTurnCoins() {
   if (!state) return;
@@ -270,6 +300,7 @@ function beginTurn(p) {
   if (p.soulNext) { p.soul += p.soulNext; p.soulNext = 0; }
   p.noPlayMinion = false;
   p.coinP = null;
+  p._soulDrawUsed = false;
   p.board.forEach(m => {
     if (m.skipAttack || unitCannotAttack(m)) { m.canAttack = false; m.attacksLeft = 0; m.skipAttack = false; }
     else { m.canAttack = true; m.attacksLeft = 1; }

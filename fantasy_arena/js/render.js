@@ -16,7 +16,7 @@ function boardLayoutFingerprint() {
 }
 
 function cacheHudStyles() {
-  const ids = ["endBtn", "oppSoulGem", "mySoulGem"];
+  const ids = ["endBtn", "oppSoulGem", "mySoulGem", "oppSoulDraw", "mySoulDraw"];
   const sels = ["#oppStrip .hud-hero", "#myStrip .hud-hero", "#oppStrip .hero-hp", "#myStrip .hero-hp"];
   const out = { ids: {}, sels: {} };
   ids.forEach(id => {
@@ -277,6 +277,7 @@ function render() {
   const mm = document.getElementById("mySoulGem");
   if (om) om.textContent = opp.soul + "/" + opp.maxSoul;
   if (mm) mm.textContent = me.soul + "/" + me.maxSoul;
+  updateSoulDrawBtns(me, opp);
   layoutHandFan();
   layoutOppFan();
   if ((me._drewCount || 0) > 0 && !me._drawingAnim) {
@@ -1173,6 +1174,34 @@ function layoutHudGems() {
     const L = parseFloat(el.style.left);
     if (!Number.isNaN(L)) el.style.setProperty("left", (L - 170) + "px", "important");
   });
+  // v0.319 소울 드로우 버튼: 소울 표시 바로 왼쪽 · 세로 중앙 맞춤 (핸드·턴 종료와 무관)
+  [["mySoulDraw", "mySoulGem", 1.0], ["oppSoulDraw", "oppSoulGem", 0.72]].forEach(([bid, gid, k]) => {
+    const b = document.getElementById(bid);
+    const g = document.getElementById(gid);
+    if (!b || !g || !g.style.left) return;
+    const gl = parseFloat(g.style.left), gt = parseFloat(g.style.top);
+    if (Number.isNaN(gl) || Number.isNaN(gt)) return;
+    const D = Math.round(Math.max(30, SOUL_W * 0.78) * k);
+    // 보이는 소울 숫자(텍스트) 기준으로 붙인다 — #…SoulGem 상자는 숫자보다 넓다
+    let textL = null, textCY = null;
+    try {
+      const tn = g.firstChild;
+      if (tn && document.createRange) {
+        const rg = document.createRange(); rg.selectNodeContents(g);
+        const tr = rg.getBoundingClientRect();
+        if (tr && tr.width > 2) { textL = tr.left - mr.left; textCY = tr.top + tr.height / 2 - mr.top; }
+      }
+    } catch (e) {}
+    // 오른쪽 끝을 소울 알약의 왼쪽 뾰족 끝에 붙이고 살짝 위로 (핸드 10장일 때 오른쪽 카드 모서리 회피)
+    const left = (textL != null ? textL : gl) - D - 3;
+    const top = (textCY != null ? textCY : gt + SOUL_H / 2) - D / 2 - Math.round(D * 0.14);
+    b.style.setProperty("left", left + "px", "important");
+    b.style.setProperty("top", top + "px", "important");
+    b.style.setProperty("width", D + "px", "important");
+    b.style.setProperty("height", D + "px", "important");
+    b.style.setProperty("right", "auto", "important");
+    b.style.setProperty("bottom", "auto", "important");
+  });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
   if (hr && hr.width >= 8 && hr.height >= 8) {
@@ -1216,6 +1245,48 @@ function layoutHudGems() {
       hp.style.setProperty("transform", "none", "important");
     });
 
+  }
+}
+
+/** v0.319 소울 드로우 버튼 상태 (내 버튼: 클릭 · 상대 버튼: 표시만). 아이콘은 assets/img/ui/soul_draw.webp */
+const SOUL_DRAW_ICON = "assets/img/ui/soul_draw.webp";
+function paintSoulDrawCost(btn) {
+  const cv = btn && btn.querySelector("canvas.sd-cost");
+  if (!cv || cv._painted) return;
+  const S = 64;
+  cv.width = S; cv.height = S;
+  const c2 = cv.getContext && cv.getContext("2d");
+  if (!c2) return;
+  // 카드 소울 숫자와 같은 스타일 (paintNumber: 900 Noto Sans KR · #120800 외곽선 · 흰색)
+  paintNumber(c2, String(typeof SOUL_DRAW_COST !== "undefined" ? SOUL_DRAW_COST : 3), S / 2, S / 2 + 2, 50, STAT_WHITE);
+  cv._painted = true;
+}
+function initSoulDrawBtn(btn, clickable) {
+  if (!btn || btn._sdInit) return;
+  btn._sdInit = true;
+  const v = (typeof GAME_VERSION !== "undefined") ? GAME_VERSION : "";
+  btn.innerHTML = `<img class="sd-icon" src="${SOUL_DRAW_ICON}?v=${v}" alt="" draggable="false"><canvas class="sd-cost" aria-hidden="true"></canvas>`;
+  paintSoulDrawCost(btn);
+  if (clickable) {
+    btn.addEventListener("pointerdown", () => { if (!btn.disabled) btn.classList.add("pressed"); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, () => btn.classList.remove("pressed")));
+    btn.addEventListener("click", (e) => { e.stopPropagation(); if (typeof onSoulDrawClick === "function") onSoulDrawClick(); });
+  }
+}
+function updateSoulDrawBtns(me, opp) {
+  const mb = document.getElementById("mySoulDraw");
+  const ob = document.getElementById("oppSoulDraw");
+  initSoulDrawBtn(mb, true);
+  initSoulDrawBtn(ob, false);
+  if (mb) {
+    const can = typeof canSoulDraw === "function" && !me.isAI && canSoulDraw(me);
+    mb.disabled = !can;
+    mb.classList.toggle("used", !!me._soulDrawUsed);
+    mb.classList.toggle("ready", can);
+  }
+  if (ob) {
+    ob.classList.toggle("used", !!opp._soulDrawUsed);
+    ob.classList.toggle("ready", typeof canSoulDraw === "function" && canSoulDraw(opp));
   }
 }
 
