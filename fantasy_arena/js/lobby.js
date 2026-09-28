@@ -13,6 +13,49 @@
     waitTimer: null,
   };
 
+  /* v0.336: 프로필(티어) 표시 — 기능 없이 예시 값.
+   * 티어 엠블럼 에셋 경로·보석(숫자) 위치는 이 테이블 한 곳에서 관리.
+   * gx,gy,gr = 1024 기준 보석 중심/반지름 (tier_emblems/work/gems.json) — 표시 크기/1024 배율로 사용. */
+  const TIER_TABLE = {
+    bronze:   { name: "브론즈",   src: "assets/tier/tier_bronze.png",   gx: 515, gy: 569, gr: 126 },
+    silver:   { name: "실버",     src: "assets/tier/tier_silver.png",   gx: 516, gy: 589, gr: 121 },
+    gold:     { name: "골드",     src: "assets/tier/tier_gold.png",     gx: 519, gy: 631, gr: 122 },
+    platinum: { name: "플래티넘", src: "assets/tier/tier_platinum.png", gx: 514, gy: 612, gr: 108 },
+    diamond:  { name: "다이아",   src: "assets/tier/tier_diamond.png",  gx: 520, gy: 610, gr: 102 },
+    champion: { name: "챔피언",   src: "assets/tier/tier_champion.png", gx: 511, gy: 598, gr: 89 },
+  };
+  const TIER_ASSET_V = "0.336";
+  const PROFILE_DEMO = { nick: "남탓하면바로던짐", tier: "diamond", div: 2, progress: 35 };
+  /** 티어 엠블럼 + 보석 위 세부 단계 숫자. size: "big" | "mini" (숫자 규칙은 lobby.css .tier-em) */
+  function tierEmblem(tier, div, size) {
+    const t = TIER_TABLE[tier] || TIER_TABLE.diamond;
+    const vars = `--gx:${t.gx / 1024};--gy:${t.gy / 1024};--gr:${t.gr / 1024}`;
+    return `<div class="tier-em ${size}" style="${vars}"><img src="${t.src}?v=${TIER_ASSET_V}" alt="${t.name}" draggable="false"><span class="tier-num">${div}</span></div>`;
+  }
+  function profileHtml(statusHtml) {
+    const p = PROFILE_DEMO, t = TIER_TABLE[p.tier] || TIER_TABLE.diamond;
+    const next = Math.max(1, p.div - 1);
+    const pct = Math.max(0, Math.min(100, p.progress | 0));
+    const mini = (div, cls) => `
+      <div class="lp-mini ${cls}">${tierEmblem(p.tier, div, "mini")}<small>${t.name} ${div}</small></div>`;
+    return `
+      <div class="lp-top">
+        ${tierEmblem(p.tier, p.div, "big")}
+        <div class="lp-info">
+          <div class="lp-name">${esc(p.nick)}</div>
+          <div class="lp-tier">${t.name} ${p.div}</div>
+        </div>
+        <div class="lp-status">${statusHtml}</div>
+      </div>
+      <div class="lp-prog">
+        ${mini(p.div, "cur")}
+        <div class="lp-bar-wrap">
+          <div class="lp-label">등급 진척도: <b>${pct}%</b></div>
+          <div class="lp-bar"><i style="width:${pct}%"></i></div>
+        </div>
+        ${mini(next, "next")}
+      </div>`;
+  }
   const tribeOf = (id) => TRIBES.find(t => t.id === id) || { id, name: id, en: id };
   const iconOf = (id) => (typeof TRIBE_ICONS !== "undefined" && TRIBE_ICONS[id]) || "";
   const esc = (s) => String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
@@ -107,9 +150,10 @@
     if (add) add.onclick = newDeck;
 
     const acc = window.FSNet && FSNet.account();
-    $("lobbyUser").innerHTML = L.online
-      ? `<span class="lobby-user-name">${esc(acc.displayName)}</span><button class="menu-btn ghost" id="btnLobbyLogout">로그아웃</button>`
-      : `<span class="lobby-user-name off">오프라인</span>${window.FSNet && FSNet.isOnline() ? '<button class="menu-btn ghost" id="btnLobbyLogin">로그인</button>' : ""}`;
+    // v0.336: 프로필 영역 (예시 값) + 접속 상태는 오른쪽 위에 작게
+    $("lobbyUser").innerHTML = profileHtml(L.online
+      ? `<span class="lobby-user-name">${esc(acc.displayName)}</span><button class="lp-link" id="btnLobbyLogout">로그아웃</button>`
+      : `<span class="lobby-user-name off">오프라인</span>${window.FSNet && FSNet.isOnline() ? '<button class="lp-link" id="btnLobbyLogin">로그인</button>' : ""}`);
     const lo = $("btnLobbyLogout"); if (lo) lo.onclick = async () => { await FSNet.logout(); refresh(); };
     const li = $("btnLobbyLogin"); if (li) li.onclick = async () => { if (await login()) refresh(); };
 

@@ -165,3 +165,71 @@
 #shop.screen.active { display: flex; align-items: center; justify-content: center; }
 #shop .shop-box { display: flex; flex-direction: column; align-items: center; }
 #shop .shop-soon { color: #cbb58a; font-size: 2.6cqh; margin: 2cqh 0 5cqh; }
+
+/* ===== v0.336 로비 프로필 영역 (티어 엠블럼 · 닉네임 · 등급 진척도) ===== */
+#lobby .lobby-user {
+  display: block; flex: 0 0 auto;
+  border-bottom: 1px solid #5a4320; padding: 0 0 1.8cqh;
+}
+#lobby .lp-top { position: relative; display: flex; align-items: center; gap: 1.2cqw; }
+/* 티어 엠블럼 + 세부 단계 숫자 (보석 중심 --gx/--gy, 반지름 --gr = 1024 기준 비율, --s = 표시 크기) */
+.tier-em { position: relative; width: var(--s); height: var(--s); flex: 0 0 auto; }
+.tier-em img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 .4cqh .8cqh rgba(0,0,0,.55)); }
+.tier-em .tier-num {
+  position: absolute; left: calc(var(--gx) * 100%); top: calc(var(--gy) * 100%);
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(0,0,0,.48);
+  color: #fff; font-family: "Noto Sans KR", sans-serif; font-weight: 900; line-height: 1; text-align: center;
+  paint-order: stroke fill; -webkit-text-stroke-color: #120800;
+}
+/* 크게: 글자 = 반지름×1.15, 외곽선 = 글자 10%, 원 반지름 = 보석 반지름×0.62 (최소 8px) */
+.tier-em.big { --s: 13cqh; }
+.tier-em.big .tier-num {
+  --fs: calc(var(--s) * var(--gr) * 1.15);
+  font-size: var(--fs); -webkit-text-stroke-width: calc(var(--fs) * .1);
+  width: max(calc(var(--s) * var(--gr) * 1.24), 16px); height: max(calc(var(--s) * var(--gr) * 1.24), 16px);
+}
+/* 작게: 글자 = max(반지름×1.3, 14px), 외곽선 2px, 원 반지름 최소 7px */
+.tier-em.mini { --s: 5.4cqh; }
+.tier-em.mini .tier-num {
+  font-size: max(calc(var(--s) * var(--gr) * 1.3), 14px); -webkit-text-stroke-width: 2px;
+  width: max(calc(var(--s) * var(--gr) * 1.24), 14px); height: max(calc(var(--s) * var(--gr) * 1.24), 14px);
+}
+#lobby .lp-info { min-width: 0; flex: 1 1 auto; }
+#lobby .lp-name {
+  color: #f3e2b0; font-size: 2.6cqh; font-weight: 700; letter-spacing: .01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 .2cqh .4cqh #000;
+}
+#lobby .lp-tier { margin-top: .4cqh; color: #8fd0ff; font-size: 2cqh; font-weight: 700; text-shadow: 0 0 1cqh rgba(80,160,255,.45); }
+#lobby .lp-status {
+  position: absolute; top: -.8cqh; right: 0;
+  display: flex; align-items: center; gap: .5cqw; font-size: 1.4cqh;
+}
+#lobby .lp-status .lobby-user-name { font-size: 1.4cqh; font-weight: 600; }
+#lobby .lp-link {
+  background: none; border: 1px solid #6a5228; border-radius: .8cqh; color: #cbb58a;
+  font-size: 1.35cqh; padding: .2cqh .6cqw; cursor: pointer;
+}
+#lobby .lp-link:hover { border-color: var(--gold); color: var(--gold); }
+#lobby .lp-prog { display: flex; align-items: flex-end; gap: .8cqw; margin-top: 2cqh; }
+#lobby .lp-mini { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; }
+#lobby .lp-mini.next { opacity: .72; }
+#lobby .lp-mini small { margin-top: .5cqh; color: #cbb58a; font-size: 1.2cqh; white-space: nowrap; }
+#lobby .lp-bar-wrap { flex: 1 1 auto; min-width: 0; padding-bottom: 2.6cqh; }
+#lobby .lp-label { color: #e8d5a4; font-size: 1.65cqh; margin-bottom: .6cqh; }
+#lobby .lp-label b { color: #ffd86a; font-family: var(--font-en); }
+#lobby .lp-bar {
+  position: relative; height: 1.9cqh; border-radius: 1cqh; overflow: hidden;
+  background: linear-gradient(#0c0805, #1a120a);
+  border: 1px solid #9a7b32; box-shadow: inset 0 .2cqh .5cqh rgba(0,0,0,.8);
+}
+#lobby .lp-bar i {
+  display: block; height: 100%; border-radius: 1cqh;
+  background: linear-gradient(#ffe39a, #e4b24a 55%, #a8741e);
+  box-shadow: 0 0 1cqh rgba(255,210,110,.55), inset 0 -.2cqh .3cqh rgba(90,50,10,.5);
+}
+/* 프로필이 생긴 만큼 선택 덱 원형 아이콘을 줄여 매칭 버튼이 밀리지 않게 */
+#lobby .lobby-sel-icon { width: 21cqh; height: 21cqh; }
+#lobby .lobby-sel-name { margin-top: 1.6cqh; }
