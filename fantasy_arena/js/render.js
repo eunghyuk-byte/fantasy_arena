@@ -765,6 +765,8 @@ async function composeCardFace(c, opts={}) {
   // v0.316: 「보호」 전장 오버레이 — 아트/프레임/텍스트 위, 소울·공/방/체 숫자·배지 아래.
   // opts.fieldShield 는 renderMinion(전장)에서만 켜짐 (핸드/덱/상세/도감은 절대 없음).
   if (opts.fieldShield) await paintProtectOverlay(ctx, W, H);
+  // v0.323: 「면역」 전장 오버레이 (3번 비전 봉인진) — 보호 위에 겹침, 숫자·배지 아래. renderMinion(전장) 전용.
+  if (opts.fieldImmune) await paintImmuneOverlay(ctx, W, H);
 
   const baseCard = (typeof CARD_MAP !== "undefined" && c && CARD_MAP[c.id]) || null;
   paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070) + 12,
@@ -797,8 +799,25 @@ function unitHasActiveShield(m) {
   if (!m) return false;
   return m.ability === "보호" || (m.keywords || []).includes("shield");
 }
+let IMMUNE_OVERLAY_BLEND = "source-over"; // v0.323
+const IMMUNE_OVERLAY_SRC = "assets/img/fx/immune_overlay.webp?v=0.323";
+/** Live immune state (same rule as isImmune() in game.js; silence clears ability+keywords). */
+function unitHasActiveImmune(m) {
+  if (!m) return false;
+  return m.ability === "면역" || (m.keywords || []).includes("immune");
+}
+async function paintImmuneOverlay(ctx, W, H) {
+  // 상단 중앙 룬 원이 종족 헤더(H*0.0697) 글자를 덮지 않도록 타원형 소프트 홀 추가
+  return paintFieldOverlay(ctx, W, H, IMMUNE_OVERLAY_SRC,
+    (typeof window !== "undefined" && window.IMMUNE_OVERLAY_BLEND) || IMMUNE_OVERLAY_BLEND,
+    [[W * 0.50, H * 0.0660, W * 0.17, H * 0.034, 0.85]]);
+}
 async function paintProtectOverlay(ctx, W, H) {
-  const img = await loadImg(PROTECT_OVERLAY_SRC);
+  return paintFieldOverlay(ctx, W, H, PROTECT_OVERLAY_SRC,
+    (typeof window !== "undefined" && window.PROTECT_OVERLAY_BLEND) || PROTECT_OVERLAY_BLEND);
+}
+async function paintFieldOverlay(ctx, W, H, src, blend, ellipseHoles) {
+  const img = await loadImg(src);
   if (!img) return;
   // Offscreen: overlay minus soft holes over the soul-cost gem and ATK/DEF/HP gems,
   // so badges + numbers stay fully readable (numbers are painted afterwards).
@@ -820,8 +839,18 @@ async function paintProtectOverlay(ctx, W, H) {
     o.fillStyle = g;
     o.beginPath(); o.arc(x, y, r, 0, Math.PI * 2); o.fill();
   }
+  for (const [x, y, rx, ry, k] of (ellipseHoles || [])) {
+    o.save();
+    o.translate(x, y); o.scale(1, ry / rx);
+    const g = o.createRadialGradient(0, 0, rx * 0.5, 0, 0, rx);
+    g.addColorStop(0, `rgba(0,0,0,${k})`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    o.fillStyle = g;
+    o.beginPath(); o.arc(0, 0, rx, 0, Math.PI * 2); o.fill();
+    o.restore();
+  }
   ctx.save();
-  ctx.globalCompositeOperation = (typeof window !== "undefined" && window.PROTECT_OVERLAY_BLEND) || PROTECT_OVERLAY_BLEND;
+  ctx.globalCompositeOperation = blend || "source-over";
   ctx.drawImage(oc, 0, 0);
   ctx.restore();
 }
@@ -906,7 +935,8 @@ function faceCacheKey(c, opts) {
     ? GAME_VERSION
     : (typeof window !== "undefined" ? window.GAME_VERSION : "");
   const fsh = opts && opts.fieldShield ? "fsh1" : "fsh0";
-  return ["v107statColor", version, fsh, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, (() => { const L = coinLinksForFace(c); return "ec" + L.atkC + "," + L.defC + "," + L.hpC; })(), c._itemFx || "", opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  const fim = opts && opts.fieldImmune ? "fim1" : "fim0";
+  return ["v107statColor", version, fsh, fim, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, (() => { const L = coinLinksForFace(c); return "ec" + L.atkC + "," + L.defC + "," + L.hpC; })(), c._itemFx || "", opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
@@ -1085,6 +1115,8 @@ function renderMinion(m, side) {
     hp:  m._fxHp  != null ? m._fxHp  : m.hp,
     // v0.316: 전장 유닛 현재 보호막 상태로만 오버레이 (인쇄 텍스트 X)
     fieldShield: unitHasActiveShield(m),
+    // v0.323: 전장 유닛 현재 면역 상태 (침묵 등으로 잃으면 사라짐)
+    fieldImmune: unitHasActiveImmune(m),
   };
   const cacheKey = faceCacheKey(m, faceOpts);
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
