@@ -2,7 +2,7 @@
   "name": "fantasy-arena-desktop",
   "version": "0.0.100",
   "private": true,
-  "description": "Electron shell for Fantasy Arena — fixed 4:3 window like Hearthstone",
+  "description": "Electron shell for Fantasy Arena — fixed 16:9 window (1920×1080) like Hearthstone",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

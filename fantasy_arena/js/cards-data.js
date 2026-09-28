@@ -18,7 +18,7 @@ const TRIBE_ICONS = {
   metal:"assets/img/icons/earth.png"  /* no metal tribe frames; reuse earth */
 };
 const HUD_UI = {
-  board:"assets/img/hud/board.jpg",
+  board:"assets/img/hud/board_169.jpg",
   deck:"assets/img/hud/back.png",
   /* end-turn plates (v0.219): playable→pressed, none→glow, opp→off; hold→off visual */
   endturnOff:"assets/img/hud/endturn_off.png",

@@ -1,11 +1,12 @@
 const { app, BrowserWindow, ipcMain, screen } = require("electron");
 const path = require("path");
 
+// v0.327: 16:9 stage (기준 1920×1080) — keep in sync with fantasy_arena/js/settings.js PRESETS
 const PRESETS = {
-  "1024x768": { w: 1024, h: 768 },
-  "1280x960": { w: 1280, h: 960 },
-  "1600x1200": { w: 1600, h: 1200 },
-  "1920x1440": { w: 1920, h: 1440 }
+  "1280x720": { w: 1280, h: 720 },
+  "1600x900": { w: 1600, h: 900 },
+  "1920x1080": { w: 1920, h: 1080 },
+  "2560x1440": { w: 2560, h: 1440 }
 };
 
 const GAME_DIR = app.isPackaged
@@ -21,14 +22,14 @@ function clampToDisplay(w, h) {
   const scale = Math.min(1, wa.width / w, wa.height / h);
   return {
     w: Math.max(640, Math.round(w * scale)),
-    h: Math.max(480, Math.round(h * scale)),
+    h: Math.max(360, Math.round(h * scale)),
     scale,
     display: { w: wa.width, h: wa.height }
   };
 }
 
 function createWindow() {
-  const start = PRESETS["1280x960"];
+  const start = PRESETS["1920x1080"];
   const fit = clampToDisplay(start.w, start.h);
   mainWindow = new BrowserWindow({
     width: fit.w,
@@ -74,7 +75,7 @@ ipcMain.handle("desktop-info", () => ({
 ipcMain.handle("set-resolution", (event, payload) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   const id = payload && payload.id;
-  const preset = PRESETS[id] || { w: payload?.w || 1280, h: payload?.h || 960 };
+  const preset = PRESETS[id] || { w: payload?.w || 1920, h: payload?.h || 1080 };
   const fit = applyContentSize(win, preset.w, preset.h);
   return { ok: true, id: id || `${preset.w}x${preset.h}`, ...fit, logical: preset };
 });

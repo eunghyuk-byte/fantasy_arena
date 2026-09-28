@@ -1,6 +1,6 @@
 # Fantasy Arena Desktop (Electron)
 
-Fixed 4:3 game window shell (Hearthstone-style). Wraps `../fantasy_arena` web build.
+Fixed 16:9 game window shell (1920×1080 기준, v0.327) (Hearthstone-style). Wraps `../fantasy_arena` web build.
 
 ## Run (dev)
 ```bash

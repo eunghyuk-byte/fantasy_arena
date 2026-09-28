@@ -1,4 +1,18 @@
 
+/** v0.327: board art content box (object-fit:contain) narrowed to its 4:3 core.
+ *  16:9 art (3840×2160) keeps the original 4:3 board pixel-identical in x 480~3360 → core = centered 4:3 of the content box.
+ *  All HUD fractions (CX/CY) were authored against the 4:3 board, so they use this core. 4:3 art → core = whole content. */
+function boardCoreBox(bg, br) {
+  const nw = bg.naturalWidth, nh = bg.naturalHeight;
+  if (!nw || !nh || !br) return null;
+  const scale = Math.min(br.width / nw, br.height / nh);
+  const contentW = nw * scale, contentH = nh * scale;
+  const contentLeft = br.left + (br.width - contentW) / 2;
+  const contentTop = br.top + (br.height - contentH) / 2;
+  const coreW = Math.min(contentW, contentH * 4 / 3);
+  return { left: contentLeft + (contentW - coreW) / 2, top: contentTop, w: coreW, h: contentH };
+}
+
 /** Last successful board/HUD geometry fingerprint + inline style cache. */
 var _boardLayoutKey = "";
 var _hudStyleCache = null;
@@ -1199,13 +1213,13 @@ function layoutHudGems() {
   const mr = main.getBoundingClientRect();
   // Keep prior seats if unmeasurable (coin modal / viewport thrash)
   if (br.width < 8 || br.height < 8 || mr.width < 8 || mr.height < 8) return;
-  const nw = bg.naturalWidth, nh = bg.naturalHeight;
-  const scale = Math.min(br.width / nw, br.height / nh);
-  const contentW = nw * scale;
-  const contentH = nh * scale;
+  const core = boardCoreBox(bg, br);
+  if (!core) return;
+  const contentW = core.w;
+  const contentH = core.h;
   if (!(contentW > 8 && contentH > 8)) return;
-  const contentLeft = br.left + (br.width - contentW) / 2;
-  const contentTop = br.top + (br.height - contentH) / 2;
+  const contentLeft = core.left;
+  const contentTop = core.top;
 
   function placeIn(el, parentRect, CX, CY, bw, bh) {
     if (!el || !parentRect) return;
@@ -1514,13 +1528,13 @@ function layoutEndBtn() {
   const mr = main.getBoundingClientRect();
   // Keep prior seat if metrics are unusable (coin-modal / chrome thrash) — never zero mid-frame
   if (br.width < 8 || br.height < 8 || mr.width < 8 || mr.height < 8) return;
-  const nw = bg.naturalWidth, nh = bg.naturalHeight;
-  const scale = Math.min(br.width / nw, br.height / nh);
-  const contentW = nw * scale;
-  const contentH = nh * scale;
+  const core = boardCoreBox(bg, br);
+  if (!core) return;
+  const contentW = core.w;
+  const contentH = core.h;
   if (!(contentW > 8 && contentH > 8)) return;
-  const contentLeft = br.left + (br.width - contentW) / 2;
-  const contentTop = br.top + (br.height - contentH) / 2;
+  const contentLeft = core.left;
+  const contentTop = core.top;
   // v0.225: button center = board mid horizontal ∩ right gold-frame vertical edge
   // content-box: CY 0.5 = battlefield center divider; CX ≈ right edge of gold board frame
   const CX = 0.968;

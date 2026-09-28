@@ -1,29 +1,30 @@
-/* Fixed 4:3 stage — web letterbox OR Electron native window */
+/* Fixed 16:9 stage (v0.327, 기준 1920×1080) — web letterbox/pillarbox OR Electron native window */
 (function () {
   const STORAGE_RES = "fantasy-arena-resolution";
   const STORAGE_FS = "fantasy-arena-fullscreen";
 
   const PRESETS = [
-    { id: "1024x768", w: 1024, h: 768, label: "1024 × 768 (4:3)" },
-    { id: "1280x960", w: 1280, h: 960, label: "1280 × 960 (4:3)" },
-    { id: "1600x1200", w: 1600, h: 1200, label: "1600 × 1200 (4:3)" },
-    { id: "1920x1440", w: 1920, h: 1440, label: "1920 × 1440 (4:3)" }
+    { id: "1280x720", w: 1280, h: 720, label: "1280 × 720 (16:9)" },
+    { id: "1600x900", w: 1600, h: 900, label: "1600 × 900 (16:9)" },
+    { id: "1920x1080", w: 1920, h: 1080, label: "1920 × 1080 (16:9 · 권장)" },
+    { id: "2560x1440", w: 2560, h: 1440, label: "2560 × 1440 (16:9)" }
   ];
+  const DEFAULT_RES = "1920x1080";
 
   function desktop() {
     return (typeof window !== "undefined" && window.fantasyArenaDesktop) || null;
   }
 
   function getPreset(id) {
-    return PRESETS.find(p => p.id === id) || PRESETS[1];
+    return PRESETS.find(p => p.id === id) || PRESETS.find(p => p.id === DEFAULT_RES);
   }
 
   function loadResId() {
     try {
       const v = localStorage.getItem(STORAGE_RES);
-      if (v && PRESETS.some(p => p.id === v)) return v;
+      if (v && PRESETS.some(p => p.id === v)) return v;   // 옛 4:3 값(1280x960 등)은 무시 → 기본값
     } catch (e) {}
-    return "1280x960";
+    return DEFAULT_RES;
   }
 
   function loadFsWanted() {
@@ -89,17 +90,24 @@
     document.documentElement.classList.add("is-desktop");
     document.body.classList.add("is-desktop");
     app.classList.add("desktop-fill");
-    // Window content size IS the stage — fill 100%, no CSS scale (drag/layout stable)
-    app.style.width = "100%";
-    app.style.height = "100%";
-    app.style.left = "0";
-    app.style.top = "0";
+    // v0.327: window content is normally exactly the preset (16:9) → stage fills it.
+    // Fullscreen / other-ratio window → aspect-fit (may scale up) + black bars, never stretch. No CSS scale.
+    const vw = window.innerWidth || document.documentElement.clientWidth;
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    const fit = Math.min(vw / preset.w, vh / preset.h) || 1;
+    const w = Math.round(preset.w * fit);
+    const h = Math.round(preset.h * fit);
+    app.style.width = w + "px";
+    app.style.height = h + "px";
+    app.style.left = Math.round((vw - w) / 2) + "px";
+    app.style.top = Math.round((vh - h) / 2) + "px";
     app.style.transform = "none";
-    app.style.setProperty("--stage-w", "100%");
-    app.style.setProperty("--stage-h", "100%");
+    app.style.setProperty("--stage-w", w + "px");
+    app.style.setProperty("--stage-h", h + "px");
     app.dataset.res = preset.id;
     app.dataset.stageScale = "1";
-    app.dataset.resSize = preset.w + "x" + preset.h;
+    app.dataset.resSize = w + "x" + h + "@" + preset.id;
+    app.dataset.logical = preset.w + "x" + preset.h;
     document.documentElement.style.setProperty("--stage-scale", "1");
   }
 
@@ -108,7 +116,11 @@
     const d = desktop();
     if (d && d.setResolution) {
       try {
-        await d.setResolution(preset.id);
+        // v0.327: 전체화면 중에는 창 크기를 바꾸지 않는다 (main.js setResolution이 전체화면을 풀어 버림) → 레터박스만
+        let fsNow = false;
+        try { const bnd = d.getBounds ? await d.getBounds() : null; fsNow = !!(bnd && bnd.fullscreen); } catch (e) {}
+        // id + size: older desktop shells without the new 16:9 preset ids still get the right size
+        if (!fsNow) await d.setResolution({ id: preset.id, w: preset.w, h: preset.h });
       } catch (e) {
         console.warn("desktop setResolution", e);
       }

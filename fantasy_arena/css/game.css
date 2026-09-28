@@ -2352,14 +2352,9 @@ html.is-desktop, html.is-desktop body {
   overflow: hidden;
   background: #000;
 }
+/* v0.327: desktop stage is aspect-fit (16:9) and centered by settings.js — fullscreen on another ratio letterboxes */
 #app.desktop-fill {
   position: absolute !important;
-  left: 0 !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
   transform: none !important;
   box-shadow: none !important;
 }
@@ -2570,16 +2565,20 @@ html.is-desktop, html.is-desktop body {
   display: none !important;
 }
 
-/* Playfield covers full stage; main is full width; HUD absolute overlay */
+/* v0.327 16:9 stage: playfield = centered 4:3 core (board art's original 4:3 region, x 480~3360 of 3840).
+   All board/HUD layout stays relative to this core; the widened side wood is background only.
+   Own size container so cqh/cqi inside keep the old 4:3 proportions. */
 #game.active > .playfield {
   position: relative !important;
   z-index: 2 !important;
   display: block !important;
-  width: 100% !important;
+  width: min(100%, calc(100cqh * 4 / 3)) !important;
   height: 100% !important;
   padding: 0 !important;
-  margin: 0 !important;
+  margin: 0 auto !important;
   grid-template-columns: none !important;
+  container-type: size;
+  container-name: core;
 }
 #game.active .col-main {
   position: absolute !important;

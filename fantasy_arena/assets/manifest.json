@@ -1807,9 +1807,9 @@
       "name": "deck_wind_unit_uncommon_frame"
     },
     {
-      "path": "assets/img/hud/board.jpg",
-      "bytes": 5758278,
-      "name": "board"
+      "path": "assets/img/hud/board_169.jpg",
+      "bytes": 1275897,
+      "name": "board_169"
     },
     {
       "path": "assets/img/icons/dark.png",
