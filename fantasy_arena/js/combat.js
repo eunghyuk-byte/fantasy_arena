@@ -403,6 +403,8 @@ function hideScreens() {
   document.getElementById("game").classList.remove("active");
   const db = document.getElementById("deckBuilder");
   if (db) db.classList.remove("active");
+  const lb = document.getElementById("lobby"); // v0.331
+  if (lb) lb.classList.remove("active");
   document.getElementById("overlay").classList.remove("show");
 }
 function showGame() {

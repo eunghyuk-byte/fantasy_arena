@@ -3455,6 +3455,20 @@ html.is-desktop, html.is-desktop body {
   }
 }
 
+/* v0.331: new FantasySoul wordmark (same 2400×777 canvas, shorter word → wider transparent sides:
+   left 256px / right 256px of 2400 vs old 62px). Size box to the image and pull the transparent
+   sides in so the emblem–text gap stays ≈ old (~30px @148px) and the group stays centered. */
+#title .title-wordmark {
+  --wm-h: min(22vh, 148px);
+  width: auto !important;
+  height: var(--wm-h) !important;
+  max-height: var(--wm-h) !important;
+  margin-left: calc(var(--wm-h) * -0.25) !important;
+  margin-right: calc(var(--wm-h) * -0.327) !important;
+}
+@media (max-width: 640px) {
+  #title .title-wordmark { --wm-h: min(18vh, 112px); }
+}
 
 /* ===== P0 spell VFX size ~30% smaller (sharper look) ===== */
 #spellFx .fx-stage .fx-strip,

@@ -1,0 +1,15 @@
+{
+  "name": "fantasysoul-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FantasySoul (판타지소울) account + deck API server",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0"
+  }
+}

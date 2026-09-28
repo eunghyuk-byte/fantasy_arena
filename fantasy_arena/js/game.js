@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.330";
+const GAME_VERSION = "0.331";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -79,6 +79,12 @@ function persistDecks(map) {
   localStorage.setItem("runestone-decks", JSON.stringify(map));
 }
 function deckFor(hero, isAI) {
+  // v0.331: lobby "AI 연습" plays the selected saved deck (server or local) once.
+  if (!isAI && Array.isArray(window._deckOverride) && window._deckOverride.length === 30) {
+    const ov = window._deckOverride.filter(id => CARD_MAP[id] && !CARD_MAP[id].token);
+    window._deckOverride = null;
+    if (ov.length === 30) return shuffle(ov);
+  }
   if (!isAI) {
     const saved = loadSavedDecks()[hero.id];
     // Drop deleted/token/unknown ids (e.g. post-hero-power leftovers, empty autoFill).
@@ -2585,7 +2591,7 @@ function autoFillDraft() {
   }
   renderBuilder();
 }
-function saveDraftDeck() {
+function saveDraftDeck(opts) {
   if (draftDeck.length !== 30) {
     alert("덱은 정확히 30장이어야 저장됩니다. 지금 " + draftDeck.length + "장입니다.");
     return false;
@@ -2593,7 +2599,12 @@ function saveDraftDeck() {
   const map = loadSavedDecks();
   map[selectedHero.id] = draftDeck.slice();
   persistDecks(map);
-  alert(selectedHero.name + " 종족 덱을 저장했습니다.");
+  // v0.331: logged in -> also save to server (name prompt). Offline keeps the local-only flow.
+  if (window.Lobby && window.FSNet && FSNet.isLoggedIn()) {
+    Lobby.saveDraftToServer(draftDeck.slice(), selectedHero.id, !!(opts && opts.quiet));
+    return true;
+  }
+  if (!(opts && opts.quiet)) alert(selectedHero.name + " 종족 덱을 저장했습니다.");
   return true;
 }
 
@@ -2833,7 +2844,7 @@ document.getElementById("btnClearDeck").onclick = () => { draftDeck = []; render
 document.getElementById("btnAutoFill").onclick = () => autoFillDraft();
 document.getElementById("btnSaveDeck").onclick = () => saveDraftDeck();
 document.getElementById("btnPlaySaved").onclick = () => {
-  if (!saveDraftDeck()) return;
+  if (!saveDraftDeck({ quiet: true })) return;
   startGame(true);
 };
 

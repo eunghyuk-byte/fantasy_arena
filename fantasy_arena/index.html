@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/game.css?v=0.329" />
+<link rel="stylesheet" href="css/game.css?v=0.331" />
+<link rel="stylesheet" href="css/lobby.css?v=0.331" />
 </head>
 <body>
 <button class="bgm-btn settings-gear-btn" id="settingsGearBtn" title="설정" aria-label="설정">⚙</button>
@@ -15,11 +16,12 @@
   <section id="title" class="screen active">
     <header class="title-brand" aria-label="판타지소울 FantasySoul">
       <img class="title-emblem" src="assets/img/logos/logo_emblem.png?v=0.158" alt="" />
-      <img class="title-wordmark" src="assets/img/logos/logo_wordmark_stand.png?v=0.158" alt="판타지소울 FantasySoul" />
+      <img class="title-wordmark" src="assets/img/logos/logo_wordmark_stand.png?v=0.331" alt="판타지소울 FantasySoul" />
     </header>
     <div class="title-body">
       <div class="hero-picks" id="heroPicks"></div>
       <div class="title-menu" id="titleMenu">
+        <button class="menu-btn" id="btnLobby">온라인 로비</button>
         <button class="menu-btn" id="btnDeck">덱 구성</button>
         <button class="menu-btn" id="btnAi">플레이</button>
         <button class="menu-btn ghost" id="btnHelp">도움말</button>
@@ -27,6 +29,64 @@
       </div>
     </div>
   </section>
+
+  <!-- v0.331 로비 (덱 목록 + 매칭) -->
+  <section id="lobby" class="screen">
+    <div class="lobby">
+      <div class="lobby-panel lobby-left">
+        <div class="lobby-head">
+          <h2>내 덱</h2>
+          <span class="lobby-count" id="lobbyDeckCount">0 / 10</span>
+        </div>
+        <div class="lobby-notice" id="lobbyNotice"></div>
+        <div class="lobby-decks" id="lobbyDecks"></div>
+        <div class="lobby-left-actions">
+          <button class="menu-btn ghost" id="btnLobbyEdit">덱 편집</button>
+          <button class="menu-btn ghost" id="btnLobbyRename">이름 변경</button>
+          <button class="menu-btn ghost" id="btnLobbyDelete">삭제</button>
+        </div>
+      </div>
+      <div class="lobby-panel lobby-right">
+        <div class="lobby-user" id="lobbyUser"></div>
+        <div class="lobby-sel" id="lobbySel"></div>
+        <button class="menu-btn lobby-match" id="btnMatch">매칭 시작</button>
+        <button class="menu-btn ghost" id="btnLobbyAi">AI 연습</button>
+        <button class="menu-btn ghost" id="btnLobbyBack">타이틀로</button>
+      </div>
+    </div>
+    <div class="lobby-wait" id="lobbyWait">
+      <div class="lobby-wait-box">
+        <div class="lobby-spinner"></div>
+        <h2>매칭 상대를 찾는 중…</h2>
+        <div class="lobby-wait-deck" id="lobbyWaitDeck"></div>
+        <div class="lobby-wait-time" id="lobbyWaitTime">00:00</div>
+        <button class="menu-btn" id="btnMatchCancel">취소</button>
+      </div>
+    </div>
+  </section>
+
+<div class="help-pop" id="fsPromptPop">
+  <div class="help-box fs-prompt-box">
+    <h2 id="fsPromptTitle">입력</h2>
+    <p id="fsPromptText"></p>
+    <input type="text" id="fsPromptInput" class="fs-prompt-input" maxlength="20" autocomplete="off" spellcheck="false" />
+    <div class="fs-prompt-err" id="fsPromptErr"></div>
+    <div class="fs-prompt-actions">
+      <button class="menu-btn" id="fsPromptOk">확인</button>
+      <button class="menu-btn ghost" id="fsPromptCancel">취소</button>
+    </div>
+  </div>
+</div>
+
+<div class="help-pop" id="fsTribePop">
+  <div class="help-box fs-prompt-box fs-tribe-box">
+    <h2>새 덱 — 속성 선택</h2>
+    <div class="fs-tribe-grid" id="fsTribeGrid"></div>
+    <div class="fs-prompt-actions">
+      <button class="menu-btn ghost" id="fsTribeCancel">취소</button>
+    </div>
+  </div>
+</div>
 
 
   
@@ -238,8 +298,10 @@
 <script src="js/sfx.js?v=0.102"></script>
 <script src="js/settings.js?v=0.327"></script>
 <script src="js/render.js?v=0.328"></script>
-<script src="js/combat.js?v=0.322"></script>
+<script src="js/combat.js?v=0.331"></script>
 <script src="js/spell-fx.js?v=0.102"></script>
-<script src="js/game.js?v=0.330"></script>
+<script src="js/game.js?v=0.331"></script>
+<script src="js/net.js?v=0.331"></script>
+<script src="js/lobby.js?v=0.331"></script>
 </body>
 </html>
