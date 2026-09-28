@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.337";
+const GAME_VERSION = "0.338";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -537,7 +537,8 @@ function equipItemOnUnit(p, card, unit) {
       const raw = String(card.text).replace(/\s*부여\s*$/, "").trim();
       if (raw) itemBits.push(raw);
     }
-    const parts = ["아이템 착용중", ...itemBits];
+    // v0.338: 「아이템 착용중」 문구는 전장 장비 배지가 대신 — 아이템이 준 능력·효과 문구만 표시
+    const parts = [...itemBits];
     if (unit._baseText) parts.push(unit._baseText);
     const uniq = [];
     parts.forEach(p => { if (p && !uniq.includes(p)) uniq.push(p); });
