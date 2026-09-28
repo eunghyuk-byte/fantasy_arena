@@ -825,6 +825,14 @@ async function paintProtectOverlay(ctx, W, H) {
   ctx.drawImage(oc, 0, 0);
   ctx.restore();
 }
+/** v0.322: 얼굴에 그릴 코인 링크 — effectiveCoinLinks(game.js)가 있으면 그것, 없으면 인쇄값 */
+function coinLinksForFace(c) {
+  if (typeof effectiveCoinLinks === "function") {
+    const e = effectiveCoinLinks(c);
+    return { atkC: e.atkC | 0, defC: e.defC | 0, hpC: e.hpC | 0 };
+  }
+  return { atkC: parseCoin(c.atkC), defC: parseCoin(c.defC), hpC: parseCoin(c.hpC) };
+}
 async function paintStatCoins(ctx, c, W, H) {
   const gold = await loadImg((typeof COIN_GOLD !== "undefined" && COIN_GOLD) ? COIN_GOLD : "assets/img/coins/gold.png");
   const black = await loadImg((typeof COIN_BLACK !== "undefined" && COIN_BLACK) ? COIN_BLACK : "assets/img/coins/black.png");
@@ -835,10 +843,12 @@ async function paintStatCoins(ctx, c, W, H) {
   // Vertical overlap between stacked rows (~45% of coin height)
   const rowStep = Math.round(size * 0.55);
   const cyBot = H * 0.978 - 2; // v0.244: up 1 more
+  // v0.322: 전장 유닛은 장착 코인 아이템을 반영한 실제 링크 (조작된주화 → 골드 등). 코인 판정과 같은 함수.
+  const L = coinLinksForFace(c);
   const slots = [
-    [W * 0.1343, parseCoin(c.atkC)],
-    [W * 0.5008, parseCoin(c.defC)],
-    [W * 0.8745, parseCoin(c.hpC)]
+    [W * 0.1343, L.atkC],
+    [W * 0.5008, L.defC],
+    [W * 0.8745, L.hpC]
   ];
   // 1~4: one row; 5: 2/3 (top/bottom)
   function coinRows(n) {
@@ -896,7 +906,7 @@ function faceCacheKey(c, opts) {
     ? GAME_VERSION
     : (typeof window !== "undefined" ? window.GAME_VERSION : "");
   const fsh = opts && opts.fieldShield ? "fsh1" : "fsh0";
-  return ["v107statColor", version, fsh, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  return ["v107statColor", version, fsh, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, (() => { const L = coinLinksForFace(c); return "ec" + L.atkC + "," + L.defC + "," + L.hpC; })(), c._itemFx || "", opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);

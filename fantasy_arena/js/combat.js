@@ -95,9 +95,10 @@ function doAttack(p, attacker, target, auto) {
   function sharedDetail(unit, roll, atkVal, defVal, hpVal, hpFrom) {
     const bits = [];
     if (hpFrom == null) hpFrom = hpVal - roll.dHp;
-    if (unit.atkC) bits.push(`공 ${unit.atk}→<b>${atkVal}</b> (${roll.dAtk >= 0 ? "+" : ""}${roll.dAtk})`);
-    if (unit.defC) bits.push(`방 ${unit.def || 0}→<b>${defVal}</b> (${roll.dDef >= 0 ? "+" : ""}${roll.dDef})`);
-    if (unit.hpC) bits.push(`체 ${hpFrom}→<b>${hpVal}</b> (${roll.dHp >= 0 ? "+" : ""}${roll.dHp})`);
+    const L = (typeof effectiveCoinLinks === "function") ? effectiveCoinLinks(unit) : unit; // v0.322
+    if (L.atkC) bits.push(`공 ${unit.atk}→<b>${atkVal}</b> (${roll.dAtk >= 0 ? "+" : ""}${roll.dAtk})`);
+    if (L.defC) bits.push(`방 ${unit.def || 0}→<b>${defVal}</b> (${roll.dDef >= 0 ? "+" : ""}${roll.dDef})`);
+    if (L.hpC) bits.push(`체 ${hpFrom}→<b>${hpVal}</b> (${roll.dHp >= 0 ? "+" : ""}${roll.dHp})`);
     return bits.join(" · ") || `앞면 ${roll.heads}/${roll.n}`;
   }
 

@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.321";
+const GAME_VERSION = "0.322";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1535,15 +1535,34 @@ function storedTurnCoins(m) {
   if (!st || !state || st.turnKey !== (state.turnSerial | 0)) return null;
   return st;
 }
-function rollSharedCoins(m) {
-  // v0.317 코인 아이템: 매 코인 판정마다 적용 (장착 시 코인 링크는 그대로). 코인 없는 유닛은 스탯만.
+/**
+ * v0.322: 유닛의 "실제" 코인 링크 (장착 코인 아이템 반영). 코인 판정(rollSharedCoins)과
+ * 전장 코인 표시(render.js paintStatCoins·faceCacheKey, 상세 fmtCoinLinks)가 모두 이 함수만 쓴다.
+ * 아이템 없는 카드(핸드·덱·도감)는 인쇄된 링크 그대로.
+ *  - 도둑바람 coin_zero: 링크 0 (코인 없음)
+ *  - 조작된주화 coins_to_gold: 블랙(−) 링크 → 골드(+)
+ *  - 노름바위 coin_set5_if_any / 저주의인형 coin_set1_if_any: 링크 있는 스탯의 코인 수 5 / 1 (부호 유지)
+ * 반환 { atkC, defC, hpC, n } — n = 공유 코인 수 = max(|링크|).
+ */
+function effectiveCoinLinks(m) {
   const fx = m && m._itemFx;
   let la = (m && m.atkC) || 0, ld = (m && m.defC) || 0, lh = (m && m.hpC) || 0;
   if (fx === "coin_zero") { la = 0; ld = 0; lh = 0; }                              // 도둑바람
   if (fx === "coins_to_gold") { la = Math.abs(la); ld = Math.abs(ld); lh = Math.abs(lh); } // 조작된주화: 블랙 링크→골드
   let n = Math.max(Math.abs(la), Math.abs(ld), Math.abs(lh));
-  if (fx === "coin_set5_if_any" && n > 0) n = 5;                                   // 노름바위
-  if (fx === "coin_set1_if_any" && n > 0) n = 1;                                   // 저주의인형
+  let setN = 0;
+  if (fx === "coin_set5_if_any" && n > 0) setN = 5;                                // 노름바위
+  if (fx === "coin_set1_if_any" && n > 0) setN = 1;                                // 저주의인형
+  if (setN) { n = setN; la = coinSign(la) * n; ld = coinSign(ld) * n; lh = coinSign(lh) * n; }
+  return { atkC: la, defC: ld, hpC: lh, n };
+}
+function rollSharedCoins(m) {
+  // v0.317 코인 아이템: 매 코인 판정마다 적용 (장착 시 코인 링크는 그대로). 코인 없는 유닛은 스탯만.
+  // v0.322: 링크 계산은 effectiveCoinLinks (표시와 동일)
+  const fx = m && m._itemFx;
+  const eff = effectiveCoinLinks(m);
+  const la = eff.atkC, ld = eff.defC, lh = eff.hpC;
+  const n = eff.n;
   let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
   if (m && m.coinLuckBonus) luck = Math.min(1, luck + m.coinLuckBonus);
   if (m && m.coinGold) luck = 1;
@@ -2626,7 +2645,8 @@ const ABI_HELP = {
 function fmtCoinLinks(c) {
   const parts = [];
   const one = (label, v) => { if (!v) return; parts.push(label + (v > 0 ? "+" : "") + v); };
-  one("공", c.atkC || 0); one("방", c.defC || 0); one("체", c.hpC || 0);
+  const L = effectiveCoinLinks(c); // v0.322: 장착 코인 아이템 반영 (아이템 없는 카드는 인쇄값)
+  one("공", L.atkC); one("방", L.defC); one("체", L.hpC);
   return parts.length ? parts.join(" ") : "";
 }
 function buildLoreSkillsHtml(c) {
