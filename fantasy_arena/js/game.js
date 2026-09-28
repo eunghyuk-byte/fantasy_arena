@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.341";
+const GAME_VERSION = "0.342";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -343,8 +343,10 @@ function beginTurn(p) {
   p.noPlayMinion = false;
   p.coinP = null;
   p._soulDrawUsed = false;
+  const _serial = (state.turnSerial | 0);
   p.board.forEach(m => {
-    if (m.skipAttack || unitCannotAttack(m)) { m.canAttack = false; m.attacksLeft = 0; m.skipAttack = false; }
+    m._readyTurn = _serial; // v0.342: 턴 시작 때 전장에 있던 유닛 (소환 수면 아님)
+    if (m.skipAttack || unitCannotAttack(m)) { if (m.skipAttack) m._frozenTurn = _serial; m.canAttack = false; m.attacksLeft = 0; m.skipAttack = false; }
     else { m.canAttack = true; m.attacksLeft = 1; }
   });
   draw(p, 1);
@@ -844,10 +846,13 @@ function printedSoul(m) {
   const b = (typeof CARD_MAP !== "undefined" && CARD_MAP[m.id]) || null;
   return (b && b.cost != null) ? (b.cost | 0) : ((m.cost | 0) || 0);
 }
-/** v0.341: 침묵 — 능력·키워드·유언 제거. 공격불가(인쇄/효과: cannotAttack·skipAttack)도 지워
- *  주인의 다음 턴 시작부터 공격 가능. 소환 수면(이번 턴 canAttack=false)은 그대로 둔다. */
-function silenceMinion(m) {
+/** v0.341: 침묵 — 능력·키워드·유언 제거. 공격불가(인쇄/효과: cannotAttack·skipAttack)도 지운다.
+ *  v0.342(하스스톤식): 주인의 턴이고, 이번 턴 시작 때부터 전장에 있었고(소환 수면 아님),
+ *  이번 턴 아직 공격하지 않았다면 → 바로 공격 가능. 그 밖(상대 턴 침묵 등)은 주인의 다음 턴부터. */
+function silenceMinion(m, owner) {
   if (!m) return;
+  let wasBlocked = !!(m.skipAttack || unitCannotAttack(m));
+  try { if (m._frozenTurn === (state.turnSerial | 0)) wasBlocked = true; } catch (e) {} // 이번 턴 「다음 턴 공격 불가」로 막힌 유닛
   m.ability = null;
   m.atkSkill = null;
   m.keywords = [];
@@ -861,6 +866,13 @@ function silenceMinion(m) {
   // 장착 아이템 해제 시 침묵 전 능력/문구로 되돌아가지 않게
   if (m._itemBonuses) { m._itemBonuses.prevAbility = null; m._itemBonuses.prevAtkSkill = null; m._itemBonuses.extraAbility = null; }
   if (m._baseText != null) m._baseText = "침묵";
+  try {
+    const serial = (state.turnSerial | 0);
+    if (wasBlocked && owner && owner === current() && m._readyTurn === serial && m._atkTurn !== serial && !(m.attacksLeft > 0)) {
+      m.canAttack = true;
+      m.attacksLeft = 1;
+    }
+  } catch (e) {}
 }
 /** Permanent: skip dealing attack in end-of-turn combat / no attack rights. Still takes damage. */
 function unitCannotAttack(m) {
@@ -1264,7 +1276,7 @@ function applyFx(p, fx, target) {
     if (n) log(`${(CARD_MAP[sid] && CARD_MAP[sid].name) || sid} ${n}개 소환`);
     else log("전장이 가득 차 토큰을 소환할 수 없습니다");
   } else if (fx.type === "silence_enemy_board") {
-    [...e.board].forEach(m => silenceMinion(m));
+    [...e.board].forEach(m => silenceMinion(m, e));
     log("적 전체 침묵 (능력 제거)");
   } else if (fx.type === "bounce_enemy_board") {
     // 동남풍: 적 전장 → 핸드. 손패 10장 초과분은 파괴(유언 등 발동)
@@ -2727,7 +2739,7 @@ const ABI_HELP = {
   "출전": "낼 때 카드 1장을 뽑습니다.",
   "유언": "파괴될 때 카드 1장을 뽑습니다.",
   "면역": "스펠·효과의 단일 대상으로 지정되지 않습니다. 전체 효과는 받습니다.",
-  "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다. 침묵되면 다음 턴부터 공격할 수 있습니다."
+  "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다. 침묵되면 공격할 수 있습니다 (내 턴에 침묵되면 바로, 이번 턴 소환된 유닛은 다음 턴부터)."
 };
 function fmtCoinLinks(c) {
   const parts = [];
@@ -2771,7 +2783,18 @@ async function openCardLore(id) {
   const face = await composeCardFace(c);
   const img = slot.querySelector("img.card-face");
   if (img && face) img.src = face;
-  document.getElementById("loreName").textContent = c.name;
+  const info = cardInfoParts(c);
+  document.getElementById("loreName").textContent = info.name;
+  const metaEl = document.getElementById("loreMeta");
+  metaEl.innerHTML = info.metaHtml;
+  const skEl = document.getElementById("loreSkills");
+  if (skEl) skEl.innerHTML = info.skillsHtml;
+  document.getElementById("loreText").textContent = info.lore;
+  document.getElementById("cardLorePop").classList.add("show");
+}
+/** v0.342: 카드 설명 정보 (모달 오른쪽 · 덱 편집 호버 툴팁 공용) */
+function cardInfoParts(c) {
+  const id = c.id;
   const raceNm = c.type === "minion" ? (c.token ? "토큰" : (c.race || (CARD_RACE && CARD_RACE[c.id]) || "")) : (c.type === "item" ? "아이템" : "스펠");
   const RARITY_KO = { common:"커먼", uncommon:"언커먼", rare:"레어", legendary:"전설" };
   const rareKo = RARITY_KO[c.rarity || "common"] || "커먼";
@@ -2781,12 +2804,101 @@ async function openCardLore(id) {
   const coin = (c.type === "minion") ? fmtCoinLinks(c) : "";
   const top = [c.cost + "소울", tribeNm, raceNm, stats, coin ? ("코인 " + coin) : ""].filter(Boolean).join(" · ");
   const bot = [rareKo, cap].filter(Boolean).join(" · ");
-  const metaEl = document.getElementById("loreMeta");
-  metaEl.innerHTML = top + (bot ? "<br><br>" + bot : "");
-  const skEl = document.getElementById("loreSkills");
-  if (skEl) skEl.innerHTML = buildLoreSkillsHtml(c);
-  document.getElementById("loreText").textContent = loreOf(id);
-  document.getElementById("cardLorePop").classList.add("show");
+  return { name: c.name, metaHtml: top + (bot ? "<br><br>" + bot : ""), skillsHtml: buildLoreSkillsHtml(c), lore: loreOf(id) };
+}
+
+/* ===== v0.342: 덱 편집 — 호버 툴팁 + 클릭 즉시 추가 ===== */
+function escHtml(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch])); }
+function poolTipEl() {
+  let el = document.getElementById("poolTip");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "poolTip";
+    el.className = "pool-tip lore-side";
+    el.setAttribute("aria-hidden", "true");
+    document.body.appendChild(el);
+  }
+  return el;
+}
+let _poolTipId = null;
+function hidePoolTip() {
+  _poolTipId = null;
+  const el = document.getElementById("poolTip");
+  if (el) el.classList.remove("show");
+}
+function showPoolTip(anchor, id) {
+  const c = CARD_MAP[id];
+  if (!c || !anchor) return;
+  const el = poolTipEl();
+  if (_poolTipId !== id) {
+    const info = cardInfoParts(c);
+    el.innerHTML = `<h3>${escHtml(info.name)}</h3><div class="lore-meta">${info.metaHtml}</div>` +
+      (info.skillsHtml ? `<div class="lore-skills">${info.skillsHtml}</div>` : "") +
+      (info.lore ? `<p>${escHtml(info.lore)}</p>` : "");
+    _poolTipId = id;
+  }
+  el.classList.add("show");
+  positionPoolTip(anchor);
+}
+function positionPoolTip(anchor) {
+  const el = document.getElementById("poolTip");
+  if (!el || !anchor) return;
+  const r = anchor.getBoundingClientRect();
+  const vw = window.innerWidth, vh = window.innerHeight, gap = 12, pad = 8;
+  const w = el.offsetWidth, h = el.offsetHeight;
+  let left = r.right + gap;
+  if (left + w > vw - pad) left = r.left - gap - w; // 오른쪽이 넘치면 왼쪽으로
+  left = Math.max(pad, Math.min(left, vw - pad - w));
+  let top = r.top;
+  top = Math.max(pad, Math.min(top, vh - pad - h));
+  el.style.left = Math.round(left) + "px";
+  el.style.top = Math.round(top) + "px";
+}
+let _builderToastT = 0;
+function builderToast(msg) {
+  let el = document.getElementById("builderToast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "builderToast";
+    el.className = "builder-toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(_builderToastT);
+  _builderToastT = setTimeout(() => el.classList.remove("show"), 1400);
+}
+/** 클릭 한 번 = 바로 추가. 실패하면 짧은 안내만. 반환: 추가 여부 */
+function poolClickAdd(id) {
+  const c = CARD_MAP[id];
+  if (!c) return false;
+  if (draftDeck.length >= 30) { builderToast("덱이 가득 찼습니다 (30장)"); return false; }
+  const cap = maxCopies(id);
+  if (copiesInDraft(id) >= cap) { builderToast(`${c.name}: 덱당 최대 ${cap}장`); return false; }
+  addToDraft(id);
+  return true;
+}
+function bindPoolHover(pool) {
+  if (!pool || pool._tipBound) return;
+  pool._tipBound = true;
+  pool.addEventListener("mouseover", (e) => {
+    const it = e.target.closest && e.target.closest(".pool-item");
+    if (!it || !pool.contains(it)) return;
+    showPoolTip(it, it.dataset.id);
+  });
+  pool.addEventListener("mouseout", (e) => {
+    const it = e.target.closest && e.target.closest(".pool-item");
+    if (!it) return;
+    const to = e.relatedTarget;
+    if (to && it.contains(to)) return;
+    // 다시 그려진(같은 id) 카드로 옮겨간 경우는 mouseover가 다시 띄움
+    hidePoolTip();
+  });
+  pool.addEventListener("scroll", hidePoolTip, { passive: true });
+  pool.addEventListener("dragstart", hidePoolTip);
+  window.addEventListener("scroll", hidePoolTip, { passive: true, capture: true });
+  window.addEventListener("wheel", hidePoolTip, { passive: true });
+  window.addEventListener("resize", hidePoolTip);
 }
 
 
@@ -2828,9 +2940,15 @@ function renderBuilder() {
       });
     }
   }
-    pool.querySelectorAll(".pool-item").forEach(el => {
-    el.onclick = () => openCardMenu(el.dataset.id);
+  // v0.342: 클릭 = 즉시 추가 (모달 없음) · 호버 = 설명 툴팁
+  pool.querySelectorAll(".pool-item").forEach(el => {
+    el.onclick = (ev) => { ev.stopPropagation(); poolClickAdd(el.dataset.id); };
   });
+  bindPoolHover(pool);
+  if (_poolTipId) {
+    const again = pool.querySelector(`.pool-item[data-id="${_poolTipId}"]`);
+    if (again && again.matches(":hover")) positionPoolTip(again); else hidePoolTip();
+  }
   const counts = {};
   draftDeck.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
   const list = document.getElementById("deckList");

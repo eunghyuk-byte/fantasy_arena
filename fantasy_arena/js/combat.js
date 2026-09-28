@@ -69,6 +69,7 @@ function doAttack(p, attacker, target, auto) {
   if (!ok) { resolve(); return; }
   attacker.attacksLeft -= 1;
   attacker.canAttack = attacker.attacksLeft > 0;
+  try { attacker._atkTurn = (state.turnSerial | 0); } catch (e) {} // v0.342: 이번 턴 공격함 (침묵 즉시 공격권 판정)
 
   // v0.317 「공격:」 아이템 (내 턴 공격 선언 시 · 코인 판정 전)
   if (attacker._itemFx && typeof applyItemAttackFx === "function") {
