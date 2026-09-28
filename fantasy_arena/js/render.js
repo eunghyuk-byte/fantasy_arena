@@ -1174,27 +1174,34 @@ function layoutHudGems() {
     const L = parseFloat(el.style.left);
     if (!Number.isNaN(L)) el.style.setProperty("left", (L - 170) + "px", "important");
   });
-  // v0.319 소울 드로우 버튼: 소울 표시 바로 왼쪽 · 세로 중앙 맞춤 (핸드·턴 종료와 무관)
-  [["mySoulDraw", "mySoulGem", 1.0], ["oppSoulDraw", "oppSoulGem", 0.72]].forEach(([bid, gid, k]) => {
+  // v0.320 소울 드로우 버튼 (~68px @1280×800). 내 버튼: 소울 표시 바로 아래(핸드 10장 오른쪽 끝 바깥 · 5번째 유닛 칸 아래).
+  // 소울 표시 왼쪽은 핸드 10장 오른쪽 카드와, 위쪽은 5번째 유닛 칸과 겹쳐 빈 자리가 없다. 상대 버튼: 상대 소울 왼쪽, 비율 축소.
+  [["mySoulDraw", "mySoulGem", 1.0, "below"], ["oppSoulDraw", "oppSoulGem", 0.72, "left"]].forEach(([bid, gid, k, mode]) => {
     const b = document.getElementById(bid);
     const g = document.getElementById(gid);
     if (!b || !g || !g.style.left) return;
     const gl = parseFloat(g.style.left), gt = parseFloat(g.style.top);
     if (Number.isNaN(gl) || Number.isNaN(gt)) return;
-    const D = Math.round(Math.max(30, SOUL_W * 0.78) * k);
+    const D = Math.round(Math.max(44, SOUL_W * 1.15) * k);
     // 보이는 소울 숫자(텍스트) 기준으로 붙인다 — #…SoulGem 상자는 숫자보다 넓다
-    let textL = null, textCY = null;
+    let textL = null, textCY = null, textB = null;
     try {
       const tn = g.firstChild;
       if (tn && document.createRange) {
         const rg = document.createRange(); rg.selectNodeContents(g);
         const tr = rg.getBoundingClientRect();
-        if (tr && tr.width > 2) { textL = tr.left - mr.left; textCY = tr.top + tr.height / 2 - mr.top; }
+        if (tr && tr.width > 2) { textL = tr.left - mr.left; textCY = tr.top + tr.height / 2 - mr.top; textB = tr.bottom - mr.top; }
       }
     } catch (e) {}
-    // 오른쪽 끝을 소울 알약의 왼쪽 뾰족 끝에 붙이고 살짝 위로 (핸드 10장일 때 오른쪽 카드 모서리 회피)
-    const left = (textL != null ? textL : gl) - D - 3;
-    const top = (textCY != null ? textCY : gt + SOUL_H / 2) - D / 2 - Math.round(D * 0.14);
+    let left, top;
+    if (mode === "below") {
+      // 소울 알약 왼쪽 끝(숫자 왼쪽 −8px)에 맞춰 바로 아래
+      left = (textL != null ? textL : gl) - 8;
+      top = (textB != null ? textB : gt + SOUL_H) + 6;
+    } else {
+      left = (textL != null ? textL : gl) - D - 3;
+      top = (textCY != null ? textCY : gt + SOUL_H / 2) - D / 2;
+    }
     b.style.setProperty("left", left + "px", "important");
     b.style.setProperty("top", top + "px", "important");
     b.style.setProperty("width", D + "px", "important");
@@ -1250,15 +1257,37 @@ function layoutHudGems() {
 
 /** v0.319 소울 드로우 버튼 상태 (내 버튼: 클릭 · 상대 버튼: 표시만). 아이콘은 assets/img/ui/soul_draw.webp */
 const SOUL_DRAW_ICON = "assets/img/ui/soul_draw.webp";
+/** 아이콘(1024 기준)의 소울 보석 중심·반지름 — 아이콘 교체 시 여기만 맞춘다 */
+const SOUL_DRAW_GEM = { cx: 238, cy: 176, r: 104 };
 function paintSoulDrawCost(btn) {
   const cv = btn && btn.querySelector("canvas.sd-cost");
   if (!cv || cv._painted) return;
-  const S = 64;
+  // 캔버스 = 아이콘 전체(1024 기준 좌표 비율). 파란 소울 보석 중심 (238,176) r104 → 숫자 크기 ≈ 1.3r
+  const S = 256;
   cv.width = S; cv.height = S;
   const c2 = cv.getContext && cv.getContext("2d");
   if (!c2) return;
-  // 카드 소울 숫자와 같은 스타일 (paintNumber: 900 Noto Sans KR · #120800 외곽선 · 흰색)
-  paintNumber(c2, String(typeof SOUL_DRAW_COST !== "undefined" ? SOUL_DRAW_COST : 3), S / 2, S / 2 + 2, 50, STAT_WHITE);
+  const G = SOUL_DRAW_GEM;
+  const cx = S * G.cx / 1024, cy = S * G.cy / 1024, size = Math.round(S * G.r * 1.3 / 1024);
+  const txt = String(typeof SOUL_DRAW_COST !== "undefined" ? SOUL_DRAW_COST : 3);
+  // 카드 소울 숫자와 같은 글꼴·색 (900 Noto Sans KR · #120800 외곽선 · 흰색), 외곽선만 얇게
+  c2.clearRect(0, 0, S, S);
+  c2.save();
+  c2.font = `900 ${size}px "Noto Sans KR", Arial, sans-serif`;
+  c2.textAlign = "center";
+  c2.textBaseline = "middle";
+  c2.lineJoin = "round";
+  c2.lineWidth = Math.max(2, size * 0.10);
+  c2.strokeStyle = "#120800";
+  // 글리프 세로 중심 보정 (middle 기준선은 숫자 높이 중앙보다 살짝 아래)
+  let dy = 0;
+  try { const m = c2.measureText(txt); if (m.actualBoundingBoxAscent != null) dy = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2; } catch (e) {}
+  c2.textBaseline = dy ? "alphabetic" : "middle";
+  const yy = dy ? cy + dy : cy;
+  c2.strokeText(txt, cx, yy);
+  c2.fillStyle = STAT_WHITE;
+  c2.fillText(txt, cx, yy);
+  c2.restore();
   cv._painted = true;
 }
 function initSoulDrawBtn(btn, clickable) {
@@ -1267,6 +1296,8 @@ function initSoulDrawBtn(btn, clickable) {
   const v = (typeof GAME_VERSION !== "undefined") ? GAME_VERSION : "";
   btn.innerHTML = `<img class="sd-icon" src="${SOUL_DRAW_ICON}?v=${v}" alt="" draggable="false"><canvas class="sd-cost" aria-hidden="true"></canvas>`;
   paintSoulDrawCost(btn);
+  // 웹폰트 로드 후 다시 그림 (첫 그림이 Arial 대체 글꼴일 수 있음)
+  try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const cv = btn.querySelector("canvas.sd-cost"); if (cv) { cv._painted = false; paintSoulDrawCost(btn); } }); } catch (e) {}
   if (clickable) {
     btn.addEventListener("pointerdown", () => { if (!btn.disabled) btn.classList.add("pressed"); });
     ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, () => btn.classList.remove("pressed")));
