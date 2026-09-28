@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.314";
+const GAME_VERSION = "0.315";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -626,7 +626,13 @@ function needsTarget(card) {
   return ["dmg", "kill", "buff"].includes(fx.type) && fx.target;
 }
 
+/** 면역(9/28): 단일 대상 스펠·소환 효과로 지정할 수 없다 (아이템 장착 대상은 예외). */
 function validTargets(p, fx) {
+  const list = validTargetsRaw(p, fx);
+  if (fx && fx._itemEquip) return list;
+  return list.filter(t => !(t.kind === "minion" && isImmune(t.minion)));
+}
+function validTargetsRaw(p, fx) {
   const e = opponent(p);
   const list = [];
   if (fx && fx._itemEquip) {
@@ -752,6 +758,11 @@ function adjustSharedCoinN(m, delta) {
 function applyFx(p, fx, target) {
   const e = opponent(p);
   if (!fx) return;
+  // 면역(9/28): 단일 대상 지정 불가 — 혹시 대상으로 넘어와도 단일 대상 부분만 무효 (전체 부분은 적용)
+  if (target && target.kind === "minion" && isImmune(target.minion)) {
+    log(`${target.minion.name} 면역 · 대상으로 지정할 수 없음`);
+    target = null;
+  }
   if (fx.type === "dmg") {
     dealToTarget(p, target, fx.value);
     if (target && target.kind === "minion") {
@@ -816,9 +827,9 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "kill") {
     if (target && target.kind === "minion") destroyMinion(target.owner, target.minion, { fromSpell: true });
     if (fx.enemyDef) {
-      // 지각균열: 적 전체 방 감소 (방어 직접 감소 · 면역 제외)
+      // 지각균열: 적 전체 방 감소 (방어 직접 감소 · 면역 포함)
       [...e.board].forEach(m => {
-        if (m.dying || isImmune(m)) return;
+        if (m.dying) return;
         m.def = Math.max(0, (m.def || 0) + fx.enemyDef);
       });
     }
@@ -826,8 +837,7 @@ function applyFx(p, fx, target) {
     if (target && target.kind === "minion") destroyMinion(target.owner, target.minion, { fromSpell: true });
   } else if (fx.type === "set_one") {
     if (target && target.kind === "minion") {
-      if (isImmune(target.minion)) { log(`${target.minion.name} 면역 · 스펠 효과 무시`); }
-      else {
+      {
         const m = target.minion;
         if (fx.atk != null) m.atk = fx.atk;
         if (fx.def != null) m.def = fx.def;
@@ -857,8 +867,7 @@ function applyFx(p, fx, target) {
     }
   } else if (fx.type === "buff") {
     if (target && target.kind === "minion") {
-      if (isImmune(target.minion)) { log(`${target.minion.name} 면역 · 스펠 효과 무시`); }
-      else {
+      {
         const m = target.minion;
         if (fx.atk) m.atk += fx.atk;
         if (fx.def) m.def = (m.def || 0) + fx.def;
@@ -887,8 +896,7 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "own_black_buff") {
     if (target && target.kind === "minion") {
       const m = target.minion;
-      if (isImmune(m)) { log(`${m.name} 면역 · 스펠 효과 무시`); }
-      else {
+      {
         // 불길한예감: 골드(+)도 즉시 블랙(−)으로 전환
         if ((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0)) {
           m.atkC = -Math.abs(m.atkC || 0);
@@ -916,8 +924,7 @@ function applyFx(p, fx, target) {
     });
   } else if (fx.type === "grant_extra") {
     if (target && target.kind === "minion") {
-      if (isImmune(target.minion)) { log(`${target.minion.name} 면역 · 스펠 효과 무시`); }
-      else {
+      {
         const m = target.minion;
         if (fx.atk) m.atk += fx.atk;
         if (fx.hp) { m.hp += fx.hp; m.maxHp = (m.maxHp || m.hp) + fx.hp; }
@@ -928,7 +935,6 @@ function applyFx(p, fx, target) {
     }
   } else if (fx.type === "set_enemy") {
     e.board.forEach(m => {
-      if (isImmune(m)) return;
       if (fx.atk != null) m.atk = fx.atk;
       if (fx.coinZero) { m.atkC = 0; m.defC = 0; m.hpC = 0; }
     });
@@ -953,8 +959,7 @@ function applyFx(p, fx, target) {
     log(`바람망토 · 손패 유닛 ${n}장 소울${delta >= 0 ? "+" : ""}${delta}`);
   } else if (fx.type === "double_def") {
     if (target && target.kind === "minion") {
-      if (isImmune(target.minion)) log(`${target.minion.name} 면역 · 스펠 효과 무시`);
-      else target.minion.def = (target.minion.def || 0) * 2;
+      target.minion.def = (target.minion.def || 0) * 2;
     }
   } else if (fx.type === "soul") {
     p.soul += fx.value;
@@ -962,10 +967,9 @@ function applyFx(p, fx, target) {
     dealHero(e, fx.value);
   } else if (fx.type === "float_def") {
     const n = Math.max(0, 5 - p.board.length) + Math.max(0, 5 - e.board.length);
-    [...p.board, ...e.board].forEach(m => { if (!isImmune(m)) m.def = Math.max(0, (m.def || 0) - n); });
+    [...p.board, ...e.board].forEach(m => { m.def = Math.max(0, (m.def || 0) - n); });
   } else if (fx.type === "seal_giant") {
     e.board.forEach(m => {
-      if (isImmune(m)) return;
       if ((m.hp || 0) >= 6) { m.atk = 0; m.atkC = 0; }
     });
   } else if (fx.type === "summon_islands") {
@@ -983,7 +987,6 @@ function applyFx(p, fx, target) {
     log(n ? `${(CARD_MAP[sid] && CARD_MAP[sid].name) || sid} ${n}기 소환` : "전장이 가득 차 소환할 수 없습니다");
   } else if (fx.type === "magnet") {
     e.board.forEach(m => {
-      if (isImmune(m)) return;
       if (m.atkC || m.defC || m.hpC) { m.atk = 0; m.def = 0; }
     });
   } else if (fx.type === "earthquake") {
@@ -1001,7 +1004,7 @@ function applyFx(p, fx, target) {
     });
   } else if (fx.type === "tornado") {
     const cap = fx.maxCost != null ? fx.maxCost : 2;
-    [...p.board, ...e.board].forEach(m => { if (!isImmune(m) && printedSoul(m) <= cap) m.dying = true; });
+    [...p.board, ...e.board].forEach(m => { if (printedSoul(m) <= cap) m.dying = true; });
     [p, e].forEach(pl => pl.board.filter(m => m.dying).forEach(m => destroyMinion(pl, m, { fromSpell: true })));
   } else if (fx.type === "smash") {
     p.board.forEach(m => {
@@ -1022,7 +1025,6 @@ function applyFx(p, fx, target) {
     const minC = fx.minCost != null ? fx.minCost : 0;
     [...p.board, ...e.board].forEach(m => {
       if (printedSoul(m) < minC) return;
-      if (isImmune(m)) return;
       if (fx.atk != null) m.atk = fx.atk;
       else m.atk = 1;
       if (fx.hp != null) { m.hp = fx.hp; m.maxHp = fx.hp; }
@@ -1030,7 +1032,6 @@ function applyFx(p, fx, target) {
     });
   } else if (fx.type === "petrify") {
     e.board.forEach(m => {
-      if (isImmune(m)) return;
       if ((m.atk || 0) <= 3) { m.atk = 0; m.def = (m.def || 0) + 1; }
     });
   } else if (fx.type === "aoe_by_def") {
@@ -1038,7 +1039,6 @@ function applyFx(p, fx, target) {
     const dmg = fx.value || 0;
     let hit = 0;
     [...e.board].forEach(m => {
-      if (isImmune(m)) { log(`${m.name} 면역 · 소환 피해 무시`); return; }
       const blocked = Math.max(0, Number(m.def) || 0);
       const hpDmg = Math.max(0, dmg - blocked);
       if (hpDmg > 0) damageMinion(e, m, hpDmg, { fromSpell: true });
@@ -1050,7 +1050,6 @@ function applyFx(p, fx, target) {
     // 「체력·방어 감소」: 방어를 거치지 않고 직접 감소. N=coinPoolN. 영웅 제외.
     let touched = 0;
     [...e.board].forEach(m => {
-      if (isImmune(m)) { log(`${m.name} 면역 · 소환 감소 무시`); return; }
       const n = coinPoolN(m);
       if (!n) return;
       const prevDef = Math.max(0, Number(m.def) || 0);
@@ -1071,7 +1070,6 @@ function applyFx(p, fx, target) {
     const thr = fx.value != null ? fx.value : 5;
     const victims = e.board.filter(m => (Number(m.atk) || 0) >= thr);
     victims.forEach(m => {
-      if (isImmune(m)) { log(`${m.name} 면역 · 소환 파괴 무시`); return; }
       log(`${m.name} 공격 ${m.atk} ≥ ${thr} · 파괴`);
       destroyMinion(e, m, { fromSpell: true });
     });
@@ -1099,7 +1097,6 @@ function applyFx(p, fx, target) {
     else log("전장이 가득 차 토큰을 소환할 수 없습니다");
   } else if (fx.type === "silence_enemy_board") {
     [...e.board].forEach(m => {
-      if (isImmune(m)) return;
       m.ability = null;
       m.atkSkill = null;
       m.keywords = [];
@@ -1142,7 +1139,6 @@ function applyFx(p, fx, target) {
     });
     [...e.board].forEach(m => {
       if (keepEnemy && m.uid === keepEnemy.uid) return;
-      if (isImmune(m)) return;
       destroyMinion(e, m, { fromSpell: true });
     });
     log("일기토 · 양쪽 하나씩만 남김");
@@ -1151,12 +1147,11 @@ function applyFx(p, fx, target) {
     [...e.board].forEach(m => damageMinion(e, m, n, { fromSpell: true }));
     log(`연환계 · 적 ${n}체에게 ${n} 피해`);
   } else if (fx.type === "enemy_skip_attack") {
-    [...e.board].forEach(m => { if (!isImmune(m)) m.skipAttack = true; });
+    [...e.board].forEach(m => { m.skipAttack = true; });
     log("적 전체 다음 턴 공격 불가");
   } else if (fx.type === "sac_summon_hand") {
     const sac = target && target.kind === "minion" && target.owner === p ? target.minion : null;
     if (!sac) { log("허허실실 · 아군 대상을 선택하세요"); return; }
-    if (isImmune(sac)) { log("허허실실 · 면역 대상"); return; }
     const handUnits = p.hand.filter(c => c.type === "minion");
     if (!handUnits.length) { log("허허실실 · 손패 유닛 없음"); return; }
     destroyMinion(p, sac, { fromSpell: true });
@@ -1174,7 +1169,6 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "steal_minion") {
     if (!target || target.kind !== "minion" || target.owner !== e) { log("미인계 · 적 유닛을 선택하세요"); return; }
     const stolen = target.minion;
-    if (isImmune(stolen)) { log(`${stolen.name} 면역 · 탈취 실패`); return; }
     if (p.board.length >= 5) { log("전장 가득 참"); return; }
     e.board = e.board.filter(x => x.uid !== stolen.uid);
     stolen.canAttack = false; stolen.attacksLeft = 0;
@@ -1204,11 +1198,10 @@ function applyFx(p, fx, target) {
     });
     log(n ? `소환 · 코인 있는 아군 ${n}기 코인 수 ${goal}` : "소환 · 코인 있는 아군 없음");
   } else if (fx.type === "set_enemy_hp") {
-    // 황충: 적 전체 유닛 체력을 value로 (면역 제외)
+    // 황충: 적 전체 유닛 체력을 value로 (면역 포함)
     const v = fx.value != null ? fx.value : 1;
     let n = 0;
     e.board.forEach(m => {
-      if (isImmune(m)) return;
       m.hp = v; n++;
     });
     log(n ? `소환 · 적 ${n}기 체력 ${v}` : "소환 · 대상 적 없음");
@@ -1223,10 +1216,6 @@ function spellDamageMinion(owner, m, dmg, ctx) {
   ctx = ctx || { fromSpell: true };
   dmg = Math.max(0, Number(dmg) || 0);
   if (!dmg) return;
-  if (ctx.fromSpell && isImmune(m)) {
-    log(`${m.name} 면역 · 스펠 효과 무시`);
-    return;
-  }
   const blocked = Math.min(dmg, Math.max(0, Number(m.def) || 0));
   const hpDmg = Math.max(0, dmg - blocked);
   if (blocked) log(`${m.name} 스펠 피해 ${dmg} (방어 ${blocked} 흡수) → 체력 −${hpDmg}`);
@@ -1255,10 +1244,6 @@ function damageMinion(owner, m, n, ctx) {
   if (!m || m.dying) return;
   ctx = ctx || {};
   n = Math.max(0, Number(n) || 0);
-  if (ctx.fromSpell && isImmune(m)) {
-    log(`${m.name} 면역 · 스펠 효과 무시`);
-    return;
-  }
   // 보호: only real HP≥1 hits consume; 0-dmg & black-coin HP loss do not
   const hasShield = abilityOf(m) === "보호" || (m.keywords || []).includes("shield");
   if (n > 0 && hasShield) {
@@ -1367,13 +1352,7 @@ function destroyMinion(owner, m, opts) {
   if (!m || !owner) return;
   if (!owner.board.some(x => x.uid === m.uid)) return;
   opts = opts || {};
-  // Spell/effect destroy vs immune
-  if (opts.fromSpell === true || (opts.fromSpell !== false && !m._deathCtx)) {
-    if (isImmune(m)) {
-      log(`${m.name} 면역 · 스펠 파괴 무시`);
-      return;
-    }
-  }
+  // 면역(9/28): 전체 파괴 효과는 면역도 받는다 (단일 대상 지정은 validTargets/applyFx에서 차단)
   m.hp = Math.min(m.hp, 0);
   m.dying = true;
   if (opts.fromSpell === false) {
@@ -2491,7 +2470,7 @@ const ABI_HELP = {
   "강탈": "파괴될 때 나를 파괴한 적을 탈취합니다.",
   "출전": "낼 때 카드 1장을 뽑습니다.",
   "유언": "파괴될 때 카드 1장을 뽑습니다.",
-  "면역": "스펠 효과를 받지 않습니다.",
+  "면역": "스펠·효과의 단일 대상으로 지정되지 않습니다. 전체 효과는 받습니다.",
   "공격불가": "내 턴 종료 시 공격하지 않습니다. 전장에 남으며 피격은 받습니다."
 };
 function fmtCoinLinks(c) {
