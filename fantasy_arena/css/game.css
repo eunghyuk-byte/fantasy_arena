@@ -2560,6 +2560,10 @@ html.is-desktop, html.is-desktop body {
   object-position: center center !important;
   z-index: 0 !important;
   pointer-events: none !important;
+  /* v0.328: 보드 배경 1.15배 확대 (사용자 변경안) · 가로 중앙 유지 · 틀 위쪽이 화면 위 가까이.
+     layoutHudGems/layoutEndBtn/layoutBoardDecks는 getBoundingClientRect(변환 포함)로 따라감 */
+  transform: translateY(calc(var(--board-zoom-dy, 0.0075) * 100cqh)) scale(var(--board-zoom, 1.15)) !important;
+  transform-origin: 50% 50% !important;
 }
 #game.active .col-main > #boardBgLayer {
   display: none !important;
@@ -3514,8 +3518,9 @@ html.is-desktop, html.is-desktop body {
 #game.active .log,
 #game.active .col-main > .log {
   position: absolute !important;
-  left: 10px !important;
-  top: 10px !important;
+  /* v0.328: 보드 배경 1.15배 — 금테 모서리 바깥(왼쪽 위 나무)으로, 잘리지 않게 top 6px */
+  left: -8.7cqh !important;
+  top: 6px !important;
   right: auto !important;
   bottom: auto !important;
   transform: none !important;
@@ -3555,7 +3560,7 @@ html.is-desktop, html.is-desktop body {
 #game.active .hint,
 #game.active .col-main > .hint {
   position: absolute !important;
-  left: 10px !important;
+  left: -8.7cqh !important; /* v0.328: 로그 패널과 같이 금테 바깥 왼쪽 위 */
   top: auto !important;
   white-space: pre-line !important;
   /* sit just under log panel — JS sets --hint-top; fallback below */
@@ -3780,8 +3785,9 @@ body.dragging-card {
 }
 #game.active #oppDeck .pile-stack,
 #game.active #myDeck .pile-stack {
-  width: min(72px, 100%);
-  height: min(104px, 17cqh);
+  /* v0.328: --deck-u = 보드 배경 확대 배율 (layoutBoardDecks) */
+  width: min(calc(72px * var(--deck-u, 1)), 100%);
+  height: min(calc(104px * var(--deck-u, 1)), calc(17cqh * var(--deck-u, 1)));
 }
 
 /* Opp hero: drop well below top frame (match lowered opp deck band) */
@@ -3822,7 +3828,7 @@ body.dragging-card {
 #game.active #oppBoard,
 #game.active #myBoard {
   justify-content: flex-start !important;
-  width: min(70%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important;
+  width: min(82%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important; /* v0.328: 70→82% (전장 카드 1.44배) */
   max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
@@ -3842,7 +3848,7 @@ body.dragging-card {
 /* Drop-glow follows narrowed+taller myBoard */
 #game.active.drop-ready #myBoard,
 #game.active #myBoard.drop-glow {
-  width: min(70%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important;
+  width: min(82%, calc(5 * var(--slot-w, 112px) + 4 * 10px + 28px)) !important; /* v0.328: 70→82% (전장 카드 1.44배) */
   max-width: calc(5 * var(--slot-w, 112px) + 4 * 10px + 36px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
@@ -4423,14 +4429,14 @@ input, textarea, [contenteditable="true"] {
 /* ===== v0.262: yellow field borders — opp up 5, my down 5 more ===== */
 #game.active .board.opp,
 #game.active #oppBoard {
-  transform: translate(calc(-1.5% + 20px), 20px) !important; /* was 25 → up 5 */
+  transform: translate(calc(-1.5% - 1px), 4.167cqh) !important; /* v0.328: 큰 전장 카드 — 변경안 자리 (was +20px,20px) */
 }
 #game.active #myBoard {
-  transform: translate(calc(-1.5% + 20px), 70px) !important; /* was 65 → down 5 */
+  transform: translate(calc(-1.5% - 1px), 10.185cqh) !important; /* v0.328: 큰 전장 카드 — 변경안 자리 (was +20px,70px) */
 }
 #game.active.drop-ready #myBoard,
 #game.active #myBoard.drop-glow {
-  transform: translate(calc(-1.5% + 20px), 70px) !important;
+  transform: translate(calc(-1.5% - 1px), 10.185cqh) !important;
 }
 
 /* 한글 줄 바꿈: 단어 중간이 아니라 띄어쓰기 자리에서만 (9/25) */

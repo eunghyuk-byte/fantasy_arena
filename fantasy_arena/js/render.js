@@ -12,6 +12,15 @@ function boardCoreBox(bg, br) {
   const coreW = Math.min(contentW, contentH * 4 / 3);
   return { left: contentLeft + (contentW - coreW) / 2, top: contentTop, w: coreW, h: contentH };
 }
+/** v0.328: 보드 배경 확대 배율 (CSS --board-zoom, 기본 1.15). 배경 기준 px 보정값(−170 등)도 같이 곱한다. */
+function boardZoom(bg) {
+  try {
+    const r = bg.getBoundingClientRect();
+    const w0 = bg.offsetWidth;
+    if (w0 > 8 && r.width > 8) return r.width / w0;
+  } catch (e) {}
+  return 1;
+}
 
 /** Last successful board/HUD geometry fingerprint + inline style cache. */
 var _boardLayoutKey = "";
@@ -131,51 +140,38 @@ function ensureBoardLayouts(force) {
 
 function layoutBoardDecks() {
   const main = document.querySelector("#game.active .col-main");
-  const oppB = document.getElementById("oppBoard");
-  const myB = document.getElementById("myBoard");
+  const bg = document.getElementById("boardBgLayer");
   const oppD = document.getElementById("oppDeck");
   const myD = document.getElementById("myDeck");
-  if (!main || !oppB || !myB || !oppD || !myD) return;
+  if (!main || !bg || !oppD || !myD || !bg.naturalWidth) return;
   const mr = main.getBoundingClientRect();
   if (mr.width < 8 || mr.height < 8) return;
-  const place = (board, deck, edge) => {
-    const br = board.getBoundingClientRect();
-    const w = Math.max(56, Math.min(84, br.width * 0.11));
-    deck.style.position = "absolute";
-    // Stage-left (not board-left): board is centered/narrower than parchment
-    // v0.247 LEFT10 → v0.263 LEFT20 more (cumul −30)
-    deck.style.left = Math.max(0, Math.max(6, Math.min(18, mr.width * 0.02)) - 30) + "px";
-    deck.style.width = w + "px";
-    deck.style.zIndex = "6";
-    deck.style.display = "flex";
-    deck.style.flexDirection = "column";
-    deck.style.alignItems = "center";
-    deck.style.pointerEvents = "none";
-    deck.style.margin = "0";
-    deck.style.boxSizing = "border-box";
-    if (edge === "top") {
-      // Opp deck: sit low in opp lane (near unit row), not stuck to top frame
-      const pileH = Math.max(96, Math.min(120, br.height * 0.42));
-      const topPad = Math.max(8, br.height * 0.52);
-      // v0.225…v0.247 UP30 → v0.263 UP +100 (cumul −130)
-      deck.style.top = (br.top - mr.top + topPad - 130) + "px";
-      deck.style.bottom = "auto";
-      deck.style.height = pileH + "px";
-      deck.style.justifyContent = "flex-start";
-      deck.style.paddingTop = "0";
-      deck.style.paddingBottom = "0";
-    } else {
-      deck.style.top = "auto";
-      // v0.236: ally deck UP ~50px
-      deck.style.bottom = (mr.bottom - br.bottom + 4 + 80) + "px";
-      deck.style.height = Math.max(90, br.height * 0.85) + "px";
-      deck.style.justifyContent = "flex-end";
-      deck.style.paddingTop = "0";
-      deck.style.paddingBottom = "6px";
-    }
+  const core = boardCoreBox(bg, bg.getBoundingClientRect());
+  if (!core || core.w < 8) return;
+  // v0.328: 덱 더미는 보드 배경(4:3 코어) 기준 비율로 — 배경 확대(1.15)와 같이 스케일·이동.
+  // 값은 v0.327 1920×1080(코어 1440×1080, 확대 없음)에서의 자리: 왼쪽 32px · 상대 덱 top 346 h 238 · 내 덱 top 464 h 324 · 폭 84
+  const u = core.h / 1080;
+  const place = (deck, top, h, justify) => {
+    deck.style.setProperty("position", "absolute", "important");
+    deck.style.setProperty("left", (core.left + core.w * (32 / 1440) - mr.left) + "px", "important");
+    deck.style.setProperty("top", (core.top + top * u - mr.top) + "px", "important");
+    deck.style.setProperty("bottom", "auto", "important");
+    deck.style.setProperty("width", (84 * u) + "px", "important");
+    deck.style.setProperty("height", (h * u) + "px", "important");
+    deck.style.setProperty("z-index", "6", "important");
+    deck.style.setProperty("display", "flex", "important");
+    deck.style.setProperty("flex-direction", "column", "important");
+    deck.style.setProperty("align-items", "center", "important");
+    deck.style.setProperty("justify-content", justify, "important");
+    deck.style.setProperty("pointer-events", "none", "important");
+    deck.style.setProperty("margin", "0", "important");
+    deck.style.setProperty("box-sizing", "border-box", "important");
+    deck.style.setProperty("padding-top", "0", "important");
+    deck.style.setProperty("padding-bottom", justify === "flex-end" ? (6 * u) + "px" : "0", "important");
+    deck.style.setProperty("--deck-u", String(u));
   };
-  place(oppB, oppD, "top");
-  place(myB, myD, "bottom");
+  place(oppD, 346, 238, "flex-start");
+  place(myD, 464, 324, "flex-end");
 }
 
 function layoutBoardAlign() {
@@ -197,7 +193,8 @@ function layoutBoardAlign() {
   // Rows: oppHand | oppBoard | myBoard | myHand | hint
   // HAND LAYOUT LOCK (see LAYOUT_HAND_LOCK.md) — do not shrink below 0.28; negative CSS margin forbidden
   const HAND_ROW_FRAC = 0.28; // LOCKED
-  const hand = HAND_ROW_FRAC, hint = 0.015, oppHand = 0.14; // v0.243: room for 2× opp backs
+  // v0.328: oppHand 0.14→0.105 — 전장 카드 1.44배(높이 ≈0.299H)가 레인 안에 들어가게 (손패 행 0.28은 그대로)
+  const hand = HAND_ROW_FRAC, hint = 0.015, oppHand = 0.105;
   const rest = 1 - hand - hint - oppHand; // boards total
   // v0.234: equal field lanes (ignore parchment midFrac split)
   const oppBoard = rest / 2;
@@ -214,24 +211,29 @@ function layoutBoardAlign() {
   );
 }
 
+const FIELD_CARD_H_FRAC = 0.299;
 function layoutBoardSlots() {
   ["myBoard", "oppBoard"].forEach(id => {
     const board = document.getElementById(id);
     if (!board) return;
     const bh = board.clientHeight || 0;
     const bw = board.clientWidth || 0;
-    // Fit up to 5 units in board width; height ~88% of lane
-    let slotH = Math.floor(bh * 0.94); // v0.225: field lane a bit taller
+    // v0.328: 전장 카드 = 화면 높이의 29.9% (1080 기준 216×323, v0.327 대비 ≈1.44배 · 사용자 변경안)
+    const mainEl = board.closest(".col-main");
+    const mh = (mainEl && mainEl.clientHeight) || 0;
+    let slotH = mh > 200 ? Math.round(mh * FIELD_CARD_H_FRAC) : Math.floor(bh * 0.94);
     if (!slotH || slotH < 120) slotH = 160;
-    if (slotH > 220) slotH = 220;
     let slotW = Math.floor(slotH * 2 / 3);
-    const maxW = Math.floor((bw - 24) / 5.15);
+    // v0.328: 가능한 폭 = col-main의 82% (CSS .board width cap) — 현재 bw로 재면 이전 작은 slot에 묶임
+    const availW = (mainEl && mainEl.clientWidth) ? mainEl.clientWidth * 0.82 : bw;
+    const maxW = Math.floor((availW - 68) / 5);
     if (maxW > 40 && slotW > maxW) {
       slotW = maxW;
       slotH = Math.floor(slotW * 3 / 2);
     }
-    board.style.setProperty("--slot-h", slotH + "px");
-    board.style.setProperty("--slot-w", slotW + "px");
+    // v0.328: important — 예전 CSS .board { --slot-h: clamp(...) !important }가 JS 값을 덮고 있었음
+    board.style.setProperty("--slot-h", slotH + "px", "important");
+    board.style.setProperty("--slot-w", slotW + "px", "important");
   });
 }
 
@@ -1220,6 +1222,7 @@ function layoutHudGems() {
   if (!(contentW > 8 && contentH > 8)) return;
   const contentLeft = core.left;
   const contentTop = core.top;
+  const Z = boardZoom(bg); // v0.328: 배경 확대만큼 px 보정값도 확대
 
   function placeIn(el, parentRect, CX, CY, bw, bh) {
     if (!el || !parentRect) return;
@@ -1245,7 +1248,10 @@ function layoutHudGems() {
     const el = document.getElementById(id);
     if (!el || !el.style.left) return;
     const L = parseFloat(el.style.left);
-    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 170) + "px", "important");
+    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 170 * Z) + "px", "important");
+    // v0.328: 소울 숫자 글자도 배경과 같이 확대 (소울 드로우 숫자가 이 크기를 따름)
+    if (el._baseFs == null) { el.style.removeProperty("font-size"); el._baseFs = parseFloat(getComputedStyle(el).fontSize) || 16; }
+    el.style.setProperty("font-size", (el._baseFs * Z).toFixed(2) + "px", "important");
   });
   // v0.321 소울 드로우 버튼 (~92px @1280×800, v0.319의 2배) → v0.324 보이는 판 ~46px (요소 ~62px, 왼쪽 위 기준 동일 위치). 내 버튼: 소울 표시 바로 아래(핸드 10장 오른쪽 끝 바깥 · 5번째 유닛 칸 아래).
   // 소울 표시 왼쪽은 핸드 10장 오른쪽 카드와, 위쪽은 5번째 유닛 칸과 겹쳐 빈 자리가 없다. 상대 버튼: 상대 소울 왼쪽, 비율 축소.
@@ -1256,7 +1262,7 @@ function layoutHudGems() {
     const gl = parseFloat(g.style.left), gt = parseFloat(g.style.top);
     if (Number.isNaN(gl) || Number.isNaN(gt)) return;
     // v0.324: 3상태 아트(판 지름 757/1024) — 보이는 판이 v0.321 버튼(~92px)의 절반(~46px)이 되도록 요소 크기 = 이전 × 0.5 ÷ (757/1024)
-    const D = Math.round(Math.max(60, SOUL_W * 1.56) * k * 0.5 / SOUL_DRAW_PLATE_FRAC);
+    const D = Math.round(Math.max(60 * Z, SOUL_W * 1.56) * k * 0.5 / SOUL_DRAW_PLATE_FRAC);
     // 보이는 소울 숫자(텍스트) 기준으로 붙인다 — #…SoulGem 상자는 숫자보다 넓다
     let textL = null, textCY = null, textB = null;
     try {
@@ -1270,8 +1276,8 @@ function layoutHudGems() {
     let left, top;
     if (mode === "below") {
       // 소울 알약 왼쪽 끝(숫자 왼쪽 −8px)에 맞춰 바로 아래
-      left = (textL != null ? textL : gl) - 8;
-      top = (textB != null ? textB : gt + SOUL_H) + 6;
+      left = (textL != null ? textL : gl) - 8 * Z;
+      top = (textB != null ? textB : gt + SOUL_H) + 6 * Z;
     } else {
       left = (textL != null ? textL : gl) - D - 3;
       top = (textCY != null ? textCY : gt + SOUL_H / 2) - D / 2;
@@ -1302,7 +1308,7 @@ function layoutHudGems() {
     [oppHero, myHero].forEach(el => {
       if (!el || !el.style.left) return;
       const L = parseFloat(el.style.left);
-      if (!Number.isNaN(L)) el.style.setProperty("left", (L + 15) + "px", "important");
+      if (!Number.isNaN(L)) el.style.setProperty("left", (L + 15 * Z) + "px", "important");
     });
 
     // HP hearts — place relative to hero-slot after heroes are seated
@@ -1323,8 +1329,8 @@ function layoutHudGems() {
       const vx = contentLeft + contentW * CX - HP_W / 2;
       const vy = contentTop + contentH * CY - HP_H / 2;
       // v0.236: hero HP numbers DOWN ~9px and LEFT ~7px
-      hp.style.setProperty("left", (vx - sr.left - 6) + "px", "important");
-      hp.style.setProperty("top", (vy - sr.top + 9) + "px", "important");
+      hp.style.setProperty("left", (vx - sr.left - 6 * Z) + "px", "important");
+      hp.style.setProperty("top", (vy - sr.top + 9 * Z) + "px", "important");
       hp.style.setProperty("width", HP_W + "px", "important");
       hp.style.setProperty("height", HP_H + "px", "important");
       hp.style.setProperty("right", "auto", "important");
@@ -1549,8 +1555,9 @@ function layoutEndBtn() {
   // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
   if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
   // v0.236… v0.259: end-turn LEFT cumulative −99
-  btn.style.left = (left - 99) + "px";
-  btn.style.top = (top - 24) + "px";
+  const Z = boardZoom(bg); // v0.328
+  btn.style.left = (left - 99 * Z) + "px";
+  btn.style.top = (top - 24 * Z) + "px";
   btn.style.width = bw + "px";
   btn.style.height = bh + "px";
   btn.style.right = "auto";
