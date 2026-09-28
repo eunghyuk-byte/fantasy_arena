@@ -784,6 +784,9 @@ async function composeCardFace(c, opts={}) {
   // v0.326: 「환생」 전장 오버레이 (1번 불사조 깃털) — 보호 위, 숫자·배지 아래. 환생 소모·침묵 시 사라짐.
   // v0.332: 면역+환생 겹침 시 깃털(불꽃 면적 큼)이 면역 룬을 가리지 않도록 환생을 먼저 그리고 면역을 위에 올린다.
   if (opts.fieldRebirth) await paintRebirthOverlay(ctx, W, H);
+  // v0.337: 「아이템 착용중」 장비 배지 (가죽 고리 청동 방패·검, 컨셉 1안) — 보호·환생·면역 위(가장 위), 숫자·배지 아래.
+  // 전장 유닛(renderMinion)에서 equippedItem 있을 때만. 해제·환생(해제)·사망 시 사라짐.
+  if (opts.fieldEquip) await paintEquipBadge(ctx, W, H);
   // v0.323: 「면역」 전장 오버레이 (3번 비전 봉인진) — 보호·환생 위, 숫자·배지 아래. renderMinion(전장) 전용.
   if (opts.fieldImmune) await paintImmuneOverlay(ctx, W, H);
 
@@ -846,6 +849,18 @@ async function paintRebirthOverlay(ctx, W, H) {
 async function paintProtectOverlay(ctx, W, H) {
   return paintFieldOverlay(ctx, W, H, PROTECT_OVERLAY_SRC,
     (typeof window !== "undefined" && window.PROTECT_OVERLAY_BLEND) || PROTECT_OVERLAY_BLEND);
+}
+/* v0.337 장비 배지: 768×1152 전장 카드 비율 오버레이에서 배지 영역만 잘라낸 에셋.
+ * 위치 = 원본 768×1152 기준 (577,637) 크기 158×306 → 카드 W/H 비율로 배치 (아래 패널 오른쪽, 체력 보석 위). */
+const EQUIP_BADGE_SRC = "assets/img/fx/equip_badge.webp?v=0.337";
+const EQUIP_BADGE_BOX = { x: 577 / 768, y: 637 / 1152, w: 158 / 768, h: 306 / 1152 };
+async function paintEquipBadge(ctx, W, H) {
+  const img = await loadImg(EQUIP_BADGE_SRC);
+  if (!img) return;
+  const b = EQUIP_BADGE_BOX;
+  ctx.save();
+  ctx.drawImage(img, W * b.x, H * b.y, W * b.w, H * b.h);
+  ctx.restore();
 }
 async function paintFieldOverlay(ctx, W, H, src, blend, ellipseHoles) {
   const img = await loadImg(src);
@@ -968,7 +983,8 @@ function faceCacheKey(c, opts) {
   const fsh = opts && opts.fieldShield ? "fsh1" : "fsh0";
   const fim = opts && opts.fieldImmune ? "fim1" : "fim0";
   const frb = opts && opts.fieldRebirth ? "frb1" : "frb0";
-  return ["v107statColor", version, fsh, fim, frb, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, (() => { const L = coinLinksForFace(c); return "ec" + L.atkC + "," + L.defC + "," + L.hpC; })(), c._itemFx || "", opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  const feq = opts && opts.fieldEquip ? "feq1" : "feq0";
+  return ["v107statColor", version, fsh, fim, frb, feq, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, (() => { const L = coinLinksForFace(c); return "ec" + L.atkC + "," + L.defC + "," + L.hpC; })(), c._itemFx || "", opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
@@ -1151,6 +1167,8 @@ function renderMinion(m, side) {
     fieldImmune: unitHasActiveImmune(m),
     // v0.326: 전장 유닛 미사용 환생 (아이템 모래시계·피닉스깃털·소생초 포함, 소모·침묵 시 사라짐)
     fieldRebirth: unitHasActiveRebirth(m),
+    // v0.337: 아이템 착용중 장비 배지 (전장 전용)
+    fieldEquip: !!m.equippedItem,
   };
   const cacheKey = faceCacheKey(m, faceOpts);
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
