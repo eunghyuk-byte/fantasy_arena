@@ -3963,7 +3963,9 @@ html.is-desktop #game.active .my-hand .card.playable,
 #game .col-main > .soul-draw-btn.used {
   cursor: default;
 }
-#game .col-main > .soul-draw-btn .sd-cost.dim { opacity: .55; filter: grayscale(1); }
+#game .col-main > .soul-draw-btn .sd-cost.dim { opacity: .7; filter: grayscale(1); }
+/* v0.326: 상대 표시 버튼 숫자는 읽히게 (거의 원래 밝기) */
+#game .col-main > .soul-draw-btn.opp .sd-cost.dim { opacity: .92; filter: none; }
 #game .col-main > .soul-draw-btn.opp { cursor: default; pointer-events: auto; }
 
 /* =====================================================================

@@ -292,7 +292,7 @@ const CARDS = [
   { id:"a40", tribe:"water", name:"소교", cost:1, type:"minion", token:true, atk:1, def:1, hp:1, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
   { id:"e42", tribe:"earth", name:"미로", cost:1, type:"minion", token:true, atk:0, def:2, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", cannotAttack:true, ability:"공격불가", text:"공격불가" },
   { id:"di7", tribe:"dark", name:"적토마", cost:6, type:"item", rarity:"legendary", atk:4, def:1, hp:4, text:"파괴: 적토마 (4/1/4) 1기 생성", itemFx:"destroy_summon_chitu" },
-  { id:"li7", tribe:"light", name:"백우선", cost:2, type:"item", rarity:"legendary", atk:0, def:1, hp:2, text:"내 턴이 끝날 때 랜덤 빛 카드를 내 핸드에 생성", itemFx:"eot_random_light_hand" },
+  { id:"li7", tribe:"light", name:"백우선", cost:2, type:"item", rarity:"legendary", atk:0, def:1, hp:2, text:"내 턴 종료: 랜덤 빛 카드를 내 핸드에 생성", itemFx:"eot_random_light_hand" },
   { id:"ei7", tribe:"earth", name:"맹덕신서", cost:3, type:"item", rarity:"legendary", atk:0, def:1, hp:2, text:"상대가 사용하는 스펠을 내 핸드로 복사", itemFx:"copy_enemy_spell" },
   { id:"ni7", tribe:"wind", name:"청강검", cost:4, type:"item", rarity:"legendary", atk:3, def:0, hp:2, text:"처치: 드로우 1", itemFx:"kill_draw" },
   { id:"ai7", tribe:"water", name:"청룡언월도", cost:6, type:"item", rarity:"legendary", atk:2, def:2, hp:0, text:"공격: 이 유닛의 방어만큼 적 전체 피해", itemFx:"attack_def_aoe_damage" },

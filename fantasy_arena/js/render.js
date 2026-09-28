@@ -767,6 +767,8 @@ async function composeCardFace(c, opts={}) {
   if (opts.fieldShield) await paintProtectOverlay(ctx, W, H);
   // v0.323: 「면역」 전장 오버레이 (3번 비전 봉인진) — 보호 위에 겹침, 숫자·배지 아래. renderMinion(전장) 전용.
   if (opts.fieldImmune) await paintImmuneOverlay(ctx, W, H);
+  // v0.326: 「환생」 전장 오버레이 (1번 불사조 깃털) — 보호·면역 위, 숫자·배지 아래. 환생 소모·침묵 시 사라짐.
+  if (opts.fieldRebirth) await paintRebirthOverlay(ctx, W, H);
 
   const baseCard = (typeof CARD_MAP !== "undefined" && c && CARD_MAP[c.id]) || null;
   paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070) + 12,
@@ -810,6 +812,18 @@ async function paintImmuneOverlay(ctx, W, H) {
   // 상단 중앙 룬 원이 종족 헤더(H*0.0697) 글자를 덮지 않도록 타원형 소프트 홀 추가
   return paintFieldOverlay(ctx, W, H, IMMUNE_OVERLAY_SRC,
     (typeof window !== "undefined" && window.IMMUNE_OVERLAY_BLEND) || IMMUNE_OVERLAY_BLEND,
+    [[W * 0.50, H * 0.0660, W * 0.17, H * 0.034, 0.85]]);
+}
+let REBIRTH_OVERLAY_BLEND = "source-over"; // v0.326
+const REBIRTH_OVERLAY_SRC = "assets/img/fx/rebirth_overlay.webp?v=0.326";
+/** Live unused-rebirth state (same rule as resolveDeath hasRebirth in game.js; consumed/silenced → false). */
+function unitHasActiveRebirth(m) {
+  if (!m) return false;
+  return (m.ability != null && String(m.ability).includes("환생")) || (m.keywords || []).includes("rebirth");
+}
+async function paintRebirthOverlay(ctx, W, H) {
+  return paintFieldOverlay(ctx, W, H, REBIRTH_OVERLAY_SRC,
+    (typeof window !== "undefined" && window.REBIRTH_OVERLAY_BLEND) || REBIRTH_OVERLAY_BLEND,
     [[W * 0.50, H * 0.0660, W * 0.17, H * 0.034, 0.85]]);
 }
 async function paintProtectOverlay(ctx, W, H) {
@@ -936,7 +950,8 @@ function faceCacheKey(c, opts) {
     : (typeof window !== "undefined" ? window.GAME_VERSION : "");
   const fsh = opts && opts.fieldShield ? "fsh1" : "fsh0";
   const fim = opts && opts.fieldImmune ? "fim1" : "fim0";
-  return ["v107statColor", version, fsh, fim, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, (() => { const L = coinLinksForFace(c); return "ec" + L.atkC + "," + L.defC + "," + L.hpC; })(), c._itemFx || "", opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
+  const frb = opts && opts.fieldRebirth ? "frb1" : "frb0";
+  return ["v107statColor", version, fsh, fim, frb, c.id, c.type || "", c.tribe || "", c.cost, c.atk, c.def, c.atkC, c.defC, c.hpC, (() => { const L = coinLinksForFace(c); return "ec" + L.atkC + "," + L.defC + "," + L.hpC; })(), c._itemFx || "", opts && opts.atk != null ? opts.atk : c.atk, opts && opts.def != null ? opts.def : c.def, opts && opts.hp != null ? opts.hp : c.hp, c.name, c.text || "", c.ability || "", shield, c.itemWorn ? "eq" : "", (c.equippedItem && c.equippedItem.id) || ""].join("|");
 }
 function faceSrc(c, opts, el) {
   const key = faceCacheKey(c, opts);
@@ -1117,6 +1132,8 @@ function renderMinion(m, side) {
     fieldShield: unitHasActiveShield(m),
     // v0.323: 전장 유닛 현재 면역 상태 (침묵 등으로 잃으면 사라짐)
     fieldImmune: unitHasActiveImmune(m),
+    // v0.326: 전장 유닛 미사용 환생 (아이템 모래시계·피닉스깃털·소생초 포함, 소모·침묵 시 사라짐)
+    fieldRebirth: unitHasActiveRebirth(m),
   };
   const cacheKey = faceCacheKey(m, faceOpts);
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
@@ -1252,6 +1269,12 @@ function layoutHudGems() {
     b.style.setProperty("right", "auto", "important");
     b.style.setProperty("bottom", "auto", "important");
   });
+  // v0.326: 버튼 크기가 바뀌면 숫자(소울 표시와 같은 CSS 크기)를 다시 그림
+  ["mySoulDraw", "oppSoulDraw"].forEach(bid => {
+    const b = document.getElementById(bid);
+    const cv = b && b.querySelector("canvas.sd-cost");
+    if (cv && cv._txt != null) { try { paintSoulDrawCost(b, cv._txt); } catch (e) {} }
+  });
 
   const hr = hud ? hud.getBoundingClientRect() : null;
   if (hr && hr.width >= 8 && hr.height >= 8) {
@@ -1327,24 +1350,29 @@ function paintSoulDrawCost(btn, cost) {
   const cv = btn && btn.querySelector("canvas.sd-cost");
   if (!cv) return;
   const txt = String(cost != null ? cost : (typeof SOUL_DRAW_COST !== "undefined" ? SOUL_DRAW_COST : 3));
-  if (cv._painted && cv._txt === txt) return;   // v0.321: 비용 값이 바뀌면 다시 그림
+  // v0.326: 숫자 크기 = 위 소울 표시(#mySoulGem 「10/10」)의 실제 CSS 글자 크기. 상대 버튼은 버튼 크기 비율만큼.
+  const { cssPx, btnW } = soulDrawNumberCssPx(btn);
+  const key = txt + "|" + cssPx.toFixed(2) + "|" + btnW.toFixed(1);
+  if (cv._painted && cv._key === key) return;   // v0.321: 비용 값·크기가 바뀌면 다시 그림
   cv._txt = txt;
-  // 캔버스 = 아이콘 전체(1024 기준 좌표 비율). 보석 중심 (282,216) · 글자 158px@1024
+  cv._key = key;
+  // 캔버스 = 아이콘 전체(1024 기준 좌표 비율). 보석 중심 (282,216)
   const S = 256;
   cv.width = S; cv.height = S;
   const c2 = cv.getContext && cv.getContext("2d");
   if (!c2) return;
   const G = SOUL_DRAW_GEM;
   const cx = S * G.cx / 1024, cy = S * G.cy / 1024;
-  let size = Math.round(S * G.font / 1024);
-  // 두 자리 숫자는 보석 평면(지름 2r) 안에 들어가도록 축소
+  // 버튼 폭(btnW CSS px)에 canvas S가 늘어나므로 canvas 글자 = cssPx × S / btnW (측정 불가 시 158@1024)
+  let size = btnW > 4 ? Math.round(cssPx * S / btnW) : Math.round(S * G.font / 1024);
+  // 두 자리 숫자만 너무 넓으면 축소 (보석 테두리 조금 넘는 것은 허용)
   // 카드 소울 숫자와 같은 글꼴·색 (900 Noto Sans KR · #120800 외곽선 · 흰색), 외곽선만 얇게
   c2.clearRect(0, 0, S, S);
   c2.save();
   const setFont = () => { c2.font = `900 ${size}px "Noto Sans KR", Arial, sans-serif`; };
   setFont();
   try {
-    const maxW = S * G.r * 1.7 / 1024;
+    const maxW = S * G.r * 2.9 / 1024;
     const w = c2.measureText(txt).width;
     if (w > maxW) { size = Math.max(8, Math.floor(size * maxW / w)); setFont(); }
   } catch (e) {}
@@ -1363,6 +1391,23 @@ function paintSoulDrawCost(btn, cost) {
   c2.fillText(txt, cx, yy);
   c2.restore();
   cv._painted = true;
+}
+/** 소울 드로우 숫자 CSS 크기: 내 버튼 = 내 소울 표시 글자 크기, 상대 버튼 = 그 × (상대 버튼 폭 / 내 버튼 폭). */
+function soulDrawNumberCssPx(btn) {
+  let base = 16;
+  try {
+    const g = document.getElementById("mySoulGem");
+    const f = g ? parseFloat(getComputedStyle(g).fontSize) : NaN;
+    if (f > 4) base = f;
+  } catch (e) {}
+  let btnW = 0, myW = 0;
+  try {
+    btnW = btn.getBoundingClientRect().width || parseFloat(btn.style.width) || 0;
+    const mb = document.getElementById("mySoulDraw");
+    myW = mb ? (mb.getBoundingClientRect().width || parseFloat(mb.style.width) || 0) : 0;
+  } catch (e) {}
+  const k = (btn && btn.id !== "mySoulDraw" && myW > 4 && btnW > 4) ? btnW / myW : 1;
+  return { cssPx: base * k, btnW };
 }
 function initSoulDrawBtn(btn, clickable) {
   if (!btn || btn._sdInit) return;
