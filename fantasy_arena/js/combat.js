@@ -4,18 +4,6 @@ function atkSkillOf(m) {
 }
 
 
-/** 서량백마 등: 공격할 때마다 체력 +N */
-function applyItemAttackHooks(attacker) {
-  if (!attacker || attacker.hp <= 0 || attacker.dying) return;
-  const n = attacker._onAttackHeal | 0;
-  if (n <= 0) return;
-  const cap = (attacker.maxHp != null && attacker.maxHp > 0) ? attacker.maxHp + n : attacker.hp + n;
-  // permanent growth: raise maxHp too
-  attacker.maxHp = Math.max(attacker.maxHp || attacker.hp, attacker.hp) + n;
-  attacker.hp += n;
-  if (typeof log === "function") log(`${attacker.name} 서량백마 · 체+${n}`);
-}
-
 function applyLifesteal(attacker, hpDealt) {
   if (!attacker || hpDealt <= 0 || attacker.hp <= 0 || attacker.dying) return 0;
   const heal = Math.ceil(hpDealt / 2);
@@ -38,7 +26,8 @@ function applyAtkSkillOnStart(attacker, def) {
     log(`${attacker.name} 약화공격 → ${def.name} 공·방 -1`);
   } else if (sk === 8) {
     def.atk = 0;
-    def.def = Math.max(0, Math.min(5, (def.def || 0) + 1));
+    // 석화 방+1은 5까지만 올리되, 이미 5를 넘는 방어(아이템·스펠)는 깎지 않음
+    def.def = Math.max(0, Math.max(def.def || 0, Math.min(5, (def.def || 0) + 1)));
     log(`${attacker.name} 석화공격 → ${def.name} 공=0 방+1`);
   }
 }
@@ -81,6 +70,22 @@ function doAttack(p, attacker, target, auto) {
   attacker.attacksLeft -= 1;
   attacker.canAttack = attacker.attacksLeft > 0;
 
+  // v0.317 「공격:」 아이템 (내 턴 공격 선언 시 · 코인 판정 전)
+  if (attacker._itemFx && typeof applyItemAttackFx === "function") {
+    applyItemAttackFx(p, attacker);
+    if (!(attacker.hp > 0) || attacker.dying || !p.board.includes(attacker)) { render(); resolve(); return; }
+    if (target.kind === "minion" && !(target.minion && target.minion.hp > 0 && !target.minion.dying && target.owner.board.includes(target.minion))) {
+      // 선공 효과로 대상이 사라지면 다음 생존 적(유닛, 없으면 영웅)으로 재지정
+      const nextL = attackTargets(p, attacker);
+      const nm = nextL.find(t => t.kind === "minion" && t.minion.hp > 0 && !t.minion.dying);
+      const nh = nextL.find(t => t.kind === "hero");
+      if (nm) target = nm;
+      else if (nh) target = nh;
+      else { render(); resolve(); return; }
+      log(`${attacker.name} 대상 재지정 → ${target.kind === "hero" ? "영웅" : target.minion.name}`);
+    }
+  }
+
   const sk0 = atkSkillOf(attacker);
   // ON ATTACK START: weaken / petrify before rolls (primary only; aoe applies per-target without 7/8)
   if (target.kind === "minion" && target.minion && sk0 !== 9) {
@@ -98,7 +103,7 @@ function doAttack(p, attacker, target, auto) {
 
   const aShared = rollSharedCoins(attacker);
   const aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
-  const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef);
+  const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef, attacker.def);
   const aHpSnap = beginCombatHpCoin(attacker, aShared.dHp);
   const rows = [];
   if (aShared.flips.length) {
@@ -121,7 +126,7 @@ function doAttack(p, attacker, target, auto) {
     }
     dShared = rollSharedCoins(def);
     dAtk = clampAtk((Number(def.atk) || 0) + dShared.dAtk);
-    defVal = clampDef((Number(def.def) || 0) + dShared.dDef);
+    defVal = clampDef((Number(def.def) || 0) + dShared.dDef, def.def);
     dHpSnap = beginCombatHpCoin(def, dShared.dHp);
     if (dShared.flips.length) {
       rows.push({
@@ -221,7 +226,6 @@ function doAttack(p, attacker, target, auto) {
         await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
         dealHero(target.owner, hpDmg);
         if (sk === 6) applyLifesteal(attacker, hpDmg);
-        applyItemAttackHooks(attacker);
         render();
         await waitMs(hits > 1 ? 300 : 420);
       }
@@ -253,7 +257,6 @@ function doAttack(p, attacker, target, auto) {
             await Vfx.attackSeq(atkEl, defElH, hpDmgH, critH);
             dealHero(nextH.owner, hpDmgH);
             if (sk === 6) applyLifesteal(attacker, hpDmgH);
-            applyItemAttackHooks(attacker);
             render();
             await waitMs(hits > 1 ? 300 : 420);
             continue;
@@ -286,7 +289,6 @@ function doAttack(p, attacker, target, auto) {
         }
         const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
         if (sk === 6) applyLifesteal(attacker, hpDealt);
-        applyItemAttackHooks(attacker);
         render();
         await waitMs(360);
         const survived = def && def.hp > 0 && !def.dying;
@@ -304,6 +306,8 @@ function doAttack(p, attacker, target, auto) {
             render();
             await waitMs(360);
           }
+          // v0.317 「반격:」 아이템 (상대 턴에 반격할 때)
+          if (def._itemFx && typeof applyItemCounterFx === "function") applyItemCounterFx(target.owner, def);
         } else if (!survived) {
           log(`${def.name} 격파 · 반격 없음`);
           const deadEl = Vfx.elOf(def.uid);
@@ -431,7 +435,7 @@ function aiTurn() {
 
   const tryPlay = () => {
     const plays = p.hand
-      .filter(c => c.cost <= p.soul)
+      .filter(c => (typeof effectiveCardCost === "function" ? effectiveCardCost(p, c) : c.cost) <= p.soul)
       .filter(c => c.type !== "minion" || p.board.length < 5)
       .sort((a, b) => scorePlay(p, b) - scorePlay(p, a));
     for (const card of plays) {

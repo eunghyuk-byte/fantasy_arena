@@ -242,7 +242,12 @@ function render() {
   // Do not rebuild hand DOM mid-drag — destroys pointer target and breaks drops
   const dragging = (typeof _drag !== "undefined" && _drag);
   if (!dragging) {
-    mh.innerHTML = me.hand.map(c => renderCard(c, myTurn && current() === me && c.cost <= me.soul && (c.type !== "minion" || me.board.length < 5))).join("");
+    // v0.317: 올빼미의눈 등 실효 소울을 핸드 카드 숫자에 반영 (비싸지면 빨강 · statColor)
+    mh.innerHTML = me.hand.map(c => {
+      const eff = handCardCost(c, me);
+      const shown = eff !== c.cost ? Object.assign({}, c, { cost: eff }) : c;
+      return renderCard(shown, myTurn && current() === me && eff <= me.soul && (c.type !== "minion" || me.board.length < 5));
+    }).join("");
   }
   document.getElementById("oppBoard").innerHTML = renderLane(opp, "opp");
   const boardDragging = dragging && _drag && _drag.kind === "board";
@@ -1251,8 +1256,11 @@ function layoutEndBtn() {
   btn.style.transform = "none";
 }
 
+function handCardCost(c, me) {
+  return (typeof effectiveCardCost === "function") ? effectiveCardCost(me, c) : c.cost;
+}
 function isHandCardPlayable(c, me) {
-  return c.cost <= me.soul && (c.type !== "minion" || me.board.length < 5);
+  return handCardCost(c, me) <= me.soul && (c.type !== "minion" || me.board.length < 5);
 }
 
 function endBtnHudSrcs() {

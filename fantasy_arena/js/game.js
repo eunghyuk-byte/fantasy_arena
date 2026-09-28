@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.316";
+const GAME_VERSION = "0.317";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -321,6 +321,7 @@ async function runAutoCombat(p) {
     render();
     await waitMs(480);
   }
+  try { applyItemEndTurnFx(p); } catch (err) { console.warn(err); }
   ui.battling = false;
 }
 function endTurn() {
@@ -376,17 +377,11 @@ function unequipItem(m) {
   if (b.grantedKw) {
     m.keywords = (m.keywords || []).filter(k => k !== b.grantedKw);
   }
-  if (b.savedCoins) {
-    m.atkC = b.savedCoins.atkC || 0;
-    m.defC = b.savedCoins.defC || 0;
-    m.hpC = b.savedCoins.hpC || 0;
-  }
-  if (b.clearedCoinGold) delete m.coinGold;
   if (b.grantedCoinLuck) delete m.coinLuckBonus;
   delete m.equippedItem;
   delete m._itemBonuses;
-  delete m._onAttackHeal;
   delete m._onKillDraw;
+  delete m._itemFx;
   m.itemWorn = false;
   if (m._baseText != null) { m.text = m._baseText; delete m._baseText; }
 }
@@ -398,12 +393,6 @@ function equipItemOnUnit(p, card, unit) {
   let dAtk = Number(card.atk) || 0;
   let dDef = Number(card.def) || 0;
   let dHp = Number(card.hp) || 0;
-  if (card.id === "ei4") {
-    const n = unitCoinTotal(unit);
-    dAtk = n; dHp = n; dDef = 0;
-  } else if (card.id === "ai4") {
-    dDef = unitCoinTotal(unit); dAtk = 0; dHp = 0;
-  }
   const prevAtkSkill = unit.atkSkill;
   const prevAbility = unit.ability;
   let grantedCharge = false;
@@ -439,57 +428,14 @@ function equipItemOnUnit(p, card, unit) {
     ability: card.ability, prevAbility,
     grantedCharge, grantedKw
   };
-  if (card.id === "ni4") {
-    bonuses.savedCoins = { atkC: unit.atkC || 0, defC: unit.defC || 0, hpC: unit.hpC || 0 };
-    unit.atkC = 0; unit.defC = 0; unit.hpC = 0;
-  }
-  if (card.id === "fi5") {
-    bonuses.savedCoins = { atkC: unit.atkC || 0, defC: unit.defC || 0, hpC: unit.hpC || 0 };
-    const a = unit.atkC || 0, d = unit.defC || 0, h = unit.hpC || 0;
-    const n = Math.max(Math.abs(a), Math.abs(d), Math.abs(h));
-    if (n <= 0) {
-      unit.atkC = -5; unit.defC = 0; unit.hpC = 0;
-    } else {
-      const sign = (v) => (v > 0 ? 1 : v < 0 ? -1 : 0);
-      const sa = sign(a), sd = sign(d), sh = sign(h);
-      unit.atkC = sa ? sa * 5 : 0;
-      unit.defC = sd ? sd * 5 : 0;
-      unit.hpC = sh ? sh * 5 : 0;
-    }
-  }
-  if (card.id === "di4") {
-    // 조작된주화: 블랙(−) 코인을 즉시 골드(+)로 전환 + 전투 시 앞면 고정
-    if ((unit.atkC || 0) || (unit.defC || 0) || (unit.hpC || 0)) {
-      bonuses.savedCoins = { atkC: unit.atkC || 0, defC: unit.defC || 0, hpC: unit.hpC || 0 };
-      unit.atkC = Math.abs(unit.atkC || 0);
-      unit.defC = Math.abs(unit.defC || 0);
-      unit.hpC = Math.abs(unit.hpC || 0);
-      unit.coinBlack = false;
-      unit.coinGold = true;
-      bonuses.clearedCoinGold = true;
-    }
-  }
-  if (card.id === "li3") {
+  // v0.317: 코인 아이템(노름바위·불꽃도박반지·도둑바람·저주의인형·조작된주화)은 장착 시 코인을 바꾸지 않고
+  // 매 코인 판정(rollSharedCoins)에서 적용. 성스러운주화는 유닛별 앞면 확률 +0.2.
+  if (card.itemFx) unit._itemFx = card.itemFx;
+  if (card.itemFx === "coin_luck20") {
     unit.coinLuckBonus = 0.2;
     bonuses.grantedCoinLuck = true;
   }
-
-  if (card.id === "di7") {
-    if ((unit.atkC || 0) || (unit.defC || 0) || (unit.hpC || 0)) {
-      if (!bonuses.savedCoins) bonuses.savedCoins = { atkC: unit.atkC || 0, defC: unit.defC || 0, hpC: unit.hpC || 0 };
-      unit.atkC = Math.abs(unit.atkC || 0);
-      unit.defC = Math.abs(unit.defC || 0);
-      unit.hpC = Math.abs(unit.hpC || 0);
-      unit.coinBlack = false;
-      unit.coinGold = true;
-      bonuses.clearedCoinGold = true;
-    }
-  }
-  if (card.id === "ei7" || card.itemFx === "atk_heal3") {
-    unit._onAttackHeal = 3;
-    bonuses.onAttackHeal = 3;
-  }
-  if (card.id === "ni7" || card.itemFx === "kill_draw") {
+  if (card.itemFx === "kill_draw") {
     unit._onKillDraw = 1;
     bonuses.onKillDraw = 1;
   }
@@ -511,7 +457,6 @@ function equipItemOnUnit(p, card, unit) {
     parts.forEach(p => { if (p && !uniq.includes(p)) uniq.push(p); });
     unit.text = uniq.join(" · ");
   }
-  if (card.id === "ni1") draw(p, 1);
   log(`${p.name}이(가) ${unit.name}에게 ${card.name} 장착`);
   return true;
 }
@@ -520,18 +465,118 @@ function resolveInstantItem(p, card) {
 }
 
 
-/** 백우선(li7) 장착 중이면 스펠 소울 −1 (최소 0). */
-function boardSpellDiscount(p) {
-  if (!p || !p.board) return 0;
-  for (const m of p.board) {
-    if (m && m.equippedItem && m.equippedItem.id === "li7") return 1;
-  }
-  return 0;
+/** 장착 아이템 효과(itemFx)를 가진 전장 유닛 목록 */
+function unitsWithItemFx(p, fx) {
+  if (!p || !p.board) return [];
+  return p.board.filter(m => m && m._itemFx === fx && m.hp > 0 && !m.dying);
+}
+/** 올빼미의눈(enemy_spell_cost_plus1): 상대 전장의 장착 유닛 수만큼 내 스펠 소울 +1 (중첩) */
+function enemySpellTax(p) {
+  if (!p || !state || !state.p1 || !state.p2) return 0;
+  return unitsWithItemFx(opponent(p), "enemy_spell_cost_plus1").length;
 }
 function effectiveCardCost(p, card) {
   let c = card && card.cost != null ? Number(card.cost) : 0;
-  if (card && card.type === "spell") c = Math.max(0, c - boardSpellDiscount(p));
+  if (card && card.type === "spell") c = Math.max(0, c + enemySpellTax(p));
   return c;
+}
+/** 카드 1장을 핸드에 생성. 손패 10장이면 드로우와 같이 소각. */
+function addCardToHand(p, id, why) {
+  if (!p || !id || !CARD_MAP[id]) return null;
+  const nm = CARD_MAP[id].name || id;
+  if (p.hand.length >= 10) {
+    log(`${p.name}의 손패가 가득 차 ${nm}이(가) 불탔다`);
+    return null;
+  }
+  const c = cloneCard(id);
+  delete c.token;
+  p.hand.push(c);
+  if (!p.isAI) p._drewCount = (p._drewCount || 0) + 1;
+  log(`${why ? why + " · " : ""}${nm} 핸드에 생성`);
+  return c;
+}
+/** 흑마법서·백우선: 해당 속성의 토큰 아닌 카드(유닛·스펠·아이템) 중 무작위 1장 */
+function randomTribeCardId(tribe) {
+  const pool = CARDS.filter(c => c && c.tribe === tribe && !c.token && ["minion", "spell", "item"].includes(c.type));
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)].id;
+}
+/** v0.317: 아이템·스펠 효과로 오른 방어에는 상한 없음 */
+function clampDefBuff(m, n) {
+  m.def = Math.max(0, (Number(m.def) || 0) + n);
+}
+/** 처치: killer(장착 유닛)가 상대 유닛을 처치했을 때 */
+function applyItemKillFx(killerOwner, killer, victimOwner) {
+  const fx = killer && killer._itemFx;
+  if (!fx || !killerOwner || killerOwner === victimOwner) return;
+  const nm = (killer.equippedItem && killer.equippedItem.name) || "";
+  if (fx === "kill_atk_plus2") {
+    killer.atk = (Number(killer.atk) || 0) + 2;
+    log(`${killer.name} ${nm} · 처치: 공격+2`);
+  } else if (fx === "kill_def_plus1") {
+    clampDefBuff(killer, 1);
+    log(`${killer.name} ${nm} · 처치: 방어+1`);
+  } else if (fx === "kill_all_def_hp_minus1") {
+    const foe = opponent(killerOwner);
+    let n = 0;
+    foe.board.forEach(m => {
+      if (m.hp <= 0 || m.dying) return;
+      m.def = Math.max(0, (Number(m.def) || 0) - 1);
+      const from = Number(m.hp) || 0;
+      m.hp = from - 1;
+      m.damaged = true;
+      m._hurt = { from, to: m.hp, dmg: 1 };
+      if (m.hp <= 0) {
+        m.dying = true;
+        m._deathCtx = Object.assign({}, m._deathCtx || {}, { fromSpell: true });
+      }
+      n++;
+    });
+    log(`${killer.name} ${nm} · 처치: 적 전체 방·체 −1 (${n}기)`);
+  } else if (fx === "kill_random_dark_hand") {
+    addCardToHand(killerOwner, randomTribeCardId("dark"), `${nm} 처치`);
+  }
+}
+/** 공격: 장착 유닛이 내 턴에 공격을 선언할 때 (코인 판정 전) */
+function applyItemAttackFx(p, attacker) {
+  const fx = attacker && attacker._itemFx;
+  if (!fx || !state || p !== current()) return;
+  const nm = (attacker.equippedItem && attacker.equippedItem.name) || "";
+  if (fx === "attack_def_plus1") {
+    clampDefBuff(attacker, 1);
+    log(`${attacker.name} ${nm} · 공격: 방어+1`);
+  } else if (fx === "attack_summon_a10") {
+    if (p.board.length < 5) {
+      const tok = cloneCard("a10");
+      tok.canAttack = true; tok.attacksLeft = 1;
+      p.board.push(tok);
+      log(`${nm} · 공격: ${tok.name} 1기 생성`);
+    } else log(`${nm} · 전장이 가득 차 파도창병을 생성할 수 없습니다`);
+  } else if (fx === "attack_def_aoe_damage") {
+    const dmg = Math.max(0, Number(attacker.def) || 0);
+    applyFx(p, { type: "aoe_by_def", value: dmg, label: nm || "공격" }, null);
+  }
+}
+/** 반격: 장착 유닛이 상대 턴에 반격할 때 */
+function applyItemCounterFx(owner, unit) {
+  const fx = unit && unit._itemFx;
+  if (!fx || !state || owner === current()) return;
+  const nm = (unit.equippedItem && unit.equippedItem.name) || "";
+  if (fx === "counter_def_plus1") {
+    clampDefBuff(unit, 1);
+    log(`${unit.name} ${nm} · 반격: 방어+1`);
+  } else if (fx === "counter_draw") {
+    draw(owner, 1);
+    log(`${unit.name} ${nm} · 반격: 드로우 1`);
+  }
+}
+/** 내 턴이 끝날 때: 턴 종료 자동 공격이 모두 끝난 뒤 */
+function applyItemEndTurnFx(p) {
+  if (!p || state.over) return;
+  unitsWithItemFx(p, "eot_random_light_hand").forEach(m => {
+    const nm = (m.equippedItem && m.equippedItem.name) || "";
+    addCardToHand(p, randomTribeCardId("light"), `${nm} 턴 종료`);
+  });
 }
 
 function playCard(p, card, target) {
@@ -594,9 +639,12 @@ function playCard(p, card, target) {
 
 async function runSpellCast(p, card, target) {
   state.busy = true;
+  // 맹덕신서(copy_enemy_spell): 시전 시점 상대 전장 장착 유닛 수만큼, 해결 뒤 원본 소울 복사본을 상대 핸드에
+  const copiers = unitsWithItemFx(opponent(p), "copy_enemy_spell").length;
   try {
     await playSpellFx(card, target);
     resolveSpell(p, card, target);
+    for (let i = 0; i < copiers; i++) addCardToHand(opponent(p), card.id, "맹덕신서 복사");
   } finally {
     state.busy = false;
   }
@@ -1043,9 +1091,9 @@ function applyFx(p, fx, target) {
       const hpDmg = Math.max(0, dmg - blocked);
       if (hpDmg > 0) damageMinion(e, m, hpDmg, { fromSpell: true });
       hit++;
-      log(`${m.name} 소환 피해 ${dmg} (방어 ${blocked} 흡수) → 체력 −${hpDmg}`);
+      log(`${m.name} ${fx.label || "소환"} 피해 ${dmg} (방어 ${blocked} 흡수) → 체력 −${hpDmg}`);
     });
-    if (dmg) log(`소환 · 방어 ${dmg}만큼 적 전체 피해` + (hit ? ` (${hit}체)` : ""));
+    if (dmg) log(`${fx.label || "소환"} · 방어 ${dmg}만큼 적 전체 피해` + (hit ? ` (${hit}체)` : ""));
   } else if (fx.type === "reduce_by_coins") {
     // 「체력·방어 감소」: 방어를 거치지 않고 직접 감소. N=coinPoolN. 영웅 제외.
     let touched = 0;
@@ -1286,6 +1334,7 @@ function resolveDeath(owner, m) {
   const ab = abilityOf(m);
   const fromSpell = !!ctx.fromSpell;
   const hasRebirth = (ab && String(ab).includes("환생")) || (m.keywords || []).includes("rebirth");
+  const deadItemFx = m._itemFx || null;
   if (typeof unequipItem === "function") unequipItem(m);
 
   if (ab === "유언") {
@@ -1325,6 +1374,16 @@ function resolveDeath(owner, m) {
   if (ctx.killer && (ctx.killer._onKillDraw | 0) > 0 && ctx.killerOwner) {
     draw(ctx.killerOwner, ctx.killer._onKillDraw | 0);
     log(`${ctx.killer.name} 청강검 · 처치 드로우`);
+  }
+  if (ctx.killer && ctx.killerOwner) applyItemKillFx(ctx.killerOwner, ctx.killer, owner);
+  // 파괴: 장착 아이템 효과 (환생으로 살아난 경우는 발동 안 함 · 아이템은 이미 해제됨)
+  if (deadItemFx === "destroy_summon_chitu") {
+    // 적토마 토큰(d40)은 아이템이 없어 재생성 루프 없음
+    applyFx(owner, { type: "summon_token", summonId: "d40" }, null);
+  } else if (deadItemFx === "destroy_enemy_atk_zero") {
+    const foe = opponent(owner);
+    foe.board.forEach(x => { x.atk = 0; });
+    log(`인어의하프 · 파괴: 적 전체 공=0 (${foe.board.length}기)`);
   }
   // 기존 파괴: 효과 + 성흔 등 부여된 파괴: 효과 (중첩)
   const drs = [].concat(m.deathrattle ? [m.deathrattle] : [], m.deathrattles || []);
@@ -1405,24 +1464,43 @@ function coinPoolN(m) {
  * Respects turn luck (coinP) and coinGold (forced heads).
  */
 function rollSharedCoins(m) {
-  const n = coinPoolN(m);
+  // v0.317 코인 아이템: 매 코인 판정마다 적용 (장착 시 코인 링크는 그대로). 코인 없는 유닛은 스탯만.
+  const fx = m && m._itemFx;
+  let la = (m && m.atkC) || 0, ld = (m && m.defC) || 0, lh = (m && m.hpC) || 0;
+  if (fx === "coin_zero") { la = 0; ld = 0; lh = 0; }                              // 도둑바람
+  if (fx === "coins_to_gold") { la = Math.abs(la); ld = Math.abs(ld); lh = Math.abs(lh); } // 조작된주화: 블랙 링크→골드
+  let n = Math.max(Math.abs(la), Math.abs(ld), Math.abs(lh));
+  if (fx === "coin_set5_if_any" && n > 0) n = 5;                                   // 노름바위
+  if (fx === "coin_set1_if_any" && n > 0) n = 1;                                   // 저주의인형
   let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
   if (m && m.coinLuckBonus) luck = Math.min(1, luck + m.coinLuckBonus);
   if (m && m.coinGold) luck = 1;
   if (m && m.coinBlack) luck = 0;
-  const flips = Array.from({ length: n }, () => Math.random() < luck);
+  let flips = Array.from({ length: n }, () => Math.random() < luck);
+  if (fx === "coin_all_same" && n > 0) {
+    // 불꽃도박반지: 50% 전부 앞면 · 50% 전부 뒷면
+    const allHeads = Math.random() < 0.5;
+    flips = Array.from({ length: n }, () => allHeads);
+  }
   const heads = flips.filter(Boolean).length;
   return {
     flips,
     heads,
     n,
-    dAtk: coinSign(m && m.atkC) * heads,
-    dDef: coinSign(m && m.defC) * heads,
-    dHp: coinSign(m && m.hpC) * heads
+    dAtk: coinSign(la) * heads,
+    dDef: coinSign(ld) * heads,
+    dHp: coinSign(lh) * heads
   };
 }
 function clampAtk(v) { return Math.max(0, v | 0); }
-function clampDef(v) { return Math.max(0, Math.min(5, v | 0)); }
+/**
+ * 코인 적용 후 방어: 0 ~ 5 클램프. 단 아이템 장착·스펠 효과로 방어 스탯이 이미 5를 넘으면
+ * 그 방어 스탯까지는 깎지 않는다 (v0.317: 아이템·스펠로 오른 방어는 상한 없음).
+ */
+function clampDef(v, baseDef) {
+  const cap = Math.max(5, Number(baseDef) || 0);
+  return Math.max(0, Math.min(cap, v | 0));
+}
 /** Gold/positive HP coin floor 1. Black HP coin to ≤0 destroys before the exchange (beginCombatHpCoin). */
 function clampHp(v) { return Math.max(1, v | 0); }
 /**
