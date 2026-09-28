@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.343";
+const GAME_VERSION = "0.344";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -588,6 +588,27 @@ function randomTribeCardId(tribe) {
   const pool = CARDS.filter(c => c && c.tribe === tribe && !c.token && ["minion", "spell", "item"].includes(c.type));
   if (!pool.length) return null;
   return pool[Math.floor(Math.random() * pool.length)].id;
+}
+/** v0.344: 속성 스펠만 / 속성 유닛(토큰 제외) 무작위 */
+function randomTribeSpellId(tribe) {
+  const pool = CARDS.filter(c => c && c.tribe === tribe && !c.token && c.type === "spell");
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)].id;
+}
+function randomTribeMinionId(tribe) {
+  const pool = CARDS.filter(c => c && c.tribe === tribe && !c.token && c.type === "minion");
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)].id;
+}
+/** v0.344: 유닛 고유 처치: (손책 등) — 아이템 처치와 같이 killer가 직접 처치했을 때만 */
+function applyUnitKillFx(killerOwner, killer, victimOwner) {
+  const fx = killer && killer.onKill;
+  if (!fx || !killerOwner || killerOwner === victimOwner) return;
+  if (fx.type === "random_tribe_hand") {
+    const tid = randomTribeCardId(fx.tribe || killer.tribe);
+    if (tid) addCardToHand(killerOwner, tid, `${killer.name} 처치`);
+    else log(`${killer.name} 처치 · 생성할 카드 없음`);
+  }
 }
 /** v0.317: 아이템·스펠 효과로 오른 방어에는 상한 없음 */
 function clampDefBuff(m, n) {
@@ -1355,6 +1376,53 @@ function applyFx(p, fx, target) {
       p.board.push(stolen);
       log(`소환 · ${stolen.name} 탈취`);
     }
+  } else if (fx.type === "random_tribe_spells_hand") {
+    // 순욱: 속성 스펠만 N장 핸드 생성 (풀이면 addCardToHand가 소각)
+    const n = fx.count || 2;
+    const tribe = fx.tribe || "earth";
+    let got = 0;
+    for (let i = 0; i < n; i++) {
+      const sid = randomTribeSpellId(tribe);
+      if (!sid) { log("소환 · 생성할 스펠 없음"); break; }
+      if (addCardToHand(p, sid, "소환")) got++;
+    }
+    if (got) log(`소환 · ${tribe} 스펠 ${got}장 핸드 생성`);
+  } else if (fx.type === "summon_random_tribe_minion") {
+    // 감녕: 토큰 제외 랜덤 속성 유닛 1기 전장 생성
+    if (p.board.length >= 5) { log("전장이 가득 차 소환할 수 없습니다"); }
+    else {
+      const mid = randomTribeMinionId(fx.tribe || "wind");
+      if (!mid) { log("소환 · 생성할 유닛 없음"); }
+      else {
+        const tok = cloneCard(mid);
+        if (unitCannotAttack(tok)) { tok.canAttack = false; tok.attacksLeft = 0; }
+        else { tok.canAttack = true; tok.attacksLeft = 1; }
+        p.board.push(tok);
+        log(`소환 · ${tok.name} 전장 생성`);
+      }
+    }
+  } else if (fx.type === "kill_random_enemy") {
+    // 허저: 랜덤 적 1기 처치 (면역 제외 · 파괴/환생/유언 정상)
+    const pool = (e.board || []).filter(m => !isImmune(m) && m.hp > 0 && !m.dying);
+    if (!pool.length) { log("소환 · 처치할 적 유닛 없음"); }
+    else {
+      const vic = pool[Math.floor(Math.random() * pool.length)];
+      log(`소환 · ${vic.name} 처치`);
+      destroyMinion(e, vic, { fromSpell: true });
+    }
+  } else if (fx.type === "steal_random_atk_le") {
+    // 방통: 공격력 ≤ value 랜덤 적 탈취 (초선과 동일 · _sickTurn)
+    const thr = fx.value != null ? fx.value : 3;
+    const pool = (e.board || []).filter(m => !isImmune(m) && m.hp > 0 && !m.dying && (Number(m.atk) || 0) <= thr);
+    if (!pool.length) { log(`소환 · 공격력 ${thr} 이하 탈취 대상 없음`); }
+    else if (p.board.length >= 5) { log("소환 · 전장 가득 참 · 탈취 미발동"); }
+    else {
+      const stolen = pool[Math.floor(Math.random() * pool.length)];
+      e.board = e.board.filter(x => x.uid !== stolen.uid);
+      stolen.canAttack = false; stolen.attacksLeft = 0; stolen._sickTurn = (state.turnSerial | 0);
+      p.board.push(stolen);
+      log(`소환 · ${stolen.name} 탈취 (공격 ${stolen.atk} ≤ ${thr})`);
+    }
   } else if (fx.type === "set_coin_n") {
     // 황월영: 코인 링크가 있는 아군만 공유 코인 N을 value로 (부호 유지, 코인 0 스탯 유지)
     const goal = fx.value != null ? fx.value : 5;
@@ -1501,6 +1569,7 @@ function resolveDeath(owner, m) {
     log(`${ctx.killer.name} 청강검 · 처치 드로우`);
   }
   if (ctx.killer && ctx.killerOwner) applyItemKillFx(ctx.killerOwner, ctx.killer, owner);
+  if (ctx.killer && ctx.killerOwner) applyUnitKillFx(ctx.killerOwner, ctx.killer, owner);
   // 파괴: 장착 아이템 효과 (환생으로 살아난 경우는 발동 안 함 · 아이템은 이미 해제됨)
   if (deadItemFx === "destroy_summon_chitu") {
     // 적토마 토큰(d40)은 아이템이 없어 재생성 루프 없음
