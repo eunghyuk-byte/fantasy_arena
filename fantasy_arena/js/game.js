@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.338";
+const GAME_VERSION = "0.339";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -762,6 +762,12 @@ function needsTarget(card) {
   return ["dmg", "kill", "buff"].includes(fx.type) && fx.target;
 }
 
+/** v0.339: 장착 아이템을 낼 수 있는 아군 유닛(아직 아이템 없는 유닛)이 있는가 — 실제 장착 대상 판정(validTargets _itemEquip)과 동일 기준.
+ *  즉시 아이템(장착 아님)은 대상 불필요 → true. 손패 「낼 수 있음」 테두리·턴 종료 버튼 판정에 사용 (AI 판정은 별도, 영향 없음). */
+function itemHasEquipTarget(p, card) {
+  if (!card || card.type !== "item" || !isEquipItem(card)) return true;
+  return validTargets(p, { _itemEquip: true }).length > 0;
+}
 /** 면역(9/28): 단일 대상 스펠·소환 효과로 지정할 수 없다 (아이템 장착 대상은 예외). */
 function validTargets(p, fx) {
   const list = validTargetsRaw(p, fx);

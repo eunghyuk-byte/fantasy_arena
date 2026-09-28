@@ -262,7 +262,8 @@ function render() {
     mh.innerHTML = me.hand.map(c => {
       const eff = handCardCost(c, me);
       const shown = eff !== c.cost ? Object.assign({}, c, { cost: eff }) : c;
-      return renderCard(shown, myTurn && current() === me && eff <= me.soul && (c.type !== "minion" || me.board.length < 5));
+      // v0.339: 테두리 = isHandCardPlayable (소울 + 유닛 칸 + 아이템은 장착 가능한 아군 유닛 있음)
+      return renderCard(shown, myTurn && current() === me && isHandCardPlayable(c, me));
     }).join("");
   }
   document.getElementById("oppBoard").innerHTML = renderLane(opp, "opp");
@@ -1597,7 +1598,11 @@ function handCardCost(c, me) {
   return (typeof effectiveCardCost === "function") ? effectiveCardCost(me, c) : c.cost;
 }
 function isHandCardPlayable(c, me) {
-  return handCardCost(c, me) <= me.soul && (c.type !== "minion" || me.board.length < 5);
+  if (handCardCost(c, me) > me.soul) return false;
+  if (c.type === "minion" && me.board.length >= 5) return false;
+  // v0.339: 장착 아이템은 아직 아이템 없는 아군 유닛이 1개 이상일 때만 (game.js itemHasEquipTarget = 실제 장착 대상 판정)
+  if (c.type === "item" && typeof itemHasEquipTarget === "function" && !itemHasEquipTarget(me, c)) return false;
+  return true;
 }
 
 function endBtnHudSrcs() {
