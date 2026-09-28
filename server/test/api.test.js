@@ -63,7 +63,9 @@ test("deck API end-to-end", async (t) => {
   assert.equal(r.status, 200); assert.equal(r.body.deck.name, "불꽃 컨트롤");
   assert.deepEqual(r.body.deck.cards, fire);
   assert.equal((await api("PATCH", "/api/decks/" + id, { name: "   " }, tok)).status, 422, "empty name rejected");
-  assert.equal((await api("PATCH", "/api/decks/" + id, { name: "가".repeat(21) }, tok)).status, 422, "21-char name rejected");
+  assert.equal((await api("PATCH", "/api/decks/" + id, { name: "가".repeat(9) }, tok)).status, 422, "9-char name rejected");
+  const r8 = await api("PATCH", "/api/decks/" + id, { name: "가나다라마바사아" }, tok);
+  assert.equal(r8.status, 200, "8-char name ok"); assert.equal(r8.body.deck.name, "가나다라마바사아");
   // delete
   assert.equal((await api("DELETE", "/api/decks/" + id, null, tok)).status, 200);
   assert.equal((await api("GET", "/api/decks", null, tok)).body.decks.length, 0);

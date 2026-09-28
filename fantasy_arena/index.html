@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="css/game.css?v=0.333" />
-<link rel="stylesheet" href="css/lobby.css?v=0.333" />
+<link rel="stylesheet" href="css/lobby.css?v=0.334" />
 </head>
 <body>
 <button class="bgm-btn settings-gear-btn" id="settingsGearBtn" title="설정" aria-label="설정">⚙</button>
@@ -21,9 +21,8 @@
     <div class="title-body">
       <div class="title-menu" id="titleMenu">
         <button class="menu-btn" id="btnLobby">온라인 로비</button>
-        <button class="menu-btn" id="btnDeck">덱 구성</button>
-        <button class="menu-btn" id="btnAi">플레이</button>
-        <button class="menu-btn ghost" id="btnHelp">도움말</button>
+        <button class="menu-btn" id="btnShop">상점</button>
+        <button class="menu-btn" id="btnSettings">설정</button>
         <div class="build-ver" id="buildVer">v0.196</div>
       </div>
     </div>
@@ -36,6 +35,15 @@
       <p class="tsel-sub" id="tselSub"></p>
       <div class="tsel-grid" id="tselGrid"></div>
       <button class="menu-btn ghost tsel-back" id="btnTselBack">뒤로</button>
+    </div>
+  </section>
+
+  <!-- v0.334 상점 (준비 중) -->
+  <section id="shop" class="screen">
+    <div class="shop-box">
+      <h2 class="tsel-title">상점</h2>
+      <p class="shop-soon">준비 중입니다.</p>
+      <button class="menu-btn ghost tsel-back" id="btnShopBack">뒤로</button>
     </div>
   </section>
 
@@ -93,6 +101,7 @@
 <div class="help-pop" id="settingsPop">
   <div class="help-box settings-box">
     <h2>설정</h2>
+    <button class="menu-btn" id="btnSettingsHelp" style="width:100%;margin:4px 0 14px">도움말</button>
     <h3>플레이 방식</h3>
     <p>같은 화면에서 둘이 번갈아 하는 모드입니다.</p>
     <button class="menu-btn" id="btnPvp" style="width:100%;margin:8px 0 16px">같은 화면 1대1 (핫시트)</button>
@@ -297,10 +306,10 @@
 <script src="js/sfx.js?v=0.102"></script>
 <script src="js/settings.js?v=0.327"></script>
 <script src="js/render.js?v=0.332.1"></script>
-<script src="js/combat.js?v=0.333"></script>
+<script src="js/combat.js?v=0.334"></script>
 <script src="js/spell-fx.js?v=0.102"></script>
-<script src="js/game.js?v=0.333"></script>
+<script src="js/game.js?v=0.334"></script>
 <script src="js/net.js?v=0.331"></script>
-<script src="js/lobby.js?v=0.333"></script>
+<script src="js/lobby.js?v=0.334"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
 //  - every card exists, is not a token, and belongs to the deck's tribe (units/spells/items)
 //  - rare/legendary max 1 copy, common/uncommon max 2
 //  - tribe must be an open tribe
-const NAME_MAX = 20;
+const NAME_MAX = 8; // v0.334: 덱 이름 1~8자 (글자 수, 로비 덱 칸 한 줄)
 
 function maxCopies(card) {
   return (card.rarity === "legendary" || card.rarity === "rare") ? 1 : 2;

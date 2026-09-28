@@ -407,6 +407,8 @@ function hideScreens() {
   if (lb) lb.classList.remove("active");
   const ts = document.getElementById("tribeSelect"); // v0.333
   if (ts) ts.classList.remove("active");
+  const sh = document.getElementById("shop"); // v0.334
+  if (sh) sh.classList.remove("active");
   document.getElementById("overlay").classList.remove("show");
 }
 function showGame() {

@@ -65,7 +65,7 @@ MySQL/PostgreSQL로 바꿀 때는 `store/`에 같은 메서드를 가진 구현�
 
 인증: `Authorization: Bearer <token>`. 다른 계정의 덱은 404.
 
-덱 규칙(클라이언트 `game.js`의 maxCopies/tribeCards/saveDraftDeck과 동일): 정확히 30장 · 덱 속성 카드만(유닛·스펠·아이템) · 토큰/없는 카드 금지 · 레어·전설 1장, 커먼·언커먼 2장 · 이름 1~20자.
+덱 규칙(클라이언트 `game.js`의 maxCopies/tribeCards/saveDraftDeck과 동일): 정확히 30장 · 덱 속성 카드만(유닛·스펠·아이템) · 토큰/없는 카드 금지 · 레어·전설 1장, 커먼·언커먼 2장 · 이름 1~8자(글자 수).
 
 ## 스팀 로그인으로 바꿀 때
 

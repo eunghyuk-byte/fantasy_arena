@@ -1,7 +1,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { validateDeck, normalizeName } = require("./deckRules");
+const { validateDeck, normalizeName, NAME_MAX } = require("./deckRules");
 const { issueSession, resolveSession } = require("./auth/sessions");
 const { devLogin } = require("./auth/devAuth");
 const { steamLogin } = require("./auth/steamAuth");
@@ -129,7 +129,7 @@ function createApp({ store, cards, config }) {
           tribe: body.tribe !== undefined ? body.tribe : cur.tribe,
           cards: body.cards !== undefined ? body.cards : cur.cards,
         };
-        if (body.name !== undefined && !normalizeName(body.name)) return fail(res, 422, "invalid_name", "덱 이름은 1~20자여야 합니다.");
+        if (body.name !== undefined && !normalizeName(body.name)) return fail(res, 422, "invalid_name", `덱 이름은 1~${NAME_MAX}자여야 합니다.`);
         const v = validateDeck(merged, cards, config.deckSize);
         if (!v.ok) return fail(res, 422, "invalid_deck", v.errors[0], { errors: v.errors });
         const deck = await store.updateDeck(account.id, id, v.value);

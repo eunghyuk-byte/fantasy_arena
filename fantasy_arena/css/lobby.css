@@ -156,3 +156,12 @@
 .fs-prompt-err { min-height: 20px; color: #ff8a7a; font-size: 14px; margin: 4px 0; }
 .fs-prompt-actions { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
 .fs-prompt-actions .menu-btn { min-width: 140px; margin: 0; }
+
+/* v0.334: 덱 이름 최대 8자 — 한글 8자가 덱 칸 한 줄에 들어가게 */
+#lobby .lobby-deck-name { font-size: 1.75cqh; letter-spacing: -.02em; }
+#fsPromptText { white-space: pre-line; }
+
+/* v0.334 상점 (준비 중) */
+#shop.screen.active { display: flex; align-items: center; justify-content: center; }
+#shop .shop-box { display: flex; flex-direction: column; align-items: center; }
+#shop .shop-soon { color: #cbb58a; font-size: 2.6cqh; margin: 2cqh 0 5cqh; }

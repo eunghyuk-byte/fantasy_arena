@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.333";
+const GAME_VERSION = "0.334";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -77,6 +77,31 @@ function loadSavedDecks() {
 }
 function persistDecks(map) {
   localStorage.setItem("runestone-decks", JSON.stringify(map));
+}
+/* v0.334: 로컬 덱 여러 개 (최대 10, 서버와 같은 규칙) — localStorage "fs-local-decks" = [{id,name,tribe,cards}].
+ * 처음 불러올 때 예전 속성별 덱(runestone-decks, 30장)을 「속성 덱」 이름으로 이전.
+ * runestone-decks[속성]은 「마지막 저장 덱」으로 계속 기록 (핫시트·이 덱으로 플레이 호환). */
+const LOCAL_DECK_MAX = 10;
+const DECK_NAME_MAX = 8; // 서버 deckRules NAME_MAX와 동일 (글자 수)
+function deckNameError(v) {
+  const n = String(v || "").replace(/\s+/g, " ").trim();
+  if (!n) return "이름을 입력하세요.";
+  if ([...n].length > DECK_NAME_MAX) return `덱 이름은 최대 ${DECK_NAME_MAX}자입니다.`;
+  return null;
+}
+function loadLocalDecks() {
+  let list = null;
+  try { list = JSON.parse(localStorage.getItem("fs-local-decks") || "null"); } catch (e) { list = null; }
+  if (!Array.isArray(list)) {
+    const map = loadSavedDecks();
+    list = TRIBES.filter(t => Array.isArray(map[t.id]) && map[t.id].length === 30)
+      .map((t, i) => ({ id: "L" + Date.now().toString(36) + i, name: t.name + " 덱", tribe: t.id, cards: map[t.id].slice() }));
+    persistLocalDecks(list);
+  }
+  return list.filter(d => d && d.id && TRIBES.some(t => t.id === d.tribe) && Array.isArray(d.cards));
+}
+function persistLocalDecks(list) {
+  try { localStorage.setItem("fs-local-decks", JSON.stringify(list || [])); } catch (e) {}
 }
 function deckFor(hero, isAI) {
   // v0.331: lobby "AI 연습" plays the selected saved deck (server or local) once.
@@ -2632,9 +2657,14 @@ function saveDraftDeck(opts) {
   const map = loadSavedDecks();
   map[selectedHero.id] = draftDeck.slice();
   persistDecks(map);
-  // v0.331: logged in -> also save to server (name prompt). Offline keeps the local-only flow.
+  // v0.331: logged in -> also save to server (name prompt).
   if (window.Lobby && window.FSNet && FSNet.isLoggedIn()) {
     Lobby.saveDraftToServer(draftDeck.slice(), selectedHero.id, !!(opts && opts.quiet));
+    return true;
+  }
+  // v0.334: 로컬도 저장할 때 항상 이름 입력 (로컬 덱 목록, 최대 10개)
+  if (window.Lobby && Lobby.saveDraftLocal) {
+    Lobby.saveDraftLocal(draftDeck.slice(), selectedHero.id, !!(opts && opts.quiet));
     return true;
   }
   if (!(opts && opts.quiet)) alert(selectedHero.name + " 종족 덱을 저장했습니다.");
@@ -2901,12 +2931,18 @@ function paintBuildVer() {
   if (el) el.textContent = "v" + GAME_VERSION;
 }
 paintBuildVer();
-document.getElementById("btnAi").onclick = () => openTribeSelect("play");
+// v0.334: 메인 메뉴 = 온라인 로비 · 상점 · 설정. 덱 구성·AI 연습은 로비(내 덱)에서, 도움말은 설정 안으로.
+function openShop() {
+  hideScreens();
+  document.getElementById("shop").classList.add("active");
+  try { Bgm.to("menu", 600); } catch (e) {}
+}
+document.getElementById("btnShop").onclick = openShop;
+document.getElementById("btnShopBack").onclick = () => backTitle();
 document.getElementById("btnPvp").onclick = () => {
   try { document.getElementById("settingsPop").classList.remove("show"); } catch (e) {}
   openTribeSelect("pvp");
 };
-document.getElementById("btnDeck").onclick = () => openTribeSelect("deck");
 document.getElementById("btnBackMenu").onclick = () => backTitle();
 document.getElementById("btnClearDeck").onclick = () => { draftDeck = []; renderBuilder(); };
 document.getElementById("btnAutoFill").onclick = () => autoFillDraft();
@@ -2947,7 +2983,7 @@ function openHelp() {
 function closeHelp() {
   document.getElementById("helpPop").classList.remove("show");
 }
-document.getElementById("btnHelp").onclick = openHelp;
+document.getElementById("btnSettingsHelp").onclick = openHelp; // v0.334: 설정 안 「도움말」
 const _btnQuit = document.getElementById("btnQuit");
 if (_btnQuit) _btnQuit.onclick = () => {
   try {

@@ -18,13 +18,15 @@
   const esc = (s) => String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 
   /* ---------- generic prompt / confirm ---------- */
-  function prompt({ title, text = "", value = "", okText = "확인", input = true, validate }) {
+  function prompt({ title, text = "", value = "", okText = "확인", cancelText = "취소", input = true, validate, maxLength = 20 }) {
     return new Promise(resolve => {
       const pop = $("fsPromptPop"), inp = $("fsPromptInput"), err = $("fsPromptErr");
       $("fsPromptTitle").textContent = title;
       $("fsPromptText").textContent = text;
       $("fsPromptText").style.display = text ? "" : "none";
       $("fsPromptOk").textContent = okText;
+      $("fsPromptCancel").textContent = cancelText;
+      inp.maxLength = maxLength;
       inp.style.display = input ? "" : "none";
       inp.value = value;
       err.textContent = "";
@@ -57,11 +59,11 @@
   }
 
   /* ---------- data ---------- */
+  // v0.334: 로컬 덱 여러 개 (game.js loadLocalDecks, 최대 10)
   function localDecks() {
-    const map = (typeof loadSavedDecks === "function") ? loadSavedDecks() : {};
-    return TRIBES.filter(t => Array.isArray(map[t.id]) && map[t.id].length === 30)
-      .map(t => ({ id: "local:" + t.id, name: t.name + " 덱", tribe: t.id, cards: map[t.id].slice(), local: true }));
+    return loadLocalDecks().map(d => ({ id: "local:" + d.id, lid: d.id, name: d.name, tribe: d.tribe, cards: d.cards.slice(), local: true }));
   }
+  const nameRule = (v) => deckNameError(v);
   async function refresh() {
     L.online = !!(window.FSNet && FSNet.isLoggedIn());
     if (L.online) {
@@ -75,12 +77,12 @@
     render();
   }
   const selected = () => L.decks.find(d => String(d.id) === String(L.selId)) || null;
-  const maxDecks = () => (window.FSNet && FSNet.state.maxDecks) || 10;
+  const maxDecks = () => L.online ? ((window.FSNet && FSNet.state.maxDecks) || 10) : LOCAL_DECK_MAX;
 
   /* ---------- render ---------- */
   function render() {
     const max = maxDecks();
-    $("lobbyDeckCount").textContent = L.online ? `${L.decks.length} / ${max}` : `로컬 ${L.decks.length}`;
+    $("lobbyDeckCount").textContent = L.online ? `${L.decks.length} / ${max}` : `로컬 ${L.decks.length} / ${max}`;
     const notice = $("lobbyNotice");
     if (!L.online) {
       notice.textContent = (window.FSNet && FSNet.isOnline())
@@ -94,7 +96,7 @@
         <div class="lobby-deck-icon"><img src="${iconOf(d.tribe)}" alt="${esc(tribeOf(d.tribe).en)}" draggable="false"></div>
         <div class="lobby-deck-name">${esc(d.name)}</div>
       </div>`);
-    const canAdd = L.online ? L.decks.length < max : true;
+    const canAdd = L.decks.length < max;
     if (canAdd) tiles.push(`<div class="lobby-deck add" id="lobbyAddDeck"><div class="lobby-deck-icon plus">+</div><div class="lobby-deck-name">새 덱</div></div>`);
     $("lobbyDecks").innerHTML = tiles.join("");
     $("lobbyDecks").querySelectorAll(".lobby-deck[data-id]").forEach(el => {
@@ -121,8 +123,8 @@
     $("btnMatch").title = L.online ? "" : "매칭은 서버 로그인 후 가능합니다.";
     $("btnLobbyAi").disabled = !d;
     $("btnLobbyEdit").disabled = !d;
-    $("btnLobbyRename").disabled = !(d && !d.local);
-    $("btnLobbyDelete").disabled = !(d && !d.local);
+    $("btnLobbyRename").disabled = !d; // v0.334: 로컬 덱도 이름 변경·삭제
+    $("btnLobbyDelete").disabled = !d;
   }
 
   /* ---------- actions ---------- */
@@ -130,8 +132,9 @@
     if (!window.FSNet || !FSNet.isOnline()) return false;
     const name = await prompt({
       title: "로그인 (테스트)",
-      text: "임시 테스트 로그인입니다. 이름을 입력하세요. (출시 때 스팀 로그인으로 바뀝니다)",
+      text: "임시 테스트 로그인입니다. 이름을 입력하세요. (출시 때 스팀 로그인으로 바뀝니다)\n로그인 없이 이 기기 덱으로 하려면 「로컬 모드」.",
       okText: "로그인",
+      cancelText: "로컬 모드",
       validate: async (v) => { const r = await FSNet.devLogin(v); return r.ok ? null : (r.message || "로그인 실패"); },
     });
     return !!name;
@@ -168,24 +171,36 @@
   function editSelected() {
     const d = selected();
     if (!d) return;
-    openBuilder(d.tribe, d.cards, d.local ? null : { id: d.id, name: d.name });
+    openBuilder(d.tribe, d.cards, d.local ? { lid: d.lid, name: d.name, local: true } : { id: d.id, name: d.name });
   }
   async function renameSelected() {
     const d = selected();
-    if (!d || d.local) return;
+    if (!d) return;
     const name = await prompt({
-      title: "덱 이름 변경", value: d.name, okText: "변경",
-      validate: async (v) => { const r = await FSNet.renameDeck(d.id, v); return r.ok ? null : (r.message || "변경 실패"); },
+      title: "덱 이름 변경", text: `최대 ${DECK_NAME_MAX}자`, value: d.name, okText: "변경", maxLength: DECK_NAME_MAX,
+      validate: async (v) => {
+        const e = nameRule(v); if (e) return e;
+        if (d.local) {
+          const list = loadLocalDecks(); const x = list.find(k => k.id === d.lid);
+          if (!x) return "덱을 찾을 수 없습니다.";
+          x.name = v.replace(/\s+/g, " ").trim(); persistLocalDecks(list); return null;
+        }
+        const r = await FSNet.renameDeck(d.id, v); return r.ok ? null : (r.message || "변경 실패");
+      },
     });
     if (name) refresh();
   }
   async function deleteSelected() {
     const d = selected();
-    if (!d || d.local) return;
+    if (!d) return;
     const ok = await prompt({ title: "덱 삭제", text: `「${d.name}」 덱을 삭제할까요?`, okText: "삭제", input: false });
     if (!ok) return;
-    const r = await FSNet.deleteDeck(d.id);
-    if (!r.ok) alert(r.message || "삭제하지 못했습니다.");
+    if (d.local) {
+      persistLocalDecks(loadLocalDecks().filter(k => k.id !== d.lid));
+    } else {
+      const r = await FSNet.deleteDeck(d.id);
+      if (!r.ok) alert(r.message || "삭제하지 못했습니다.");
+    }
     L.selId = null;
     refresh();
   }
@@ -233,7 +248,9 @@
       text: L.edit ? "이름을 확인하고 저장하세요." : `서버에 저장할 덱 이름을 입력하세요. (계정당 최대 ${maxDecks()}개)`,
       value: (L.edit && L.edit.name) || (t.name + " 덱"),
       okText: "저장",
+      maxLength: DECK_NAME_MAX,
       validate: async (v) => {
+        const e = nameRule(v); if (e) return e;
         const r = L.edit
           ? await FSNet.updateDeck(L.edit.id, { name: v, tribe: tribeId, cards })
           : await FSNet.createDeck({ name: v, tribe: tribeId, cards });
@@ -249,6 +266,45 @@
     }
   }
 
+  /* v0.334: 로그인 안 한(로컬) 저장 — 항상 이름 입력, 로컬 덱 목록(최대 10)에 추가/덮어쓰기. */
+  async function saveDraftLocal(cards, tribeId, quiet) {
+    const ed = L.edit && L.edit.local ? L.edit : null;
+    if (quiet) {
+      // "이 덱으로 플레이": 편집 중인 로컬 덱만 카드 갱신 (이름 창 없음)
+      if (ed) { const list = loadLocalDecks(); const x = list.find(k => k.id === ed.lid); if (x) { x.cards = cards.slice(); x.tribe = tribeId; persistLocalDecks(list); } }
+      return;
+    }
+    const t = tribeOf(tribeId);
+    let saved = null;
+    const name = await prompt({
+      title: ed ? "덱 저장 (덮어쓰기)" : "덱 저장",
+      text: `이 기기에 저장할 덱 이름을 입력하세요. (최대 ${DECK_NAME_MAX}자 · 덱 최대 ${LOCAL_DECK_MAX}개)`,
+      value: (ed && ed.name) || (t.name + " 덱"),
+      okText: "저장",
+      maxLength: DECK_NAME_MAX,
+      validate: async (v) => {
+        const e = nameRule(v); if (e) return e;
+        const nm = v.replace(/\s+/g, " ").trim();
+        const list = loadLocalDecks();
+        let x = ed && list.find(k => k.id === ed.lid);
+        if (x) { x.name = nm; x.tribe = tribeId; x.cards = cards.slice(); }
+        else {
+          if (list.length >= LOCAL_DECK_MAX) return `로컬 덱은 최대 ${LOCAL_DECK_MAX}개입니다. 로비에서 덱을 삭제하세요.`;
+          x = { id: "L" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: nm, tribe: tribeId, cards: cards.slice() };
+          list.push(x);
+        }
+        persistLocalDecks(list);
+        saved = x;
+        return null;
+      },
+    });
+    if (name && saved) {
+      L.edit = { lid: saved.id, name: saved.name, local: true };
+      L.selId = "local:" + saved.id;
+      alert(`「${saved.name}」 덱을 저장했습니다.`);
+    }
+  }
+
   /* ---------- wiring ---------- */
   $("btnLobby").onclick = enter;
   $("btnLobbyBack").onclick = () => { cancelMatch(); backTitle(); };
@@ -259,14 +315,9 @@
   $("btnMatch").onclick = startMatch;
   $("btnMatchCancel").onclick = cancelMatch;
   const back = $("btnBackMenu");
-  // v0.333: 타이틀에서 들어온 덱 구성의 「메뉴」는 속성 선택 화면으로 돌아감
-  if (back) back.onclick = () => { if (L.fromLobby) open(); else openTribeSelect("deck"); };
-  const deckBtn = $("btnDeck");
-  if (deckBtn) {
-    const prev = deckBtn.onclick;
-    deckBtn.onclick = (e) => { L.fromLobby = false; L.edit = null; if (prev) prev.call(deckBtn, e); };
-  }
+  // v0.334: 덱 구성은 로비에서만 들어옴 → 「뒤로」는 로비
+  if (back) back.onclick = () => open();
 
-  window.Lobby = { enter, open, refresh, saveDraftToServer, prompt, _state: L };
+  window.Lobby = { enter, open, refresh, saveDraftToServer, saveDraftLocal, prompt, _state: L };
   if (window.FSNet) FSNet.probe();
 })();
