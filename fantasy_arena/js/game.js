@@ -3086,7 +3086,7 @@ document.getElementById("btnPlaySaved").onclick = () => {
 const TRIBE_SPEC = {
   earth: "특화: 체력. 체 코인 링크.",
   fire: "특화: 공격. 기본 스탯이 높고 공 −코인이 많음.",
-  water: "특화: 방어. 방 코인 링크.",
+  water: "특화: 방어. 대부분 방 코인 링크.",
   wind: "특화: 안정. 코인 N≤2.",
   light: "특화: 코인(전부 +).",
   dark: "특화: 승부. 코인 N 3~5, 대부분 맞교환."
