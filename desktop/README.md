@@ -1,4 +1,4 @@
-# Fantasy Arena Desktop (Electron)
+# FantasySoul Desktop (Electron) — 판타지소울
 
 Fixed 16:9 game window shell (1920×1080 기준, v0.327) (Hearthstone-style). Wraps `../fantasy_arena` web build.
 
@@ -21,8 +21,8 @@ npm run pack          # unpacked dir only (faster smoke test)
 ```
 
 Artifacts (version from package.json):
-- `dist/Fantasy Arena Setup <version>.exe` — NSIS installer (choose install folder)
-- `dist/Fantasy Arena <version>.exe` — portable (no install)
+- `dist/FantasySoul Setup <version>.exe` — NSIS installer (choose install folder)
+- `dist/FantasySoul <version>.exe` — portable (no install)
 
 Copy renamed builds for distribution, e.g.:
 - `FantasyArena-Setup-0.0.83.exe`
@@ -30,7 +30,7 @@ Copy renamed builds for distribution, e.g.:
 
 ## Install / play (Windows)
 1. Run the Setup `.exe`, pick a folder (or use Portable).
-2. Launch **Fantasy Arena** — window is fixed 4:3 (default 1280×960 content).
+2. Launch **FantasySoul (판타지소울)** — window is fixed 4:3 (default 1280×960 content).
 3. In-game **설정 · 해상도**: 1024×768, 1280×960, 1600×1200, 1920×1440 (+ fullscreen).
 
 ## Resolutions

@@ -1,4 +1,4 @@
-# fantasy_arena (판마스톤)
+# fantasy_arena (판타지소울 / FantasySoul)
 
 단일 `runestone.html`을 모듈 트리로 분리한 패키지.
 

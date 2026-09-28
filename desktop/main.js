@@ -40,7 +40,7 @@ function createWindow() {
     fullscreenable: true,
     backgroundColor: "#000000",
     autoHideMenuBar: true,
-    title: "판마스톤 — Fantasy Arena",
+    title: "판타지소울 — FantasySoul",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,

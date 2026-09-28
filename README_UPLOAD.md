@@ -1,4 +1,4 @@
-# 판타지 아레나 GitHub 패키지 (일러스트 제외)
+# 판타지소울(FantasySoul) GitHub 패키지 (일러스트 제외)
 
 업로드 루트: fantasy_arena/
 
