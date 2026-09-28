@@ -3089,7 +3089,7 @@ const TRIBE_SPEC = {
   water: "특화: 방어. 방 코인 링크.",
   wind: "특화: 안정. 코인 N≤2.",
   light: "특화: 코인(전부 +).",
-  dark: "특화: 승부. 코인 N 3~5 맞교환."
+  dark: "특화: 승부. 코인 N 3~5, 대부분 맞교환."
 };
 const RACE_LORE = (typeof TRIBES !== "undefined" ? TRIBES : []).map(h => [
   h.name + " (" + h.en + ")",
