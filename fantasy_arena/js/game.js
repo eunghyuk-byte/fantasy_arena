@@ -2526,6 +2526,22 @@ document.addEventListener("pointercancel", () => { try { if (!_drag) hidePeek();
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") { ui.targeting = null; ui.attacker = null; render(); }
 });
+// v0.332: 전투 화면 버튼(소울 드로우·턴 종료·설정 톱니 등)에 포커스가 남은 채 Space/Enter를 눌러
+// 버튼이 키보드로 발동하는 오발동 차단. 전투 조작은 마우스(포인터)만. (의도된 단축키는 Esc=대상 지정 취소뿐)
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+  const g = document.getElementById("game");
+  if (!g || !g.classList.contains("active")) return;
+  const a = document.activeElement;
+  if (!a || a === document.body) return;
+  if (a.matches && a.matches("input, textarea, select, [contenteditable]")) return;
+  // 팝업(설정·도움말 등) 안 버튼은 정상 동작 유지 — 전장(#game) 안 버튼과 톱니만 막음
+  if (a.id === "settingsGearBtn" || g.contains(a)) {
+    e.preventDefault();
+    e.stopPropagation();
+    try { a.blur(); } catch (err) {}
+  }
+}, true);
 
 
 let draftDeck = [];

@@ -1446,6 +1446,8 @@ function initSoulDrawBtn(btn, clickable) {
 function bindSoulDrawPress(btn) {
   if (!btn || btn._sdPressBound) return;
   btn._sdPressBound = true;
+  // v0.332: 키보드 포커스 제외 (Tab으로 못 잡고, Space/Enter 오발동 없음)
+  btn.tabIndex = -1;
   const clearHold = () => {
     if (!btn._sdHolding) return;
     btn._sdHolding = false;
@@ -1475,6 +1477,7 @@ function bindSoulDrawPress(btn) {
     btn._sdPtr = null;
     clearHold();
     try { if (e.pointerId != null) btn.releasePointerCapture(e.pointerId); } catch (err) {}
+    try { btn.blur(); } catch (err) {}   // v0.332: 포커스가 남아 Space/Enter로 재발동하지 않게
     if (!armed || !over) return;          // 버튼 밖에서 떼면 취소
     if (btn.disabled || btn._sdDesired !== "idle") return;
     btn._sdFiredAt = Date.now();
@@ -1486,10 +1489,11 @@ function bindSoulDrawPress(btn) {
   btn.addEventListener("pointerleave", (e) => { if (!btn._sdArmed) clearHold(); else if (!stillOverBtn(e)) { btn._sdHolding = false; setSoulDrawArt(btn, btn._sdDesired || "used"); } });
   btn.addEventListener("pointerenter", (e) => { if (btn._sdArmed && stillOverBtn(e)) { btn._sdHolding = true; setSoulDrawArt(btn, "hold"); } });
   window.addEventListener("pointerup", (e) => { if (btn._sdArmed) onUp(e); }, true);
-  // 마우스/터치 click은 위에서 처리 — #game 클릭 핸들러로 번지지 않게만. 키보드(Enter/Space, detail 0)만 여기서 실행.
-  btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    if (e.detail === 0 && !btn.disabled && btn._sdDesired === "idle" && typeof onSoulDrawClick === "function") onSoulDrawClick();
+  // 마우스/터치는 pointerup에서만 발동. click은 #game 클릭 핸들러로 번지지 않게만 막는다.
+  // v0.332: 키보드(Enter/Space → click detail 0) 발동 경로 제거 — 카드 드래그 소환 후 Space로 3소울 드로우되던 버그.
+  btn.addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); });
+  btn.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); e.stopPropagation(); }
   });
 }
 function updateSoulDrawBtns(me, opp) {
@@ -1626,6 +1630,7 @@ function updateEndBtn(myTurn) {
     const btn = document.getElementById("endBtn");
     if (!btn || btn._endBtnPressBound) return;
     btn._endBtnPressBound = true;
+    btn.tabIndex = -1; // v0.332: 키보드 포커스/Space·Enter 오발동 방지 (턴 종료는 마우스 누름+뗌만)
     const clearHold = () => {
       if (!btn._endBtnHolding) return;
       btn._endBtnHolding = false;
@@ -1657,6 +1662,7 @@ function updateEndBtn(myTurn) {
       btn._endBtnPtr = null;
       clearHold();
       try { if (e.pointerId != null) btn.releasePointerCapture(e.pointerId); } catch (err) {}
+      try { btn.blur(); } catch (err) {}
       if (!armed) return;
       if (btn.disabled || !btn.classList.contains("my-turn")) return;
       // Cancel if release point is outside #endBtn bounds
