@@ -781,10 +781,11 @@ async function composeCardFace(c, opts={}) {
   // v0.316: 「보호」 전장 오버레이 — 아트/프레임/텍스트 위, 소울·공/방/체 숫자·배지 아래.
   // opts.fieldShield 는 renderMinion(전장)에서만 켜짐 (핸드/덱/상세/도감은 절대 없음).
   if (opts.fieldShield) await paintProtectOverlay(ctx, W, H);
-  // v0.323: 「면역」 전장 오버레이 (3번 비전 봉인진) — 보호 위에 겹침, 숫자·배지 아래. renderMinion(전장) 전용.
-  if (opts.fieldImmune) await paintImmuneOverlay(ctx, W, H);
-  // v0.326: 「환생」 전장 오버레이 (1번 불사조 깃털) — 보호·면역 위, 숫자·배지 아래. 환생 소모·침묵 시 사라짐.
+  // v0.326: 「환생」 전장 오버레이 (1번 불사조 깃털) — 보호 위, 숫자·배지 아래. 환생 소모·침묵 시 사라짐.
+  // v0.332: 면역+환생 겹침 시 깃털(불꽃 면적 큼)이 면역 룬을 가리지 않도록 환생을 먼저 그리고 면역을 위에 올린다.
   if (opts.fieldRebirth) await paintRebirthOverlay(ctx, W, H);
+  // v0.323: 「면역」 전장 오버레이 (3번 비전 봉인진) — 보호·환생 위, 숫자·배지 아래. renderMinion(전장) 전용.
+  if (opts.fieldImmune) await paintImmuneOverlay(ctx, W, H);
 
   const baseCard = (typeof CARD_MAP !== "undefined" && c && CARD_MAP[c.id]) || null;
   paintNumber(ctx, String(c.cost ?? 0), W*0.1386, H*0.0996 - 2, Math.round(H*0.070) + 12,

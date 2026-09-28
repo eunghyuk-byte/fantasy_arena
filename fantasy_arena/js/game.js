@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.331";
+const GAME_VERSION = "0.332";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -422,7 +422,8 @@ function unequipItem(m) {
     if (b.prevAtkSkill == null) delete m.atkSkill;
     else m.atkSkill = b.prevAtkSkill;
   }
-  if (b.ability != null) {
+  // v0.332: 유닛 자체 능력이 있었으면(keptUnitAbility) ability는 건드리지 않음 — 아이템 능력은 키워드/extraAbility로만 부여됐음
+  if (b.ability != null && !b.keptUnitAbility) {
     if (b.prevAbility == null) delete m.ability;
     else m.ability = b.prevAbility;
   }
@@ -467,8 +468,13 @@ function equipItemOnUnit(p, card, unit) {
       }
     }
   }
+  let keptUnitAbility = false;
+  let extraAbility = null;
   if (card.ability) {
-    unit.ability = card.ability;
+    // v0.332: 유닛에 이미 능력(면역·복수·유언 등)이 있으면 덮어쓰지 않고 유지.
+    // 아이템 능력은 키워드(rebirth/shield/...)로 부여 + extraAbility로 기록(키워드로 판정 안 되는 강탈·복수·유언도 둘 다 발동)
+    if (prevAbility) { keptUnitAbility = true; extraAbility = card.ability; }
+    else unit.ability = card.ability;
     const kwMap = { "보호": "shield", "환생": "rebirth", "강탈": "steal", "출전": "battlecry", "복수": "revenge", "유언": "deathrattle", "면역": "immune" };
     const kw = kwMap[card.ability];
     if (kw) {
@@ -480,7 +486,7 @@ function equipItemOnUnit(p, card, unit) {
   const bonuses = {
     atk: dAtk, def: dDef, hp: dHp,
     atkSkill: card.atkSkill, prevAtkSkill,
-    ability: card.ability, prevAbility,
+    ability: card.ability, prevAbility, keptUnitAbility, extraAbility,
     grantedCharge, grantedKw
   };
   // v0.317: 코인 아이템(노름바위·불꽃도박반지·도둑바람·저주의인형·조작된주화)은 장착 시 코인을 바꾸지 않고
@@ -791,6 +797,14 @@ function findOn(p, uid) { return p.board.find(m => m.uid === uid); }
 
 function abilityOf(m) {
   return (m && m.ability) || null;
+}
+/** v0.332: 유닛 능력 + (유닛 능력과 겹쳐 착용한) 아이템 능력 목록 */
+function abilityList(m) {
+  if (!m) return [];
+  const a = String(m.ability || "").split(",").map(x => x.trim()).filter(Boolean);
+  const x = m._itemBonuses && m._itemBonuses.extraAbility;
+  if (x && !a.includes(x)) a.push(x);
+  return a;
 }
 /** 기본(인쇄) 소울: 손패 할인 등으로 바뀐 cost가 아니라 카드 원본 소울 */
 function printedSoul(m) {
@@ -1210,7 +1224,7 @@ function applyFx(p, fx, target) {
       m.silenced = true;
       m.text = "침묵";
       // 장착 아이템 해제 시 침묵 전 능력/문구로 되돌아가지 않게
-      if (m._itemBonuses) { m._itemBonuses.prevAbility = null; m._itemBonuses.prevAtkSkill = null; }
+      if (m._itemBonuses) { m._itemBonuses.prevAbility = null; m._itemBonuses.prevAtkSkill = null; m._itemBonuses.extraAbility = null; }
       if (m._baseText != null) m._baseText = "침묵";
     });
     log("적 전체 침묵 (능력 제거)");
@@ -1388,15 +1402,18 @@ function resolveDeath(owner, m) {
   // 능력 판정은 아이템 해제 전에 한다 (아이템으로 받은 환생·강탈도 발동, 침묵으로 지운 능력은 되살아나지 않음)
   const ctx = m._deathCtx || {};
   const ab = abilityOf(m);
+  // v0.332: 유닛 능력 + 겹쳐 착용한 아이템 능력 (둘 다 발동)
+  const abs = (typeof abilityList === "function") ? abilityList(m) : String(ab || "").split(",").map(x => x.trim()).filter(Boolean);
   const fromSpell = !!ctx.fromSpell;
-  const hasRebirth = (ab && String(ab).includes("환생")) || (m.keywords || []).includes("rebirth");
+  const hasRebirth = (ab && String(ab).includes("환생")) || abs.includes("환생") || (m.keywords || []).includes("rebirth");
   const deadItemFx = m._itemFx || null;
   if (typeof unequipItem === "function") unequipItem(m);
 
-  if (ab === "유언") {
+  if (abs.includes("유언")) {
     log(`${m.name} 파괴: 드로우 1`);
     draw(owner, 1);
-  } else if (ab === "복수") {
+  }
+  if (abs.includes("복수")) {
     if (fromSpell) {
       log(`${m.name} 파괴:제거 · 스펠 사망이라 미발동`);
     } else if (ctx.killer && ctx.killerOwner && ctx.killer.hp > 0 && !ctx.killer.dying) {
@@ -1446,7 +1463,7 @@ function resolveDeath(owner, m) {
   const drs = [].concat(m.deathrattle ? [m.deathrattle] : [], m.deathrattles || []);
   drs.forEach(dfx => applyFx(owner, dfx, null));
 
-  if (ab === "강탈") {
+  if (abs.includes("강탈")) {
     const killer = ctx.killer;
     const killerOwner = ctx.killerOwner;
     if (fromSpell || !killer || !killerOwner) {
