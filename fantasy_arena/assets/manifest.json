@@ -1,5 +1,5 @@
 {
-  "count": 699,
+  "count": 712,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -533,7 +533,7 @@
     },
     {
       "path": "assets/img/art/e14.jpg",
-      "bytes": 290296,
+      "bytes": 222015,
       "name": "e14"
     },
     {
@@ -558,7 +558,7 @@
     },
     {
       "path": "assets/img/art/e19.jpg",
-      "bytes": 258774,
+      "bytes": 209222,
       "name": "e19"
     },
     {
@@ -738,7 +738,7 @@
     },
     {
       "path": "assets/img/art/f12.jpg",
-      "bytes": 333521,
+      "bytes": 288654,
       "name": "f12"
     },
     {
@@ -753,7 +753,7 @@
     },
     {
       "path": "assets/img/art/f15.jpg",
-      "bytes": 330907,
+      "bytes": 224700,
       "name": "f15"
     },
     {
@@ -1128,7 +1128,7 @@
     },
     {
       "path": "assets/img/art/ls6.jpg",
-      "bytes": 243673,
+      "bytes": 229448,
       "name": "ls6"
     },
     {
@@ -3475,6 +3475,91 @@
       "path": "assets/img/hud/endturn_glow.png",
       "bytes": 408320,
       "name": "endturn_glow"
+    },
+    {
+      "path": "assets/img/art/ns10.jpg",
+      "bytes": 220350,
+      "name": "ns10"
+    },
+    {
+      "path": "assets/img/art/e41.jpg",
+      "bytes": 220438,
+      "name": "e41"
+    },
+    {
+      "path": "assets/img/art/ei7.jpg",
+      "bytes": 291994,
+      "name": "ei7"
+    },
+    {
+      "path": "assets/img/art/li7.jpg",
+      "bytes": 137992,
+      "name": "li7"
+    },
+    {
+      "path": "assets/img/art/ls10.jpg",
+      "bytes": 248300,
+      "name": "ls10"
+    },
+    {
+      "path": "assets/img/art/l40.jpg",
+      "bytes": 254855,
+      "name": "l40"
+    },
+    {
+      "path": "assets/img/art/ds10.jpg",
+      "bytes": 266060,
+      "name": "ds10"
+    },
+    {
+      "path": "assets/img/art/as10.jpg",
+      "bytes": 180063,
+      "name": "as10"
+    },
+    {
+      "path": "assets/img/art/fs9.jpg",
+      "bytes": 266535,
+      "name": "fs9"
+    },
+    {
+      "path": "assets/img/art/fi7.jpg",
+      "bytes": 157392,
+      "name": "fi7"
+    },
+    {
+      "path": "assets/img/art/fs10.jpg",
+      "bytes": 262764,
+      "name": "fs10"
+    },
+    {
+      "path": "assets/img/art/di7.jpg",
+      "bytes": 156620,
+      "name": "di7"
+    },
+    {
+      "path": "assets/img/art/es10.jpg",
+      "bytes": 283603,
+      "name": "es10"
+    },
+    {
+      "path": "assets/img/art/ni7.jpg",
+      "bytes": 194892,
+      "name": "ni7"
+    },
+    {
+      "path": "assets/img/art/ai7.jpg",
+      "bytes": 118348,
+      "name": "ai7"
+    },
+    {
+      "path": "assets/img/art/e43.jpg",
+      "bytes": 308494,
+      "name": "e43"
+    },
+    {
+      "path": "assets/img/art/f40.jpg",
+      "bytes": 300056,
+      "name": "f40"
     }
   ]
 }
