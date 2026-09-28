@@ -4458,3 +4458,134 @@ html, body, body * {
   word-break: keep-all;
   overflow-wrap: break-word;
 }
+
+/* ===== v0.333 타이틀: 왼쪽 속성 카드 제거 → 로고·메뉴 화면 중앙 (16:9 stage cq 단위) ===== */
+#title.screen.active {
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 4cqh 4cqw 6cqh !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(ellipse 46cqw 34cqh at 50% 30%, rgba(228,195,106,.13), transparent 70%),
+    radial-gradient(ellipse 70cqw 60cqh at 50% 62%, rgba(90,60,24,.28), transparent 75%) !important;
+}
+#title .title-brand {
+  width: auto !important;
+  margin: 0 auto 4.2cqh !important;
+  gap: 2cqh !important;
+}
+#title .title-emblem {
+  height: 25cqh !important;
+  max-height: 25cqh !important;
+}
+#title .title-wordmark {
+  --wm-h: 25cqh;
+}
+#title .title-body {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+}
+#title .title-menu {
+  position: relative;
+  width: 27cqw;
+  min-width: 300px;
+  gap: 1.5cqh !important;
+  padding: 3cqh 2.4cqw 2.2cqh !important;
+  border: 2px solid #5a4320;
+  border-radius: 1.8cqh;
+  background: linear-gradient(#22180fcc, #140e09e6);
+  box-shadow: inset 0 0 0 1px #2a1c10, 0 1.4cqh 4cqh rgba(0,0,0,.55);
+}
+#title .title-menu::before,
+#title .title-menu::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 40%;
+  height: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: .7;
+}
+#title .title-menu::before { top: -2px; }
+#title .title-menu::after { bottom: -2px; }
+#title .title-menu .menu-btn {
+  padding: 1.7cqh 1.4cqw !important;
+  font-size: 2.3cqh !important;
+  letter-spacing: .12em !important;
+}
+#title .title-menu .menu-btn.ghost { font-size: 2cqh !important; }
+#title .title-menu .build-ver {
+  position: absolute !important;
+  right: 1.2cqw !important;
+  bottom: -4.6cqh !important;
+  font-size: 1.6cqh !important;
+  margin: 0 !important;
+}
+
+/* ===== v0.333 속성 선택 화면 (덱 구성 · 플레이 · 로비 새 덱) ===== */
+#tribeSelect.screen.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4cqh 4cqw;
+  background: radial-gradient(ellipse 60cqw 50cqh at 50% 45%, rgba(228,195,106,.10), transparent 72%);
+}
+#tribeSelect .tsel {
+  display: flex; flex-direction: column; align-items: center;
+  width: 100%;
+}
+#tribeSelect .tsel-title {
+  margin: 0 0 .8cqh; color: var(--gold); font-size: 4.6cqh; letter-spacing: .08em;
+  text-shadow: 0 .35cqh 0 #4a3208, 0 0 2.4cqh rgba(228,195,106,.25);
+}
+#tribeSelect .tsel-sub { margin: 0 0 3.4cqh; color: #cbb58a; font-size: 2cqh; }
+#tribeSelect .tsel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 21cqw);
+  gap: 2.8cqh 2cqw;
+  margin-bottom: 3.6cqh;
+}
+#tribeSelect .tsel-card {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 2.2cqh 1cqw 2cqh;
+  border: 2px solid #5a4320;
+  border-radius: 1.8cqh;
+  background: linear-gradient(#22180f, #140e09);
+  box-shadow: inset 0 0 0 1px #2a1c10, 0 1cqh 2.6cqh rgba(0,0,0,.5);
+  color: var(--gold);
+  cursor: pointer;
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+#tribeSelect .tsel-card:hover {
+  transform: translateY(-.6cqh);
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px #2a1c10, 0 0 3cqh color-mix(in srgb, var(--tc) 55%, transparent), 0 1.4cqh 3cqh rgba(0,0,0,.55);
+}
+#tribeSelect .tsel-card.lock { opacity: .42; filter: grayscale(.4); cursor: not-allowed; }
+#tribeSelect .tsel-icon {
+  width: 19cqh; height: 19cqh;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1.2cqh;
+}
+#tribeSelect .tsel-icon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+#tribeSelect .tsel-en {
+  font-family: var(--font-en); font-weight: 600; font-size: 3cqh; letter-spacing: .03em; line-height: 1.1;
+}
+#tribeSelect .tsel-ko { color: #cbb58a; font-size: 1.8cqh; margin-top: .3cqh; }
+#tribeSelect .tsel-badge {
+  position: absolute; top: 1.2cqh; right: 1.2cqh;
+  font-size: 1.45cqh; padding: .3cqh .9cqh; border-radius: 1cqh;
+  color: #cbb58a; background: rgba(0,0,0,.45); border: 1px solid #6a5228;
+}
+#tribeSelect .tsel-badge.ok { color: #ffe7a8; border-color: var(--gold-dim); }
+#tribeSelect .tsel-back {
+  min-width: 18cqw; margin: 0; padding: 1.4cqh 2cqw; font-size: 2cqh;
+}

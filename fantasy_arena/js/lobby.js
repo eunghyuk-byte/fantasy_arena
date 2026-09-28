@@ -56,20 +56,6 @@
     });
   }
 
-  function pickTribe() {
-    return new Promise(resolve => {
-      const pop = $("fsTribePop"), grid = $("fsTribeGrid");
-      grid.innerHTML = TRIBES.filter(t => t.open).map(t => `
-        <button class="fs-tribe" data-id="${t.id}" style="--tc:${t.color}">
-          <img src="${iconOf(t.id)}" alt=""><span>${esc(t.name)}</span>
-        </button>`).join("");
-      const close = (v) => { pop.classList.remove("show"); resolve(v); };
-      grid.querySelectorAll(".fs-tribe").forEach(b => { b.onclick = () => close(b.dataset.id); });
-      $("fsTribeCancel").onclick = () => close(null);
-      pop.classList.add("show");
-    });
-  }
-
   /* ---------- data ---------- */
   function localDecks() {
     const map = (typeof loadSavedDecks === "function") ? loadSavedDecks() : {};
@@ -175,9 +161,9 @@
     sanitizeDraftDeck();
     renderBuilder();
   }
-  async function newDeck() {
-    const tr = await pickTribe();
-    if (tr) openBuilder(tr, [], null);
+  function newDeck() {
+    // v0.333: 타이틀 「덱 구성」과 같은 속성 선택 화면 (뒤로 → 로비)
+    openTribeSelect("lobby", { onPick: (tr) => openBuilder(tr, [], null), onBack: open });
   }
   function editSelected() {
     const d = selected();
@@ -273,7 +259,8 @@
   $("btnMatch").onclick = startMatch;
   $("btnMatchCancel").onclick = cancelMatch;
   const back = $("btnBackMenu");
-  if (back) back.onclick = () => { if (L.fromLobby) open(); else backTitle(); };
+  // v0.333: 타이틀에서 들어온 덱 구성의 「메뉴」는 속성 선택 화면으로 돌아감
+  if (back) back.onclick = () => { if (L.fromLobby) open(); else openTribeSelect("deck"); };
   const deckBtn = $("btnDeck");
   if (deckBtn) {
     const prev = deckBtn.onclick;

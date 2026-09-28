@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.332";
+const GAME_VERSION = "0.333";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -2844,34 +2844,69 @@ function updateDeckStats() {
   }).join("");
 }
 
-function renderHeroPicks() {
-  const box = document.getElementById("heroPicks");
-  box.innerHTML = TRIBES.map(h => `
-    <div class="hero-card ${h.open && selectedHero.id === h.id ? "sel" : ""} ${h.open ? "" : "lock"}" data-id="${h.id}" style="--tc:${h.color}">
-      <div class="art"><img src="${(typeof TRIBE_ICONS!=="undefined" && TRIBE_ICONS[h.id]) || ""}" alt="${h.en}"></div>
-      <h3 class="en">${h.en}</h3>
-    </div>`).join("");
-  box.querySelectorAll(".hero-card").forEach(el => {
+/* v0.333: 타이틀 왼쪽 속성 카드 6장 제거 → 하스스톤식 속성 선택 화면(#tribeSelect).
+ * mode: "deck"(덱 구성) · "play"(AI 대전) · "pvp"(핫시트) · "lobby"(로비 새 덱, opts.onPick/onBack) */
+const TSEL_TEXT = {
+  deck:  ["덱 구성", "덱을 만들 속성을 고르세요."],
+  play:  ["플레이", "AI 대전에 쓸 속성을 고르세요. 저장된 덱이 없으면 기본 덱으로 시작합니다."],
+  pvp:   ["같은 화면 1대1", "플레이어 1의 속성을 고르세요."],
+  lobby: ["새 덱", "새 덱의 속성을 고르세요."],
+};
+let _tsel = { mode: "deck", opts: {} };
+function openTribeSelect(mode, opts) {
+  _tsel = { mode: mode || "deck", opts: opts || {} };
+  const [title, sub] = TSEL_TEXT[_tsel.mode] || TSEL_TEXT.deck;
+  document.getElementById("tselTitle").textContent = title + " — 속성 선택";
+  document.getElementById("tselSub").textContent = sub;
+  const saved = (typeof loadSavedDecks === "function") ? loadSavedDecks() : {};
+  const grid = document.getElementById("tselGrid");
+  grid.innerHTML = TRIBES.map(t => {
+    const n = Array.isArray(saved[t.id]) ? saved[t.id].length : 0;
+    // 배지: 덱 구성=저장/작성 중 여부, 플레이·핫시트=저장 덱 없으면 기본 덱으로 시작, 로비 새 덱=없음
+    const badge = _tsel.mode === "lobby" ? "" : (n === 30 ? "저장된 덱" : (n ? `작성 중 ${n}/30` : (_tsel.mode === "deck" ? "" : "기본 덱")));
+    return `<button class="tsel-card ${t.open ? "" : "lock"}" data-id="${t.id}" style="--tc:${t.color}">
+      <div class="tsel-icon"><img src="${(typeof TRIBE_ICONS !== "undefined" && TRIBE_ICONS[t.id]) || ""}" alt="" draggable="false"></div>
+      <div class="tsel-en">${t.en}</div>
+      <div class="tsel-ko">${t.name}</div>
+      ${badge ? `<div class="tsel-badge ${n === 30 ? "ok" : ""}">${badge}</div>` : ""}
+    </button>`;
+  }).join("");
+  grid.querySelectorAll(".tsel-card").forEach(el => {
     el.onclick = () => {
-      const h = TRIBES.find(x => x.id === el.dataset.id);
-      if (!h.open) return;
-      selectedHero = h;
-      renderHeroPicks();
+      const t = TRIBES.find(x => x.id === el.dataset.id);
+      if (t && t.open) pickTribeFromSelect(t);
     };
   });
+  hideScreens();
+  document.getElementById("tribeSelect").classList.add("active");
+  try { Bgm.to("menu", 600); } catch (e) {}
 }
+function pickTribeFromSelect(t) {
+  selectedHero = t;
+  const { mode, opts } = _tsel;
+  if (mode === "lobby") { if (opts.onPick) opts.onPick(t.id); return; }
+  if (mode === "play") { startGame(true); return; }
+  if (mode === "pvp") { startGame(false); return; }
+  draftDeck = (loadSavedDecks()[t.id] || []).slice();
+  sanitizeDraftDeck();
+  showBuilder();
+}
+function tribeSelectBack() {
+  if (_tsel.mode === "lobby" && _tsel.opts.onBack) { _tsel.opts.onBack(); return; }
+  backTitle();
+}
+document.getElementById("btnTselBack").onclick = () => tribeSelectBack();
 function paintBuildVer() {
   const el = document.getElementById("buildVer");
   if (el) el.textContent = "v" + GAME_VERSION;
 }
 paintBuildVer();
-renderHeroPicks();
-document.getElementById("btnAi").onclick = () => startGame(true);
+document.getElementById("btnAi").onclick = () => openTribeSelect("play");
 document.getElementById("btnPvp").onclick = () => {
   try { document.getElementById("settingsPop").classList.remove("show"); } catch (e) {}
-  startGame(false);
+  openTribeSelect("pvp");
 };
-document.getElementById("btnDeck").onclick = () => { draftDeck = (loadSavedDecks()[selectedHero.id] || []).slice(); sanitizeDraftDeck(); showBuilder(); };
+document.getElementById("btnDeck").onclick = () => openTribeSelect("deck");
 document.getElementById("btnBackMenu").onclick = () => backTitle();
 document.getElementById("btnClearDeck").onclick = () => { draftDeck = []; renderBuilder(); };
 document.getElementById("btnAutoFill").onclick = () => autoFillDraft();
