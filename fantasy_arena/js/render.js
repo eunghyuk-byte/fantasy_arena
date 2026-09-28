@@ -1216,7 +1216,7 @@ function layoutHudGems() {
     const L = parseFloat(el.style.left);
     if (!Number.isNaN(L)) el.style.setProperty("left", (L - 170) + "px", "important");
   });
-  // v0.321 소울 드로우 버튼 (~92px @1280×800, v0.319의 2배). 내 버튼: 소울 표시 바로 아래(핸드 10장 오른쪽 끝 바깥 · 5번째 유닛 칸 아래).
+  // v0.321 소울 드로우 버튼 (~92px @1280×800, v0.319의 2배) → v0.324 보이는 판 ~46px (요소 ~62px, 왼쪽 위 기준 동일 위치). 내 버튼: 소울 표시 바로 아래(핸드 10장 오른쪽 끝 바깥 · 5번째 유닛 칸 아래).
   // 소울 표시 왼쪽은 핸드 10장 오른쪽 카드와, 위쪽은 5번째 유닛 칸과 겹쳐 빈 자리가 없다. 상대 버튼: 상대 소울 왼쪽, 비율 축소.
   [["mySoulDraw", "mySoulGem", 1.0, "below"], ["oppSoulDraw", "oppSoulGem", 0.6, "left"]].forEach(([bid, gid, k, mode]) => {
     const b = document.getElementById(bid);
@@ -1224,7 +1224,8 @@ function layoutHudGems() {
     if (!b || !g || !g.style.left) return;
     const gl = parseFloat(g.style.left), gt = parseFloat(g.style.top);
     if (Number.isNaN(gl) || Number.isNaN(gt)) return;
-    const D = Math.round(Math.max(60, SOUL_W * 1.56) * k);
+    // v0.324: 3상태 아트(판 지름 757/1024) — 보이는 판이 v0.321 버튼(~92px)의 절반(~46px)이 되도록 요소 크기 = 이전 × 0.5 ÷ (757/1024)
+    const D = Math.round(Math.max(60, SOUL_W * 1.56) * k * 0.5 / SOUL_DRAW_PLATE_FRAC);
     // 보이는 소울 숫자(텍스트) 기준으로 붙인다 — #…SoulGem 상자는 숫자보다 넓다
     let textL = null, textCY = null, textB = null;
     try {
@@ -1297,27 +1298,56 @@ function layoutHudGems() {
   }
 }
 
-/** v0.319 소울 드로우 버튼 상태 (내 버튼: 클릭 · 상대 버튼: 표시만). 아이콘은 assets/img/ui/soul_draw.webp */
-const SOUL_DRAW_ICON = "assets/img/ui/soul_draw.webp";
-/** 아이콘(1024 기준)의 소울 보석 중심·반지름 — 아이콘 교체 시 여기만 맞춘다 */
-const SOUL_DRAW_GEM = { cx: 195, cy: 170, r: 90 };
+/** v0.324 소울 드로우 3상태 버튼 (endBtn과 같은 방식: idle / hold(누르는 중) / used).
+ *  내 버튼: 클릭 · 상대 버튼: 표시만(항상 used 아트). 세 아트는 윤곽이 같아 교체 시 흔들리지 않는다. */
+const SOUL_DRAW_SRCS = {
+  idle: "assets/img/ui/soul_draw_idle.webp",
+  hold: "assets/img/ui/soul_draw_hold.webp",
+  used: "assets/img/ui/soul_draw_used.webp",
+};
+/** 판(plate) 지름 / 캔버스 (1024 기준 757px) — 버튼 크기 계산용 */
+const SOUL_DRAW_PLATE_FRAC = 757 / 1024;
+/** 아이콘(1024 기준)의 소울 보석 중심·평면 반지름 · 숫자 글자 크기 — 아이콘 교체 시 여기만 맞춘다 */
+const SOUL_DRAW_GEM = { cx: 282, cy: 216, r: 117, font: 158 };
+function soulDrawSrc(kind) {
+  const v = (typeof GAME_VERSION !== "undefined") ? GAME_VERSION : "";
+  return (SOUL_DRAW_SRCS[kind] || SOUL_DRAW_SRCS.idle) + "?v=" + v;
+}
+function setSoulDrawArt(btn, kind) {
+  if (!btn) return;
+  const img = btn.querySelector("img.sd-icon");
+  if (!img) return;
+  const src = soulDrawSrc(kind);
+  if (img.getAttribute("src") !== src) img.setAttribute("src", src);
+  btn.dataset.sdArt = kind;
+  const cv = btn.querySelector("canvas.sd-cost");
+  if (cv) cv.classList.toggle("dim", kind === "used");
+}
 function paintSoulDrawCost(btn, cost) {
   const cv = btn && btn.querySelector("canvas.sd-cost");
   if (!cv) return;
   const txt = String(cost != null ? cost : (typeof SOUL_DRAW_COST !== "undefined" ? SOUL_DRAW_COST : 3));
   if (cv._painted && cv._txt === txt) return;   // v0.321: 비용 값이 바뀌면 다시 그림
   cv._txt = txt;
-  // 캔버스 = 아이콘 전체(1024 기준 좌표 비율). v0.321 보라 소울 보석 중심 (195,170) → 숫자 크기 ≈ 1.3r
+  // 캔버스 = 아이콘 전체(1024 기준 좌표 비율). 보석 중심 (282,216) · 글자 158px@1024
   const S = 256;
   cv.width = S; cv.height = S;
   const c2 = cv.getContext && cv.getContext("2d");
   if (!c2) return;
   const G = SOUL_DRAW_GEM;
-  const cx = S * G.cx / 1024, cy = S * G.cy / 1024, size = Math.round(S * G.r * 1.3 / 1024);
+  const cx = S * G.cx / 1024, cy = S * G.cy / 1024;
+  let size = Math.round(S * G.font / 1024);
+  // 두 자리 숫자는 보석 평면(지름 2r) 안에 들어가도록 축소
   // 카드 소울 숫자와 같은 글꼴·색 (900 Noto Sans KR · #120800 외곽선 · 흰색), 외곽선만 얇게
   c2.clearRect(0, 0, S, S);
   c2.save();
-  c2.font = `900 ${size}px "Noto Sans KR", Arial, sans-serif`;
+  const setFont = () => { c2.font = `900 ${size}px "Noto Sans KR", Arial, sans-serif`; };
+  setFont();
+  try {
+    const maxW = S * G.r * 1.7 / 1024;
+    const w = c2.measureText(txt).width;
+    if (w > maxW) { size = Math.max(8, Math.floor(size * maxW / w)); setFont(); }
+  } catch (e) {}
   c2.textAlign = "center";
   c2.textBaseline = "middle";
   c2.lineJoin = "round";
@@ -1337,16 +1367,64 @@ function paintSoulDrawCost(btn, cost) {
 function initSoulDrawBtn(btn, clickable) {
   if (!btn || btn._sdInit) return;
   btn._sdInit = true;
-  const v = (typeof GAME_VERSION !== "undefined") ? GAME_VERSION : "";
-  btn.innerHTML = `<img class="sd-icon" src="${SOUL_DRAW_ICON}?v=${v}" alt="" draggable="false"><canvas class="sd-cost" aria-hidden="true"></canvas>`;
+  btn.innerHTML = `<img class="sd-icon" src="${soulDrawSrc(clickable ? "idle" : "used")}" alt="" draggable="false"><canvas class="sd-cost" aria-hidden="true"></canvas>`;
+  // 3상태 아트 미리 로드 (누르는 순간 깜빡임 방지)
+  try { Object.keys(SOUL_DRAW_SRCS).forEach(k => { const im = new Image(); im.src = soulDrawSrc(k); }); } catch (e) {}
   paintSoulDrawCost(btn);
   // 웹폰트 로드 후 다시 그림 (첫 그림이 Arial 대체 글꼴일 수 있음)
   try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const cv = btn.querySelector("canvas.sd-cost"); if (cv) { cv._painted = false; paintSoulDrawCost(btn, cv._txt); } }); } catch (e) {}
-  if (clickable) {
-    btn.addEventListener("pointerdown", () => { if (!btn.disabled) btn.classList.add("pressed"); });
-    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, () => btn.classList.remove("pressed")));
-    btn.addEventListener("click", (e) => { e.stopPropagation(); if (typeof onSoulDrawClick === "function") onSoulDrawClick(); });
-  }
+  if (clickable) bindSoulDrawPress(btn);
+}
+/** endBtn(bindEndBtnPressVisual)과 같은 누름 처리: pointerdown → hold 아트, 떼거나 벗어나면 복원.
+ *  떼는 위치는 e.target이 아니라 좌표로 판정 (setPointerCapture 때문에 밖에서 떼도 target이 버튼 → 드래그-오프 버그). */
+function bindSoulDrawPress(btn) {
+  if (!btn || btn._sdPressBound) return;
+  btn._sdPressBound = true;
+  const clearHold = () => {
+    if (!btn._sdHolding) return;
+    btn._sdHolding = false;
+    setSoulDrawArt(btn, btn._sdDesired || "used");
+  };
+  const stillOverBtn = (e) => {
+    const x = e.clientX, y = e.clientY;
+    if (typeof x !== "number" || typeof y !== "number" || Number.isNaN(x) || Number.isNaN(y)) return false;
+    const r = btn.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  };
+  btn.addEventListener("pointerdown", (e) => {
+    if (btn.disabled || btn._sdDesired !== "idle") return;
+    if (e.button != null && e.button !== 0) return;
+    e.preventDefault();
+    btn._sdHolding = true;
+    btn._sdArmed = true;
+    btn._sdPtr = e.pointerId;
+    setSoulDrawArt(btn, "hold");
+    try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  const onUp = (e) => {
+    if (btn._sdPtr != null && e.pointerId != null && e.pointerId !== btn._sdPtr) return;
+    const armed = !!btn._sdArmed;
+    const over = stillOverBtn(e);
+    btn._sdArmed = false;
+    btn._sdPtr = null;
+    clearHold();
+    try { if (e.pointerId != null) btn.releasePointerCapture(e.pointerId); } catch (err) {}
+    if (!armed || !over) return;          // 버튼 밖에서 떼면 취소
+    if (btn.disabled || btn._sdDesired !== "idle") return;
+    btn._sdFiredAt = Date.now();
+    if (typeof onSoulDrawClick === "function") onSoulDrawClick();
+  };
+  btn.addEventListener("pointerup", onUp);
+  btn.addEventListener("pointercancel", () => { btn._sdArmed = false; btn._sdPtr = null; clearHold(); });
+  // 포인터가 버튼 밖으로 나가면 hold 아트만 해제 (떼기 판정은 onUp 좌표로)
+  btn.addEventListener("pointerleave", (e) => { if (!btn._sdArmed) clearHold(); else if (!stillOverBtn(e)) { btn._sdHolding = false; setSoulDrawArt(btn, btn._sdDesired || "used"); } });
+  btn.addEventListener("pointerenter", (e) => { if (btn._sdArmed && stillOverBtn(e)) { btn._sdHolding = true; setSoulDrawArt(btn, "hold"); } });
+  window.addEventListener("pointerup", (e) => { if (btn._sdArmed) onUp(e); }, true);
+  // 마우스/터치 click은 위에서 처리 — #game 클릭 핸들러로 번지지 않게만. 키보드(Enter/Space, detail 0)만 여기서 실행.
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (e.detail === 0 && !btn.disabled && btn._sdDesired === "idle" && typeof onSoulDrawClick === "function") onSoulDrawClick();
+  });
 }
 function updateSoulDrawBtns(me, opp) {
   const mb = document.getElementById("mySoulDraw");
@@ -1361,14 +1439,21 @@ function updateSoulDrawBtns(me, opp) {
   }
   if (ob) paintSoulDrawCost(ob, costOf(opp));
   if (mb) {
+    // canSoulDraw: 내 턴 · 이번 턴 미사용 · 소울 충분 → idle, 아니면 used (상대 턴 포함)
     const can = typeof canSoulDraw === "function" && !me.isAI && canSoulDraw(me);
     mb.disabled = !can;
-    mb.classList.toggle("used", !!me._soulDrawUsed);
+    mb.classList.toggle("used", !can);
     mb.classList.toggle("ready", can);
+    mb._sdDesired = can ? "idle" : "used";
+    if (!can) { mb._sdHolding = false; mb._sdArmed = false; }
+    setSoulDrawArt(mb, mb._sdHolding ? "hold" : mb._sdDesired);
   }
   if (ob) {
-    ob.classList.toggle("used", !!opp._soulDrawUsed);
+    // 상대 버튼은 표시만 — 항상 used 아트
+    ob.classList.add("used");
     ob.classList.toggle("ready", typeof canSoulDraw === "function" && canSoulDraw(opp));
+    ob._sdDesired = "used";
+    setSoulDrawArt(ob, "used");
   }
 }
 
