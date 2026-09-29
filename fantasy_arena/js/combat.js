@@ -181,9 +181,70 @@ function doAttack(p, attacker, target, auto) {
     render();
     await waitMs(280);
     const atkEl = Vfx.elOf(attacker.uid);
-    const aDefNow = window._pendingAtkDef || 0;
+    let aDefNow = window._pendingAtkDef || 0;
     const sk = atkSkillOf(attacker);
     const foe = opponent(p);
+
+    /**
+     * v0.374 반격: 반격하는 유닛(cu)의 공격 능력을 공격할 때와 같게 적용해 공격자에게 반격.
+     * - 관통·돌진·치명·흡혈·약화·석화: 공격 때와 같은 계산 (calcAtkSkillHpDamage / applyAtkSkillOnStart 공용)
+     * - 연속: 공격자에게 두 번 (첫 반격으로 처치하면 끝 · 다음 유닛·영웅으로 이어지지 않음)
+     * - 광역: 퍼지지 않음 → 공격자 하나에게 일반 반격
+     * 약화·석화·관통으로 공격자의 공·방이 바뀌면 이번 전투의 남은 타격(연속 2타·다음 반격 방어)에도 반영.
+     */
+    async function counterAttack(cu, cuOwner, cAtk, cDefVal) {
+      const csk = atkSkillOf(cu);
+      const hits = csk === 4 ? 2 : 1;
+      const skName = (csk > 1 && csk !== 9 && typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[csk]) ? ATK_SKILL_HELP[csk][0] : "";
+      for (let h = 1; h <= hits; h++) {
+        if (!(attacker.hp > 0) || attacker.dying || !p.board.includes(attacker)) break;
+        if (!(cu.hp > 0) || cu.dying) break;
+        const oa = Number(attacker.atk) || 0, od = Number(attacker.def) || 0;
+        const syncAttackerStats = () => {
+          const dA = (Number(attacker.atk) || 0) - oa;
+          const dD = (Number(attacker.def) || 0) - od;
+          if (dA) aAtk = Math.max(0, aAtk + dA);
+          if (dD) {
+            window._pendingAtkDef = Math.max(0, (window._pendingAtkDef || 0) + dD);
+            aDefNow = window._pendingAtkDef;
+          }
+        };
+        if (csk === 7 || csk === 8) { applyAtkSkillOnStart(cu, attacker); syncAttackerStats(); }
+        const backBlock = window._pendingAtkDef || 0;
+        const odPierce = Number(attacker.def) || 0;
+        const calc = calcAtkSkillHpDamage(cu, cAtk, backBlock, cDefVal, attacker);
+        if (csk === 2 && (Number(attacker.def) || 0) !== odPierce) {
+          const dD = (Number(attacker.def) || 0) - odPierce;
+          window._pendingAtkDef = Math.max(0, (window._pendingAtkDef || 0) + dD);
+          aDefNow = window._pendingAtkDef;
+        }
+        const dmg = calc.hpDmg;
+        if (hits > 1) log(`${cu.name} 연속 반격 ${h}/${hits}`);
+        if (dmg <= 0) {
+          log(`${cu.name} 반격` + (skName ? ` [${skName}]` : "") + (csk === 2 ? ` (관통 흡수 ${calc.absorbed})` : "") + ` → 체력피해 0`);
+          continue;
+        }
+        log(`${cu.name} 반격` + (skName ? ` [${skName}]` : "") + (csk === 2 ? ` (관통 흡수 ${calc.absorbed})` : ""));
+        const atkNow = Vfx.elOf(attacker.uid);
+        const defNow = Vfx.elOf(cu.uid);
+        const cCrit = csk === 5 || dmg >= cAtk + 2;
+        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter", { uid: attacker.uid }); } catch (e) {}
+        await Vfx.parrySeq(defNow, atkNow, dmg, cCrit);
+        const hpBefore = attacker.hp;
+        if (csk === 5) {
+          const shielded = hasOwnAbility(attacker, "보호") || (attacker.keywords || []).includes("shield");
+          damageMinion(p, attacker, Math.max(dmg, attacker.hp), combatKillCtx(cu, cuOwner));
+          if (!shielded) log(`${cu.name} 치명 반격 → ${attacker.name} 즉사`);
+        } else {
+          damageMinion(p, attacker, dmg, combatKillCtx(cu, cuOwner));
+        }
+        const dealt = Math.max(0, hpBefore - Math.max(0, attacker.hp));
+        if (csk === 6) applyLifesteal(cu, dealt);
+        render();
+        await waitMs(360);
+      }
+      if (!(attacker.hp > 0) || attacker.dying) log(`${attacker.name} 반격으로 격파`);
+    }
 
     // v0.311: 체 코인으로 0 이하 → 공격·방어 피해 교환 전에 파괴 (공격은 사용됨, 반격·영웅 피해 없음)
     // v0.312: 광역(9)은 맨 앞 방어자만 코인 사망이면 나머지 적에게 그대로 발동 (공격자 코인 사망이면 전부 취소)
@@ -312,25 +373,10 @@ function doAttack(p, attacker, target, auto) {
         // counter uses this hit's defender current atk if retargeted mid-연속
         const counterAtk = (hit === 1) ? dAtk : clampAtk(Number(def.atk) || 0);
         if (survived && counterAtk && attacker.hp > 0 && !attacker.dying) {
-          const dmgBack = Math.max(0, counterAtk - backBlock);
-          if (dmgBack > 0) {
-            log(`${def.name} 반격`);
-            const atkNow = Vfx.elOf(attacker.uid);
-            const defNow = Vfx.elOf(def.uid);
-            // v0.372: 치명공격(5) 유닛의 반격도 체력 피해 1 이상이면 즉사 (옛: 반격은 기본 피해만 → 피해만 들어가고 생존하던 버그)
-            const counterCrit = atkSkillOf(def) === 5;
-            try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter", { uid: attacker.uid }); } catch (e) {}
-            await Vfx.parrySeq(defNow, atkNow, dmgBack, counterCrit);
-            if (counterCrit) {
-              const shielded = hasOwnAbility(attacker, "보호") || (attacker.keywords || []).includes("shield");
-              damageMinion(p, attacker, Math.max(dmgBack, attacker.hp), combatKillCtx(def, target.owner));
-              if (!shielded) log(`${def.name} 치명 반격 → ${attacker.name} 즉사`);
-            } else {
-              damageMinion(p, attacker, dmgBack, combatKillCtx(def, target.owner));
-            }
-            render();
-            await waitMs(360);
-          }
+          // v0.374: 반격도 공격 능력이 공격할 때와 똑같이 발동 (치명 v0.372 → 전체 확장, 9/29 사용자 확정)
+          //   광역 → 퍼지지 않고 공격자에게만 일반 반격 · 연속 → 공격자에게 두 번, 처치하면 이어지지 않음
+          const counterDefVal = (hit === 1 && def === (target && target.minion)) ? defVal : Math.max(0, Number(def.def) || 0);
+          await counterAttack(def, target.owner, counterAtk, counterDefVal);
           // v0.317 「반격:」 아이템 (상대 턴에 반격할 때)
           if (def._itemFx && typeof applyItemCounterFx === "function") applyItemCounterFx(target.owner, def);
         } else if (!survived) {

@@ -46,7 +46,7 @@ test("반격 치명: 방어로 반격 피해가 0이면 즉사 없음 · 보호�
   assert.ok(s.p2.board.includes(sh) && sh.hp === 4 && !(sh.keywords || []).includes("shield"), "보호막이 반격을 막고 생존 (공격 치명과 같은 규칙)");
 });
 
-test("반격 일반: 치명 없는 유닛의 반격은 기본 피해만 (살아남음)", async () => {
+test("반격 일반: 공격 능력 없는 유닛의 반격은 일반 피해 (살아남음)", async () => {
   const { p1, p2 } = setup(g);
   const foe = plain(p2, "e5", { atk: 1, def: 0, hp: 4, atkSkill: null });
   const mine = plain(p1, "e8", { atk: 2, def: 0, hp: 3, atkSkill: null });
