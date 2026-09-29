@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.376";
+const GAME_VERSION = "0.377";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -495,7 +495,7 @@ function equipItemOnUnit(p, card, unit) {
   if (!unit || !p || !p.board.includes(unit)) return false;
   // 규칙: 유닛당 아이템 1개만 — 이미 장착한 유닛에는 더 끼거나 교체할 수 없다
   if (unit.equippedItem) return false;
-  try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_equip"); } catch (e) {}
+  // v0.377: 장착 확정 연출(item_equip)·상단 문구 삭제 — 규칙만 적용
   let dAtk = Number(card.atk) || 0;
   let dDef = Number(card.def) || 0;
   let dHp = Number(card.hp) || 0;
@@ -2319,29 +2319,23 @@ function spellTargetFromPoint(x, y, allowed) {
   }
   return null;
 }
-let _equipHoverUid = null;
 function clearEquipHover() {
   document.querySelectorAll(".minion.equip-glow, .minion.spell-glow, .hero-slot.spell-glow, .hero-portrait.spell-glow").forEach(el => {
     el.classList.remove("equip-glow");
     el.classList.remove("spell-glow");
   });
-  _equipHoverUid = null;
 }
+/**
+ * 아이템 드래그: 장착할 유닛 표시. v0.377 — 아이템 연출(item_hover 팩 · 상단 문구 · equip-glow 반짝임 루프) 삭제,
+ * 대상 판정(unitFromPoint · 유닛당 1개 규칙)은 그대로이고 표시는 스펠 타겟 글로우(spell-glow)와 같게
+ */
 function highlightEquipHover(x, y, allowed) {
-  // Clear glow classes only — keep _equipHoverUid so we do not re-fire item_hover every move
-  document.querySelectorAll(".minion.equip-glow, .minion.spell-glow, .hero-slot.spell-glow, .hero-portrait.spell-glow").forEach(el => {
-    el.classList.remove("equip-glow");
-    el.classList.remove("spell-glow");
-  });
-  if (!allowed) { _equipHoverUid = null; return; }
+  clearEquipHover();
+  if (!allowed) return;
   const hit = unitFromPoint(x, y);
-  if (!hit || hit.minion.equippedItem) { _equipHoverUid = null; return; }
-  const el = document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
-  if (el) el.classList.add("equip-glow");
-  if (hit.minion.uid !== _equipHoverUid) {
-    _equipHoverUid = hit.minion.uid;
-    try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_hover"); } catch (e) {}
-  }
+  if (!hit || hit.minion.equippedItem) return;
+  const el = document.querySelector('#myBoard .minion[data-uid="' + hit.minion.uid + '"]') || document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
+  if (el) el.classList.add("spell-glow");
 }
 /** v0.372: 드래그 중 유효 대상 전체(아군·적 모두)에 은은한 글로우 — 가리키는 대상은 spell-glow 로 강하게 */
 function markSpellValid(targets) {

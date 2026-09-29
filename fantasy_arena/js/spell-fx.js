@@ -26,7 +26,6 @@ const SpellFx = (() => {
     combat: "assets/vfx/combat/",
     ui: "assets/vfx/ui/",
     coins: "assets/vfx/coins/",
-    items: "assets/vfx/items/",
     match: "assets/vfx/match/"
   };
   const ASSET_BASE = KIND_BASE.spells;
@@ -2055,7 +2054,7 @@ const SpellFx = (() => {
   function playUi(id, opts) { return playPack("ui", id, opts); }
   function playCombat(id, opts) { return playPack("combat", id, opts); }
   function playCoin(id, opts) { return Promise.resolve(false); }
-  function playItem(id, opts) { return playPack("items", id, opts); }
+  // v0.377: 아이템 연출(아이템 팩 10종) 전부 삭제 — 사용자 요청. playItem 없음
   // ─── v0.372 매치 연출 게이트: MATCH START·MY TURN·VICTORY·DEFEAT 재생 중에는 다른 진행(드로우 모션·AI·결과 화면·입력)을 막는다 ───
   let _ovCount = 0;
   const _ovWaiters = [];
@@ -2132,7 +2131,7 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, summonFormationBox, summonHandGuard, releaseHidden, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, summonFormationBox, summonHandGuard, releaseHidden, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
 })();
 window.SpellFx = SpellFx;
 // v0.366: 타이틀 화면에서 미리 로드 → 첫 판 시작 연출이 로딩 없이 바로 뜨게
