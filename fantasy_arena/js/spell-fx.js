@@ -1205,9 +1205,11 @@ const SpellFx = (() => {
       const lab = document.getElementById("fxName");
       if (lab) {
         // Combat packs: hide concept labels (opts.label only)
-        const fxLabel = (kind === "combat")
+        // v0.357: opts.label === "" → 문구 없음 (턴 시작 등). 없을 때만 팩 이름/concept로 대체
+        const hasLabel = Object.prototype.hasOwnProperty.call(opts, "label");
+        const fxLabel = (kind === "combat" || hasLabel)
           ? (opts.label || "")
-          : (opts.label || (meta && (meta.name || meta.concept)) || "");
+          : ((meta && (meta.name || meta.concept)) || "");
         lab.textContent = fxLabel;
         lab.style.opacity = lab.textContent ? "1" : "0";
       }

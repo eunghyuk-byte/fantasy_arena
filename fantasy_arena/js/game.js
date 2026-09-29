@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.356";
+const GAME_VERSION = "0.357";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -265,9 +265,11 @@ function startGame(vsAI) {
   draw(second, 4);
   second.hand.push(cloneCoinFor(second));
   state.turn = p1First ? 1 : 2;
-  beginTurn(first);
+  // v0.357: 첫 턴 연출은 match_start가 끝난 뒤 (예전엔 beginTurn이 먼저 불러 둘이 겹침)
+  beginTurn(first, { noTurnFx: true });
   showGame();
   render();
+  const matchState = state;
   try {
     (async () => {
       try {
@@ -281,6 +283,8 @@ function startGame(vsAI) {
       try {
         if (typeof SpellFx !== "undefined" && SpellFx.playUi) SpellFx.playUi("hero_intro");
       } catch (e) {}
+      // 같은 판·아직 첫 턴 주인의 턴일 때만 (그새 턴이 넘어갔거나 새 판이면 생략)
+      if (state === matchState && !state.over && current() === first) playTurnStartFx(first);
     })();
   } catch (e) {}
   if (first.isAI) aiTurn();
@@ -333,7 +337,18 @@ function clearTurnCoins() {
   state.turnSerial = (state.turnSerial | 0) + 1;
   [state.p1, state.p2].forEach(pl => (pl && pl.board || []).forEach(m => { if (m) delete m._turnRoll; }));
 }
-function beginTurn(p) {
+/** v0.357: 턴 시작 연출 — 내 턴만 (turn_start_me, 위 문구 없음). 상대 턴은 연출·문구 없음 (9/29 사용자 지시). */
+function playTurnStartFx(p) {
+  try {
+    if (typeof SpellFx === "undefined" || !SpellFx.playMatch || !p) return;
+    let isMe = !p.isAI;
+    try { if (typeof meView === "function") isMe = (p === meView().me); } catch (e) {}
+    if (!isMe) return;
+    // Fire-and-forget; label "" = 상단 문구(팩 concept 이름) 표시 안 함
+    SpellFx.playMatch("turn_start_me", { label: "" });
+  } catch (e) {}
+}
+function beginTurn(p, opts) {
   try { hidePeek(); } catch (e) {}
   try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   state.acting = p;
@@ -350,16 +365,7 @@ function beginTurn(p) {
   });
   draw(p, 1);
   log(`${p.name}의 턴 · 소울 ${p.soul}`);
-  try {
-    if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
-      let isMe = !p.isAI;
-      try {
-        if (typeof meView === "function") isMe = (p === meView().me);
-      } catch (e) {}
-      // Fire-and-forget — do not delay AI
-      SpellFx.playMatch(isMe ? "turn_start_me" : "turn_start_enemy");
-    }
-  } catch (e) {}
+  if (!(opts && opts.noTurnFx)) playTurnStartFx(p);
 }
 
 function renderHeroSlot(p, isMe) {

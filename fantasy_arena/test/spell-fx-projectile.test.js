@@ -114,3 +114,17 @@ test("fs4 팩: projectile · 350ms 비행 · 타격 330~930ms · 2MB 이하", ()
   assert.ok(total <= 2 * 1000 * 1000, "total " + total);
   for (const old of ["cast.webp", "cast_strip.png", "impact.webp", "impact_strip.png"]) assert.ok(!fs.existsSync(path.join(P4, old)), old);
 });
+
+// v0.357 턴 시작 연출: 상대 턴 연출 삭제 · 내 턴 상단 문구 없음 · 첫 턴은 match_start 뒤
+test("턴 시작 연출: turn_start_enemy 삭제, 내 턴만 문구 없이, 첫 턴은 match_start 뒤", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/game.js"), "utf8");
+  assert.doesNotMatch(src, /turn_start_enemy/);
+  assert.match(src, /SpellFx\.playMatch\("turn_start_me", \{ label: "" \}\)/);
+  assert.match(src, /beginTurn\(first, \{ noTurnFx: true \}\)/);
+  const ms = src.indexOf('SpellFx.playMatch("match_start")');
+  const after = src.indexOf("playTurnStartFx(first)");
+  assert.ok(ms > 0 && after > ms, "첫 턴 연출은 match_start 뒤");
+  assert.ok(!fs.existsSync(path.join(ROOT, "assets/vfx/match/turn_start_enemy")), "폴더 삭제");
+  const fx = fs.readFileSync(path.join(ROOT, "js/spell-fx.js"), "utf8");
+  assert.match(fx, /hasOwnProperty\.call\(opts, "label"\)/);
+});

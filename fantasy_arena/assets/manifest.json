@@ -1,5 +1,5 @@
 {
-  "count": 708,
+  "count": 703,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -2419,31 +2419,6 @@
     {
       "path": "assets/vfx/match/match_start/meta.json",
       "bytes": 418,
-      "name": "meta"
-    },
-    {
-      "path": "assets/vfx/match/turn_start_enemy/cast.webp",
-      "bytes": 260850,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/match/turn_start_enemy/cast_strip.png",
-      "bytes": 992788,
-      "name": "cast_strip"
-    },
-    {
-      "path": "assets/vfx/match/turn_start_enemy/impact.webp",
-      "bytes": 297872,
-      "name": "impact"
-    },
-    {
-      "path": "assets/vfx/match/turn_start_enemy/impact_strip.png",
-      "bytes": 1062996,
-      "name": "impact_strip"
-    },
-    {
-      "path": "assets/vfx/match/turn_start_enemy/meta.json",
-      "bytes": 423,
       "name": "meta"
     },
     {
