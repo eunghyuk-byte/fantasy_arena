@@ -436,10 +436,10 @@ const SpellFx = (() => {
   function spellKind(card) {
     const sp = (card && card.spell) || {};
     const t = sp.type || "burst";
-    if (t === "aoe_pack" || t === "aoe_enemy" || t === "aoe_all_enemy" || t === "earthquake" || t === "sandhell") return "aoe";
+    if (t === "aoe_pack" || t === "aoe_enemy" || t === "aoe_all_enemy" || t === "earthquake" || t === "sandhell" || t === "enemy_def_hp_down") return "aoe";
     if (t === "dmg" || t === "face") return "bolt";
-    if (t === "heal_hero" || t === "buff" || t === "buff_all" || t === "grant_extra" || t === "grant_kw") return "buff";
-    if (t === "kill" || t === "kill_if" || t === "wipe_all") return "kill";
+    if (t === "heal_hero" || t === "buff" || t === "buff_all" || t === "grant_extra" || t === "grant_kw" || t === "heal_all_full") return "buff";
+    if (t === "kill" || t === "kill_if" || t === "wipe_all" || t === "sac_own_aoe" || t === "duel_random_keep") return "kill";
     if (t === "draw" || t === "draw_ex" || t === "soul" || t === "soul_next" || t === "coin_luck") return "utility";
     if (t === "petrify" || t === "set_one" || t === "set_enemy" || t === "magnet") return "control";
     return t;

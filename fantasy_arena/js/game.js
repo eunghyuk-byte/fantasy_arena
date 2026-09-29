@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.349";
+const GAME_VERSION = "0.350";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -563,9 +563,15 @@ function enemySpellTax(p) {
   if (!p || !state || !state.p1 || !state.p2) return 0;
   return unitsWithItemFx(opponent(p), "enemy_spell_cost_plus1").length;
 }
+/** v0.350 요정의부츠(enemy_minion_cost_plus1): 상대 전장의 장착 유닛 수만큼 내 유닛 카드 소울 +1 (중첩 · 올빼미의눈과 같은 방식) */
+function enemyMinionTax(p) {
+  if (!p || !state || !state.p1 || !state.p2) return 0;
+  return unitsWithItemFx(opponent(p), "enemy_minion_cost_plus1").length;
+}
 function effectiveCardCost(p, card) {
   let c = card && card.cost != null ? Number(card.cost) : 0;
   if (card && card.type === "spell") c = Math.max(0, c + enemySpellTax(p));
+  if (card && card.type === "minion") c = Math.max(0, c + enemyMinionTax(p));
   return c;
 }
 /** 카드 1장을 핸드에 생성. 손패 10장이면 드로우와 같이 소각. */
@@ -644,6 +650,10 @@ function applyItemKillFx(killerOwner, killer, victimOwner) {
     log(`${killer.name} ${nm} · 처치: 적 전체 방·체 −1 (${n}기)`);
   } else if (fx === "kill_random_dark_hand") {
     addCardToHand(killerOwner, randomTribeCardId("dark"), `${nm} 처치`);
+  } else if (fx === "kill_summon_harpy") {
+    // v0.350 하피의손톱: 처치: 하피(n10) 1기 생성 (전장 가득이면 미생성)
+    log(`${killer.name} ${nm} · 처치: 하피 생성`);
+    applyFx(killerOwner, { type: "summon_token", summonId: "n10" }, null);
   }
 }
 /** 공격: 장착 유닛이 내 턴에 공격을 선언할 때 (코인 판정 전) */
@@ -654,6 +664,10 @@ function applyItemAttackFx(p, attacker) {
   if (fx === "attack_def_plus1") {
     clampDefBuff(attacker, 1);
     log(`${attacker.name} ${nm} · 공격: 방어+1`);
+  } else if (fx === "attack_atk_plus2") {
+    // v0.350 불꽃검·분노의해머: 공격할 때마다 공격+2 (영구). 연속공격은 두 번째 타격 전에 한 번 더 (combat.js)
+    attacker.atk = (Number(attacker.atk) || 0) + 2;
+    log(`${attacker.name} ${nm} · 공격: 공격+2`);
   } else if (fx === "attack_summon_a10") {
     if (p.board.length < 5) {
       const tok = cloneCard("a10");
@@ -682,6 +696,13 @@ function applyItemCounterFx(owner, unit) {
 /** 내 턴이 끝날 때: 턴 종료 자동 공격이 모두 끝난 뒤 */
 function applyItemEndTurnFx(p) {
   if (!p || state.over) return;
+  // v0.350 골렘의심장·대지의팔찌: 내 턴 종료: 체+3 (최대 체력도 +3)
+  unitsWithItemFx(p, "eot_hp_plus3").forEach(m => {
+    const nm = (m.equippedItem && m.equippedItem.name) || "";
+    m.hp = (Number(m.hp) || 0) + 3;
+    m.maxHp = (Number(m.maxHp) || 0) + 3;
+    log(`${m.name} ${nm} · 내 턴 종료: 체+3`);
+  });
   unitsWithItemFx(p, "eot_random_light_hand").forEach(m => {
     const nm = (m.equippedItem && m.equippedItem.name) || "";
     addCardToHand(p, randomTribeCardId("light"), `${nm} 턴 종료`);
@@ -780,7 +801,7 @@ function needsTarget(card) {
   const fx = card.type === "spell" ? card.spell : card.battlecry;
   if (!fx) return false;
   if (fx.type === "draw_ex" && (fx.sacOwn || fx.bounceOwn || fx.enemyDmg)) return true;
-  if (fx.type === "kill_if" || fx.type === "set_one" || fx.type === "grant_extra" || fx.type === "double_def" || fx.type === "copy_own" || fx.type === "own_black_buff" || fx.type === "duel_keep_one" || fx.type === "sac_summon_hand" || fx.type === "steal_minion") return true;
+  if (fx.type === "kill_if" || fx.type === "set_one" || fx.type === "grant_extra" || fx.type === "double_def" || fx.type === "copy_own" || fx.type === "own_black_buff" || fx.type === "duel_keep_one" || fx.type === "sac_summon_hand" || fx.type === "steal_minion" || fx.type === "sac_own_aoe") return true;
   return ["dmg", "kill", "buff"].includes(fx.type) && fx.target;
 }
 
@@ -821,6 +842,8 @@ function validTargetsRaw(p, fx) {
       if (fx.maxCost != null && printedSoul(m) > fx.maxCost) return;
       if (fx.minCost != null && printedSoul(m) < fx.minCost) return;
       if (fx.anyCoin && !((m.atkC || 0) || (m.defC || 0) || (m.hpC || 0))) return;
+      // v0.350 진공베기: 코인 N개 이상 (코인 아이템 반영한 실제 코인 수)
+      if (fx.minCoins != null && effectiveCoinLinks(m).n < fx.minCoins) return;
       list.push({ kind: "minion", owner: e, minion: m });
     });
     return list;
@@ -830,7 +853,7 @@ function validTargetsRaw(p, fx) {
     sides.forEach(pl => pl.board.forEach(m => list.push({ kind: "minion", owner: pl, minion: m })));
     return list;
   }
-  if (fx.type === "grant_extra" || fx.type === "double_def" || fx.type === "copy_own") {
+  if (fx.type === "grant_extra" || fx.type === "double_def" || fx.type === "copy_own" || fx.type === "sac_own_aoe") {
     p.board.forEach(m => list.push({ kind: "minion", owner: p, minion: m }));
     return list;
   }
@@ -984,6 +1007,7 @@ function applyFx(p, fx, target) {
     if (fx.soulNext) p.soulNext = (p.soulNext || 0) + fx.soulNext;
     if (fx.ownAllHp) [...p.board].forEach(m => spellDamageMinion(p, m, fx.ownAllHp, { fromSpell: true }));
     if (fx.enemyDef) [...e.board].forEach(m => { m.def = Math.max(0, (m.def || 0) + fx.enemyDef); });
+    if (fx.enemySkip) { [...e.board].forEach(m => { m.skipAttack = true; }); log("적 전체 다음 턴 공격 불가"); }
     if (fx.enemyDmg && target && target.kind === "minion") spellDamageMinion(target.owner, target.minion, fx.enemyDmg, { fromSpell: true });
     if (fx.noPlayMinion) p.noPlayMinion = true;
     if ((fx.sacOwn || fx.bounceOwn) && target && target.kind === "minion" && target.owner === p) {
@@ -1020,6 +1044,7 @@ function applyFx(p, fx, target) {
       if (odmg) [...p.board].forEach(m => spellDamageMinion(p, m, odmg, { fromSpell: true }));
       if (fx.ownHp) [...p.board].forEach(m => { m.hp += fx.ownHp; m.maxHp = (m.maxHp || m.hp) + fx.ownHp; });
     }
+    if (fx.draw) draw(p, fx.draw); // v0.350 폭풍우: 피해 뒤 드로우
   } else if (fx.type === "aoe_enemy") {
     [...e.board].forEach(m => spellDamageMinion(e, m, fx.value, { fromSpell: true }));
   } else if (fx.type === "aoe_all_enemy") {
@@ -1191,8 +1216,37 @@ function applyFx(p, fx, target) {
       if (m.atkC || m.defC || m.hpC) { m.atk = 0; m.def = 0; }
     });
   } else if (fx.type === "earthquake") {
-    const n = Math.floor((p.maxSoul || 0) / 2);
+    // v0.350: by:"hand" = 이 카드를 낸 뒤 남은 내 손패 장수 (카드는 playCard에서 이미 손패에서 빠짐). 옛: 최대소울 절반
+    const n = fx.by === "hand" ? p.hand.length : Math.floor((p.maxSoul || 0) / 2);
+    log(`어스퀘이크 · 적 전체 피해 ${n}`);
     [...e.board].forEach(m => spellDamageMinion(e, m, n, { fromSpell: true }));
+  } else if (fx.type === "enemy_def_hp_down") {
+    // v0.350 낙석: 적 전체 방·체 −N (방어를 거치지 않고 직접 감소 · 체력 감소는 보호가 막음)
+    const n = fx.value || 1;
+    [...e.board].forEach(m => {
+      if (m.dying) return;
+      m.def = Math.max(0, (Number(m.def) || 0) - n);
+      damageMinion(e, m, n, { fromSpell: true });
+    });
+  } else if (fx.type === "heal_all_full") {
+    // v0.350 치유의빛: 아군 전체 체력 = 최대 체력
+    p.board.forEach(m => { if (!m.dying && (Number(m.maxHp) || 0) > (Number(m.hp) || 0)) m.hp = m.maxHp; });
+    log("아군 전체 체력 완전 회복");
+  } else if (fx.type === "sac_own_aoe") {
+    // v0.350 헬게이트: 아군 유닛 하나 처치 → 적 전체 피해 N
+    const sac = target && target.kind === "minion" && target.owner === p ? target.minion : null;
+    if (!sac) { log("헬게이트 · 아군 대상을 선택하세요"); return; }
+    destroyMinion(p, sac, { fromSpell: true });
+    [...e.board].forEach(m => spellDamageMinion(e, m, fx.value || 3, { fromSpell: true }));
+  } else if (fx.type === "duel_random_keep") {
+    // v0.350 일기토: 내 전장·적 전장에서 각각 랜덤 유닛 하나씩만 남기고 나머지 처치 (전체 효과 → 면역도 처치)
+    [p, e].forEach(pl => {
+      const alive = pl.board.filter(m => m.hp > 0 && !m.dying);
+      if (!alive.length) return;
+      const keep = alive[Math.floor(Math.random() * alive.length)];
+      alive.forEach(m => { if (m.uid !== keep.uid) destroyMinion(pl, m, { fromSpell: true }); });
+    });
+    log("일기토 · 양쪽 랜덤 하나씩만 남김");
   } else if (fx.type === "sandtrap") {
     const n = Math.max(0, 5 - p.board.length);
     e.board.slice(0, n).forEach(m => spellDamageMinion(e, m, 3, { fromSpell: true }));
@@ -1583,6 +1637,7 @@ function resolveDeath(owner, m) {
   const fromSpell = !!ctx.fromSpell;
   const hasRebirth = (ab && String(ab).includes("환생")) || abs.includes("환생") || (m.keywords || []).includes("rebirth");
   const deadItemFx = m._itemFx || null;
+  const deadDef = Math.max(0, Number(m.def) || 0); // 청룡언월도: 파괴 순간 방어 (아이템 방어 포함)
   if (typeof unequipItem === "function") unequipItem(m);
 
   if (abs.includes("유언")) {
@@ -1622,7 +1677,7 @@ function resolveDeath(owner, m) {
     delete m._turnRoll; // 환생 = 새 유닛: 이번 턴 코인 결과 없음
     log(`${m.name}이(가) 환생했다 (체력 1)`);
     // v0.349 (9/29): 낀 아이템의 파괴: 효과도 발동 (아이템은 이미 해제 → 아이템 없이 환생)
-    resolveItemDeathFx(owner, deadItemFx);
+    resolveItemDeathFx(owner, deadItemFx, deadDef);
     drsR.forEach(dfx => applyFx(owner, dfx, null));
     if (stealR) {
       const slot = owner.board.findIndex(x => x.uid === m.uid);
@@ -1642,7 +1697,7 @@ function resolveDeath(owner, m) {
   if (ctx.killer && ctx.killerOwner) applyItemKillFx(ctx.killerOwner, ctx.killer, owner);
   if (ctx.killer && ctx.killerOwner) applyUnitKillFx(ctx.killerOwner, ctx.killer, owner);
   // 파괴: 장착 아이템 효과 (아이템은 이미 해제됨 · v0.349: 환생하는 경우에도 발동)
-  resolveItemDeathFx(owner, deadItemFx);
+  resolveItemDeathFx(owner, deadItemFx, deadDef);
   // 기존 파괴: 효과 + 성흔 등 부여된 파괴: 효과 (중첩)
   const drs = [].concat(m.deathrattle ? [m.deathrattle] : [], m.deathrattles || []);
   drs.forEach(dfx => applyFx(owner, dfx, null));
@@ -1651,7 +1706,7 @@ function resolveDeath(owner, m) {
 }
 
 /** 파괴: 장착 아이템 효과 (적토마·인어의하프). v0.349 (9/29): 환생하는 유닛도 발동, 유닛은 아이템 없이 다시 나타난다. */
-function resolveItemDeathFx(owner, fx) {
+function resolveItemDeathFx(owner, fx, deadDef) {
   if (fx === "destroy_summon_chitu") {
     // 적토마 토큰(d40)은 아이템이 없어 재생성 루프 없음
     applyFx(owner, { type: "summon_token", summonId: "d40" }, null);
@@ -1659,6 +1714,23 @@ function resolveItemDeathFx(owner, fx) {
     const foe = opponent(owner);
     foe.board.forEach(x => { x.atk = 0; });
     log(`인어의하프 · 파괴: 적 전체 공=0 (${foe.board.length}기)`);
+  } else if (fx === "destroy_def_aoe_damage") {
+    // v0.350 청룡언월도: 파괴: 이 유닛의 방어만큼 적 전체 피해
+    applyFx(owner, { type: "aoe_by_def", value: deadDef || 0, label: "청룡언월도 파괴" }, null);
+  } else if (fx === "destroy_steal_random") {
+    // v0.350 다크아머: 파괴: 랜덤 적 하나 탈취 (면역 제외 · 초선과 같은 이동 규칙)
+    const foe = opponent(owner);
+    const pool = (foe.board || []).filter(x => !isImmune(x) && x.hp > 0 && !x.dying);
+    if (!pool.length) log("다크아머 · 파괴: 탈취할 적 유닛 없음");
+    else if (owner.board.length >= 5) log("다크아머 · 파괴: 전장 가득 참 · 탈취 미발동");
+    else {
+      const stolen = pool[Math.floor(Math.random() * pool.length)];
+      foe.board = foe.board.filter(x => x.uid !== stolen.uid);
+      stolen.canAttack = false; stolen.attacksLeft = 0;
+      try { stolen._sickTurn = (state.turnSerial | 0); } catch (e) {}
+      owner.board.push(stolen);
+      log(`다크아머 · 파괴: ${stolen.name} 탈취`);
+    }
   }
 }
 

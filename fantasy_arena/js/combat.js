@@ -104,7 +104,13 @@ function doAttack(p, attacker, target, auto) {
   }
 
   const aShared = turnCoinRoll(attacker);
-  const aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
+  let aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
+  // v0.350 「공격: 공격+2」(불꽃검·분노의해머): 연속공격은 타격마다 발동 → 두 번째 타격 전에 한 번 더
+  const retriggerAtkPlus = () => {
+    if (attacker._itemFx !== "attack_atk_plus2" || p !== current()) return;
+    applyItemAttackFx(p, attacker);
+    aAtk += 2;
+  };
   const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef, attacker.def);
   const aHpSnap = beginCombatHpCoin(attacker, aShared.dHp);
   const rows = [];
@@ -217,6 +223,7 @@ function doAttack(p, attacker, target, auto) {
       for (let hit = 1; hit <= hits; hit++) {
         if (attacker.hp <= 0 || attacker.dying) break;
         if (target.owner.hp <= 0) break;
+        if (hit > 1) retriggerAtkPlus();
         const isMeHero = target.owner === meView().me;
         const defEl = Vfx.heroOf(isMeHero);
         const calc = calcAtkSkillHpDamage(attacker, aAtk, 0, aDefNow, null);
@@ -236,6 +243,7 @@ function doAttack(p, attacker, target, auto) {
       const hits = (sk === 4) ? 2 : 1;
       for (let hit = 1; hit <= hits; hit++) {
         if (attacker.hp <= 0 || attacker.dying) break;
+        if (hit > 1) retriggerAtkPlus();
         // 연속: 1타 처치 후 남은 타는 다음 생존 적(유닛→영웅)으로 재지정. 시체/스킵 금지.
         if (!(def && def.hp > 0 && !def.dying)) {
           if (sk !== 4) break;
@@ -514,6 +522,11 @@ function pickAiTarget(p, fx, ts) {
     const kill = ts.filter(t => t.kind === "minion").sort((a, b) => (b.minion.atk + b.minion.hp) - (a.minion.atk + a.minion.hp));
     if (kill[0]) return kill[0];
     return ts.find(t => t.kind === "hero") || ts[0];
+  }
+  if (fx.type === "sac_own_aoe") {
+    // 헬게이트: 가장 약한 아군을 바친다
+    return ts.filter(t => t.kind === "minion" && t.owner === p)
+      .sort((a, b) => ((a.minion.atk || 0) + (a.minion.hp || 0)) - ((b.minion.atk || 0) + (b.minion.hp || 0)))[0] || null;
   }
   if (fx.type === "buff") {
     const mine = ts.filter(t => t.kind === "minion" && t.owner === p);
