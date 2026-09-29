@@ -369,6 +369,8 @@ const SpellFx = (() => {
   //   layers: [{ file, layout, frames, w, h, fps, startMs, durationMs, displayBoxPx@1080p, anchorOffsetYPx@1080p,
   //              oppAnchorOffsetYPx@1080p?, anchor: { selector, opp, fallbackPx@1080p, oppFallbackPx@1080p } }]
   //   → 시전자 UI 요소(선택자 rect 중심 + offsetY) 위에 한 번씩 재생. 상대가 쓰면 opp 선택자·opp 좌표
+  // 공통) meta.screenShake (선택, v0.362 fs8): { startMs, durationMs, amplitudePx@1080p }
+  //   → 캔버스가 아니라 보드(#game)의 기존 quake 클래스를 그 시각·길이·세기로 재생
   // ─────────────────────────────────────────────────────────────────────────
   const _imgCache = {};
   function loadImg(url) {
@@ -501,8 +503,27 @@ const SpellFx = (() => {
    * Shared timeline runner: full-viewport canvas in `stage`, rAF loop, sfx on the first
    * drawn frame. draw(ctx, tMs, cw, ch) paints one frame. Resolves true when t >= endMs.
    */
+  /** meta.screenShake → #game 의 기존 quake 클래스 (길이·세기는 CSS 변수로) */
+  function startScreenShake(S) {
+    const game = document.getElementById("game");
+    if (!game || !S) return;
+    const dur = Math.max(50, S.durationMs || 350);
+    const amp = (S["amplitudePx@1080p"] != null ? S["amplitudePx@1080p"] : 8) * fxScale();
+    game.style.setProperty("--quake-dur", dur + "ms");
+    game.style.setProperty("--quake-k", String(Math.round(amp / 8 * 100) / 100)); // boardQuake 최대 이동 8px 기준
+    game.classList.remove("quake");
+    void game.offsetWidth; // 애니메이션 재시작
+    game.classList.add("quake");
+    setTimeout(() => {
+      game.classList.remove("quake");
+      game.style.removeProperty("--quake-dur");
+      game.style.removeProperty("--quake-k");
+    }, dur + 40);
+  }
   function runCanvasFx(stage, endMs, sfxUrl, sfxStartMs, draw, opts) {
     opts = opts || {};
+    const shake = opts.shake || null;
+    let shaken = !shake;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const cw = window.innerWidth || 1920, ch = window.innerHeight || 1080;
     const cv = document.createElement("canvas");
@@ -529,6 +550,7 @@ const SpellFx = (() => {
           }
         }
         const t = now - t0;
+        if (!shaken && t >= (shake.startMs || 0)) { shaken = true; try { startScreenShake(shake); } catch (e) {} }
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, cw, ch);
         try { draw(ctx, t, cw, ch); } catch (e) {}
@@ -850,6 +872,7 @@ const SpellFx = (() => {
   /** Dispatch a meta-driven canvas pack. */
   function playMetaFx(stage, meta, base, opts) {
     opts = opts || {};
+    if (meta && meta.screenShake && !opts.shake) opts = Object.assign({}, opts, { shake: meta.screenShake });
     if (isAnchoredMeta(meta)) return playAnchored(stage, meta, base, opts);
     if (isProjectileMeta(meta)) return playProjectile(stage, meta, base, opts.to, opts);
     if (isFlowMeta(meta)) return playPerUnitFlow(stage, meta, base, opts);

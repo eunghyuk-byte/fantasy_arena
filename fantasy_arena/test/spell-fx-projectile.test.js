@@ -227,3 +227,36 @@ test("fs7 팩: projectile · 화면 중앙→대상 350ms · 버프 330~930ms ·
   const inMan = man.items.filter(i => i.path.startsWith("assets/vfx/spells/fs7/")).map(i => i.path.split("/").pop()).sort();
   assert.deepEqual(inMan, fs.readdirSync(P7).sort());
 });
+
+// v0.362 fs8 메테오: overlay+perUnit (aoe_all) + screenShake → #game quake
+test("fs8 팩: aoe_all · overlay+perUnit · 흔들림 260~610ms · 2MB 이하", () => {
+  const P8 = path.join(ROOT, "assets/vfx/spells/fs8");
+  const m = JSON.parse(fs.readFileSync(path.join(P8, "meta.json"), "utf8"));
+  assert.equal(m.id, "fs8");
+  assert.equal(m.concept, "A");
+  assert.equal(m.targetMode, "aoe_all");
+  assert.equal(m.playMode, "overlay+perUnit");
+  assert.equal(m.overlay.frames, 22);
+  assert.equal(m.overlay.durationMs, 917);
+  assert.deepEqual(m.unitImpact.delay, { baseMs: 250, "perPx@1080p": 0.08, origin: "center" });
+  assert.deepEqual([m.screenShake.startMs, m.screenShake.durationMs, m.screenShake["amplitudePx@1080p"]], [260, 350, 10]);
+  for (const k of ["overlay", "unitImpact", "sfx"]) assert.ok(fs.existsSync(path.join(P8, m[k].file)), m[k].file + " 존재");
+  const total = fs.readdirSync(P8).reduce((s, f) => s + fs.statSync(path.join(P8, f)).size, 0);
+  assert.ok(total <= 2 * 1024 * 1024, "total " + total);
+  for (const old of ["cast.webp", "cast_strip.png", "aoe.webp", "aoe_strip.png", "preview.mp4"]) {
+    assert.ok(!fs.existsSync(path.join(P8, old)), old + " 없음");
+  }
+  const man = JSON.parse(fs.readFileSync(path.join(ROOT, "assets/manifest.json"), "utf8"));
+  const inMan = man.items.filter(i => i.path.startsWith("assets/vfx/spells/fs8/")).map(i => i.path.split("/").pop()).sort();
+  assert.deepEqual(inMan, fs.readdirSync(P8).sort());
+});
+
+test("SpellFx: meta.screenShake → 보드 #game 기존 quake 클래스 (길이·세기 CSS 변수)", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/spell-fx.js"), "utf8");
+  assert.match(src, /function startScreenShake\(S\)/);
+  assert.match(src, /if \(meta && meta\.screenShake && !opts\.shake\)/);
+  assert.match(src, /game\.classList\.add\("quake"\)/);
+  const css = fs.readFileSync(path.join(ROOT, "css/game.css"), "utf8");
+  assert.match(css, /#game\.quake \{ animation: boardQuake var\(--quake-dur, 1\.4s\)/);
+  assert.match(css, /var\(--quake-k, 1\)/);
+});

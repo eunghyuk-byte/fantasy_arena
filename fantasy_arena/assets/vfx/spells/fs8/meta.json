@@ -1,22 +1,75 @@
 {
-  "id": "fs8",
-  "name": "메테오",
-  "kind": "aoe",
-  "durationMs": 2200,
-  "fps": 12,
-  "cast": {
-    "file": "cast.webp",
-    "frames": 12,
-    "w": 720,
-    "h": 720
+ "id": "fs8",
+ "name": "메테오",
+ "concept": "A",
+ "description": "Colossus — one colossal meteor plunges from the top-right and slams the field: white-gold flash, an enormous rolling fire dome and a heavy blast on every unit, with a screen shake",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha",
+ "durationMs": 950,
+ "card": "유닛 전체 피해 4 (spell.type aoe_pack, all:4 → both sides)",
+ "type": "aoe",
+ "targetMode": "aoe_all",
+ "playMode": "overlay+perUnit",
+ "anchor": "board",
+ "overlay": {
+  "file": "overlay_strip.webp",
+  "layout": "vertical",
+  "frames": 22,
+  "w": 704,
+  "h": 396,
+  "fps": 24,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 917,
+  "fit": "stretch to the full 16:9 stage (1920x1080 at 1080p), top-left 0,0",
+  "blend": "normal alpha (source-over)",
+  "impactAtMs": 257
+ },
+ "unitImpact": {
+  "file": "unit_impact_strip.webp",
+  "layout": "horizontal",
+  "frames": 15,
+  "w": 256,
+  "h": 256,
+  "fps": 30,
+  "loop": false,
+  "durationMs": 500,
+  "anchor": "each unit centre (both sides)",
+  "anchorOffsetYPx@1080p": 0,
+  "displayBoxPx@1080p": 300,
+  "delay": {
+   "baseMs": 250,
+   "perPx@1080p": 0.08,
+   "origin": "center"
   },
-  "aoe": {
-    "file": "aoe.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
-  },
-  "anchor": "board-center",
-  "sfxHint": "fire_meteor",
-  "concept": "운석 낙하 후 분화구 폭염"
+  "delayFormula": "delayMs = 250 + 0.08*hypot(unitX-960, unitY-540)",
+  "delaysMsAtReferenceBoard": {
+   "p1 임프 @(480,719)": 291,
+   "p1 불꽃여우 @(705,719)": 275,
+   "p1 용암술사 @(930,719)": 265,
+   "p1 여령기 @(1155,719)": 271,
+   "p2 드라이어드 @(480,311)": 293,
+   "p2 여포 @(705,311)": 277,
+   "p2 오크 @(930,311)": 268,
+   "p2 스톤골렘 @(1155,311)": 274,
+   "p2 만드라고라 @(1380,311)": 288
+  }
+ },
+ "screenShake": {
+  "optional": true,
+  "startMs": 260,
+  "durationMs": 350,
+  "amplitudePx@1080p": 10,
+  "decay": "quadratic",
+  "note": "NEW optional field: shake the board/DOM (e.g. the existing #game 'quake' class or a transform on the board layer), not the fx canvas. Preview shakes the background only."
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "hitAtMs": 260,
+  "loudnessLUFS": -17.7,
+  "truePeakDbTP": -3.6,
+  "source": "fs2 C-style: synth low brown-noise rumble with rising low-pass (slow amplitude sway) + soft pitch-drop sub thump(s), layered with this concept's own Kling clip audio low-passed ~0.6-0.65 kHz; final low-pass 1.7/2 kHz"
+ },
+ "sequence": "after the centre card: overlay 0-917ms (impact ~257ms) · unit impacts at their delays, 500ms each, all done by ~793ms · shake 260-610ms · sound from 0ms"
 }
