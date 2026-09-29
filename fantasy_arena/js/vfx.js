@@ -90,14 +90,15 @@ const Vfx = (() => {
     await hitstop(crit ? 110 : 70);
     await waitMs(crit ? 280 : 180);
   }
-  async function parrySeq(defEl, atkEl, dmg) {
+  async function parrySeq(defEl, atkEl, dmg, crit) {
     spawn("shield-burst", ...(() => { const c = center(defEl); return [c.x, c.y]; })());
     try { Sfx.playParry(); } catch(e) {}
-    slash(defEl, atkEl, false);
+    slash(defEl, atkEl, !!crit);
     recoil(atkEl);
     dmgPop(atkEl, dmg);
-    shake(180);
-    await waitMs(260);
+    shake(crit ? 300 : 180); // v0.372: 치명 반격은 공격 치명처럼 강하게
+    if (crit) await hitstop(90);
+    await waitMs(crit ? 300 : 260);
   }
   function death(el) {
     if (!el) return;

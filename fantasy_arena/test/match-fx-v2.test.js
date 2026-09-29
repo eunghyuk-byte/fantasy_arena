@@ -123,8 +123,11 @@ test("SpellFx: 비디오 모드·dim 레이어·Safari 폴백·결과 화면 해
   assert.match(combat, /SpellFx\.releaseDim\(\)/);
   // 결과 화면은 승리·패배 연출이 끝난 뒤 (최대 3.2s 대기)
   const fin = combat.slice(combat.indexOf("function finish(winner)"), combat.indexOf("function clearDrag()"));
-  assert.match(fin, /SpellFx\.playMatch\(winner === "나" \? "victory" : "defeat", \{ skipQueue: true \}\)/);
-  assert.match(fin, /Promise\.race\(\[fxP, new Promise\(r => setTimeout\(r, 3200\)\)\]\)\.then\(showResult, showResult\)/);
+  // v0.372: 다른 매치 연출이 끝난 뒤 재생, 결과 화면은 연출이 완전히 끝난 뒤(상한 = 길이 + 2초)
+  assert.match(fin, /const fxId = winner === "나" \? "victory" : "defeat";/);
+  assert.match(fin, /SpellFx\.playMatch\(fxId, \{ skipQueue: true \}\)/);
+  assert.match(fin, /setTimeout\(r, \(durMs \|\| 1800\) \+ 2000\)/);
+  assert.match(fin, /fxP\.then\(showResult, showResult\)/);
   const game = fs.readFileSync(path.join(ROOT, "js/game.js"), "utf8");
   assert.match(game, /SpellFx\.playMatch\("match_start"\)/);
   assert.match(game, /SpellFx\.playMatch\("turn_start_me", \{ label: "" \}\)/);

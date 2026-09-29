@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.371";
+const GAME_VERSION = "0.372";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -267,6 +267,9 @@ function startGame(vsAI) {
   state.turn = p1First ? 1 : 2;
   // v0.357: 첫 턴 연출은 match_start가 끝난 뒤 (예전엔 beginTurn이 먼저 불러 둘이 겹침)
   beginTurn(first, { noTurnFx: true });
+  // v0.372: 시작 연출 묶음(MATCH START → 내 첫 턴이면 MY TURN) 동안 드로우 모션·AI·입력 대기 — 첫 턴 연출이 잡힐 때까지 게이트 유지
+  let releaseIntro = () => {};
+  try { if (typeof SpellFx !== "undefined" && SpellFx.overlayHold) releaseIntro = SpellFx.overlayHold(); } catch (e) {}
   showGame();
   render();
   const matchState = state;
@@ -291,15 +294,16 @@ function startGame(vsAI) {
       } catch (e) {}
       // 같은 판·아직 첫 턴 주인의 턴일 때만 (그새 턴이 넘어갔거나 새 판이면 생략)
       if (state === matchState && !state.over && current() === first) playTurnStartFx(first);
+      releaseIntro();
       // v0.365: 승리·패배 연출도 미리 캐시 (첫 턴 연출이 끝난 뒤, 부하 분산)
       setTimeout(() => {
         try { if (state === matchState && SpellFx.preloadMatch) { SpellFx.preloadMatch("victory"); SpellFx.preloadMatch("defeat"); } } catch (e) {}
         // v0.369: 코인 듀얼 에셋(코인 8종·사운드)도 미리 로드
         try { if (state === matchState && typeof CoinDuel !== "undefined") CoinDuel.preload(); } catch (e) {}
       }, 2500);
-    })();
-  } catch (e) {}
-  if (first.isAI) aiTurn();
+    })().finally(() => releaseIntro());
+  } catch (e) { releaseIntro(); }
+  if (first.isAI) aiTurn(); // aiTurn은 매치 연출이 끝날 때까지 스스로 대기 (v0.372)
 }
 
 /**
@@ -2337,12 +2341,29 @@ function highlightEquipHover(x, y, allowed) {
     try { if (typeof SpellFx !== "undefined" && SpellFx.playItem) SpellFx.playItem("item_hover"); } catch (e) {}
   }
 }
+/** v0.372: 드래그 중 유효 대상 전체(아군·적 모두)에 은은한 글로우 — 가리키는 대상은 spell-glow 로 강하게 */
+function markSpellValid(targets) {
+  const want = new Set();
+  (targets || []).forEach(t => { if (t && t.kind === "minion" && t.minion) want.add(String(t.minion.uid)); });
+  document.querySelectorAll("#myBoard .minion, #oppBoard .minion").forEach(el => {
+    const on = want.has(String(el.getAttribute("data-uid")));
+    if (on) el.classList.add("spell-valid"); else el.classList.remove("spell-valid");
+  });
+}
+function clearSpellValid() {
+  document.querySelectorAll(".minion.spell-valid").forEach(el => el.classList.remove("spell-valid"));
+}
 function highlightSpellHover(x, y, targets) {
   clearEquipHover();
+  markSpellValid(targets);
   const hit = spellTargetFromPoint(x, y, targets);
+  // v0.372: 대상 위에서는 드래그 카드를 반투명하게 — 밑의 대상 글로우가 가려지지 않게
+  try { if (typeof _drag !== "undefined" && _drag && _drag.ghost) _drag.ghost.classList.toggle("over-target", !!hit); } catch (e) {}
   if (!hit) return;
   if (hit.kind === "minion" && hit.minion) {
-    const el = document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
+    // v0.372: 전장(#myBoard/#oppBoard) 안의 유닛 요소만 — 다른 곳의 같은 uid 요소에 붙지 않게
+    const el = document.querySelector('#myBoard .minion[data-uid="' + hit.minion.uid + '"], #oppBoard .minion[data-uid="' + hit.minion.uid + '"]')
+      || document.querySelector('.minion[data-uid="' + hit.minion.uid + '"]');
     if (el) el.classList.add("spell-glow");
   } else if (hit.kind === "hero") {
     const side = (hit.owner === meView().me) ? "me" : "opp";
@@ -3043,7 +3064,7 @@ const ATK_SKILL_HELP = {
   2: ["관통공격", "방어를 먼저 깎으며 공격합니다."],
   3: ["돌진공격", "내 방어력만큼 추가하여 공격합니다."],
   4: ["연속공격", "두 번 공격합니다. 처치 시 다음 생존 적에게 이어집니다."],
-  5: ["치명공격", "체력을 1 이상 깎으면 적이 바로 죽습니다."],
+  5: ["치명공격", "체력을 1 이상 깎으면 적이 바로 죽습니다. 반격에도 적용됩니다."],
   6: ["흡혈공격", "준 체력 피해만큼 체력을 회복합니다."],
   7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],
   8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다."],

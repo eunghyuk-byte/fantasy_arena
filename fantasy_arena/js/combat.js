@@ -317,9 +317,17 @@ function doAttack(p, attacker, target, auto) {
             log(`${def.name} 반격`);
             const atkNow = Vfx.elOf(attacker.uid);
             const defNow = Vfx.elOf(def.uid);
+            // v0.372: 치명공격(5) 유닛의 반격도 체력 피해 1 이상이면 즉사 (옛: 반격은 기본 피해만 → 피해만 들어가고 생존하던 버그)
+            const counterCrit = atkSkillOf(def) === 5;
             try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter", { uid: attacker.uid }); } catch (e) {}
-            await Vfx.parrySeq(defNow, atkNow, dmgBack);
-            damageMinion(p, attacker, dmgBack, combatKillCtx(def, target.owner));
+            await Vfx.parrySeq(defNow, atkNow, dmgBack, counterCrit);
+            if (counterCrit) {
+              const shielded = hasOwnAbility(attacker, "보호") || (attacker.keywords || []).includes("shield");
+              damageMinion(p, attacker, Math.max(dmgBack, attacker.hp), combatKillCtx(def, target.owner));
+              if (!shielded) log(`${def.name} 치명 반격 → ${attacker.name} 즉사`);
+            } else {
+              damageMinion(p, attacker, dmgBack, combatKillCtx(def, target.owner));
+            }
             render();
             await waitMs(360);
           }
@@ -380,12 +388,29 @@ function finish(winner) {
   state.winner = winner;
   const endState = state;
   // v0.365: 승리·패배 v2 연출(비디오+sfx.ogg+dim)이 끝난 뒤 결과 화면. 연출 사운드가 있으니 기존 승/패 효과음은 팩이 없을 때만
-  let fxP = null;
-  try {
-    if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
-      fxP = SpellFx.playMatch(winner === "나" ? "victory" : "defeat", { skipQueue: true });
-    }
-  } catch (e) { fxP = null; }
+  // v0.372: 다른 매치 연출(MY TURN 등)이 재생 중이면 끝난 뒤 시작 · 결과 화면(버튼)은 연출이 완전히 끝난 뒤에만
+  const hasFx = typeof SpellFx !== "undefined" && !!SpellFx.playMatch;
+  const fxId = winner === "나" ? "victory" : "defeat";
+  let releaseEnd = () => {};
+  try { if (hasFx && SpellFx.overlayHold) releaseEnd = SpellFx.overlayHold(); } catch (e) {}
+  const fxP = !hasFx ? null : (async () => {
+    try {
+      await Promise.race([waitOthersIdle(), new Promise(r => setTimeout(r, 3500))]);
+    } catch (e) {}
+    let durMs = 0;
+    try { if (SpellFx.matchDurationMs) durMs = await SpellFx.matchDurationMs(fxId); } catch (e) {}
+    const p = SpellFx.playMatch(fxId, { skipQueue: true });
+    releaseEnd();
+    // 연출 끝까지 기다림 (비디오 로드 대기 포함 상한: 길이 + 2초)
+    await Promise.race([p, new Promise(r => setTimeout(r, (durMs || 1800) + 2000))]);
+  })();
+  function waitOthersIdle() {
+    // 내 hold(releaseEnd) 하나만 남을 때까지: MY TURN 등 이미 재생 중인 매치 연출이 끝날 때까지
+    return new Promise(res => {
+      const tick = () => { if (!SpellFx.overlayBusyCount || SpellFx.overlayBusyCount() <= 1) res(); else setTimeout(tick, 50); };
+      tick();
+    });
+  }
   if (!fxP) {
     try {
       if (winner === "나") Sfx.playWin && Sfx.playWin();
@@ -406,7 +431,7 @@ function finish(winner) {
     document.getElementById("overlay").classList.add("show");
   };
   if (fxP && typeof fxP.then === "function") {
-    Promise.race([fxP, new Promise(r => setTimeout(r, 3200))]).then(showResult, showResult);
+    fxP.then(showResult, showResult);
   } else showResult();
 }
 
@@ -421,6 +446,7 @@ function clearDrag() {
   try { document.body.classList.remove("dragging-card"); } catch (err) {}
   if (typeof placeDropGlow === "function") placeDropGlow(false);
   if (typeof clearEquipHover === "function") clearEquipHover();
+  if (typeof clearSpellValid === "function") clearSpellValid();
   if (typeof clearInsertPreview === "function") clearInsertPreview();
 }
 function hideScreens() {
@@ -467,6 +493,14 @@ function aiTurn() {
   if (state.over) return;
   const p = current();
   if (!p.isAI) return;
+  // v0.372: 매치 연출(MATCH START·MY TURN·승패) 중이면 끝난 뒤 시작 (연출과 AI 행동·사운드가 겹치지 않게)
+  if (typeof SpellFx !== "undefined" && SpellFx.overlayBusy && SpellFx.overlayBusy()) {
+    if (p._aiWaitFx) return;
+    p._aiWaitFx = true;
+    const st = state;
+    SpellFx.whenOverlayIdle().then(() => { p._aiWaitFx = false; if (state === st) aiTurn(); });
+    return;
+  }
 
   const tryPlay = () => {
     const plays = p.hand

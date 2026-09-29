@@ -2005,7 +2005,56 @@ const SpellFx = (() => {
   function playCombat(id, opts) { return playPack("combat", id, opts); }
   function playCoin(id, opts) { return Promise.resolve(false); }
   function playItem(id, opts) { return playPack("items", id, opts); }
-  function playMatch(id, opts) { return playPack("match", id, opts); }
+  // ─── v0.372 매치 연출 게이트: MATCH START·MY TURN·VICTORY·DEFEAT 재생 중에는 다른 진행(드로우 모션·AI·결과 화면·입력)을 막는다 ───
+  let _ovCount = 0;
+  const _ovWaiters = [];
+  const OVERLAY_HOLD_CAP_MS = 7000; // 연출이 멈춰도 게임이 영원히 잠기지 않게
+  function syncInputBlock() {
+    let el = document.getElementById("fxInputBlock");
+    if (!el && _ovCount > 0) {
+      el = document.createElement("div");
+      el.id = "fxInputBlock";
+      el.setAttribute("aria-hidden", "true");
+      el.style.cssText = "position:fixed;inset:0;z-index:2147483000;background:transparent;pointer-events:auto;cursor:default;touch-action:none;";
+      const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
+      ["pointerdown", "pointerup", "click", "dblclick", "contextmenu", "touchstart", "wheel"].forEach(t => el.addEventListener(t, stop, { passive: false }));
+      document.body.appendChild(el);
+    }
+    if (el) el.style.display = _ovCount > 0 ? "block" : "none";
+    try { document.body.classList.toggle("fx-overlay-busy", _ovCount > 0); } catch (e) {}
+  }
+  function overlayHold() {
+    let released = false;
+    _ovCount++;
+    syncInputBlock();
+    let capT = null;
+    const release = () => {
+      if (released) return;
+      released = true;
+      if (capT) clearTimeout(capT);
+      _ovCount = Math.max(0, _ovCount - 1);
+      // 한 틱 뒤에 판정: 연출이 끝나자마자 이어지는 연출(MATCH START → MY TURN)이 먼저 잡히게
+      setTimeout(() => {
+        syncInputBlock();
+        if (_ovCount === 0) _ovWaiters.splice(0).forEach(f => { try { f(); } catch (e) {} });
+      }, 0);
+    };
+    capT = setTimeout(release, OVERLAY_HOLD_CAP_MS);
+    return release;
+  }
+  function overlayBusy() { return _ovCount > 0; }
+  function overlayBusyCount() { return _ovCount; }
+  function whenOverlayIdle() { return _ovCount > 0 ? new Promise(r => _ovWaiters.push(r)) : Promise.resolve(); }
+  // 연출 중 키 입력(단축키) 차단
+  try {
+    document.addEventListener("keydown", (e) => { if (_ovCount > 0) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+  } catch (e) {}
+  function playMatch(id, opts) {
+    const release = overlayHold();
+    const p = playPack("match", id, opts);
+    p.then(release, release);
+    return p;
+  }
 
   function cleanupFx(layer, stage, fxCard) {
     if (layer) layer.classList.remove("on");
@@ -2032,7 +2081,7 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, releaseHidden, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, releaseHidden, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
 })();
 window.SpellFx = SpellFx;
 // v0.366: 타이틀 화면에서 미리 로드 → 첫 판 시작 연출이 로딩 없이 바로 뜨게

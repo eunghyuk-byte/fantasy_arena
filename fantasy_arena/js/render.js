@@ -304,8 +304,14 @@ function render() {
     const n = me._drewCount;
     me._drewCount = 0;
     me._drawingAnim = true;
+    // v0.372: 매치 연출(MATCH START·MY TURN·승패) 중에는 드로우 모션·사운드를 미루고, 새 카드는 그동안 숨김
+    me._drawHideN = n;
     requestAnimationFrame(() => {
       (async () => {
+        try {
+          if (typeof SpellFx !== "undefined" && SpellFx.whenOverlayIdle) await SpellFx.whenOverlayIdle();
+        } catch (e) {}
+        me._drawHideN = 0;
         try {
           if (typeof playDrawSequence === "function") await playDrawSequence(n);
           else if (typeof flyDrawCard === "function") await flyDrawCard();
@@ -313,6 +319,11 @@ function render() {
         me._drawingAnim = false;
       })();
     });
+  }
+  // v0.372: 드로우 대기 중 다시 그려도(render) 아직 날아오지 않은 새 카드는 숨긴 채 (투명도만 · 레이아웃 변화 없음)
+  if ((me._drawHideN || 0) > 0 && !dragging) {
+    const cardsNow = mh.querySelectorAll(".card");
+    for (let i = Math.max(0, cardsNow.length - me._drawHideN); i < cardsNow.length; i++) cardsNow[i].style.opacity = "0";
   }
 
   if (!(typeof _drag !== "undefined" && _drag)) {
