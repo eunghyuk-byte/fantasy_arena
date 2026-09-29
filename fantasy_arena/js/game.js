@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.377";
+const GAME_VERSION = "0.378";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -127,7 +127,7 @@ function deckFor(hero, isAI) {
 function makePlayer(hero, isAI, name) {
   return {
     name, hero, isAI,
-    hp: 40, maxHp: 40,
+    hp: 50, maxHp: 50,
     soul: 0, maxSoul: 0,
     deck: deckFor(hero, isAI),
     hand: [],
