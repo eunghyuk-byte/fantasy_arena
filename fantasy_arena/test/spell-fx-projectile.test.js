@@ -128,3 +128,43 @@ test("턴 시작 연출: turn_start_enemy 삭제, 내 턴만 문구 없이, 첫 
   const fx = fs.readFileSync(path.join(ROOT, "js/spell-fx.js"), "utf8");
   assert.match(fx, /hasOwnProperty\.call\(opts, "label"\)/);
 });
+
+// v0.359 fs5 폭염: perUnit+flow (컨셉 B 불씨 낙인 → 손패로 발사체 → 도착)
+test("fs5 팩: perUnit+flow · aoe_ally · 발사체 280ms · 도착 590~990ms · 2MB 이하", () => {
+  const P5 = path.join(ROOT, "assets/vfx/spells/fs5");
+  const m = JSON.parse(fs.readFileSync(path.join(P5, "meta.json"), "utf8"));
+  assert.equal(m.id, "fs5");
+  assert.equal(m.concept, "B");
+  assert.equal(m.targetMode, "aoe_ally");
+  assert.equal(m.playMode, "perUnit+flow");
+  for (const k of ["unitImpact", "flow", "arrival", "sfx"]) {
+    assert.ok(m[k] && m[k].file, k + ".file");
+    assert.ok(fs.existsSync(path.join(P5, m[k].file)), m[k].file + " 존재");
+  }
+  assert.equal(m.flow.flightMs, 280);
+  assert.equal(m.flow.startMs, 330);
+  assert.equal(m.flow.plusUnitDelay, true);
+  assert.equal(m.flow.to.selector, "#myHand");
+  assert.equal(m.arrival.startMs, 590);
+  assert.equal(m.arrival.durationMs, 400);
+  assert.equal(m.unitImpact.delay.axis, "x");
+  const total = fs.readdirSync(P5).reduce((s, f) => s + fs.statSync(path.join(P5, f)).size, 0);
+  assert.ok(total <= 2 * 1024 * 1024, "total " + total);
+  for (const old of ["cast.webp", "cast_strip.png", "aoe.webp", "aoe_strip.png", "preview.mp4"]) {
+    assert.ok(!fs.existsSync(path.join(P5, old)), old + " 없음");
+  }
+  const man = JSON.parse(fs.readFileSync(path.join(ROOT, "assets/manifest.json"), "utf8"));
+  const inMan = man.items.filter(i => i.path.startsWith("assets/vfx/spells/fs5/")).map(i => i.path.split("/").pop()).sort();
+  assert.deepEqual(inMan, fs.readdirSync(P5).sort());
+  assert.equal(man.count, man.items.length);
+});
+
+test("SpellFx: perUnit+flow 공용 재생 모드 (flow를 overlay보다 먼저 판정, 가로 지연축, 유닛 없으면 발사체 2개)", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/spell-fx.js"), "utf8");
+  assert.match(src, /async function playPerUnitFlow\(stage, meta, base, opts\)/);
+  assert.match(src, /playPerUnitFlow, preloadFlow, isFlowMeta/);
+  assert.match(src, /!isFlowMeta\(meta\) && \(pm\.indexOf\("overlay"\)/, "perUnit+flow는 overlay 모드로 가지 않음");
+  assert.match(src, /d\.axis === "x"/);
+  assert.match(src, /opts\.emptyFlows \|\| 2/);
+  assert.match(src, /#oppHand/, "상대 시전 시 상대 손패로");
+});

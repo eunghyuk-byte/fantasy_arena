@@ -2937,29 +2937,29 @@
       "name": "sfx"
     },
     {
-      "path": "assets/vfx/spells/fs5/aoe.webp",
-      "bytes": 136522,
-      "name": "aoe"
+      "path": "assets/vfx/spells/fs5/arrival_strip.webp",
+      "bytes": 427966,
+      "name": "arrival_strip"
     },
     {
-      "path": "assets/vfx/spells/fs5/aoe_strip.png",
-      "bytes": 194651,
-      "name": "aoe_strip"
-    },
-    {
-      "path": "assets/vfx/spells/fs5/cast.webp",
-      "bytes": 846312,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/spells/fs5/cast_strip.png",
-      "bytes": 1302299,
-      "name": "cast_strip"
+      "path": "assets/vfx/spells/fs5/flow_strip.webp",
+      "bytes": 363478,
+      "name": "flow_strip"
     },
     {
       "path": "assets/vfx/spells/fs5/meta.json",
-      "bytes": 375,
+      "bytes": 3382,
       "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs5/sfx.mp3",
+      "bytes": 16343,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/spells/fs5/unit_impact_strip.webp",
+      "bytes": 485742,
+      "name": "unit_impact_strip"
     },
     {
       "path": "assets/vfx/spells/fs6/cast.webp",

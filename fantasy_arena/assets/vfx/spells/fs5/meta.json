@@ -1,22 +1,116 @@
 {
-  "id": "fs5",
-  "name": "폭염",
-  "kind": "special",
-  "durationMs": 1800,
-  "fps": 12,
-  "cast": {
-    "file": "cast.webp",
-    "frames": 12,
-    "w": 720,
-    "h": 720
+ "id": "fs5",
+ "name": "폭염",
+ "concept": "B",
+ "description": "Burning Brand — a ring of fire brands each of MY units, then a small burning card flies from each unit into my hand where two golden flame cards appear and fold into the hand (literal draw 2)",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha",
+ "fps": 30,
+ "durationMs": 1000,
+ "card": "아군 전체 피해 2 / 드로우2 (spell.type draw_ex, ownAllHp:2, draw:2)",
+ "type": "aoe",
+ "targetMode": "aoe_ally",
+ "playMode": "perUnit+flow",
+ "playModeNote": "NEW MODE perUnit+flow (3 layers). 1) unitImpact on every unit of the CASTER's board (aoe_ally), each at its own delay. 2) flow: one small projectile per unit, from that unit's centre to the caster's hand, starting at flow.startMs + that unit's delay. 3) arrival: one strip at the hand when the flows land. If the caster has no units, launch 2 flows (draw 2) from the caster's board centre instead. For the AI caster, use the opponent board and point 'to' at #oppHand (or the opp deck).",
+ "unitImpact": {
+  "file": "unit_impact_strip.webp",
+  "layout": "horizontal",
+  "frames": 15,
+  "w": 320,
+  "h": 320,
+  "fps": 30,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 500,
+  "anchor": "each unit centre on the caster's board",
+  "anchorOffsetYPx@1080p": 60,
+  "displayBoxPx@1080p": 320,
+  "delay": {
+   "baseMs": 0,
+   "perPx@1080p": 0.1,
+   "origin": "center",
+   "axis": "x",
+   "note": "delayMs = 0.1*|unitX - stageCentreX| (0-50ms ripple); using full distance from centre (existing unitDelayMs) is also fine"
+  }
+ },
+ "flow": {
+  "file": "flow_strip.webp",
+  "layout": "horizontal",
+  "frames": 15,
+  "w": 400,
+  "h": 140,
+  "fps": 30,
+  "loop": true,
+  "orientation": "points +X (right); rotate by flight angle",
+  "headX": 0.973,
+  "headY": 0.5,
+  "displayLengthPx@1080p": 230,
+  "from": "each unit centre (same units as unitImpact), offsetYPx@1080p -20",
+  "to": {
+   "selector": "#myHand",
+   "point": "rect centre",
+   "offsetYPx@1080p": -15,
+   "fallbackPx@1080p": [
+    960,
+    905
+   ]
   },
-  "aoe": {
-    "file": "aoe.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
-  },
-  "anchor": "self-board",
-  "sfxHint": "fire_heatwave",
-  "concept": "자기장 폭염 — 고통의 열파"
+  "startMs": 330,
+  "plusUnitDelay": true,
+  "flightMs": 280,
+  "easePow": 1.5,
+  "note": "head arrives at the 'to' point; fade in 60ms, fade out over the last 50ms (same as playProjectile)"
+ },
+ "arrival": {
+  "file": "arrival_strip.webp",
+  "layout": "horizontal",
+  "frames": 12,
+  "w": 320,
+  "h": 320,
+  "fps": 30,
+  "loop": false,
+  "anchor": "same point as flow.to",
+  "displayBoxPx@1080p": 300,
+  "startMs": 590,
+  "durationMs": 400
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "hitAtMs": 60,
+  "loudnessLUFS": -17.9,
+  "truePeakDbTP": -4.1,
+  "source": "fs2 C-style: synth low brown-noise rumble with rising low-pass (slow amplitude sway) + soft pitch-drop sub thump(s), layered with this concept's own Kling clip audio low-passed ~0.6-0.65 kHz; final low-pass 1.7/2 kHz",
+  "secondHitAtMs": 620,
+  "note": "scorch hit at 60ms, soft low landing thump when the flows reach the hand (~620ms)"
+ },
+ "referencePointsPx@1080p": {
+  "myUnits": [
+   [
+    480,
+    719
+   ],
+   [
+    705,
+    719
+   ],
+   [
+    930,
+    719
+   ],
+   [
+    1155,
+    719
+   ]
+  ],
+  "myHand": [
+   960,
+   905
+  ],
+  "myDeck": [
+   157,
+   720
+  ]
+ },
+ "sequence": "after the centre card: scorch on my units 0-550ms (delays 0-50) · flows 330-660ms · arrival at hand 590-990ms · sound from 0ms"
 }

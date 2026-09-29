@@ -357,6 +357,13 @@ const SpellFx = (() => {
   //                 anchorOffsetYPx@1080p, delay: { baseMs, perPx@1080p, origin: "center" } }
   //               → every unit on the targeted boards, each at its own delay
   //   sfx:        { file, startMs }
+  // C) meta.playMode "perUnit+flow"  (fs5 폭염 · 드로우형 공용, v0.359)
+  //   unitImpact: B와 같음 (delay.axis "x" → 가로 거리만 사용)
+  //   flow:       { file, frames, w, h, fps, headX, displayLengthPx@1080p, from: "... offsetYPx@1080p -20",
+  //                 to: { selector: "#myHand", offsetYPx@1080p, fallbackPx@1080p }, startMs, plusUnitDelay,
+  //                 flightMs, easePow }  → 유닛마다 발사체 1개 (유닛 → 손패). 유닛이 없으면 보드 중앙에서 2개
+  //   arrival:    { file, frames, w, h, fps, displayBoxPx@1080p, startMs, durationMs } → 손패 도착 지점
+  //   AI(상대)가 쓰면 상대 보드 → #oppHand
   // ─────────────────────────────────────────────────────────────────────────
   const _imgCache = {};
   function loadImg(url) {
@@ -376,11 +383,15 @@ const SpellFx = (() => {
   function isProjectileMeta(meta) {
     return !!(meta && meta.type === "projectile" && meta.projectile && meta.impact);
   }
+  function isFlowMeta(meta) {
+    const pm = String((meta && meta.playMode) || "");
+    return !!(meta && pm.indexOf("flow") >= 0 && meta.flow && meta.flow.file);
+  }
   function isOverlayMeta(meta) {
     const pm = String((meta && meta.playMode) || "");
-    return !!(meta && (pm.indexOf("overlay") >= 0 || pm.indexOf("perUnit") >= 0) && (meta.overlay || meta.unitImpact));
+    return !!(meta && !isFlowMeta(meta) && (pm.indexOf("overlay") >= 0 || pm.indexOf("perUnit") >= 0) && (meta.overlay || meta.unitImpact));
   }
-  function isCanvasMeta(meta) { return isProjectileMeta(meta) || isOverlayMeta(meta); }
+  function isCanvasMeta(meta) { return isProjectileMeta(meta) || isOverlayMeta(meta) || isFlowMeta(meta); }
   function metaSfxUrl(meta, base) { return meta && meta.sfx && meta.sfx.file ? assetUrl(base, meta.sfx.file) : ""; }
   function projectileUrls(meta, base) {
     return {
@@ -447,8 +458,19 @@ const SpellFx = (() => {
       loadSfx(metaSfxUrl(meta, base))
     ]);
   }
+  function preloadFlow(meta, base) {
+    if (!isFlowMeta(meta)) return Promise.resolve(null);
+    const U = meta.unitImpact, F = meta.flow, A = meta.arrival;
+    return Promise.all([
+      U && U.file ? loadFrames(assetUrl(base, U.file), U.frames, U.w, U.h, U.layout) : Promise.resolve(null),
+      loadFrames(assetUrl(base, F.file), F.frames, F.w, F.h, F.layout),
+      A && A.file ? loadFrames(assetUrl(base, A.file), A.frames, A.w, A.h, A.layout) : Promise.resolve(null),
+      loadSfx(metaSfxUrl(meta, base))
+    ]);
+  }
   function preloadMetaFx(meta, base) {
     if (isProjectileMeta(meta)) return preloadProjectile(meta, base);
+    if (isFlowMeta(meta)) return preloadFlow(meta, base);
     if (isOverlayMeta(meta)) return preloadOverlay(meta, base);
     return Promise.resolve(null);
   }
@@ -592,7 +614,8 @@ const SpellFx = (() => {
     const base = d.baseMs != null ? d.baseMs : 0;
     const per = d["perPx@1080p"] != null ? d["perPx@1080p"] : 0;
     const c = screenCenter();
-    return base + per * Math.hypot(pt.x - c.x, pt.y - c.y) / (k || 1);
+    const dist = d.axis === "x" ? Math.abs(pt.x - c.x) : d.axis === "y" ? Math.abs(pt.y - c.y) : Math.hypot(pt.x - c.x, pt.y - c.y);
+    return base + per * dist / (k || 1);
   }
   /**
    * Generic full-screen overlay + per-unit impact player (AOE spells).
@@ -640,10 +663,133 @@ const SpellFx = (() => {
       }
     }, opts);
   }
+  /** "offsetYPx@1080p -20" 같은 문자열/숫자에서 @1080p 오프셋 값 읽기 */
+  function metaOffsetY(obj, key) {
+    if (!obj) return 0;
+    if (typeof obj === "object") {
+      const v = obj[key || "offsetYPx@1080p"];
+      return typeof v === "number" ? v : 0;
+    }
+    const m = /offsetYPx@1080p\s*(-?\d+(?:\.\d+)?)/.exec(String(obj));
+    return m ? parseFloat(m[1]) : 0;
+  }
+  /** 시전자 보드 중앙 (내가 쓰면 #myBoard, 상대가 쓰면 #oppBoard) */
+  function casterBoardCenter(casterIsMe) {
+    const b = document.getElementById(casterIsMe === false ? "oppBoard" : "myBoard");
+    const r = b && b.getBoundingClientRect();
+    if (r && r.width > 4 && r.height > 4) return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    return boardCenterPoint();
+  }
+  /** flow 도착점: 시전자 손패 (meta.flow.to.selector, 상대 시전이면 #oppHand) */
+  function flowTargetPoint(F, casterIsMe, k) {
+    const T = (F && F.to) || {};
+    const cw = window.innerWidth || 1920, ch = window.innerHeight || 1080;
+    let sel = T.selector || "#myHand";
+    if (casterIsMe === false) sel = sel.replace("#myHand", "#oppHand").replace(".my-hand", ".opp-hand");
+    const el = document.querySelector(sel);
+    const r = el && el.getBoundingClientRect();
+    const offY = metaOffsetY(T) * k;
+    if (r && r.width > 4 && r.height > 4) return { x: r.left + r.width / 2, y: r.top + r.height / 2 + (casterIsMe === false ? -offY : offY) };
+    const fb = T["fallbackPx@1080p"] || [960, 905];
+    const y = casterIsMe === false ? (1080 - fb[1]) : fb[1];
+    return { x: fb[0] * cw / 1920, y: y * ch / 1080 };
+  }
+  /**
+   * Generic per-unit impact + flow-to-hand player (드로우형: 내 유닛마다 타격 → 각 유닛에서 손패로 발사체 → 손패 도착 효과).
+   * @param opts { casterIsMe?: bool, points?: [{x,y}], to?: {x,y}, sound?: bool, emptyFlows?: number }
+   */
+  async function playPerUnitFlow(stage, meta, base, opts) {
+    opts = opts || {};
+    if (!stage || !isFlowMeta(meta)) return false;
+    const [unFr, flFr, arFr] = await preloadFlow(meta, base);
+    if (!flFr) return false;
+    const U = unFr ? meta.unitImpact : null, F = meta.flow, A = arFr ? meta.arrival : null, S = meta.sfx || {};
+    const k = fxScale();
+    const casterIsMe = opts.casterIsMe;
+    const pts = opts.points || aoeUnitPoints(meta.targetMode || "aoe_ally", casterIsMe);
+    const to = opts.to || flowTargetPoint(F, casterIsMe, k);
+    // 1) 유닛 타격
+    const hits = [];
+    let uDur = 0, uFps = 30, uN = 1, uBox = 0;
+    if (U) {
+      uDur = U.durationMs || 500;
+      uFps = U.fps || meta.fps || 30;
+      uN = Math.max(1, U.frames || 1);
+      uBox = (U["displayBoxPx@1080p"] || 300) * k;
+      const offY = (U["anchorOffsetYPx@1080p"] || 0) * k;
+      pts.forEach(pt => hits.push({ x: pt.x, y: pt.y + offY, at: (U.startMs || 0) + unitDelayMs(U, pt, k), delay: unitDelayMs(U, pt, k) }));
+    }
+    // 2) 발사체: 유닛마다 1개 (없으면 보드 중앙에서 emptyFlows개, 기본 2)
+    const fOffY = metaOffsetY(F.from) * k;
+    const fStart = F.startMs || 0, flightMs = F.flightMs || 280, easePow = F.easePow || 1.5;
+    const fFps = F.fps || meta.fps || 30, fN = Math.max(1, F.frames || 1);
+    const L = (F["displayLengthPx@1080p"] || 230) * k;
+    const Hh = L * flFr.h / flFr.w;
+    const headOff = ((F.headX != null ? F.headX : 1) - 0.5) * L;
+    const flows = [];
+    const addFlow = (from, delay) => {
+      const dx = to.x - from.x, dy = to.y - from.y;
+      const ang = Math.atan2(dy, dx);
+      flows.push({ from, at: fStart + (F.plusUnitDelay === false ? 0 : delay), dist: Math.hypot(dx, dy) || 1, ang, cos: Math.cos(ang), sin: Math.sin(ang) });
+    };
+    if (pts.length) {
+      pts.forEach((pt, i) => addFlow({ x: pt.x, y: pt.y + fOffY }, hits[i] ? hits[i].delay : 0));
+    } else {
+      const c = casterBoardCenter(casterIsMe);
+      const n = Math.max(1, opts.emptyFlows || 2);
+      const gap = 90 * k;
+      for (let i = 0; i < n; i++) addFlow({ x: c.x + (i - (n - 1) / 2) * gap, y: c.y + fOffY }, i * 40);
+    }
+    // 3) 손패 도착
+    let aStart = 0, aDur = 0, aFps = 30, aN = 1, aBox = 0;
+    if (A) {
+      aStart = A.startMs != null ? A.startMs : fStart + flightMs;
+      aDur = A.durationMs || Math.round((A.frames || 1) * 1000 / (A.fps || 30));
+      aFps = A.fps || meta.fps || 30;
+      aN = Math.max(1, A.frames || 1);
+      aBox = (A["displayBoxPx@1080p"] || 300) * k;
+    }
+    const endMs = Math.max(
+      hits.reduce((m, h) => Math.max(m, h.at + uDur), 0),
+      flows.reduce((m, f) => Math.max(m, f.at + flightMs + 50), 0),
+      A ? aStart + aDur : 0);
+    return runCanvasFx(stage, endMs, metaSfxUrl(meta, base), S.startMs, (ctx, t) => {
+      if (U) {
+        const bw = uBox, bh = uBox * unFr.h / unFr.w;
+        hits.forEach(h => {
+          const ti = t - h.at;
+          if (ti < 0 || ti >= uDur) return;
+          drawFrame(ctx, unFr, Math.min(uN - 1, Math.floor(ti * uFps / 1000)), h.x - bw / 2, h.y - bh / 2, bw, bh);
+        });
+      }
+      flows.forEach(f => {
+        const tf = t - f.at;
+        if (tf < 0 || tf >= flightMs + 50) return;
+        const uu = Math.min(1, tf / flightMs);
+        const trav = f.dist * Math.pow(uu, easePow);
+        const op = Math.min(1, tf / 60) * (1 - Math.max(0, (tf - flightMs) / 50));
+        if (op <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = op;
+        ctx.translate(f.from.x + f.cos * (trav - headOff), f.from.y + f.sin * (trav - headOff));
+        ctx.rotate(f.ang);
+        drawFrame(ctx, flFr, Math.floor(tf * fFps / 1000) % fN, -L / 2, -Hh / 2, L, Hh);
+        ctx.restore();
+      });
+      if (A) {
+        const ta = t - aStart;
+        if (ta >= 0 && ta < aDur) {
+          const bw = aBox, bh = aBox * arFr.h / arFr.w;
+          drawFrame(ctx, arFr, Math.min(aN - 1, Math.floor(ta * aFps / 1000)), to.x - bw / 2, to.y - bh / 2, bw, bh);
+        }
+      }
+    }, opts);
+  }
   /** Dispatch a meta-driven canvas pack. */
   function playMetaFx(stage, meta, base, opts) {
     opts = opts || {};
     if (isProjectileMeta(meta)) return playProjectile(stage, meta, base, opts.to, opts);
+    if (isFlowMeta(meta)) return playPerUnitFlow(stage, meta, base, opts);
     if (isOverlayMeta(meta)) return playOverlayPerUnit(stage, meta, base, opts);
     return Promise.resolve(false);
   }
@@ -1296,6 +1442,6 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts };
 })();
 window.SpellFx = SpellFx;
