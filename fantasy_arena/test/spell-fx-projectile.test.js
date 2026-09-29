@@ -93,3 +93,24 @@ test("fs3 팩: projectile · 350ms 비행 · 타격 330~930ms · 2MB 이하", ()
   assert.ok(total <= 2 * 1024 * 1024, "total " + total);
   for (const old of ["cast.webp", "cast_strip.png", "impact.webp", "impact_strip.png"]) assert.ok(!fs.existsSync(path.join(P3, old)), old);
 });
+
+// v0.356 fs4 화염탄: projectile 팩 (컨셉 B 붕괴탄)
+test("fs4 팩: projectile · 350ms 비행 · 타격 330~930ms · 2MB 이하", () => {
+  const P4 = path.join(ROOT, "assets/vfx/spells/fs4");
+  const m = JSON.parse(fs.readFileSync(path.join(P4, "meta.json"), "utf8"));
+  assert.equal(m.id, "fs4");
+  assert.equal(m.type, "projectile");
+  assert.equal(m.targetMode, "unit");
+  assert.equal(m.projectile.flightMs, 350);
+  assert.equal(m.projectile.from, "center");
+  assert.equal(m.projectile.headX, 0.975);
+  assert.equal(m.projectile["displayLengthPx@1080p"], 420);
+  assert.equal(m.impact.startMs, 330);
+  assert.equal(m.impact.startMs + m.impact.durationMs, 930);
+  assert.equal(m.impact["displayBoxPx@1080p"], 460);
+  assert.equal(m.sfx.hitAtMs, 350);
+  for (const k of ["projectile", "impact", "sfx"]) assert.ok(fs.existsSync(path.join(P4, m[k].file)), m[k].file);
+  const total = fs.readdirSync(P4).reduce((s, f) => s + fs.statSync(path.join(P4, f)).size, 0);
+  assert.ok(total <= 2 * 1000 * 1000, "total " + total);
+  for (const old of ["cast.webp", "cast_strip.png", "impact.webp", "impact_strip.png"]) assert.ok(!fs.existsSync(path.join(P4, old)), old);
+});

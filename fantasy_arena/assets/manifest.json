@@ -1,5 +1,5 @@
 {
-  "count": 709,
+  "count": 708,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -2942,29 +2942,24 @@
       "name": "sfx"
     },
     {
-      "path": "assets/vfx/spells/fs4/cast.webp",
-      "bytes": 1391034,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/spells/fs4/cast_strip.png",
-      "bytes": 3416824,
-      "name": "cast_strip"
-    },
-    {
-      "path": "assets/vfx/spells/fs4/impact.webp",
-      "bytes": 1271194,
-      "name": "impact"
-    },
-    {
-      "path": "assets/vfx/spells/fs4/impact_strip.png",
-      "bytes": 3083480,
+      "path": "assets/vfx/spells/fs4/impact_strip.webp",
+      "bytes": 1630022,
       "name": "impact_strip"
     },
     {
       "path": "assets/vfx/spells/fs4/meta.json",
-      "bytes": 445,
+      "bytes": 1248,
       "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs4/projectile_strip.webp",
+      "bytes": 296168,
+      "name": "projectile_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs4/sfx.mp3",
+      "bytes": 16343,
+      "name": "sfx"
     },
     {
       "path": "assets/vfx/spells/fs5/aoe.webp",
