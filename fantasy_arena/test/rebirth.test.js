@@ -136,3 +136,100 @@ test("환생 없는 성기사: 사망 시 제거 (변화 없음)", () => {
   kill(g, p1, m);
   assert.ok(!p1.board.includes(m));
 });
+
+// ---- v0.348 (9/29, 하스스톤 방식): 소환: 미발동 / 파괴: 첫 파괴·재파괴 모두 발동 ----
+
+test("소환: 효과 카드(여령기) + 환생: 부활 시 소환 효과 미발동", () => {
+  const { p1, p2 } = setup(g);
+  const foe = place(g, p2, "l12");
+  foe.ability = null; foe.keywords = []; // 보호 없는 적 (피해 확인용)
+  const hpBefore = foe.hp;
+  const m = place(g, p1, "f12");
+  assert.ok(m.battlecry, "소환: 효과 있는 카드");
+  g.equipItemOnUnit(p1, g.cloneCard("li1"), m);
+  let bc = 0;
+  const orig = g.resolveBattlecry, origPlay = g.resolvePlayAbility;
+  g.resolveBattlecry = function () { bc++; return orig.apply(this, arguments); };
+  g.resolvePlayAbility = function () { bc++; return origPlay.apply(this, arguments); };
+  try {
+    kill(g, p1, m);
+  } finally { g.resolveBattlecry = orig; g.resolvePlayAbility = origPlay; }
+  assert.ok(p1.board.includes(m), "환생함");
+  assert.equal(bc, 0, "소환 처리 호출 없음");
+  assert.equal(foe.hp, hpBefore, "적 전체 피해 1 미발동");
+});
+
+test("파괴: 효과 카드(대교, 소교 생성) + 환생: 첫 파괴 발동, 부활 후 재파괴 시 또 발동", () => {
+  const { p1 } = setup(g);
+  const m = place(g, p1, "a13");
+  g.equipItemOnUnit(p1, g.cloneCard("li1"), m);
+  const tokens = () => p1.board.filter(x => x.id === "a40").length;
+  kill(g, p1, m);
+  assert.ok(p1.board.includes(m), "환생함");
+  assert.equal(tokens(), 1, "첫 파괴: 소교 생성");
+  assert.ok(m.deathrattle, "파괴: 효과 남아 있음");
+  kill(g, p1, m);
+  assert.ok(!p1.board.includes(m), "두 번째는 제거");
+  assert.equal(tokens(), 2, "재파괴: 소교 또 생성");
+});
+
+test("파괴: 효과 인쇄 환생 없는 카드(전위)는 기존대로 한 번 발동", () => {
+  const { p1, p2 } = setup(g);
+  const foe = place(g, p2, "e18"); foe.hp = 10; foe.maxHp = 10;
+  const m = place(g, p1, "f29");
+  kill(g, p1, m);
+  assert.ok(!p1.board.includes(m));
+  assert.equal(foe.hp, 10 - Math.max(0, 4 - (foe.def || 0)));
+});
+
+test("파괴: 드로우 1(유언) + 환생: 첫 파괴 드로우, 재파괴 드로우 또", () => {
+  const { p1 } = setup(g);
+  const m = place(g, p1, "e18");
+  g.equipItemOnUnit(p1, g.cloneCard("li1"), m);
+  const d0 = p1.deck.length;
+  kill(g, p1, m);
+  assert.ok(p1.board.includes(m));
+  assert.equal(p1.deck.length, d0 - 1, "첫 파괴 드로우");
+  kill(g, p1, m);
+  assert.equal(p1.deck.length, d0 - 2, "재파괴 드로우");
+});
+
+test("파괴: 나를 파괴한 적을 탈취(조조) + 환생: 첫 파괴에 탈취 발동, 조조도 환생", () => {
+  const { p1, p2 } = setup(g);
+  const m = place(g, p1, "e23");
+  g.equipItemOnUnit(p1, g.cloneCard("li1"), m);
+  const killer = place(g, p2, "e18");
+  g.damageMinion(p1, m, 99, { killer, killerOwner: p2, fromSpell: false });
+  g.resolveDeath(p1, m);
+  assert.ok(p1.board.includes(m), "조조 환생");
+  assert.ok(p1.board.includes(killer), "죽인 적 탈취");
+  assert.ok(!p2.board.includes(killer));
+});
+
+test("침묵된 성기사 + 소생초(환생): 부활 시 침묵 풀리고 보호 돌아옴, 환생 없음", () => {
+  const { p1 } = setup(g);
+  const m = place(g, p1, "l12");
+  g.silenceMinion(m, p1);
+  assert.ok(m.silenced && !hasShield(m));
+  assert.ok(g.equipItemOnUnit(p1, g.cloneCard("li1"), m));
+  kill(g, p1, m);
+  assert.ok(p1.board.includes(m), "환생함");
+  assert.ok(!m.silenced, "침묵 풀림");
+  assert.ok(hasShield(m), "보호 돌아옴");
+  assert.equal(m.text, "보호");
+  assert.ok(!hasRebirth(m));
+});
+
+test("침묵된 대교 + 환생: 첫 파괴는 침묵 상태라 파괴: 미발동, 부활 후 파괴: 돌아와 재파괴 시 발동", () => {
+  const { p1 } = setup(g);
+  const m = place(g, p1, "a13");
+  g.silenceMinion(m, p1);
+  g.equipItemOnUnit(p1, g.cloneCard("li1"), m);
+  const tokens = () => p1.board.filter(x => x.id === "a40").length;
+  kill(g, p1, m);
+  assert.ok(p1.board.includes(m));
+  assert.equal(tokens(), 0);
+  assert.ok(m.deathrattle);
+  kill(g, p1, m);
+  assert.equal(tokens(), 1);
+});

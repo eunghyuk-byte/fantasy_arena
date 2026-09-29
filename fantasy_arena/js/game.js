@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.347";
+const GAME_VERSION = "0.348";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1527,12 +1527,16 @@ function stripRebirthText(t) {
  * v0.347 (9/29) 규칙: 환생으로 다시 나타날 때 카드 기본(카드 데이터에 인쇄된) 능력은 그대로 다시 가지며 환생만 사라진다.
  * - 인쇄 능력(보호·면역·공격불가 등, 환생 제외)·공격 능력(atkSkill)·인쇄 키워드·인쇄 파괴: 효과를 다시 부여 (보호 소모했어도 다시 생김)
  * - 버프·코인·받은 피해·스펠로 받은 키워드 등 전투 중 변화는 기존 환생 규칙대로 (여기서 건드리지 않음)
- * - 침묵된 유닛은 침묵 유지 (전투 중 변화 — 기존 규칙)
+ * - v0.348 (9/29, 하스스톤 방식): 침묵된 유닛도 환생으로 나타나면 침묵이 풀리고 원래(인쇄) 능력이 돌아온다
  */
 function restorePrintedAbilitiesOnRebirth(m) {
-  if (!m || m.silenced) return;
+  if (!m) return;
   const b = (typeof CARD_MAP !== "undefined" && CARD_MAP[m.id]) || null;
   if (!b || b.type !== "minion") return;
+  if (m.silenced) {
+    m.silenced = false;
+    if (b.battlecry && !m.battlecry) m.battlecry = b.battlecry; // 인쇄 정보 복원만 (환생 시 소환: 은 발동 안 함)
+  }
   const printedAb = stripRebirthAbility(b.ability);
   const curAb = stripRebirthAbility(m.ability);
   if (printedAb) {
@@ -1566,7 +1570,7 @@ function restorePrintedAbilitiesOnRebirth(m) {
 /**
  * Resolve one lethal death. Order (locked):
  * 1) death abilities (유언/복수) fire
- * 2) 환생 → revive at 1 HP (환생 consumed; printed card abilities restored); death triggers again on 2nd death
+ * 2) 환생 → 파괴: effects (deathrattle/성흔/강탈) fire, then revive at 1 HP (환생 consumed; printed card abilities restored; 소환: not re-fired); death triggers again on 2nd death
  * 3) else remove; 강탈 steals the killer unit (not random)
  */
 function resolveDeath(owner, m) {
@@ -1601,6 +1605,12 @@ function resolveDeath(owner, m) {
   }
 
   if (hasRebirth) {
+    // v0.348 (9/29, 하스스톤 방식): 환생해도 이번 파괴의 「파괴:」 효과는 정상 발동 (인쇄·성흔 파괴: 효과 + 강탈).
+    // 환생으로 나타날 때 「소환:」 효과는 다시 발동하지 않는다 (resolveBattlecry 호출 없음).
+    // 파괴 효과 목록은 부활(능력 복원) 전에 잡는다 — 침묵된 유닛의 첫 파괴에는 인쇄 파괴: 효과 없음.
+    // 발동은 부활 처리 뒤에 한다 (applyFx → cleanupBoards 재진입 시 이 유닛이 다시 죽음 처리되지 않도록).
+    const drsR = [].concat(m.deathrattle ? [m.deathrattle] : [], m.deathrattles || []);
+    const stealR = abs.includes("강탈");
     m.keywords = (m.keywords || []).filter(k => k !== "rebirth");
     m.ability = stripRebirthAbility(m.ability);
     // v0.347 (9/29): 카드 기본(인쇄) 능력은 그대로 다시 가진다 — 보호 소모·스펠로 덮인 능력도 복원. 환생만 사라진다.
@@ -1611,6 +1621,11 @@ function resolveDeath(owner, m) {
     m._deathCtx = null;
     delete m._turnRoll; // 환생 = 새 유닛: 이번 턴 코인 결과 없음
     log(`${m.name}이(가) 환생했다 (체력 1)`);
+    drsR.forEach(dfx => applyFx(owner, dfx, null));
+    if (stealR) {
+      const slot = owner.board.findIndex(x => x.uid === m.uid);
+      resolveStealOnDeath(owner, m, ctx, fromSpell, slot >= 0 ? slot + 1 : owner.board.length);
+    }
     return;
   }
 
@@ -1637,21 +1652,24 @@ function resolveDeath(owner, m) {
   const drs = [].concat(m.deathrattle ? [m.deathrattle] : [], m.deathrattles || []);
   drs.forEach(dfx => applyFx(owner, dfx, null));
 
-  if (abs.includes("강탈")) {
-    const killer = ctx.killer;
-    const killerOwner = ctx.killerOwner;
-    if (fromSpell || !killer || !killerOwner) {
-      log(`${m.name} 파괴:탈취 · 훔칠 적 유닛 없음`);
-    } else if (!killerOwner.board.some(x => x.uid === killer.uid) || killer.hp <= 0 || killer.dying) {
-      log(`${m.name} 파괴:탈취 · 죽인 유닛이 이미 없음`);
-    } else if (owner.board.length >= 5) {
-      log(`${m.name} 파괴:탈취 · 전장 가득 참`);
-    } else {
-      killerOwner.board = killerOwner.board.filter(x => x.uid !== killer.uid);
-      const at = (deadSlot >= 0 && deadSlot <= owner.board.length) ? deadSlot : owner.board.length;
-      owner.board.splice(at, 0, killer);
-      log(`${m.name} 파괴: 나를 파괴한 적을 탈취 → ${killer.name}`);
-    }
+  if (abs.includes("강탈")) resolveStealOnDeath(owner, m, ctx, fromSpell, deadSlot);
+}
+
+/** 파괴: 나를 파괴한 적을 탈취 (강탈). at = 넣을 칸 */
+function resolveStealOnDeath(owner, m, ctx, fromSpell, at) {
+  const killer = ctx.killer;
+  const killerOwner = ctx.killerOwner;
+  if (fromSpell || !killer || !killerOwner) {
+    log(`${m.name} 파괴:탈취 · 훔칠 적 유닛 없음`);
+  } else if (!killerOwner.board.some(x => x.uid === killer.uid) || killer.hp <= 0 || killer.dying) {
+    log(`${m.name} 파괴:탈취 · 죽인 유닛이 이미 없음`);
+  } else if (owner.board.length >= 5) {
+    log(`${m.name} 파괴:탈취 · 전장 가득 참`);
+  } else {
+    killerOwner.board = killerOwner.board.filter(x => x.uid !== killer.uid);
+    const pos = (at >= 0 && at <= owner.board.length) ? at : owner.board.length;
+    owner.board.splice(pos, 0, killer);
+    log(`${m.name} 파괴: 나를 파괴한 적을 탈취 → ${killer.name}`);
   }
 }
 
@@ -2878,7 +2896,7 @@ function abiName(ab) { return (typeof ABI_LABEL !== "undefined" && ABI_LABEL[ab]
 const ABI_HELP = {
   "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",
   "복수": "파괴될 때 나를 파괴한 적을 제거합니다.",
-  "환생": "죽으면 체력 1로 한 번 다시 살아납니다. 카드 기본 능력은 그대로 다시 가지며 환생만 사라집니다.",
+  "환생": "죽으면 체력 1로 한 번 다시 살아납니다. 카드 기본 능력은 그대로 다시 가지며 환생만 사라집니다. 다시 나타날 때 소환: 효과는 발동하지 않고, 파괴: 효과는 다시 파괴될 때 또 발동합니다. 환생으로 나타나면 침묵은 풀리고 원래 능력이 돌아옵니다.",
   "강탈": "파괴될 때 나를 파괴한 적을 탈취합니다.",
   "출전": "낼 때 카드 1장을 뽑습니다.",
   "유언": "파괴될 때 카드 1장을 뽑습니다.",
