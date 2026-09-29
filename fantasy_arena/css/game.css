@@ -1106,8 +1106,8 @@
   #matchFx .mfx-overlay {
     position: absolute; left: 50%; top: 50%;
     width: max(100vw, calc(100vh * 16 / 9)); height: auto; aspect-ratio: 16 / 9;
-    /* v0.367: 오버레이만 약 15% 축소(화면 중앙 기준). dim(.mfx-dim)은 전체 화면 그대로. 비디오·Safari WebP 공통 */
-    transform: translate(-50%, -50%) scale(var(--mfx-scale, 0.85));
+    /* v0.368: 오버레이 0.72배 (0.85×0.85, v0.367은 0.85)(화면 중앙 기준). dim(.mfx-dim)은 전체 화면 그대로. 비디오·Safari WebP 공통 */
+    transform: translate(-50%, -50%) scale(var(--mfx-scale, 0.72));
     transform-origin: 50% 50%;
     pointer-events: none; user-select: none;
   }
