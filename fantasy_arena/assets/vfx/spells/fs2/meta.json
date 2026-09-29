@@ -1,24 +1,65 @@
 {
-  "id": "fs2",
-  "name": "화염폭풍",
-  "concept": "중앙 회오리 팔 개수·굽힘이 프레임마다 변형 / 광역은 톱니 링이 찢기며 파편화",
-  "fps": 14,
+ "id": "fs2",
+ "name": "화염폭풍",
+ "concept": "C — Ember Vortex — a swirling golden firestorm vortex fills the field; a small flame meteor falls onto each unit and bursts into a soft fire puff",
+ "durationMs": 950,
+ "card": "유닛 전체 피해 3 (spell.type aoe_pack, all:3 → both sides)",
+ "targetMode": "aoe_all",
+ "playMode": "overlay+perUnit",
+ "playModeNote": "Recommended: play BOTH layers: the full-screen overlay once, plus the per-unit impact on every unit on both boards, each started at its own delay. Either layer also works alone: overlay only = pure full-screen effect (no per-unit positioning); perUnit only = impacts anchored to each unit with the same delays.",
+ "overlay": {
+  "file": "overlay_strip.webp",
+  "layout": "vertical",
+  "frames": 20,
+  "w": 640,
+  "h": 360,
+  "fps": 24,
   "loop": false,
+  "startMs": 0,
+  "durationMs": 833,
+  "fit": "stretch to the full 16:9 stage (1920x1080 at 1080p), top-left 0,0",
+  "blend": "normal alpha (source-over)",
+  "note": "frames are stacked vertically (768/704/640 px wide x 20 = under the 16383 px WebP limit)"
+ },
+ "unitImpact": {
+  "file": "unit_impact_strip.webp",
   "layout": "horizontal",
-  "targetMode": "aoe_enemy",
-  "flight": false,
-  "cast": {
-    "file": "cast_strip.png",
-    "frames": 18,
-    "w": 720,
-    "h": 720
+  "frames": 15,
+  "w": 256,
+  "h": 256,
+  "fps": 30,
+  "loop": false,
+  "durationMs": 500,
+  "anchor": "each unit centre (both sides)",
+  "anchorOffsetYPx@1080p": 0,
+  "displayBoxPx@1080p": 300,
+  "delayFormula": "delayMs = 60 + 0.25*hypot(unitX-960, unitY-540)   (vortex spiralling out from centre)",
+  "delaysMsAtReferenceBoard": {
+   "p1 임프 @(480,719)": 188,
+   "p1 불꽃여우 @(705,719)": 138,
+   "p1 용암술사 @(930,719)": 105,
+   "p1 여령기 @(1155,719)": 126,
+   "p2 드라이어드 @(480,311)": 193,
+   "p2 여포 @(705,311)": 146,
+   "p2 오크 @(930,311)": 118,
+   "p2 스톤골렘 @(1155,311)": 135,
+   "p2 만드라고라 @(1380,311)": 180
   },
-  "aoe": {
-    "file": "aoe_strip.png",
-    "frames": 16,
-    "w": 720,
-    "h": 720
-  },
-  "durationMs": 2428,
-  "anchor": "board-center"
+  "delay": {
+   "baseMs": 60,
+   "perPx@1080p": 0.25,
+   "origin": "center"
+  }
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "loudnessLUFS": -17.8,
+  "truePeakDbTP": -4.4,
+  "source": "synth low brown-noise firestorm rumble with rising low-pass + soft sub thump, layered with the Kling overlay clip's audio low-passed ~0.7 kHz; sfx.mp3 about -17.8 LUFS, <= -3.5 dBTP"
+ },
+ "sequence": "after the centre spell-card showcase fades out: overlay 0-833ms; unit impacts start at their delay (max ~300ms) and last 500ms; everything done by ~800-950ms; sound from 0ms",
+ "type": "aoe",
+ "anchor": "board"
 }

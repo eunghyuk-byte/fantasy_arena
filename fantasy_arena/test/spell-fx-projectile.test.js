@@ -44,3 +44,32 @@ test("SpellFx: 발사체 공용 함수 노출 + 전장 전체 기준 시작점(�
   const sfx = fs.readFileSync(path.join(ROOT, "js/sfx.js"), "utf8");
   assert.match(sfx, /loadUrl, playUrl/);
 });
+
+// v0.354 fs2 화염폭풍: overlay+perUnit 광역 팩 (양쪽 유닛)
+test("fs2 팩: aoe_all · overlay+perUnit · 유닛별 지연식 · 2MB 이하", () => {
+  const P2 = path.join(ROOT, "assets/vfx/spells/fs2");
+  const m = JSON.parse(fs.readFileSync(path.join(P2, "meta.json"), "utf8"));
+  assert.equal(m.id, "fs2");
+  assert.equal(m.targetMode, "aoe_all", "양쪽 유닛 모두 (옛 aoe_enemy 아님)");
+  assert.equal(m.playMode, "overlay+perUnit");
+  assert.equal(m.overlay.layout, "vertical");
+  assert.equal(m.overlay.frames, 20);
+  assert.equal(m.overlay.durationMs, 833);
+  assert.equal(m.unitImpact.durationMs, 500);
+  assert.deepEqual(m.unitImpact.delay, { baseMs: 60, "perPx@1080p": 0.25, origin: "center" });
+  // 기준 보드 지연값이 식과 일치 (임프 @(480,719) → 188ms)
+  const d = 60 + 0.25 * Math.hypot(480 - 960, 719 - 540);
+  assert.equal(Math.round(d), 188);
+  for (const k of ["overlay", "unitImpact", "sfx"]) assert.ok(fs.existsSync(path.join(P2, m[k].file)), m[k].file);
+  const total = fs.readdirSync(P2).reduce((s, f) => s + fs.statSync(path.join(P2, f)).size, 0);
+  assert.ok(total <= 2 * 1024 * 1024, "total " + total);
+  for (const old of ["cast.webp", "cast_strip.png", "aoe.webp", "aoe_strip.png"]) assert.ok(!fs.existsSync(path.join(P2, old)), old);
+});
+
+test("SpellFx: 광역 공용 함수(overlay+perUnit) + 세로 스트립 + 공용 캔버스 러너", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/spell-fx.js"), "utf8");
+  assert.match(src, /async function playOverlayPerUnit\(stage, meta, base, opts\)/);
+  assert.match(src, /function runCanvasFx\(/);
+  assert.match(src, /function aoeUnitPoints\(targetMode, casterIsMe\)/);
+  assert.match(src, /vertical \? createImageBitmap\(full, 0, i \* h, w, h\)/);
+});

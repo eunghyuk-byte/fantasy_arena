@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.353";
+const GAME_VERSION = "0.354";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -773,7 +773,7 @@ async function runSpellCast(p, card, target) {
   // 맹덕신서(copy_enemy_spell): 시전 시점 상대 전장 장착 유닛 수만큼, 해결 뒤 원본 소울 복사본을 상대 핸드에
   const copiers = unitsWithItemFx(opponent(p), "copy_enemy_spell").length;
   try {
-    await playSpellFx(card, target);
+    await playSpellFx(card, target, p);
     resolveSpell(p, card, target);
     for (let i = 0; i < copiers; i++) addCardToHand(opponent(p), card.id, "맹덕신서 복사");
   } finally {
@@ -783,8 +783,11 @@ async function runSpellCast(p, card, target) {
   render();
 }
 
-function playSpellFx(card, target) {
-  if (typeof SpellFx !== "undefined" && SpellFx.play) return SpellFx.play(card, { target });
+function playSpellFx(card, target, caster) {
+  // v0.354: casterIsMe — 광역(aoe_enemy/aoe_ally) 연출이 시전자 기준 보드를 고르게
+  let casterIsMe;
+  try { if (caster) casterIsMe = caster === meView().me; } catch (e) {}
+  if (typeof SpellFx !== "undefined" && SpellFx.play) return SpellFx.play(card, { target, casterIsMe });
   return Promise.resolve();
 }
 function buildSpellFx(stage, kind, card) {

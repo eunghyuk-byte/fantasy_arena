@@ -1,5 +1,5 @@
 {
-  "count": 711,
+  "count": 710,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -2902,29 +2902,24 @@
       "name": "sfx"
     },
     {
-      "path": "assets/vfx/spells/fs2/aoe.webp",
-      "bytes": 2234622,
-      "name": "aoe"
-    },
-    {
-      "path": "assets/vfx/spells/fs2/aoe_strip.png",
-      "bytes": 940459,
-      "name": "aoe_strip"
-    },
-    {
-      "path": "assets/vfx/spells/fs2/cast.webp",
-      "bytes": 2128824,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/spells/fs2/cast_strip.png",
-      "bytes": 1452384,
-      "name": "cast_strip"
-    },
-    {
       "path": "assets/vfx/spells/fs2/meta.json",
-      "bytes": 503,
+      "bytes": 2469,
       "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs2/overlay_strip.webp",
+      "bytes": 1644322,
+      "name": "overlay_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs2/sfx.mp3",
+      "bytes": 16343,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/spells/fs2/unit_impact_strip.webp",
+      "bytes": 220220,
+      "name": "unit_impact_strip"
     },
     {
       "path": "assets/vfx/spells/fs3/cast.webp",

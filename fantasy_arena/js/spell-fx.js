@@ -341,15 +341,22 @@ const SpellFx = (() => {
     });
   }
   // ─────────────────────────────────────────────────────────────────────────
-  // v0.352 Projectile spells (공용) — meta.type === "projectile"
-  // Full-screen canvas over the whole battlefield: missile flies from screen
-  // centre to the target, impact blooms on the target, sfx starts at launch so
-  // its hitAtMs lands with the impact. Values in meta are @1080p and scale with
-  // the viewport. fs2~fs4 only need a meta.json + strips (same schema as fs1).
-  //   meta.projectile: { file, frames, w, h, headX, headY, displayLengthPx@1080p,
-  //                      flightMs, easePow, fps?, from?: "center" }
-  //   meta.impact:     { file, frames, w, h, displayBoxPx@1080p, startMs, durationMs, fps? }
-  //   meta.sfx:        { file, startMs, hitAtMs }
+  // v0.352/v0.354 Meta-driven canvas spell FX (공용) — one full-screen canvas over
+  // the whole battlefield (never clipped to the card), frames sliced once into
+  // ImageBitmaps, sfx preloaded and started on the first drawn frame.
+  // All sizes in meta are @1080p and scale with the viewport.
+  //
+  // A) meta.type === "projectile"  (fs1 화염화살)
+  //   projectile: { file, frames, w, h, headX, displayLengthPx@1080p, flightMs, easePow, fps? }
+  //   impact:     { file, frames, w, h, displayBoxPx@1080p, startMs, durationMs, fps? }
+  // B) meta.playMode "overlay" | "perUnit" | "overlay+perUnit"  (fs2 화염폭풍 · 광역 공용)
+  //   targetMode: "aoe_all" (양쪽) | "aoe_enemy" | "aoe_ally"
+  //   overlay:    { file, layout: "vertical"|"horizontal", frames, w, h, fps, startMs, durationMs }
+  //               → stretched to the full stage (0,0 → viewport)
+  //   unitImpact: { file, layout, frames, w, h, fps, durationMs, displayBoxPx@1080p,
+  //                 anchorOffsetYPx@1080p, delay: { baseMs, perPx@1080p, origin: "center" } }
+  //               → every unit on the targeted boards, each at its own delay
+  //   sfx:        { file, startMs }
   // ─────────────────────────────────────────────────────────────────────────
   const _imgCache = {};
   function loadImg(url) {
@@ -369,17 +376,24 @@ const SpellFx = (() => {
   function isProjectileMeta(meta) {
     return !!(meta && meta.type === "projectile" && meta.projectile && meta.impact);
   }
+  function isOverlayMeta(meta) {
+    const pm = String((meta && meta.playMode) || "");
+    return !!(meta && (pm.indexOf("overlay") >= 0 || pm.indexOf("perUnit") >= 0) && (meta.overlay || meta.unitImpact));
+  }
+  function isCanvasMeta(meta) { return isProjectileMeta(meta) || isOverlayMeta(meta); }
+  function metaSfxUrl(meta, base) { return meta && meta.sfx && meta.sfx.file ? assetUrl(base, meta.sfx.file) : ""; }
   function projectileUrls(meta, base) {
     return {
       proj: assetUrl(base, meta.projectile.file || "projectile_strip.webp"),
       imp: assetUrl(base, meta.impact.file || "impact_strip.webp"),
-      sfx: meta.sfx && meta.sfx.file ? assetUrl(base, meta.sfx.file) : ""
+      sfx: metaSfxUrl(meta, base)
     };
   }
-  // Strip → per-frame ImageBitmaps (decoded once) so the first impact frame never hitches.
+  // Strip → per-frame ImageBitmaps (decoded once) so the first frame never hitches.
   const _frameCache = {};
-  function loadFrames(url, frames, fw, fh) {
-    const key = url + "#" + frames;
+  function loadFrames(url, frames, fw, fh, layout) {
+    const vertical = layout === "vertical";
+    const key = url + "#" + frames + (vertical ? "v" : "h");
     if (_frameCache[key]) return _frameCache[key];
     const n = Math.max(1, frames || 1);
     _frameCache[key] = (async () => {
@@ -389,31 +403,54 @@ const SpellFx = (() => {
           const res = await fetch(url, { cache: "force-cache" });
           if (res.ok) {
             const full = await createImageBitmap(await res.blob());
-            const w = fw || Math.floor(full.width / n), h = fh || full.height;
-            const list = await Promise.all(Array.from({ length: n }, (_, i) => createImageBitmap(full, i * w, 0, w, h)));
+            const w = fw || (vertical ? full.width : Math.floor(full.width / n));
+            const h = fh || (vertical ? Math.floor(full.height / n) : full.height);
+            const list = await Promise.all(Array.from({ length: n }, (_, i) =>
+              vertical ? createImageBitmap(full, 0, i * h, w, h) : createImageBitmap(full, i * w, 0, w, h)));
             try { full.close && full.close(); } catch (e) {}
-            return { list, w, h };
+            return { list, w, h, vertical };
           }
         } catch (e) {}
       }
       // Fallback: draw slices straight from the strip <img>
       const img = await loadImg(url);
       if (!img) { delete _frameCache[key]; return null; }
-      return { img, w: fw || Math.floor(img.naturalWidth / n), h: fh || img.naturalHeight, list: null };
+      return {
+        img, list: null, vertical,
+        w: fw || (vertical ? img.naturalWidth : Math.floor(img.naturalWidth / n)),
+        h: fh || (vertical ? Math.floor(img.naturalHeight / n) : img.naturalHeight)
+      };
     })();
     return _frameCache[key];
   }
   function drawFrame(ctx, fr, i, dx, dy, dw, dh) {
     if (fr.list) ctx.drawImage(fr.list[i], dx, dy, dw, dh);
+    else if (fr.vertical) ctx.drawImage(fr.img, 0, i * fr.h, fr.w, fr.h, dx, dy, dw, dh);
     else ctx.drawImage(fr.img, i * fr.w, 0, fr.w, fr.h, dx, dy, dw, dh);
+  }
+  function loadSfx(url) {
+    return (url && typeof Sfx !== "undefined" && Sfx.loadUrl) ? Sfx.loadUrl(url) : Promise.resolve(null);
   }
   /** Warm frames + decoded audio so launch is instant (call during card showcase). */
   function preloadProjectile(meta, base) {
     if (!isProjectileMeta(meta)) return Promise.resolve(null);
     const u = projectileUrls(meta, base);
     const P = meta.projectile, I = meta.impact;
-    const snd = (u.sfx && typeof Sfx !== "undefined" && Sfx.loadUrl) ? Sfx.loadUrl(u.sfx) : Promise.resolve(null);
-    return Promise.all([loadFrames(u.proj, P.frames, P.w, P.h), loadFrames(u.imp, I.frames, I.w, I.h), snd]);
+    return Promise.all([loadFrames(u.proj, P.frames, P.w, P.h, P.layout), loadFrames(u.imp, I.frames, I.w, I.h, I.layout), loadSfx(u.sfx)]);
+  }
+  function preloadOverlay(meta, base) {
+    if (!isOverlayMeta(meta)) return Promise.resolve(null);
+    const O = meta.overlay, U = meta.unitImpact;
+    return Promise.all([
+      O ? loadFrames(assetUrl(base, O.file), O.frames, O.w, O.h, O.layout) : Promise.resolve(null),
+      U ? loadFrames(assetUrl(base, U.file), U.frames, U.w, U.h, U.layout) : Promise.resolve(null),
+      loadSfx(metaSfxUrl(meta, base))
+    ]);
+  }
+  function preloadMetaFx(meta, base) {
+    if (isProjectileMeta(meta)) return preloadProjectile(meta, base);
+    if (isOverlayMeta(meta)) return preloadOverlay(meta, base);
+    return Promise.resolve(null);
   }
   function fxScale() {
     const w = window.innerWidth || 1920, h = window.innerHeight || 1080;
@@ -421,6 +458,49 @@ const SpellFx = (() => {
   }
   function screenCenter() {
     return { x: (window.innerWidth || 1920) * 0.5, y: (window.innerHeight || 1080) * 0.5 };
+  }
+  /**
+   * Shared timeline runner: full-viewport canvas in `stage`, rAF loop, sfx on the first
+   * drawn frame. draw(ctx, tMs, cw, ch) paints one frame. Resolves true when t >= endMs.
+   */
+  function runCanvasFx(stage, endMs, sfxUrl, sfxStartMs, draw, opts) {
+    opts = opts || {};
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const cw = window.innerWidth || 1920, ch = window.innerHeight || 1080;
+    const cv = document.createElement("canvas");
+    cv.className = "fx-canvas-pack";
+    cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+    cv.style.cssText = "position:absolute;left:0;top:0;width:" + cw + "px;height:" + ch + "px;pointer-events:none;z-index:5;";
+    stage.appendChild(cv);
+    const ctx = cv.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    return new Promise(resolve => {
+      let t0 = 0, done = false;
+      const finish = () => {
+        if (done) return; done = true;
+        try { cv.remove(); } catch (e) {}
+        resolve(true);
+      };
+      const step = (now) => {
+        if (done) return;
+        if (!t0) {
+          t0 = now;
+          if (opts.sound !== false && sfxUrl && typeof Sfx !== "undefined" && Sfx.playUrl) {
+            try { Sfx.playUrl(sfxUrl, { when: Math.max(0, sfxStartMs || 0) / 1000, duckMs: endMs }); } catch (e) {}
+          }
+        }
+        const t = now - t0;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, cw, ch);
+        try { draw(ctx, t, cw, ch); } catch (e) {}
+        if (t >= endMs) { finish(); return; }
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      // Safety: never hang the turn if rAF is throttled (background tab)
+      setTimeout(finish, endMs + 1500);
+    });
   }
   /**
    * Generic projectile spell player.
@@ -459,71 +539,113 @@ const SpellFx = (() => {
     const iDur = I.durationMs || 600;
     const iFps = I.fps || meta.fps || 30;
     const endMs = iStart + iDur;
-
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const cw = window.innerWidth || 1920, ch = window.innerHeight || 1080;
-    const cv = document.createElement("canvas");
-    cv.className = "fx-proj-canvas";
-    cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
-    cv.style.cssText = "position:absolute;left:0;top:0;width:" + cw + "px;height:" + ch + "px;pointer-events:none;z-index:5;";
-    stage.appendChild(cv);
-    const ctx = cv.getContext("2d");
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-
-    return new Promise(resolve => {
-      let t0 = 0, hitFired = false, done = false;
-      const finish = () => {
-        if (done) return; done = true;
-        try { cv.remove(); } catch (e) {}
-        resolve(true);
-      };
-      const draw = (now) => {
-        if (done) return;
-        if (!t0) {
-          t0 = now;
-          // Sound on the same tick as the first projectile frame → hitAtMs lines up with impact.
-          if (opts.sound !== false && u.sfx && typeof Sfx !== "undefined" && Sfx.playUrl) {
-            try { Sfx.playUrl(u.sfx, { when: Math.max(0, (S.startMs || 0)) / 1000, duckMs: endMs }); } catch (e) {}
-          }
+    let hitFired = false;
+    return runCanvasFx(stage, endMs, u.sfx, S.startMs, (ctx, t) => {
+      // projectile: accelerate into target (head reaches target centre at flightMs)
+      if (t < flightMs + 50) {
+        const uu = Math.min(1, t / flightMs);
+        const trav = dist * Math.pow(uu, easePow);
+        const cx = from.x + cos * (trav - headOff);
+        const cy = from.y + sin * (trav - headOff);
+        const grow = 0.55 + 0.45 * Math.min(1, t / 120);
+        const op = Math.min(1, t / 60) * (1 - Math.max(0, (t - flightMs) / 50));
+        const fi = Math.floor(t * pFps / 1000) % pFrames;
+        if (op > 0) {
+          ctx.save();
+          ctx.globalAlpha = op;
+          ctx.translate(cx, cy);
+          ctx.rotate(ang);
+          ctx.scale(grow, grow);
+          drawFrame(ctx, projFr, fi, -L / 2, -Hh / 2, L, Hh);
+          ctx.restore();
         }
-        const t = now - t0;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.clearRect(0, 0, cw, ch);
-        // projectile: accelerate into target (head reaches target centre at flightMs)
-        if (t < flightMs + 50) {
-          const uu = Math.min(1, t / flightMs);
-          const trav = dist * Math.pow(uu, easePow);
-          const cx = from.x + cos * (trav - headOff);
-          const cy = from.y + sin * (trav - headOff);
-          const grow = 0.55 + 0.45 * Math.min(1, t / 120);
-          const op = Math.min(1, t / 60) * (1 - Math.max(0, (t - flightMs) / 50));
-          const fi = Math.floor(t * pFps / 1000) % pFrames;
-          if (op > 0) {
-            ctx.save();
-            ctx.globalAlpha = op;
-            ctx.translate(cx, cy);
-            ctx.rotate(ang);
-            ctx.scale(grow, grow);
-            drawFrame(ctx, projFr, fi, -L / 2, -Hh / 2, L, Hh);
-            ctx.restore();
-          }
-        }
-        // impact bloom on the target
-        const ti = t - iStart;
-        if (ti >= 0 && ti < iDur) {
-          if (!hitFired) { hitFired = true; try { opts.onHit && opts.onHit(); } catch (e) {} }
-          const fi = Math.min(iFrames - 1, Math.floor(ti * iFps / 1000));
-          const bw = box, bh = box * iH / iW;
-          drawFrame(ctx, impFr, fi, to.x - bw / 2, to.y - bh / 2, bw, bh);
-        }
-        if (t >= endMs) { finish(); return; }
-        requestAnimationFrame(draw);
-      };
-      requestAnimationFrame(draw);
-      // Safety: never hang the turn if rAF is throttled (background tab)
-      setTimeout(finish, endMs + 1500);
+      }
+      // impact bloom on the target
+      const ti = t - iStart;
+      if (ti >= 0 && ti < iDur) {
+        if (!hitFired) { hitFired = true; try { opts.onHit && opts.onHit(); } catch (e) {} }
+        const fi = Math.min(iFrames - 1, Math.floor(ti * iFps / 1000));
+        const bw = box, bh = box * iH / iW;
+        drawFrame(ctx, impFr, fi, to.x - bw / 2, to.y - bh / 2, bw, bh);
+      }
+    }, opts);
+  }
+  /** Unit centres (client px) for an AOE targetMode. casterIsMe decides which board is "enemy". */
+  function aoeUnitPoints(targetMode, casterIsMe) {
+    const my = document.getElementById("myBoard"), opp = document.getElementById("oppBoard");
+    const enemyB = casterIsMe === false ? my : opp, allyB = casterIsMe === false ? opp : my;
+    const boards = targetMode === "aoe_enemy" ? [enemyB] : targetMode === "aoe_ally" ? [allyB] : [opp, my];
+    const pts = [];
+    boards.forEach(b => {
+      if (!b) return;
+      b.querySelectorAll(".minion[data-uid]").forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (r.width < 4 || r.height < 4) return;
+        pts.push({ uid: el.getAttribute("data-uid"), x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      });
     });
+    return pts;
+  }
+  /** Per-unit start delay (ms). meta delay distance is @1080p px from the stage centre. */
+  function unitDelayMs(U, pt, k) {
+    const d = (U && U.delay) || {};
+    const base = d.baseMs != null ? d.baseMs : 0;
+    const per = d["perPx@1080p"] != null ? d["perPx@1080p"] : 0;
+    const c = screenCenter();
+    return base + per * Math.hypot(pt.x - c.x, pt.y - c.y) / (k || 1);
+  }
+  /**
+   * Generic full-screen overlay + per-unit impact player (AOE spells).
+   * @param opts { casterIsMe?: bool, points?: [{x,y}], sound?: bool }
+   */
+  async function playOverlayPerUnit(stage, meta, base, opts) {
+    opts = opts || {};
+    if (!stage || !isOverlayMeta(meta)) return false;
+    const pm = String(meta.playMode || "");
+    const [ovFr, unFr] = await preloadOverlay(meta, base);
+    const O = pm.indexOf("overlay") >= 0 && ovFr ? meta.overlay : null;
+    const U = pm.indexOf("perUnit") >= 0 && unFr ? meta.unitImpact : null;
+    if (!O && !U) return false;
+    const k = fxScale();
+    const S = meta.sfx || {};
+    const oStart = O ? (O.startMs || 0) : 0;
+    const oDur = O ? (O.durationMs || Math.round((O.frames || 1) * 1000 / (O.fps || 24))) : 0;
+    const oFps = O ? (O.fps || meta.fps || 24) : 24;
+    const oN = O ? Math.max(1, O.frames || 1) : 1;
+    const hits = [];
+    let uDur = 0, uFps = 30, uN = 1, uBox = 0, uOffY = 0;
+    if (U) {
+      uDur = U.durationMs || 500;
+      uFps = U.fps || meta.fps || 30;
+      uN = Math.max(1, U.frames || 1);
+      uBox = (U["displayBoxPx@1080p"] || 300) * k;
+      uOffY = (U["anchorOffsetYPx@1080p"] || 0) * k;
+      (opts.points || aoeUnitPoints(meta.targetMode || "aoe_all", opts.casterIsMe)).forEach(pt => {
+        hits.push({ x: pt.x, y: pt.y + uOffY, at: unitDelayMs(U, pt, k) });
+      });
+    }
+    const endMs = Math.max(O ? oStart + oDur : 0, hits.reduce((m, h) => Math.max(m, h.at + uDur), 0));
+    return runCanvasFx(stage, endMs, metaSfxUrl(meta, base), S.startMs, (ctx, t, cw, ch) => {
+      if (O) {
+        const to = t - oStart;
+        if (to >= 0 && to < oDur) drawFrame(ctx, ovFr, Math.min(oN - 1, Math.floor(to * oFps / 1000)), 0, 0, cw, ch);
+      }
+      if (U) {
+        const bw = uBox, bh = uBox * unFr.h / unFr.w;
+        hits.forEach(h => {
+          const ti = t - h.at;
+          if (ti < 0 || ti >= uDur) return;
+          drawFrame(ctx, unFr, Math.min(uN - 1, Math.floor(ti * uFps / 1000)), h.x - bw / 2, h.y - bh / 2, bw, bh);
+        });
+      }
+    }, opts);
+  }
+  /** Dispatch a meta-driven canvas pack. */
+  function playMetaFx(stage, meta, base, opts) {
+    opts = opts || {};
+    if (isProjectileMeta(meta)) return playProjectile(stage, meta, base, opts.to, opts);
+    if (isOverlayMeta(meta)) return playOverlayPerUnit(stage, meta, base, opts);
+    return Promise.resolve(false);
   }
 
   async function playAssetPack(card, layer, stage, opts) {
@@ -531,14 +653,15 @@ const SpellFx = (() => {
     const target = opts.target || null;
     const meta = await loadSpellMeta(card && card.id);
     if (!meta) return false;
-    if (isProjectileMeta(meta)) {
+    if (isCanvasMeta(meta)) {
       const fxCardP = document.getElementById("fxCard");
       if (fxCardP) { fxCardP.classList.add("out"); fxCardP.style.opacity = "0"; }
       const labP = document.getElementById("fxName");
       if (labP) { labP.textContent = ""; labP.style.opacity = "0"; }
       layer.classList.add("pack-play");
-      const toPt = resolveFxAnchor(Object.assign({ targetMode: "unit" }, meta), target);
-      const ok = await playProjectile(stage, meta, ASSET_BASE + (meta.id || card.id) + "/", toPt, {});
+      const mOpts = { casterIsMe: opts.casterIsMe };
+      if (isProjectileMeta(meta)) mOpts.to = resolveFxAnchor(Object.assign({ targetMode: "unit" }, meta), target);
+      const ok = await playMetaFx(stage, meta, ASSET_BASE + (meta.id || card.id) + "/", mOpts);
       if (fxCardP) fxCardP.style.opacity = "";
       if (ok) return true;
     }
@@ -994,7 +1117,7 @@ const SpellFx = (() => {
       const low = lowSpec();
       // v0.352: fetch pack meta + warm projectile assets during the card showcase
       loadSpellMeta(card && card.id).then(m => {
-        if (isProjectileMeta(m)) preloadProjectile(m, ASSET_BASE + (m.id || card.id) + "/");
+        if (isCanvasMeta(m)) preloadMetaFx(m, ASSET_BASE + (m.id || card.id) + "/");
         return m;
       }, () => null);
       try {
@@ -1171,6 +1294,6 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts };
 })();
 window.SpellFx = SpellFx;
