@@ -1,5 +1,5 @@
 {
-  "count": 700,
+  "count": 748,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -1895,6 +1895,246 @@
       "path": "assets/manifest.json",
       "bytes": 27106,
       "name": "manifest"
+    },
+    {
+      "path": "assets/vfx/coin_duel/README_B2.md",
+      "bytes": 3919,
+      "name": "README_B2"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins.json",
+      "bytes": 3324,
+      "name": "coins"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_late/coin.webm",
+      "bytes": 171698,
+      "name": "coin"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_late/sheet.webp",
+      "bytes": 210980,
+      "name": "sheet"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_late/timing.json",
+      "bytes": 857,
+      "name": "timing"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v1/coin.webm",
+      "bytes": 147951,
+      "name": "coin"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v1/sheet.webp",
+      "bytes": 174584,
+      "name": "sheet"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v1/timing.json",
+      "bytes": 858,
+      "name": "timing"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v2/coin.webm",
+      "bytes": 151506,
+      "name": "coin"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v2/sheet.webp",
+      "bytes": 175506,
+      "name": "sheet"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v2/timing.json",
+      "bytes": 856,
+      "name": "timing"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v3/coin.webm",
+      "bytes": 148709,
+      "name": "coin"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v3/sheet.webp",
+      "bytes": 166644,
+      "name": "sheet"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/heads_v3/timing.json",
+      "bytes": 854,
+      "name": "timing"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_late/coin.webm",
+      "bytes": 166568,
+      "name": "coin"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_late/sheet.webp",
+      "bytes": 203982,
+      "name": "sheet"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_late/timing.json",
+      "bytes": 857,
+      "name": "timing"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v1/coin.webm",
+      "bytes": 147164,
+      "name": "coin"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v1/sheet.webp",
+      "bytes": 169156,
+      "name": "sheet"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v1/timing.json",
+      "bytes": 858,
+      "name": "timing"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v2/coin.webm",
+      "bytes": 144828,
+      "name": "coin"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v2/sheet.webp",
+      "bytes": 169670,
+      "name": "sheet"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v2/timing.json",
+      "bytes": 856,
+      "name": "timing"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v3/coin.webm",
+      "bytes": 141921,
+      "name": "coin"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v3/sheet.webp",
+      "bytes": 161060,
+      "name": "sheet"
+    },
+    {
+      "path": "assets/vfx/coin_duel/coins/tails_v3/timing.json",
+      "bytes": 854,
+      "name": "timing"
+    },
+    {
+      "path": "assets/vfx/coin_duel/meta.json",
+      "bytes": 5409,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/SOUND_SOURCES_v2.txt",
+      "bytes": 1788,
+      "name": "SOUND_SOURCES_v2"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact2_1.mp3",
+      "bytes": 3500,
+      "name": "coin_impact2_1"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact2_1.ogg",
+      "bytes": 6081,
+      "name": "coin_impact2_1"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact2_2.mp3",
+      "bytes": 3500,
+      "name": "coin_impact2_2"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact2_2.ogg",
+      "bytes": 6084,
+      "name": "coin_impact2_2"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact2_3.mp3",
+      "bytes": 3212,
+      "name": "coin_impact2_3"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact2_3.ogg",
+      "bytes": 6055,
+      "name": "coin_impact2_3"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact_1.mp3",
+      "bytes": 2348,
+      "name": "coin_impact_1"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact_1.ogg",
+      "bytes": 5552,
+      "name": "coin_impact_1"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact_2.mp3",
+      "bytes": 2348,
+      "name": "coin_impact_2"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact_2.ogg",
+      "bytes": 5514,
+      "name": "coin_impact_2"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact_3.mp3",
+      "bytes": 2348,
+      "name": "coin_impact_3"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_impact_3.ogg",
+      "bytes": 5482,
+      "name": "coin_impact_3"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_rattle.mp3",
+      "bytes": 5228,
+      "name": "coin_rattle"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_rattle.ogg",
+      "bytes": 8569,
+      "name": "coin_rattle"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_rattle_late.mp3",
+      "bytes": 7820,
+      "name": "coin_rattle_late"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_rattle_late.ogg",
+      "bytes": 9993,
+      "name": "coin_rattle_late"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_slowmo.mp3",
+      "bytes": 7820,
+      "name": "coin_slowmo"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_slowmo.ogg",
+      "bytes": 7893,
+      "name": "coin_slowmo"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_slowmo_late.mp3",
+      "bytes": 9260,
+      "name": "coin_slowmo_late"
+    },
+    {
+      "path": "assets/vfx/coin_duel/sfx/coin_slowmo_late.ogg",
+      "bytes": 9177,
+      "name": "coin_slowmo_late"
     },
     {
       "path": "assets/vfx/coins/coin_burst_bad/cast.webp",

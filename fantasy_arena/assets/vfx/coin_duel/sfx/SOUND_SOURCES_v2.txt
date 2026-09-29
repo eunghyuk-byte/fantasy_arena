@@ -1,0 +1,17 @@
+Coin SFX sources (all real recordings, licence: Creative Commons 0 / Public Domain Dedication 1.0 — verified on each freesound.org page on 2026-09-29).
+Files used were the freesound HQ previews (ogg), stored in v2/work/snd/fs_<id>.ogg.
+Processing: 45 Hz high-pass, one-shot slicing at the detected onsets, -2 to -4 semitone varispeed (heavier/larger coin), +2..5 dB low shelf @160 Hz, slight high taming, per-coin ±0.6 st / ±1.2 dB variation, staggered placement from sprite timing, mastered to -17.5 LUFS integrated / <= -3 dBTP.
+
+ID      Title                                                    Author              Used for
+334939  "Coin Dropped:Bounced on Wooden Desk (Longer Sound)"     dominictreis        main heavy impact + the two bounce hits (all concepts); slowed ring in B's slow-mo
+        https://freesound.org/people/dominictreis/sounds/334939/
+854261  "Caida Moneda Girando - Spinning Coin Drop"              Diim_1              settle rattle (Euler-disk wobble tail); B first hit
+        https://freesound.org/people/Diim_1/sounds/854261/
+818514  "Coin_Spin_Drop_01"                                      artisan187          longer spin/wobble for the 'late' coin
+        https://freesound.org/people/artisan187/sounds/818514/
+235483  "coin drop_wood floor_1"                                 ekfink              low wood thump layer for C's slam
+        https://freesound.org/people/ekfink/sounds/235483/
+211447  "Drop Coins 1"                                           FlatHill            bright ring for C's glint (very low level)
+        https://freesound.org/people/FlatHill/sounds/211447/
+(Other CC0 candidates downloaded for comparison but not used: 324760, 391775, 533770/71/74/75/77, 575577, 776504/5, 854248/9.)
+No sonilo / mirelo / Higgsfield audio was used.

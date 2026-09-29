@@ -1,0 +1,149 @@
+{
+ "id": "coin_duel_v3_B2",
+ "version": "3-B2",
+ "fps": 30,
+ "description": "Coin duel concept B v3, layout B2: smaller coins, both duel cards inside the board frame on its inner left side. Coin assets, sound, timing and dim are exactly v3/B.",
+ "dim": {
+  "rgb": [
+   8,
+   6,
+   10
+  ],
+  "alpha": 0.55,
+  "fade_in_start_s": 0.0,
+  "fade_in_s": 0.12,
+  "fade_in_ease": "linear",
+  "fade_out": "starts at outro_start = last_settle + result_hold_s, lasts outro_fade_s, linear to 0",
+  "note": "draw the dim above the board and below the two duel cards and the coins"
+ },
+ "layout": {
+  "unit": "card_h = on-screen height of each duel card; H_in / W_in = board inner rect height / width",
+  "cards": {
+   "card_h_x_H_in": 0.432,
+   "card_w": "card_h*2/3",
+   "margin_x_H_in": 0.045,
+   "top_card": "x = inner.x0 + margin, y = inner.y0 + margin",
+   "bottom_card": "x = inner.x0 + margin, y = inner.y1 - margin - card_h",
+   "gap_between_cards": "H_in - 2*margin - 2*card_h (= 0.046*H_in)",
+   "as_fraction_of_inner_rect": {
+    "top": [
+     0.0318,
+     0.0449,
+     0.2045,
+     0.4321
+    ],
+    "bottom": [
+     0.0318,
+     0.523,
+     0.2045,
+     0.4321
+    ],
+    "format": "[x, y, w, h] relative to inner rect origin/size"
+   },
+   "at_1080p": {
+    "top": {
+     "x": 364,
+     "y": 98,
+     "w": 257,
+     "h": 385
+    },
+    "bottom": {
+     "x": 364,
+     "y": 524,
+     "w": 257,
+     "h": 385
+    }
+   }
+  },
+  "coins": {
+   "coin_diameter_x_card_h": 0.3,
+   "coin_pitch_x_card_h": 0.36,
+   "first_coin_offset_x_card_h": 0.24,
+   "first_coin_offset_note": "first coin centre x = card right edge + 0.24*card_h (0.09*card_h gap + radius 0.15); next coins +pitch to the right",
+   "row_y": "coin centre y = card centre y",
+   "sprite_rest_diameter_px": 160,
+   "sprite_scale": "scale = (0.30*card_h)/160; place each canvas so its timing.json anchor (scaled) sits on the coin centre",
+   "draw_order": "coins still in the air (t < impact) above settled/bouncing coins",
+   "at_1080p": {
+    "card_h": 385,
+    "coin_d": 115.5,
+    "pitch": 138.6,
+    "sprite_scale": 0.7219,
+    "first_coin_center_x": 713.4,
+    "row_y_top": 290.5,
+    "row_y_bottom": 716.5
+   }
+  },
+  "fit_rule": {
+   "rule": "card.x + card_h*(2/3 + 0.24 + (n-1)*0.36 + 0.33) <= safe_right  for n = 5  (0.33 = half the scaled 352 px sprite canvas = max in-flight coin + shadow)",
+   "equivalently": "card_h <= (safe_right - card.x) / 2.677",
+   "vertical": "card centre y -/+ 0.33*card_h stays inside the inner rect (always true with these card boxes)",
+   "check_1080p": {
+    "n5_right_extent_px": 1394.5,
+    "safe_right_px": 1540,
+    "ok": true,
+    "rest_coin_right_edge_n5_px": 1325.2,
+    "top_row_min_y_px": 163.5,
+    "bottom_row_max_y_px": 843.5
+   },
+   "if_it_fails": "shrink card_h (or pitch down to 0.33*card_h) until the rule holds"
+  },
+  "preview_example_1080p": "see at_1080p values above (previews use exactly these)"
+ },
+ "timing": {
+  "first_start_s": 0.04,
+  "stagger_s": 0.03,
+  "jitter_s": 0.012,
+  "stagger_note": "coin i (0-based, left to right) of EACH row starts at first_start_s + i*stagger_s (+0..jitter); both rows start together",
+  "result_hold_s": 0.28,
+  "outro_fade_s": 0.16,
+  "total": "last_settle + result_hold_s + outro_fade_s (5v5 ~= 2.0 s)",
+  "late_coin_rule": "exactly one coin uses the 'late' variant: in the row with more coins (bottom on a tie); index n-1 if n<3, n-1 if n==3, n//2+1 if n>3",
+  "hold_last_frame": true
+ },
+ "variant_cycle": [
+  "v1",
+  "v2",
+  "v3"
+ ],
+ "variant_rule": "non-late coins: variant_cycle[(i + (row=='top')) % 3] (any choice works; heads/tails of the same variant have identical timing)",
+ "sound": {
+  "files": "sfx/*.ogg, see sfx/sfx_index.json",
+  "per_coin_gain_db_k": -6.0,
+  "per_coin_gain_note": "gain for every one-shot of a coin = -6*log10(total coins) dB + random \u00b1gain_jitter_db",
+  "gain_jitter_db": 1.2,
+  "pitch_jitter_semitones": 0.6,
+  "pitch_note": "playbackRate = 2^(st/12), one random st per coin",
+  "triggers": {
+   "impact": "coin_impact_{1..3} (random)",
+   "slowmo": "coin_slowmo (late coin: coin_slowmo_late) at slowmo.t + 0.01",
+   "impact2": "coin_impact2_{1..3} (random)",
+   "rattle": "coin_rattle (late coin: coin_rattle_late)"
+  },
+  "max_extra_rattles": 2,
+  "rattle_rule": "the late coin always rattles; with >2 coins only 2 random others also rattle",
+  "ref_mix_lufs": -17.85,
+  "ref_mix_tp_ceiling_db": -3.3,
+  "bus_note": "reference previews are mastered to -17.85 LUFS (pyloudnorm; ffmpeg ebur128 reads -17.5..-18) / <= -3 dBTP; in game, a light limiter on the coin bus is recommended (the raw sum peaks are listed in the preview *_layout.json)"
+ },
+ "assets_index": "index.json",
+ "board_frame": {
+  "note": "inner edge of the battlefield board frame (parchment area), measured on the 1920x1080 battlefield screenshot",
+  "inner_rect_1080p": [
+   324,
+   58,
+   1257,
+   891
+  ],
+  "inner_rect_x0y0x1y1": [
+   324,
+   58,
+   1581,
+   949
+  ],
+  "corner_ornaments": "gold corner pieces curve ~70 px into the parchment at each corner (rounded parchment corners, radius ~70 px); the 0.045*H_in margin keeps card corners clear",
+  "ui_inside_or_touching": "mana badges top-right (x1416-1560, y12-75) and bottom-right (x1416-1565, y935-1000); end-turn button right edge (x>=1560, y490-560); hand cards top/bottom centre (y<130 and y>860)",
+  "safe_right_1080p": 1540,
+  "safe_right_fraction_of_inner": 0.9674
+ }
+}

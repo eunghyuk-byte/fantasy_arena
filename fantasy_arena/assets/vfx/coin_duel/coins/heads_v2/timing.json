@@ -1,0 +1,51 @@
+{
+ "outcome": "heads",
+ "variant": "v2",
+ "seed": 302,
+ "fps": 30,
+ "frames": 37,
+ "canvas": [
+  352,
+  352
+ ],
+ "anchor": [
+  176,
+  176
+ ],
+ "coin_rest_px": 160,
+ "t_settle": 1.107,
+ "events": [
+  [
+   "impact",
+   0.2949,
+   1.0
+  ],
+  [
+   "slowmo",
+   0.2949,
+   0.5022
+  ],
+  [
+   "impact2",
+   0.7972,
+   0.8
+  ],
+  [
+   "rattle",
+   0.8572,
+   0.2498
+  ],
+  [
+   "settle",
+   1.107,
+   0.35
+  ]
+ ],
+ "duration_s": 1.2333,
+ "hold_last_frame": true,
+ "files": {
+  "webm": "coin.webm"
+ },
+ "anchor_note": "coin rest centre inside the canvas (px); place this point on the coin slot",
+ "notes": "frame k shows t=k/fps after this coin starts; hold the last frame after the clip ends. events: [name, t_s, value]; impact=first hit (value=rel. gain), slowmo=[start, real duration], impact2=second hit, rattle=[start, duration], settle=face readable/final"
+}

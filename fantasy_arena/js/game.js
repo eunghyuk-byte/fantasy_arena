@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.368";
+const GAME_VERSION = "0.369";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -294,6 +294,8 @@ function startGame(vsAI) {
       // v0.365: 승리·패배 연출도 미리 캐시 (첫 턴 연출이 끝난 뒤, 부하 분산)
       setTimeout(() => {
         try { if (state === matchState && SpellFx.preloadMatch) { SpellFx.preloadMatch("victory"); SpellFx.preloadMatch("defeat"); } } catch (e) {}
+        // v0.369: 코인 듀얼 에셋(코인 8종·사운드)도 미리 로드
+        try { if (state === matchState && typeof CoinDuel !== "undefined") CoinDuel.preload(); } catch (e) {}
       }, 2500);
     })();
   } catch (e) {}
@@ -1962,9 +1964,35 @@ function rollCoins(mod, unit) {
  *  내 턴·AI 턴 모두 적용. 끄려면 false (예전처럼 자동 진행). */
 const BETA_COIN_CONFIRM = true;
 window.BETA_COIN_CONFIRM = BETA_COIN_CONFIRM;
-function showCoinResult(title, rows, done) {
+function showCoinResult(title, rows, done, duel) {
   rows = (rows || []).filter(r => r && r.flips && r.flips.length);
   if (!rows.length) { if (done) done(); return; }
+  const confirmOnly = (typeof window !== "undefined" && window.BETA_COIN_CONFIRM != null) ? !!window.BETA_COIN_CONFIRM : BETA_COIN_CONFIRM;
+  // v0.369: 코인 듀얼 v3 B2 — 전장 위 오버레이 (위=상대 카드, 아래=내 카드, 각 카드 오른쪽에 그 카드의 코인)
+  if (duel && typeof CoinDuel !== "undefined" && CoinDuel.play) {
+    let fired = false;
+    const finish = () => { if (fired) return; fired = true; if (done) done(); };
+    const fallback = () => { if (fired) return; showCoinResultLegacy(title, rows, finish, confirmOnly); };
+    try {
+      let me = null;
+      try { me = meView().me; } catch (e) { me = state && state.p1; }
+      const atkMine = duel.attackerOwner === me;
+      const rowOf = u => rows.find(r => r.unit === u) || null;
+      const side = (u, hpPre) => {
+        if (!u) return null;
+        const r = rowOf(u);
+        return { unit: u, hpPre, flips: r ? r.flips.slice() : [], detail: r ? (r.detail || "") : "" };
+      };
+      const A = side(duel.attacker, duel.aHpPre), D = side(duel.defender, duel.dHpPre);
+      CoinDuel.play({ top: atkMine ? D : A, bottom: atkMine ? A : D, confirm: confirmOnly })
+        .then(ok => { if (ok) finish(); else fallback(); }, fallback);
+    } catch (e) { fallback(); }
+    return;
+  }
+  showCoinResultLegacy(title, rows, done, confirmOnly);
+}
+/** v0.351~v0.368 코인 창 (코인 듀얼을 못 쓸 때 대체) */
+function showCoinResultLegacy(title, rows, done, confirmOnly) {
   const layer = document.getElementById("coinLayer");
   const box = document.getElementById("coinBox");
   const gold = (typeof COIN_GOLD !== "undefined" && COIN_GOLD) ? COIN_GOLD : "assets/img/coins/gold.png";
@@ -2027,7 +2055,6 @@ function showCoinResult(title, rows, done) {
   if (btn) btn.onclick = finishCoin;
   // Auto-advance so AI / end-turn combat never softlocks waiting for OK
   // v0.351: BETA_COIN_CONFIRM(window 값 우선)이면 자동 진행 없음 — OK를 눌러야 진행
-  const confirmOnly = (typeof window !== "undefined" && window.BETA_COIN_CONFIRM != null) ? !!window.BETA_COIN_CONFIRM : BETA_COIN_CONFIRM;
   if (!confirmOnly) {
     const autoMs = Math.max(900, 520 + flipsN * 300 + 380);
     setTimeout(finishCoin, autoMs);

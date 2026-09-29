@@ -1103,6 +1103,16 @@
     pointer-events: none; will-change: opacity;
   }
   #matchFx .mfx-stage { position: absolute; inset: 0; pointer-events: none; }
+  /* v0.369 코인 듀얼 v3 B2: 전장 위 오버레이 (dim < 카드 < 코인), 클릭 통과 (베타 OK 버튼만 클릭) */
+  #coinDuel { position: fixed; inset: 0; z-index: 70; pointer-events: none; overflow: hidden; }
+  #coinDuel:empty { display: none; }
+  #coinDuel .cd-dim { position: absolute; inset: 0; opacity: 0; pointer-events: none; z-index: 0; }
+  #coinDuel .cd-card { position: absolute; z-index: 1; opacity: 0; pointer-events: none; }
+  #coinDuel .cd-card img { width: 100%; height: 100%; display: block; object-fit: contain; border-radius: 6%; filter: drop-shadow(0 6px 14px rgba(0,0,0,.55)); }
+  #coinDuel .cd-card-stub { width: 100%; height: 100%; border-radius: 6%; background: #2a2016; color: #f0d9a8; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  #coinDuel .cd-coin { position: absolute; pointer-events: none; object-fit: fill; background-color: transparent; }
+  #coinDuel .cd-detail { position: absolute; z-index: 4; color: #f3e2b8; text-shadow: 0 1px 3px #000; white-space: nowrap; pointer-events: none; }
+  #coinDuel .cd-ok { position: absolute; z-index: 5; pointer-events: auto; min-width: 120px; transform: translateY(-50%); margin: 0; }
   #matchFx .mfx-overlay {
     position: absolute; left: 50%; top: 50%;
     width: max(100vw, calc(100vh * 16 / 9)); height: auto; aspect-ratio: 16 / 9;

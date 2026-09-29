@@ -63,9 +63,24 @@ const Sfx = (() => {
     src.buffer = buf;
     const g = c.createGain();
     g.gain.value = opts.gain == null ? 1 : opts.gain;
-    src.connect(g); g.connect(sfxGain);
+    // v0.369: 재생 속도(피치) · 출력 버스(코인 듀얼 버스 등)
+    if (opts.rate && opts.rate > 0) src.playbackRate.value = opts.rate;
+    src.connect(g); g.connect(opts.dest || sfxGain);
     src.start(c.currentTime + (opts.when || 0));
     return true;
+  }
+  /** v0.369: 전용 버스 (게인 dB → 가벼운 리미터 → sfx 마스터). 코인 듀얼 사운드 합계용 */
+  function makeBus(gainDb, limiter) {
+    const c = ac();
+    const g = c.createGain();
+    g.gain.value = Math.pow(10, (gainDb || 0) / 20);
+    if (limiter && c.createDynamicsCompressor) {
+      const k = c.createDynamicsCompressor();
+      k.threshold.value = -4; k.knee.value = 2; k.ratio.value = 20;
+      k.attack.value = 0.002; k.release.value = 0.08;
+      g.connect(k); k.connect(sfxGain);
+    } else g.connect(sfxGain);
+    return g;
   }
   async function playKey(key, opts) {
     if (muted) return false;
@@ -196,6 +211,6 @@ const Sfx = (() => {
   return {
     playSlash, playParry, playDeath, playCardDrop, playDraw, playSummon,
     playHeroHit, playTurn, playWin, playLose, playClick, playCoin,
-    setVolume, setMuted, warmup, loadUrl, playUrl, FILES
+    setVolume, setMuted, warmup, loadUrl, playUrl, playBuf, makeBus, FILES
   };
 })();

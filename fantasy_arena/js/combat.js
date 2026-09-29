@@ -156,6 +156,13 @@ function doAttack(p, attacker, target, auto) {
   const skLabel = (typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[atkSkillOf(attacker)])
     ? ATK_SKILL_HELP[atkSkillOf(attacker)][0] : "";
   log(`${attacker.name} 공유코인 N=${aShared.n} 앞면${aShared.heads}` + (aShared.reused ? " (이번 턴 결과)" : "") + ` → 공 ${aAtk}` + (atkSkillOf(attacker) > 1 ? ` [${skLabel}]` : ""));
+  // v0.369: 코인 듀얼 오버레이용 — 두 카드(공격자·방어자)와 코인 전 체력
+  if (rows[0] && aShared.flips.length && !aShared.reused) rows[0].unit = attacker;
+  if (def && dShared && dShared.flips.length && !dShared.reused) rows[rows.length - 1].unit = def;
+  const duel = {
+    attacker, attackerOwner: p, defender: target.kind === "minion" ? def : null,
+    aHpPre: aHpSnap ? aHpSnap.pre : attacker.hp, dHpPre: dHpSnap ? dHpSnap.pre : (def ? def.hp : null)
+  };
   showCoinResult("코인 배틀", rows, async () => {
     // Temp combat presentation: bake rolled values on face numbers + ±Δ overlays ABOVE gems (no 「공 N」)
     function armFx(u, atkVal, defV, dA, dD, dH) {
@@ -356,7 +363,7 @@ function doAttack(p, attacker, target, auto) {
     checkWin();
     render();
     resolve();
-  });
+  }, duel);
   });
 }
 

@@ -1,0 +1,246 @@
+{
+ "id": "coin_duel_v3_B2",
+ "fps": 30,
+ "canvas": 352,
+ "anchor": [
+  176,
+  176
+ ],
+ "restPx": 160,
+ "sheet": {
+  "file": "sheet.webp",
+  "cols": 8,
+  "cell": 192,
+  "note": "Safari fallback: frames from coin.webm, 192px cells, unused cells transparent"
+ },
+ "coins": {
+  "heads_late": {
+   "frames": 46,
+   "tSettle": 1.4215,
+   "duration": 1.5333,
+   "events": {
+    "impact": [
+     0.2965,
+     1.0
+    ],
+    "slowmo": [
+     0.2965,
+     0.625
+    ],
+    "impact2": [
+     0.9215,
+     0.8
+    ],
+    "rattle": [
+     0.9815,
+     0.44
+    ],
+    "settle": [
+     1.4215,
+     0.35
+    ]
+   }
+  },
+  "heads_v1": {
+   "frames": 37,
+   "tSettle": 1.1218,
+   "duration": 1.2333,
+   "events": {
+    "impact": [
+     0.2754,
+     1.0
+    ],
+    "slowmo": [
+     0.2754,
+     0.5171
+    ],
+    "impact2": [
+     0.7925,
+     0.8
+    ],
+    "rattle": [
+     0.8525,
+     0.2693
+    ],
+    "settle": [
+     1.1218,
+     0.35
+    ]
+   }
+  },
+  "heads_v2": {
+   "frames": 37,
+   "tSettle": 1.107,
+   "duration": 1.2333,
+   "events": {
+    "impact": [
+     0.2949,
+     1.0
+    ],
+    "slowmo": [
+     0.2949,
+     0.5022
+    ],
+    "impact2": [
+     0.7972,
+     0.8
+    ],
+    "rattle": [
+     0.8572,
+     0.2498
+    ],
+    "settle": [
+     1.107,
+     0.35
+    ]
+   }
+  },
+  "heads_v3": {
+   "frames": 36,
+   "tSettle": 1.0845,
+   "duration": 1.2,
+   "events": {
+    "impact": [
+     0.2892,
+     1.0
+    ],
+    "slowmo": [
+     0.2892,
+     0.491
+    ],
+    "impact2": [
+     0.7802,
+     0.8
+    ],
+    "rattle": [
+     0.8402,
+     0.2443
+    ],
+    "settle": [
+     1.0845,
+     0.35
+    ]
+   }
+  },
+  "tails_late": {
+   "frames": 46,
+   "tSettle": 1.4215,
+   "duration": 1.5333,
+   "events": {
+    "impact": [
+     0.2965,
+     1.0
+    ],
+    "slowmo": [
+     0.2965,
+     0.625
+    ],
+    "impact2": [
+     0.9215,
+     0.8
+    ],
+    "rattle": [
+     0.9815,
+     0.44
+    ],
+    "settle": [
+     1.4215,
+     0.35
+    ]
+   }
+  },
+  "tails_v1": {
+   "frames": 37,
+   "tSettle": 1.1218,
+   "duration": 1.2333,
+   "events": {
+    "impact": [
+     0.2754,
+     1.0
+    ],
+    "slowmo": [
+     0.2754,
+     0.5171
+    ],
+    "impact2": [
+     0.7925,
+     0.8
+    ],
+    "rattle": [
+     0.8525,
+     0.2693
+    ],
+    "settle": [
+     1.1218,
+     0.35
+    ]
+   }
+  },
+  "tails_v2": {
+   "frames": 37,
+   "tSettle": 1.107,
+   "duration": 1.2333,
+   "events": {
+    "impact": [
+     0.2949,
+     1.0
+    ],
+    "slowmo": [
+     0.2949,
+     0.5022
+    ],
+    "impact2": [
+     0.7972,
+     0.8
+    ],
+    "rattle": [
+     0.8572,
+     0.2498
+    ],
+    "settle": [
+     1.107,
+     0.35
+    ]
+   }
+  },
+  "tails_v3": {
+   "frames": 36,
+   "tSettle": 1.0845,
+   "duration": 1.2,
+   "events": {
+    "impact": [
+     0.2892,
+     1.0
+    ],
+    "slowmo": [
+     0.2892,
+     0.491
+    ],
+    "impact2": [
+     0.7802,
+     0.8
+    ],
+    "rattle": [
+     0.8402,
+     0.2443
+    ],
+    "settle": [
+     1.0845,
+     0.35
+    ]
+   }
+  }
+ },
+ "sfx": {
+  "coin_impact_1": "coin_impact_1",
+  "coin_impact_2": "coin_impact_2",
+  "coin_impact_3": "coin_impact_3",
+  "coin_impact2_1": "coin_impact2_1",
+  "coin_impact2_2": "coin_impact2_2",
+  "coin_impact2_3": "coin_impact2_3",
+  "coin_slowmo": "coin_slowmo",
+  "coin_slowmo_late": "coin_slowmo_late",
+  "coin_rattle": "coin_rattle",
+  "coin_rattle_late": "coin_rattle_late"
+ }
+}
