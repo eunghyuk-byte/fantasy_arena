@@ -143,3 +143,16 @@ test("match_start 2초판: 고정 1.5초 대기 없음 · meta durationMs 기반
   const M = path.join(MATCH, "match_start");
   assert.equal(fs.statSync(path.join(M, "overlay.webm")).size, readMeta("match_start").overlay.bytes);
 });
+
+// v0.367: 매치 오버레이 0.85 축소(중앙 기준), dim은 전체 화면
+test("매치 오버레이 scale 0.85 (비디오·Safari 폴백 공통 .mfx-overlay), dim은 inset:0 그대로", () => {
+  const css = fs.readFileSync(path.join(ROOT, "css/game.css"), "utf8");
+  const ov = css.slice(css.indexOf("#matchFx .mfx-overlay {"));
+  const blk = ov.slice(0, ov.indexOf("}"));
+  assert.match(blk, /transform: translate\(-50%, -50%\) scale\(var\(--mfx-scale, 0\.85\)\);/);
+  assert.match(blk, /transform-origin: 50% 50%;/);
+  const dim = css.slice(css.indexOf("#matchFx .mfx-dim {"));
+  assert.match(dim.slice(0, dim.indexOf("}")), /inset: 0/);
+  assert.doesNotMatch(dim.slice(0, dim.indexOf("}")), /scale/);
+  assert.equal((SRC.match(/className = "mfx-overlay"/g) || []).length, 2, "video·img 둘 다 같은 클래스");
+});

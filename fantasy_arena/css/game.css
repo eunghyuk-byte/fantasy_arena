@@ -1106,7 +1106,9 @@
   #matchFx .mfx-overlay {
     position: absolute; left: 50%; top: 50%;
     width: max(100vw, calc(100vh * 16 / 9)); height: auto; aspect-ratio: 16 / 9;
-    transform: translate(-50%, -50%);
+    /* v0.367: 오버레이만 약 15% 축소(화면 중앙 기준). dim(.mfx-dim)은 전체 화면 그대로. 비디오·Safari WebP 공통 */
+    transform: translate(-50%, -50%) scale(var(--mfx-scale, 0.85));
+    transform-origin: 50% 50%;
     pointer-events: none; user-select: none;
   }
   #spellFx .fx-veil {
