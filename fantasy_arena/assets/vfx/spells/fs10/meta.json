@@ -1,0 +1,102 @@
+{
+ "id": "fs10",
+ "name": "재폭풍",
+ "concept": "A",
+ "description": "Ash Gale — a rolling band of grey volcanic ash with glowing embers sweeps in from the left across my board, then an ash column pours down onto each new slot, bursts along the ground around a glowing ember core, and the 3 화산재 settle in",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha",
+ "card": "cost 6 · fire · rare · 내 전장에 화산재 (5/0/1) 3기 생성 (spell.type summon_n, summonId f40, count 3)",
+ "durationMs": 1000,
+ "type": "summon",
+ "targetMode": "self",
+ "playMode": "summon",
+ "count": 3,
+ "playModeNote": "Same summon mode as es9 A (v0.371 playSummon): resolve summon_n first (opts.resolveNow) and keep the 3 new 화산재 tokens hidden (opacity 0); 1) formation strip centred on the midpoint of the 3 new token slots (fallback: caster board centre), drawn displayWidthPx wide and displayWidthPx*squashY*(h/w) tall — the frames are native 16:9 (640x360) so squashY is 1.0 (draws 900x506 @1080p); 2) rise strip on each token slot at startMs + i*staggerMs; 3) each token fades in at rise start + tokenFadeIn.startMs over tokenFadeIn.durationMs, then solidReveal pops the real card. Last token (i=2): rise 480-980 ms, fade 660-820 ms, pop 820-1000 ms. The preview does exactly that.",
+ "formation": {
+  "file": "formation_strip.webp",
+  "layout": "horizontal",
+  "frames": 23,
+  "w": 640,
+  "h": 360,
+  "fps": 30,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 767,
+  "displayWidthPx@1080p": 900,
+  "squashY": 1.0,
+  "anchor": "midpoint of the summoned token slots",
+  "note": "frames are already a flat ground-level 16:9 storm band; do not squash further",
+  "handGuard": {
+   "fadePx@1080p": 70,
+   "note": "v0.376 game: the 900px band reached over the top of my hand cards — the canvas erases the formation (only) with a 70px fade ending at the hand-card top edge (opp cast: hand-card bottom edge). Hand layout untouched."
+  }
+ },
+ "rise": {
+  "file": "rise_strip.webp",
+  "layout": "horizontal",
+  "frames": 15,
+  "w": 384,
+  "h": 384,
+  "fps": 30,
+  "loop": false,
+  "durationMs": 500,
+  "anchor": "each summoned token's centre",
+  "anchorOffsetYPx@1080p": -30,
+  "displayBoxPx@1080p": 380,
+  "startMs": 300,
+  "staggerMs": 90,
+  "tokenFadeInMs": "start+180..start+340",
+  "tokenFadeIn": {
+   "startMs": 180,
+   "durationMs": 160
+  },
+  "solidReveal": {
+   "durationMs": 180,
+   "note": "after the fade-in the real token card pops (brightness 1.7→1, scale 1.06→1), same as es9 A in v0.371"
+  }
+ },
+ "referencePointsPx@1080p": {
+  "tokenSlots": [
+   [
+    930,
+    719
+   ],
+   [
+    1155,
+    719
+   ],
+   [
+    1380,
+    719
+   ]
+  ],
+  "formationCentre": [
+   1155,
+   719
+  ],
+  "note": "board with 2 own units (임프, 불꽃여우) before cast; tokens are appended at slots 3, 4 and 5"
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 993,
+  "hitAtMs": 440,
+  "secondHitAtMs": 530,
+  "thirdHitAtMs": 620,
+  "loudnessLUFS": -17.9,
+  "truePeakDbTP": -4.1,
+  "source": "fs2 C-style: synth low brown-noise swell with rising low-pass (slow amplitude sway) + 3 soft pitch-drop sub thumps (90 ms apart, 2nd/3rd softer), layered with a low-passed texture from the already-generated fs2 C Kling clip audio; 0 new credits",
+  "note": "a heavy low rumble as the gale rolls in, then three soft low thumps as the ash columns land"
+ },
+ "webpQuality": {
+  "formation": {
+   "q": 91,
+   "alphaQ": 96
+  }
+ },
+ "sizes": {
+  "formation_strip.webp": 1443478,
+  "rise_strip.webp": 499728,
+  "sfx.mp3": 16343,
+  "gameAssetsTotal(bytes, excl. meta/preview)": 1959549
+ }
+}

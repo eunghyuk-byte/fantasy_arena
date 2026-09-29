@@ -1,5 +1,5 @@
 {
-  "count": 770,
+  "count": 774,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -3183,6 +3183,26 @@
     },
     {
       "path": "assets/vfx/spells/fs1/sfx.mp3",
+      "bytes": 16343,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/spells/fs10/formation_strip.webp",
+      "bytes": 1443478,
+      "name": "formation_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs10/meta.json",
+      "bytes": 3628,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs10/rise_strip.webp",
+      "bytes": 499728,
+      "name": "rise_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs10/sfx.mp3",
       "bytes": 16343,
       "name": "sfx"
     },

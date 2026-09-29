@@ -377,6 +377,7 @@ const SpellFx = (() => {
   //   formation: { file, frames, w, h, fps, durationMs, displayWidthPx@1080p, squashY } → 새 토큰 자리 중점에 납작한 타원
   //   rise: { file, ..., displayBoxPx@1080p, anchorOffsetYPx@1080p, startMs, staggerMs, tokenFadeIn: { startMs, durationMs },
   //           solidReveal: { durationMs } } → 토큰마다. 게임은 opts.resolveNow()로 먼저 해결하고 새 토큰 uid를 돌려준다
+  //   v0.376 (fs10 재폭풍): 높이 = 폭 × squashY × (프레임 h/w) · formation.handGuard { fadePx@1080p } → 손패 앞에서 formation만 페이드
   // B 추가) overlay.fitBox { sizePx@1080p, anchor: "targetBoard", offsetYPx@1080p } · unitImpact.delay.staggerMs (X 순서) (as9)
   // B 추가) unitImpact.delay.origin "corner" (+corner, metric "manhattan", minMs, mirrorYWhenOppCasts) ·
   //   overlay.opacity (0~1) · overlay.flipYWhenOppCasts  (v0.371 ns9 동남풍)
@@ -1025,8 +1026,54 @@ const SpellFx = (() => {
     Object.keys(_hidden).forEach(u => delete _hidden[u]);
     if (any) syncHideStyle();
   }
+  /** v0.376 summon formation 크기: 폭 displayWidthPx × squashY × (프레임 h/w). es9 448² ×0.72 → 520×374 · fs10 640×360 ×1.0 → 900×506 */
+  function summonFormationBox(meta, k, fr) {
+    const F = (meta && meta.formation) || {};
+    const fw = (F["displayWidthPx@1080p"] || 520) * (k || 1);
+    const w = (fr && fr.w) || F.w || 1, h = (fr && fr.h) || F.h || w;
+    const sq = (F.squashY != null && F.squashY > 0) ? F.squashY : 1;
+    return { fw, fh: fw * sq * (h / w) };
+  }
   /**
-   * v0.371 summon player (es9 팔진도): 게임이 먼저 해결(토큰 소환)하고 숨긴 뒤 호출.
+   * v0.376 formation.handGuard { "fadePx@1080p" }: 시전자 손패 쪽으로 번지는 formation(폭풍 띠)을 손패 카드 윗선(상대면 아랫선) 앞에서
+   * 부드럽게 지움 — 손패 레이아웃은 그대로, 연출 캔버스에서만. meta에 없으면 null (es9 등 기존 동작 그대로)
+   * @returns { edge, fade, below } below=true: edge 아래(내 손패)를 지움 · false: edge 위(상대 손패)를 지움
+   */
+  function summonHandGuard(meta, casterIsMe, k) {
+    const G = meta && meta.formation && meta.formation.handGuard;
+    if (!G) return null;
+    const fade = (G["fadePx@1080p"] != null ? G["fadePx@1080p"] : 70) * (k || 1);
+    const opp = casterIsMe === false;
+    const cards = [...document.querySelectorAll(opp ? "#oppHand > *" : "#myHand .card")]
+      .map(el => el.getBoundingClientRect()).filter(r => r && r.width > 2 && r.height > 2);
+    const hand = document.getElementById(opp ? "oppHand" : "myHand");
+    const hr = hand && hand.getBoundingClientRect();
+    let edge = null;
+    if (cards.length) edge = opp ? Math.max(...cards.map(r => r.bottom)) : Math.min(...cards.map(r => r.top));
+    else if (hr && hr.height > 2) edge = opp ? hr.bottom : hr.top;
+    if (edge == null) return null;
+    return { edge, fade, below: !opp };
+  }
+  function applyHandGuard(ctx, g, cw, ch) {
+    if (!g) return;
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-out";
+    if (g.below) {
+      const y0 = g.edge - g.fade;
+      const gr = ctx.createLinearGradient(0, y0, 0, g.edge);
+      gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,1)");
+      ctx.fillStyle = gr; ctx.fillRect(0, y0, cw, ch - y0 + 1);
+    } else {
+      const y1 = g.edge + g.fade;
+      const gr = ctx.createLinearGradient(0, g.edge, 0, y1);
+      gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = gr; ctx.fillRect(0, 0, cw, y1);
+    }
+    ctx.restore();
+  }
+  /**
+   * v0.371 summon player (es9 팔진도 · v0.376 fs10 재폭풍, 둘 다 spell.type summon_n): 게임이 먼저 해결(토큰 소환)하고 숨긴 뒤 호출.
+   * 상대가 쓰면 상대 전장의 새 토큰 rect 기준 (토큰이 없으면 시전자 보드 중앙) · squashY·handGuard는 meta에서
    * formation = 새 토큰 자리들의 중점(없으면 시전자 보드 중앙)에 납작한 타원 · rise = 토큰마다 startMs + i*staggerMs
    * 토큰은 rise 시작 + tokenFadeIn.startMs 부터 fade, 이어서 solidReveal(실제 카드 팝)
    * @param opts { tokenUids: [uid...], casterIsMe?, sound? }
@@ -1047,7 +1094,8 @@ const SpellFx = (() => {
         if (pt) pts.push({ uid: u, x: pt.x, y: pt.y });
       });
       const c = pts.length ? { x: pts.reduce((a, p) => a + p.x, 0) / pts.length, y: pts.reduce((a, p) => a + p.y, 0) / pts.length } : casterBoardCenter(opts.casterIsMe);
-      const fw = (F["displayWidthPx@1080p"] || 520) * k, fh = fw * (F.squashY || 1) * (fFr ? fFr.h / fFr.w : 1);
+      const { fw, fh } = summonFormationBox(meta, k, fFr);
+      const guard = summonHandGuard(meta, opts.casterIsMe, k); // v0.376 fs10: 폭풍 띠가 손패를 가리지 않게
       const fStart = F.startMs || 0, fDur = F.durationMs || Math.round((F.frames || 1) * 1000 / (F.fps || 30));
       const fFps = F.fps || meta.fps || 30, fN = Math.max(1, F.frames || 1);
       const rBox = (R["displayBoxPx@1080p"] || 380) * k, rOff = (R["anchorOffsetYPx@1080p"] || 0) * k;
@@ -1060,9 +1108,12 @@ const SpellFx = (() => {
       const endMs = Math.max(fFr ? fStart + fDur : 0,
         rFr ? rises.reduce((m, r) => Math.max(m, r.at + rDur), 0) : 0,
         rises.reduce((m, r) => Math.max(m, r.at + (fi.startMs || 0) + (fi.durationMs || 200) + popMs), 0));
-      return await runCanvasFx(stage, endMs, metaSfxUrl(meta, base), S.startMs, (ctx, t) => {
+      return await runCanvasFx(stage, endMs, metaSfxUrl(meta, base), S.startMs, (ctx, t, cw, ch) => {
         const tf = t - fStart;
-        if (fFr && tf >= 0 && tf < fDur) drawFrame(ctx, fFr, Math.min(fN - 1, Math.floor(tf * fFps / 1000)), c.x - fw / 2, c.y - fh / 2, fw, fh);
+        if (fFr && tf >= 0 && tf < fDur) {
+          drawFrame(ctx, fFr, Math.min(fN - 1, Math.floor(tf * fFps / 1000)), c.x - fw / 2, c.y - fh / 2, fw, fh);
+          applyHandGuard(ctx, guard, cw, ch); // formation만 지움 (rise는 뒤에 그림)
+        }
         if (rFr) {
           const bh = rBox * rFr.h / rFr.w;
           rises.forEach(r => {
@@ -2081,7 +2132,7 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, releaseHidden, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, summonFormationBox, summonHandGuard, releaseHidden, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
 })();
 window.SpellFx = SpellFx;
 // v0.366: 타이틀 화면에서 미리 로드 → 첫 판 시작 연출이 로딩 없이 바로 뜨게
