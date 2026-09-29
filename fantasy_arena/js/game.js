@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.363";
+const GAME_VERSION = "0.364";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -274,9 +274,11 @@ function startGame(vsAI) {
     (async () => {
       try {
         if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
+          // v0.364: 첫 내 턴 연출(비디오·사운드) 미리 로드 — match_start 재생 중에
+          try { if (SpellFx.preloadMatch) SpellFx.preloadMatch("turn_start_me"); } catch (e) {}
           await Promise.race([
             SpellFx.playMatch("match_start"),
-            new Promise(r => setTimeout(r, 2200))
+            new Promise(r => setTimeout(r, 2600))
           ]);
         }
       } catch (e) {}

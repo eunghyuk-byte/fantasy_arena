@@ -1406,6 +1406,228 @@ const SpellFx = (() => {
     });
   }
 
+  // ─── v0.364 매치 연출 v2: 알파 비디오 오버레이(overlay.webm) + 공용 dim 레이어 ───
+  // dim = 오버레이 아래·전장 위의 검은 레이어 (pointer-events:none, 클릭 막지 않음).
+  // meta.dim(doInCode!==false && opacity>0)이 있으면 그 값·시간, 없으면 기본값:
+  // 불투명도 0.4 (turn_start_me 0.3) · 150ms 페이드인 · 애니 페이드아웃 구간에 맞춰 페이드아웃.
+  // victory/defeat 는 결과 화면까지 dim 유지 (hideScreens → releaseDim).
+  const DIM_DEFAULT_OPACITY = 0.4;
+  const DIM_DEFAULT_BY_ID = { turn_start_me: 0.3 };
+  const DIM_DEFAULT_FADE_IN_MS = 150;
+  const DIM_HOLD_IDS = { victory: true, defeat: true };
+  function isVideoPackMeta(meta) {
+    return !!(meta && meta.overlay && typeof meta.overlay.file === "string" && /\.webm$/i.test(meta.overlay.file));
+  }
+  function packFadeOutWindow(meta) {
+    const dur = (meta && meta.durationMs) || 1500;
+    const fo = meta && meta.fadeOut;
+    if (fo && fo.startMs != null && fo.endMs != null) return [fo.startMs, fo.endMs];
+    const tl = meta && meta.timelineMs && meta.timelineMs.fadeOutMs;
+    if (Array.isArray(tl) && tl.length === 2) return [tl[0], tl[1]];
+    return [Math.max(0, dur - 300), dur];
+  }
+  /** 순수 함수 (테스트용): 연출 id + meta + opts → dim 타임라인. null = dim 없음 */
+  function resolveDim(id, meta, opts) {
+    opts = opts || {};
+    if (opts.dim === false) return null;
+    const dur = (meta && meta.durationMs) || 1500;
+    const d = meta && meta.dim;
+    const useMeta = !!(d && d.doInCode !== false && typeof d.opacity === "number" && d.opacity > 0);
+    const opacity = useMeta ? d.opacity
+      : (typeof opts.dimOpacity === "number" ? opts.dimOpacity
+        : (DIM_DEFAULT_BY_ID[id] != null ? DIM_DEFAULT_BY_ID[id] : DIM_DEFAULT_OPACITY));
+    if (!(opacity > 0)) return null;
+    let fadeInStartMs = 0, fadeInEndMs = DIM_DEFAULT_FADE_IN_MS;
+    if (useMeta && d.fadeIn && d.fadeIn.endMs != null) {
+      fadeInStartMs = d.fadeIn.startMs || 0;
+      fadeInEndMs = d.fadeIn.endMs;
+    }
+    const hold = opts.holdDim != null ? !!opts.holdDim
+      : (!!DIM_HOLD_IDS[id] || (useMeta && d.fadeOut === null));
+    let fadeOutStartMs = null, fadeOutEndMs = null;
+    if (!hold) {
+      if (useMeta && d.fadeOut && d.fadeOut.endMs != null) {
+        fadeOutStartMs = d.fadeOut.startMs;
+        fadeOutEndMs = d.fadeOut.endMs;
+      } else {
+        const w = packFadeOutWindow(meta);
+        fadeOutStartMs = w[0];
+        fadeOutEndMs = w[1];
+      }
+    }
+    return {
+      color: (useMeta && d.color) || "#000000",
+      opacity, fadeInStartMs, fadeInEndMs, fadeOutStartMs, fadeOutEndMs, hold,
+      durationMs: dur, fromMeta: useMeta
+    };
+  }
+  /** Safari: VP9 알파 webm 미지원(검은 배경) → overlay_safari.webp(애니 WebP 알파) + sfx.mp3 (sfx/bgm의 EXTS 폴백과 같은 방식) */
+  function needsSafariFallback() {
+    try {
+      const ua = navigator.userAgent || "";
+      const isSafari = /Safari\//.test(ua) && !/(Chrome|Chromium|CriOS|Edg|OPR|Android|FxiOS|Firefox)\//.test(ua);
+      if (isSafari) return true;
+      const v = document.createElement("video");
+      return !(v.canPlayType && v.canPlayType('video/webm; codecs="vp09.00.10.08"'));
+    } catch (e) { return true; }
+  }
+  function ensureMatchLayer() {
+    let layer = document.getElementById("matchFx");
+    if (!layer) {
+      layer = document.createElement("div");
+      layer.id = "matchFx";
+      layer.innerHTML = '<div class="mfx-dim" id="matchDim"></div><div class="mfx-stage" id="matchStage"></div>';
+      document.body.appendChild(layer);
+    }
+    layer.style.pointerEvents = "none";
+    return layer;
+  }
+  let _dimTimers = [];
+  let _dimToken = 0;
+  function clearDimTimers() { _dimTimers.forEach(t => clearTimeout(t)); _dimTimers = []; }
+  function dimTo(el, opacity, ms, easing) {
+    el.style.transition = ms > 0 ? ("opacity " + ms + "ms " + (easing || "ease-out")) : "none";
+    el.style.opacity = String(opacity);
+  }
+  /** dim 타임라인 시작 (t0 = 애니 첫 프레임). hold면 releaseDim()까지 유지 */
+  function startDim(dim) {
+    const layer = ensureMatchLayer();
+    const el = document.getElementById("matchDim");
+    clearDimTimers();
+    const token = ++_dimToken;
+    layer.classList.remove("held");
+    layer.classList.add("on");
+    if (!dim) { dimTo(el, 0, 0); return token; }
+    el.style.background = dim.color || "#000";
+    const cur = parseFloat(getComputedStyle(el).opacity) || 0;
+    dimTo(el, cur, 0);
+    void el.offsetWidth;
+    const fin = () => dimTo(el, dim.opacity, Math.max(0, dim.fadeInEndMs - dim.fadeInStartMs), "cubic-bezier(.33,1,.68,1)");
+    if (dim.fadeInStartMs > 0) _dimTimers.push(setTimeout(fin, dim.fadeInStartMs)); else fin();
+    if (!dim.hold && dim.fadeOutStartMs != null) {
+      _dimTimers.push(setTimeout(() => {
+        if (token === _dimToken) dimTo(el, 0, Math.max(0, dim.fadeOutEndMs - dim.fadeOutStartMs), "ease-in-out");
+      }, dim.fadeOutStartMs));
+    }
+    return token;
+  }
+  /** 결과 화면이 닫힐 때(hideScreens) 호출: 유지 중인 dim·마지막 프레임 해제 */
+  function releaseDim(ms) {
+    const layer = document.getElementById("matchFx");
+    if (!layer || !layer.classList.contains("held")) return false;
+    const el = document.getElementById("matchDim");
+    const stage = document.getElementById("matchStage");
+    const token = ++_dimToken;
+    clearDimTimers();
+    if (stage) stage.innerHTML = "";
+    if (el) dimTo(el, 0, ms == null ? 250 : ms, "ease-in-out");
+    _dimTimers.push(setTimeout(() => {
+      if (token !== _dimToken) return;
+      layer.classList.remove("on", "held");
+    }, (ms == null ? 250 : ms) + 30));
+    return true;
+  }
+  function pickMatchSfxUrl(base, meta) {
+    const file = (meta && meta.sfx && meta.sfx.file) || "sfx.ogg";
+    const ogg = assetUrl(base, file);
+    const mp3 = assetUrl(base, file.replace(/\.ogg$/i, ".mp3"));
+    if (typeof Sfx === "undefined" || !Sfx.loadUrl) return Promise.resolve(null);
+    return Sfx.loadUrl(ogg).then(buf => (buf ? ogg : (mp3 !== ogg ? Sfx.loadUrl(mp3).then(b => (b ? mp3 : null)) : null)), () => null);
+  }
+  function waitEvent(el, names, ms) {
+    return new Promise(res => {
+      let done = false;
+      const fin = (v) => { if (done) return; done = true; names.forEach(n => el.removeEventListener(n, h)); res(v); };
+      const h = (e) => fin(e.type);
+      names.forEach(n => el.addEventListener(n, h));
+      setTimeout(() => fin("timeout"), ms);
+    });
+  }
+  /** 매치 팩 사전 로드 (비디오 캐시 + sfx 디코드) */
+  async function preloadMatch(id) {
+    try {
+      const meta = await loadPackMeta("match", id);
+      if (!isVideoPackMeta(meta)) return false;
+      const base = packBase("match", id);
+      const file = needsSafariFallback() ? (meta.overlay.safariFile || "overlay_safari.webp") : meta.overlay.file;
+      await Promise.all([fetch(assetUrl(base, file), { cache: "force-cache" }).then(r => r.blob()).catch(() => null), pickMatchSfxUrl(base, meta)]);
+      return true;
+    } catch (e) { return false; }
+  }
+  const _sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  async function _playVideoPack(kind, id, meta, base, opts) {
+    const dur = meta.durationMs || 1500;
+    const layer = ensureMatchLayer();
+    const stage = document.getElementById("matchStage");
+    // 이전 판에서 유지 중이던 dim/마지막 프레임 정리
+    if (stage) stage.innerHTML = "";
+    const safari = needsSafariFallback();
+    let visual = null;
+    let video = null;
+    if (!safari) {
+      video = document.createElement("video");
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.setAttribute("playsinline", "");
+      video.setAttribute("muted", "");
+      video.preload = "auto";
+      video.className = "mfx-overlay";
+      video.src = assetUrl(base, meta.overlay.file);
+      visual = video;
+    } else {
+      const sf = meta.overlay.safariFile || "overlay_safari.webp";
+      const url = assetUrl(base, sf);
+      if (await probeUrl(url)) {
+        const img = new Image();
+        img.className = "mfx-overlay";
+        img.alt = "";
+        img.decoding = "async";
+        img.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "r=" + Date.now(); // 애니 WebP 처음부터 재생
+        visual = img;
+      }
+    }
+    const sfxP = opts.sound === false ? Promise.resolve(null) : pickMatchSfxUrl(base, meta);
+    if (visual && stage) {
+      visual.style.opacity = "0";
+      stage.appendChild(visual);
+      if (video) {
+        try { video.load(); } catch (e) {}
+        await waitEvent(video, ["canplaythrough", "canplay", "error"], 700);
+      } else {
+        await (visual.decode ? visual.decode().catch(() => {}) : Promise.resolve());
+      }
+    }
+    const sfxUrl = await Promise.race([sfxP, _sleep(400).then(() => null)]);
+    let ok = !!visual;
+    if (video) {
+      try { await video.play(); } catch (e) { ok = false; }
+      if (!ok) { try { video.remove(); } catch (e) {} visual = null; }
+    }
+    if (visual) visual.style.opacity = "1";
+    // t0: 비디오·dim·사운드 동시 시작
+    const dim = resolveDim(id, meta, opts);
+    startDim(dim);
+    if (sfxUrl && typeof Sfx !== "undefined" && Sfx.playUrl) {
+      try { Sfx.playUrl(sfxUrl, { duckMs: dur }); } catch (e) {}
+    }
+    if (video && ok) await Promise.race([waitEvent(video, ["ended"], dur + 250), _sleep(dur + 250)]);
+    else await _sleep(dur);
+    if (dim && dim.hold) {
+      // 결과 화면까지 유지: 모달(.overlay z20) 아래로 내림. 마지막 프레임이 보이는 팩(lastFrameAlphaMax>0)은 그대로 둠
+      layer.classList.add("held");
+      if (!(meta.lastFrameAlphaMax > 0) && stage) stage.innerHTML = "";
+    } else {
+      if (stage && visual && visual.parentNode === stage) stage.removeChild(visual);
+      const tailMs = dim && dim.fadeOutEndMs != null ? Math.max(0, dim.fadeOutEndMs - dur) : 0;
+      const token = _dimToken;
+      _dimTimers.push(setTimeout(() => {
+        if (token === _dimToken && !layer.classList.contains("held")) layer.classList.remove("on");
+      }, tailMs + 40));
+    }
+    return ok;
+  }
+
   let _packQueue = Promise.resolve();
 
   async function _playPackInner(kind, id, opts) {
@@ -1413,6 +1635,8 @@ const SpellFx = (() => {
     if (!kind || !id) return false;
     const meta = await loadPackMeta(kind, id);
     const base = packBase(kind, id);
+    // v0.364: 매치 팩 v2 = 알파 비디오 오버레이 + 공용 dim
+    if (isVideoPackMeta(meta)) return _playVideoPack(kind, id, meta, base, opts);
     const fps = (meta && meta.fps) || 12;
     const layoutHint = (meta && meta.layout) || opts.layout || null;
     const cast = (meta && meta.cast) || {};
@@ -1428,6 +1652,7 @@ const SpellFx = (() => {
     const layer = ensureLayer();
     const stage = document.getElementById("fxStage");
     const fxCard = document.getElementById("fxCard");
+    let matchDim = null;
     try {
       if (fxCard) {
         fxCard.innerHTML = "";
@@ -1447,6 +1672,8 @@ const SpellFx = (() => {
       }
       layer.classList.add("on", "pack-play");
       layer.style.display = "";
+      // v0.364: 구형(스트립) 매치 팩(승리·패배 최종본 대기)도 공용 dim — 결과 화면까지 유지
+      if (kind === "match") { matchDim = resolveDim(id, meta, opts); startDim(matchDim); }
       const veil = layer.querySelector(".fx-veil");
       if (veil) veil.style.setProperty("background", "transparent", "important");
       // Keep stage until first strip mounts (avoid mid-spell blank flash)
@@ -1474,6 +1701,11 @@ const SpellFx = (() => {
     } finally {
       cleanupFx(layer, stage, fxCard);
       if (layer) layer.classList.remove("pack-play");
+      if (kind === "match") {
+        const ml = document.getElementById("matchFx");
+        if (ml && matchDim && matchDim.hold) ml.classList.add("held");
+        else if (ml) { const el = document.getElementById("matchDim"); if (el) dimTo(el, 0, 250, "ease-in-out"); setTimeout(() => { if (!ml.classList.contains("held")) ml.classList.remove("on"); }, 300); }
+      }
     }
   }
 
@@ -1528,6 +1760,6 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, isVideoPackMeta, needsSafariFallback };
 })();
 window.SpellFx = SpellFx;

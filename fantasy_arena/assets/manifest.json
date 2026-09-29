@@ -2397,54 +2397,54 @@
       "name": "meta"
     },
     {
-      "path": "assets/vfx/match/match_start/cast.webp",
-      "bytes": 1160488,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/match/match_start/cast_strip.png",
-      "bytes": 3440025,
-      "name": "cast_strip"
-    },
-    {
-      "path": "assets/vfx/match/match_start/impact.webp",
-      "bytes": 1283522,
-      "name": "impact"
-    },
-    {
-      "path": "assets/vfx/match/match_start/impact_strip.png",
-      "bytes": 3746327,
-      "name": "impact_strip"
-    },
-    {
       "path": "assets/vfx/match/match_start/meta.json",
-      "bytes": 418,
+      "bytes": 3894,
       "name": "meta"
     },
     {
-      "path": "assets/vfx/match/turn_start_me/cast.webp",
-      "bytes": 794684,
-      "name": "cast"
+      "path": "assets/vfx/match/match_start/overlay.webm",
+      "bytes": 1580149,
+      "name": "overlay"
     },
     {
-      "path": "assets/vfx/match/turn_start_me/cast_strip.png",
-      "bytes": 2112829,
-      "name": "cast_strip"
+      "path": "assets/vfx/match/match_start/overlay_safari.webp",
+      "bytes": 3194898,
+      "name": "overlay_safari"
     },
     {
-      "path": "assets/vfx/match/turn_start_me/impact.webp",
-      "bytes": 514176,
-      "name": "impact"
+      "path": "assets/vfx/match/match_start/sfx.mp3",
+      "bytes": 25004,
+      "name": "sfx"
     },
     {
-      "path": "assets/vfx/match/turn_start_me/impact_strip.png",
-      "bytes": 1976319,
-      "name": "impact_strip"
+      "path": "assets/vfx/match/match_start/sfx.ogg",
+      "bytes": 15225,
+      "name": "sfx"
     },
     {
       "path": "assets/vfx/match/turn_start_me/meta.json",
-      "bytes": 417,
+      "bytes": 3608,
       "name": "meta"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/overlay.webm",
+      "bytes": 478758,
+      "name": "overlay"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/overlay_safari.webp",
+      "bytes": 879868,
+      "name": "overlay_safari"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/sfx.mp3",
+      "bytes": 14252,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/match/turn_start_me/sfx.ogg",
+      "bytes": 11084,
+      "name": "sfx"
     },
     {
       "path": "assets/vfx/match/victory/cast.webp",

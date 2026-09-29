@@ -419,6 +419,8 @@ function hideScreens() {
   const sh = document.getElementById("shop"); // v0.334
   if (sh) sh.classList.remove("active");
   document.getElementById("overlay").classList.remove("show");
+  // v0.364: 결과 화면이 닫히면 승리·패배 dim 해제
+  try { if (typeof SpellFx !== "undefined" && SpellFx.releaseDim) SpellFx.releaseDim(); } catch (e) {}
 }
 function showGame() {
   hideScreens();

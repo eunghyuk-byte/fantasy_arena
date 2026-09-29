@@ -1,23 +1,87 @@
 {
-  "id": "turn_start_me",
-  "fps": 12,
-  "loop": false,
-  "layout": "horizontal",
-  "cast": {
-    "file": "cast_strip.png",
-    "webp": "cast.webp",
-    "frames": 10,
-    "w": 720,
-    "h": 720
-  },
-  "impact": {
-    "file": "impact_strip.png",
-    "webp": "impact.webp",
-    "frames": 8,
-    "w": 720,
-    "h": 720
-  },
-  "durationMs": 1500,
-  "anchor": "board-center",
-  "concept": "내 턴 시작 골드 알림"
+ "effect": "my_turn_v2",
+ "concept": "B_final",
+ "text": "MY TURN",
+ "description": "Emblem Row Slam (final, 0.8 s) — bold MY TURN slams in from 2x with a gold shockwave; the logo divider snaps open and the six element emblems pop out along it from the centre outward, hold, then everything fades out smoothly",
+ "durationMs": 800,
+ "fps": 60,
+ "frames": 48,
+ "overlay": {
+  "file": "overlay.webm",
+  "format": "WebM, VP9 video with alpha channel (yuva420p, alpha_mode=1), straight/non-premultiplied alpha, no audio track",
+  "width": 1920,
+  "height": 1080,
+  "bytes": 478758,
+  "vp9Crf": 36,
+  "blend": "normal (source-over)",
+  "contentBoundsPx": {
+   "x": 0,
+   "y": 229,
+   "w": 1920,
+   "h": 608
+  }
+ },
+ "anchor": {
+  "type": "battlefield-centre",
+  "pivot": "canvas centre (960,540)",
+  "positionAtRef1080p": [
+   954,
+   510
+  ],
+  "placement": "draw the 1920x1080 canvas unscaled at 1080p (scale 1:1 with the stage) with its centre on the battlefield centre; in the reference layout that is (954,510), the centre gem of the board divider, i.e. canvas top-left at (-6,-30). Plain stage centre (960,540) also works."
+ },
+ "dim": {
+  "includedInOverlay": false,
+  "doInCode": false,
+  "opacity": 0,
+  "note": "no dim: the battlefield stays fully visible; overlay is pointer-events:none and gone after 800 ms"
+ },
+ "endState": "overlay fades out smoothly from 500 ms and is fully transparent by the last frame; remove it when the video ends",
+ "lastFrameAlphaMax": 0,
+ "sfx": {
+  "file": "sfx.ogg",
+  "format": "Ogg Vorbis, mono, 48 kHz",
+  "startMs": 0,
+  "durationMs": 800,
+  "loudnessLUFS": -17.6,
+  "truePeakDbTP": -3.1,
+  "note": "start together with the overlay (t=0); its tail fades with the visual fade-out (from 500 ms)"
+ },
+ "timelineMs": {
+  "textSlamMs": 100,
+  "emblemsPopMs": [
+   100,
+   240
+  ],
+  "fadeOutMs": [
+   500,
+   783
+  ]
+ },
+ "preview": {
+  "file": "preview.mp4",
+  "format": "H.264 + AAC, 1920x1080, 60 fps",
+  "leadInMs": 300,
+  "tailMs": 300,
+  "background": "real battlefield screenshot (spell_anim/common/bg_board.png), no dim"
+ },
+ "sources": {
+  "gameArt": [
+   "fantasy_arena/assets/img/logos/logo_wordmark_stand.png (divider)",
+   "fantasy_arena/assets/img/emblems/composites/*.png (all 6)"
+  ],
+  "fxElements": "Kling 3.0 pro clip mt_A from the v1 batch (reused, no new generation), keyed from black to additive light; element-colour glows, rings and sparks rendered in code",
+  "lettering": "rendered in code in the logo typeface, bold: Google Sans Flex weight 880 (v2 used 550) (SIL OFL, the open release of the Product Sans / Google Sans design the wordmark uses), per-glyph width tuned to the wordmark; gold grain texture sampled from logo_wordmark_stand.png, its measured gradient, dark-red outline and inner rim",
+  "sound": "re-timed native audio of v1 Kling clip mt_A, layered with synthesized sub thump / body hit / low swell / rumble; loudness-normalised; no sonilo/mirelo"
+ },
+ "fadeOut": {
+  "startMs": 500,
+  "endMs": 783,
+  "curve": "cosine ease-in-out (opacity = (0.5+0.5cos(pi*u))^1.35); every layer (lettering, emblems, glows, particles) fades together; fully transparent on the last frame"
+ },
+ "changesFromV2": [
+  "duration 500 -> 800 ms (hold extended; entrance timing unchanged); divider moved 8 px lower for the taller bold letters; sound re-fitted to 800 ms with a low bloom and fading tail",
+  "lettering much bolder: Google Sans Flex wght 880 (v2: 550), stem/cap 0.168 -> ~0.28, tracking 0.02 -> 0.03; same logo-sampled gold texture, outline and bevel",
+  "natural fade-out 500-783 ms (cosine ease) replacing the late, steep fade"
+ ]
 }

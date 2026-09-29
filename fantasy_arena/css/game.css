@@ -1091,6 +1091,24 @@
     pointer-events: none; overflow: hidden;
   }
   #spellFx.on { display: block; }
+  /* v0.364 매치 연출 v2: 공용 dim(전장 위) + 알파 비디오 오버레이(dim 위). 클릭 통과 */
+  #matchFx {
+    position: fixed; inset: 0; z-index: 79; display: none;
+    pointer-events: none; overflow: hidden;
+  }
+  #matchFx.on { display: block; }
+  #matchFx.held { z-index: 19; } /* 승리·패배: 결과 모달(.overlay z20) 아래에서 dim 유지 */
+  #matchFx .mfx-dim {
+    position: absolute; inset: 0; background: #000; opacity: 0;
+    pointer-events: none; will-change: opacity;
+  }
+  #matchFx .mfx-stage { position: absolute; inset: 0; pointer-events: none; }
+  #matchFx .mfx-overlay {
+    position: absolute; left: 50%; top: 50%;
+    width: max(100vw, calc(100vh * 16 / 9)); height: auto; aspect-ratio: 16 / 9;
+    transform: translate(-50%, -50%);
+    pointer-events: none; user-select: none;
+  }
   #spellFx .fx-veil {
     position: absolute; inset: 0;
     background: radial-gradient(ellipse at 50% 55%, rgba(40,24,8,.15), rgba(8,6,4,.55));
