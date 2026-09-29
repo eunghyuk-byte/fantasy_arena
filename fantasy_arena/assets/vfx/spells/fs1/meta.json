@@ -1,24 +1,43 @@
 {
-  "id": "fs1",
-  "name": "화염화살",
-  "concept": "가느다란 불화살 — 프레임마다 몸통·꼬리 혀 실루엣이 다시 그려지며 좌→우 발사 / 명중은 핀포인트 가시 폭발",
-  "fps": 14,
-  "loop": false,
-  "layout": "horizontal",
-  "targetMode": "unit",
-  "flight": true,
-  "cast": {
-    "file": "cast_strip.png",
-    "frames": 18,
-    "w": 720,
-    "h": 720
-  },
-  "impact": {
-    "file": "impact_strip.png",
-    "frames": 16,
-    "w": 720,
-    "h": 720
-  },
-  "durationMs": 2428,
-  "anchor": "target"
+ "id": "fs1",
+ "name": "화염화살",
+ "type": "projectile",
+ "targetMode": "unit",
+ "anchor": "target",
+ "concept": "A — Silk Ember Arrow — golden ribbon-tailed flame arrow → soft star-flower flame bloom",
+ "fps": 30,
+ "durationMs": 930,
+ "projectile": {
+  "file": "projectile_strip.webp",
+  "frames": 15,
+  "w": 480,
+  "h": 160,
+  "loop": true,
+  "headX": 0.979,
+  "headY": 0.5,
+  "displayLengthPx@1080p": 380,
+  "flightMs": 350,
+  "easePow": 1.7,
+  "from": "center"
+ },
+ "impact": {
+  "file": "impact_strip.webp",
+  "frames": 18,
+  "w": 512,
+  "h": 512,
+  "displayBoxPx@1080p": 380,
+  "startMs": 330,
+  "durationMs": 600
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "hitAtMs": 350,
+  "variant": "sound_v2/S3"
+ },
+ "source": {
+  "projectile": "GPT Image 2.5 key image -> Kling 3.0 pro in-place flame loop, 15-frame seamless loop",
+  "impact": "Kling 3.0 pro (sound on) strike video, frames from the hit onward, retimed to 600ms",
+  "sfx": "sound_v2 S3 (Kling native thump, rebuilt), hit at 350ms"
+ }
 }

@@ -167,10 +167,35 @@ const Sfx = (() => {
     muted = !!m;
     if (sfxGain) sfxGain.gain.value = muted ? 0 : vol;
   }
+  // v0.352: arbitrary-URL one-shots (spell packs). loadUrl caches the decoded buffer so
+  // callers can preload, then start sound + animation on the same tick.
+  const urlCache = new Map();
+  function loadUrl(url) {
+    if (!url) return Promise.resolve(null);
+    if (urlCache.has(url)) return urlCache.get(url);
+    const p = (async () => {
+      try {
+        const c = ac();
+        const res = await fetch(url, { cache: "force-cache" });
+        if (!res.ok) return null;
+        return await c.decodeAudioData(await res.arrayBuffer());
+      } catch (e) { return null; }
+    })();
+    urlCache.set(url, p);
+    return p;
+  }
+  async function playUrl(url, opts) {
+    opts = opts || {};
+    if (muted) return false;
+    const buf = await loadUrl(url);
+    if (!buf) return false;
+    if (opts.duckMs) duck(opts.duckMs);
+    return playBuf(buf, opts);
+  }
   function warmup() { Object.values(FILES).forEach(stem => load(stem)); }
   return {
     playSlash, playParry, playDeath, playCardDrop, playDraw, playSummon,
     playHeroHit, playTurn, playWin, playLose, playClick, playCoin,
-    setVolume, setMuted, warmup, FILES
+    setVolume, setMuted, warmup, loadUrl, playUrl, FILES
   };
 })();
