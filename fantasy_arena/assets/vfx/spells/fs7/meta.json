@@ -1,22 +1,51 @@
 {
-  "id": "fs7",
-  "name": "화염방패",
-  "kind": "buff",
-  "durationMs": 1600,
-  "fps": 12,
-  "cast": {
-    "file": "cast.webp",
-    "frames": 12,
-    "w": 720,
-    "h": 720
-  },
-  "impact": {
-    "file": "impact.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
-  },
-  "anchor": "target",
-  "sfxHint": "fire_shield",
-  "concept": "불꽃 방패가 아군에 장착"
+ "id": "fs7",
+ "name": "화염방패",
+ "type": "projectile",
+ "targetMode": "unit",
+ "anchor": "target",
+ "concept": "A",
+ "description": "Sun Aegis — radiant sun-orb flies in, then a golden heater shield forges from swirling flame over the unit and dissolves into rising sparks",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha, horizontal frames",
+ "fps": 30,
+ "durationMs": 930,
+ "card": "유닛 하나 공·방·체 +4 (spell.type buff, target any_minion, atk/def/hp +4)",
+ "projectile": {
+  "file": "projectile_strip.webp",
+  "frames": 15,
+  "w": 480,
+  "h": 180,
+  "loop": true,
+  "orientation": "points +X (right); rotate by flight angle",
+  "headX": 0.977,
+  "headY": 0.5,
+  "displayLengthPx@1080p": 400,
+  "flightMs": 350,
+  "easePow": 1.7,
+  "from": "center",
+  "to": "target unit centre"
+ },
+ "impact": {
+  "file": "impact_strip.webp",
+  "frames": 18,
+  "w": 512,
+  "h": 512,
+  "loop": false,
+  "anchor": "target unit centre",
+  "anchorOffsetYPx@1080p": 0,
+  "displayBoxPx@1080p": 440,
+  "startMs": 330,
+  "durationMs": 600
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "hitAtMs": 350,
+  "loudnessLUFS": -17.8,
+  "truePeakDbTP": -3.8,
+  "source": "fs2 C-style: synth low brown-noise rumble with rising low-pass (slow amplitude sway) + soft pitch-drop sub thump(s), layered with this concept's own Kling clip audio low-passed ~0.6-0.65 kHz; final low-pass 1.7/2 kHz"
+ },
+ "style": "warm gold/orange fire only — no blue, no hex cells, no rune circle (distinct from Protect / Immune overlays)",
+ "sequence": "after the centre card: projectile centre→target 0-350ms, buff 330-930ms, sound from 0ms (hit 350ms)"
 }

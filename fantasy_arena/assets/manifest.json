@@ -1,5 +1,5 @@
 {
-  "count": 702,
+  "count": 701,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -2982,29 +2982,24 @@
       "name": "soul_burst_strip"
     },
     {
-      "path": "assets/vfx/spells/fs7/cast.webp",
-      "bytes": 1184616,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/spells/fs7/cast_strip.png",
-      "bytes": 1295272,
-      "name": "cast_strip"
-    },
-    {
-      "path": "assets/vfx/spells/fs7/impact.webp",
-      "bytes": 153706,
-      "name": "impact"
-    },
-    {
-      "path": "assets/vfx/spells/fs7/impact_strip.png",
-      "bytes": 256079,
+      "path": "assets/vfx/spells/fs7/impact_strip.webp",
+      "bytes": 1288008,
       "name": "impact_strip"
     },
     {
       "path": "assets/vfx/spells/fs7/meta.json",
-      "bytes": 374,
+      "bytes": 1694,
       "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs7/projectile_strip.webp",
+      "bytes": 372300,
+      "name": "projectile_strip"
+    },
+    {
+      "path": "assets/vfx/spells/fs7/sfx.mp3",
+      "bytes": 16343,
+      "name": "sfx"
     },
     {
       "path": "assets/vfx/spells/fs8/aoe.webp",

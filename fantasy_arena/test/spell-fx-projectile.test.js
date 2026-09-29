@@ -203,3 +203,27 @@ test("SpellFx: anchored 공용 재생 모드 (시전자 선택자 · 상대면 o
   assert.match(src, /oppFallbackPx@1080p/);
   assert.match(src, /if \(isAnchoredMeta\(meta\)\) return playAnchored\(stage, meta, base, opts\);/);
 });
+
+// v0.361 fs7 화염방패: projectile 팩 (컨셉 A 태양 방패, fs3·fs4와 같은 playProjectile)
+test("fs7 팩: projectile · 화면 중앙→대상 350ms · 버프 330~930ms · 2MB 이하", () => {
+  const P7 = path.join(ROOT, "assets/vfx/spells/fs7");
+  const m = JSON.parse(fs.readFileSync(path.join(P7, "meta.json"), "utf8"));
+  assert.equal(m.id, "fs7");
+  assert.equal(m.concept, "A");
+  assert.equal(m.type, "projectile");
+  assert.equal(m.targetMode, "unit");
+  assert.equal(m.projectile.from, "center");
+  assert.equal(m.projectile.flightMs, 350);
+  assert.equal(m.impact.startMs, 330);
+  assert.equal(m.impact.durationMs, 600);
+  assert.equal(m.sfx.hitAtMs, 350);
+  for (const k of ["projectile", "impact", "sfx"]) assert.ok(fs.existsSync(path.join(P7, m[k].file)), m[k].file + " 존재");
+  const total = fs.readdirSync(P7).reduce((s, f) => s + fs.statSync(path.join(P7, f)).size, 0);
+  assert.ok(total <= 2 * 1024 * 1024, "total " + total);
+  for (const old of ["cast.webp", "cast_strip.png", "impact.webp", "impact_strip.png", "preview.mp4"]) {
+    assert.ok(!fs.existsSync(path.join(P7, old)), old + " 없음");
+  }
+  const man = JSON.parse(fs.readFileSync(path.join(ROOT, "assets/manifest.json"), "utf8"));
+  const inMan = man.items.filter(i => i.path.startsWith("assets/vfx/spells/fs7/")).map(i => i.path.split("/").pop()).sort();
+  assert.deepEqual(inMan, fs.readdirSync(P7).sort());
+});
