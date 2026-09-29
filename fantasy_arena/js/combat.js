@@ -371,26 +371,36 @@ function checkWin() {
 function finish(winner) {
   state.over = true;
   state.winner = winner;
-  try {
-    if (winner === "무승부") Sfx.playLose && Sfx.playLose();
-    else if (winner === "나") Sfx.playWin && Sfx.playWin();
-    else Sfx.playLose && Sfx.playLose();
-  } catch (e) {}
+  const endState = state;
+  // v0.365: 승리·패배 v2 연출(비디오+sfx.ogg+dim)이 끝난 뒤 결과 화면. 연출 사운드가 있으니 기존 승/패 효과음은 팩이 없을 때만
+  let fxP = null;
   try {
     if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
-      if (winner === "나") SpellFx.playMatch("victory");
-      else if (winner !== "무승부") SpellFx.playMatch("defeat");
-      else SpellFx.playMatch("defeat");
+      fxP = SpellFx.playMatch(winner === "나" ? "victory" : "defeat", { skipQueue: true });
     }
-  } catch (e) {}
+  } catch (e) { fxP = null; }
+  if (!fxP) {
+    try {
+      if (winner === "나") Sfx.playWin && Sfx.playWin();
+      else Sfx.playLose && Sfx.playLose();
+    } catch (e) {}
+  }
   render();
   const meWin = winner === "나";
-  document.getElementById("modal").innerHTML = `
+  let shown = false;
+  const showResult = () => {
+    if (shown || state !== endState) return; // 그새 로비로 나갔거나 새 판이면 생략
+    shown = true;
+    document.getElementById("modal").innerHTML = `
     <h2>${winner === "무승부" ? "무승부" : winner + " 승리"}</h2>
     <p>${meWin ? "상대 영웅을 쓰러뜨렸다." : winner === "무승부" ? "둘 다 쓰러졌다." : "이번엔 패배."}</p>
     <button class="menu-btn" onclick="backTitle()">로비로</button>
   `;
-  document.getElementById("overlay").classList.add("show");
+    document.getElementById("overlay").classList.add("show");
+  };
+  if (fxP && typeof fxP.then === "function") {
+    Promise.race([fxP, new Promise(r => setTimeout(r, 3200))]).then(showResult, showResult);
+  } else showResult();
 }
 
 function clearDrag() {

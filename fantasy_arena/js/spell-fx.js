@@ -1410,7 +1410,8 @@ const SpellFx = (() => {
   // dim = 오버레이 아래·전장 위의 검은 레이어 (pointer-events:none, 클릭 막지 않음).
   // meta.dim(doInCode!==false && opacity>0)이 있으면 그 값·시간, 없으면 기본값:
   // 불투명도 0.4 (turn_start_me 0.3) · 150ms 페이드인 · 애니 페이드아웃 구간에 맞춰 페이드아웃.
-  // victory/defeat 는 결과 화면까지 dim 유지 (hideScreens → releaseDim).
+  // meta.dim.fadeOut 이 있으면 그대로 페이드아웃(v2 승리·패배: 1350→1800ms, 이후 결과 화면).
+  // meta.dim.fadeOut === null 이거나 meta dim 없는 구형 victory/defeat 팩만 결과 화면까지 유지 (hideScreens → releaseDim).
   const DIM_DEFAULT_OPACITY = 0.4;
   const DIM_DEFAULT_BY_ID = { turn_start_me: 0.3 };
   const DIM_DEFAULT_FADE_IN_MS = 150;
@@ -1443,7 +1444,7 @@ const SpellFx = (() => {
       fadeInEndMs = d.fadeIn.endMs;
     }
     const hold = opts.holdDim != null ? !!opts.holdDim
-      : (!!DIM_HOLD_IDS[id] || (useMeta && d.fadeOut === null));
+      : (useMeta ? d.fadeOut === null : !!DIM_HOLD_IDS[id]);
     let fadeOutStartMs = null, fadeOutEndMs = null;
     if (!hold) {
       if (useMeta && d.fadeOut && d.fadeOut.endMs != null) {
@@ -1614,9 +1615,10 @@ const SpellFx = (() => {
     if (video && ok) await Promise.race([waitEvent(video, ["ended"], dur + 250), _sleep(dur + 250)]);
     else await _sleep(dur);
     if (dim && dim.hold) {
-      // 결과 화면까지 유지: 모달(.overlay z20) 아래로 내림. 마지막 프레임이 보이는 팩(lastFrameAlphaMax>0)은 그대로 둠
+      // 결과 화면까지 유지: 모달(.overlay z20) 아래로 내림. 마지막 프레임이 실제로 보이는 팩(lastFrameAlphaMax≥128)만 남김
+      // (DEFEAT v2 처럼 알파 2/255 잔상만 남는 팩은 제거)
       layer.classList.add("held");
-      if (!(meta.lastFrameAlphaMax > 0) && stage) stage.innerHTML = "";
+      if (!(meta.lastFrameAlphaMax >= 128) && stage) stage.innerHTML = "";
     } else {
       if (stage && visual && visual.parentNode === stage) stage.removeChild(visual);
       const tailMs = dim && dim.fadeOutEndMs != null ? Math.max(0, dim.fadeOutEndMs - dur) : 0;

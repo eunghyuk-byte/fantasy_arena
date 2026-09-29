@@ -2372,29 +2372,29 @@
       "name": "meta"
     },
     {
-      "path": "assets/vfx/match/defeat/cast.webp",
-      "bytes": 989630,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/match/defeat/cast_strip.png",
-      "bytes": 2892227,
-      "name": "cast_strip"
-    },
-    {
-      "path": "assets/vfx/match/defeat/impact.webp",
-      "bytes": 1355412,
-      "name": "impact"
-    },
-    {
-      "path": "assets/vfx/match/defeat/impact_strip.png",
-      "bytes": 3536900,
-      "name": "impact_strip"
-    },
-    {
       "path": "assets/vfx/match/defeat/meta.json",
-      "bytes": 404,
+      "bytes": 4517,
       "name": "meta"
+    },
+    {
+      "path": "assets/vfx/match/defeat/overlay.webm",
+      "bytes": 1202822,
+      "name": "overlay"
+    },
+    {
+      "path": "assets/vfx/match/defeat/overlay_safari.webp",
+      "bytes": 2474134,
+      "name": "overlay_safari"
+    },
+    {
+      "path": "assets/vfx/match/defeat/sfx.mp3",
+      "bytes": 29612,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/match/defeat/sfx.ogg",
+      "bytes": 16712,
+      "name": "sfx"
     },
     {
       "path": "assets/vfx/match/match_start/meta.json",
@@ -2447,29 +2447,29 @@
       "name": "sfx"
     },
     {
-      "path": "assets/vfx/match/victory/cast.webp",
-      "bytes": 1701328,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/match/victory/cast_strip.png",
-      "bytes": 5933788,
-      "name": "cast_strip"
-    },
-    {
-      "path": "assets/vfx/match/victory/impact.webp",
-      "bytes": 1688796,
-      "name": "impact"
-    },
-    {
-      "path": "assets/vfx/match/victory/impact_strip.png",
-      "bytes": 6161235,
-      "name": "impact_strip"
-    },
-    {
       "path": "assets/vfx/match/victory/meta.json",
-      "bytes": 412,
+      "bytes": 4538,
       "name": "meta"
+    },
+    {
+      "path": "assets/vfx/match/victory/overlay.webm",
+      "bytes": 1423222,
+      "name": "overlay"
+    },
+    {
+      "path": "assets/vfx/match/victory/overlay_safari.webp",
+      "bytes": 4375538,
+      "name": "overlay_safari"
+    },
+    {
+      "path": "assets/vfx/match/victory/sfx.mp3",
+      "bytes": 29612,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/match/victory/sfx.ogg",
+      "bytes": 19074,
+      "name": "sfx"
     },
     {
       "path": "assets/vfx/spells/as1/cast.webp",

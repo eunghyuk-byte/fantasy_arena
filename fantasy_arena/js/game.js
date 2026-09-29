@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.364";
+const GAME_VERSION = "0.365";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -287,6 +287,10 @@ function startGame(vsAI) {
       } catch (e) {}
       // 같은 판·아직 첫 턴 주인의 턴일 때만 (그새 턴이 넘어갔거나 새 판이면 생략)
       if (state === matchState && !state.over && current() === first) playTurnStartFx(first);
+      // v0.365: 승리·패배 연출도 미리 캐시 (첫 턴 연출이 끝난 뒤, 부하 분산)
+      setTimeout(() => {
+        try { if (state === matchState && SpellFx.preloadMatch) { SpellFx.preloadMatch("victory"); SpellFx.preloadMatch("defeat"); } } catch (e) {}
+      }, 2500);
     })();
   } catch (e) {}
   if (first.isAI) aiTurn();

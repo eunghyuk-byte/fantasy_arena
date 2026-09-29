@@ -17,8 +17,9 @@ function loadDimFns() {
   return new Function(SRC.slice(a, b) + "\nreturn { resolveDim, isVideoPackMeta, packFadeOutWindow };")();
 }
 
-test("match_start·turn_start_me: v2 비디오 팩 파일 + 구 스트립 제거", () => {
-  for (const [id, dur, fo] of [["match_start", 1500, [1080, 1483]], ["turn_start_me", 800, [500, 783]]]) {
+test("match_start·turn_start_me·victory·defeat: v2 비디오 팩 파일 + 구 스트립 제거", () => {
+  for (const [id, dur, fo] of [["match_start", 1500, [1080, 1483]], ["turn_start_me", 800, [500, 783]],
+    ["victory", 1800, [1350, 1783]], ["defeat", 1800, [1350, 1783]]]) {
     const m = readMeta(id);
     assert.equal(m.durationMs, dur, id + " durationMs");
     assert.equal(m.fps, 60);
@@ -40,7 +41,7 @@ test("manifest: 매치 v2 파일 등록·구 파일 제거·count 일치", () =>
   const man = JSON.parse(fs.readFileSync(path.join(ROOT, "assets/manifest.json"), "utf8"));
   assert.equal(man.count, man.items.length);
   const paths = new Set(man.items.map(i => i.path));
-  for (const id of ["match_start", "turn_start_me"]) {
+  for (const id of ["match_start", "turn_start_me", "victory", "defeat"]) {
     for (const f of fs.readdirSync(path.join(MATCH, id))) {
       const p = "assets/vfx/match/" + id + "/" + f;
       assert.ok(paths.has(p), p);
@@ -70,7 +71,21 @@ test("dim: MY TURN은 meta dim 없음(doInCode:false) → 기본 0.3·150ms 페�
   assert.equal(d.hold, false);
 });
 
-test("dim: 기본 0.4, 승리·패배는 결과 화면까지 유지(hold), meta.dim.fadeOut:null도 hold", () => {
+test("dim: 승리·패배 v2는 meta 값(0.4, 페이드인 250/350ms, 1350→1800ms 페이드아웃, 유지 안 함)", () => {
+  const { resolveDim } = loadDimFns();
+  for (const [id, fin] of [["victory", 250], ["defeat", 350]]) {
+    const m = readMeta(id);
+    const d = resolveDim(id, m);
+    assert.equal(d.opacity, 0.4, id);
+    assert.equal(d.fromMeta, true);
+    assert.deepEqual([d.fadeInStartMs, d.fadeInEndMs, d.fadeOutStartMs, d.fadeOutEndMs], [0, fin, 1350, 1800], id);
+    assert.equal(d.hold, false, id + " 연출 끝나면 dim 해제 → 결과 화면");
+  }
+  assert.equal(readMeta("defeat").lastFrameAlphaMax, 2, "DEFEAT 마지막 프레임 알파 2/255 → 코드에서 제거");
+  assert.match(SRC, /meta\.lastFrameAlphaMax >= 128/);
+});
+
+test("dim: 기본 0.4, meta dim 없는 구형 승리·패배는 결과 화면까지 유지(hold), meta.dim.fadeOut:null도 hold", () => {
   const { resolveDim } = loadDimFns();
   const plain = { durationMs: 1000, fadeOut: { startMs: 700, endMs: 980 } };
   const d = resolveDim("some_match_fx", plain);
@@ -105,6 +120,10 @@ test("SpellFx: 비디오 모드·dim 레이어·Safari 폴백·결과 화면 해
   assert.match(css, /#matchFx\.held \{ z-index: 19; \}/, "결과 모달(20) 아래에서 유지");
   const combat = fs.readFileSync(path.join(ROOT, "js/combat.js"), "utf8");
   assert.match(combat, /SpellFx\.releaseDim\(\)/);
+  // 결과 화면은 승리·패배 연출이 끝난 뒤 (최대 3.2s 대기)
+  const fin = combat.slice(combat.indexOf("function finish(winner)"), combat.indexOf("function clearDrag()"));
+  assert.match(fin, /SpellFx\.playMatch\(winner === "나" \? "victory" : "defeat", \{ skipQueue: true \}\)/);
+  assert.match(fin, /Promise\.race\(\[fxP, new Promise\(r => setTimeout\(r, 3200\)\)\]\)\.then\(showResult, showResult\)/);
   const game = fs.readFileSync(path.join(ROOT, "js/game.js"), "utf8");
   assert.match(game, /SpellFx\.playMatch\("match_start"\)/);
   assert.match(game, /SpellFx\.playMatch\("turn_start_me", \{ label: "" \}\)/);
