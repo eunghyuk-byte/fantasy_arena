@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.370";
+const GAME_VERSION = "0.371";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -791,8 +791,21 @@ async function runSpellCast(p, card, target) {
   // 맹덕신서(copy_enemy_spell): 시전 시점 상대 전장 장착 유닛 수만큼, 해결 뒤 원본 소울 복사본을 상대 핸드에
   const copiers = unitsWithItemFx(opponent(p), "copy_enemy_spell").length;
   try {
-    await playSpellFx(card, target, p);
-    resolveSpell(p, card, target);
+    // v0.371 일기토(duel_random_keep): 생존 유닛을 연출 전에 뽑아 연출·해결에 같이 넘김 (연출 = 실제 결과)
+    const plan = {};
+    if (card && card.spell && card.spell.type === "duel_random_keep") plan.keepUids = pickDuelKeepUids(p);
+    // v0.371 소환 연출(summon 모드, 팔진도): 연출이 먼저 해결을 부르고 새 토큰 uid를 받아 숨겼다가 드러냄
+    let resolved = false;
+    plan.resolveNow = () => {
+      if (resolved) return [];
+      resolved = true;
+      const before = new Set(p.board.map(m => m.uid));
+      resolveSpell(p, card, target, plan);
+      try { render(); } catch (e) {}
+      return p.board.filter(m => !before.has(m.uid)).map(m => m.uid);
+    };
+    await playSpellFx(card, target, p, plan);
+    if (!resolved) { resolved = true; resolveSpell(p, card, target, plan); }
     for (let i = 0; i < copiers; i++) addCardToHand(opponent(p), card.id, "맹덕신서 복사");
   } finally {
     state.busy = false;
@@ -801,11 +814,14 @@ async function runSpellCast(p, card, target) {
   render();
 }
 
-function playSpellFx(card, target, caster) {
+function playSpellFx(card, target, caster, plan) {
   // v0.354: casterIsMe — 광역(aoe_enemy/aoe_ally) 연출이 시전자 기준 보드를 고르게
   let casterIsMe;
   try { if (caster) casterIsMe = caster === meView().me; } catch (e) {}
-  if (typeof SpellFx !== "undefined" && SpellFx.play) return SpellFx.play(card, { target, casterIsMe });
+  const o = { target, casterIsMe };
+  if (plan && plan.keepUids) o.keepUids = plan.keepUids.slice();
+  if (plan && plan.resolveNow) o.resolveNow = plan.resolveNow;
+  if (typeof SpellFx !== "undefined" && SpellFx.play) return SpellFx.play(card, o);
   return Promise.resolve();
 }
 function buildSpellFx(stage, kind, card) {
@@ -977,8 +993,20 @@ function resolvePlayAbility(p, m) {
   }
 }
 
-function resolveSpell(p, card, target) {
-  applyFx(p, card.spell, target);
+function resolveSpell(p, card, target, plan) {
+  let fx = card.spell;
+  if (fx && plan && plan.keepUids && fx.type === "duel_random_keep") fx = Object.assign({}, fx, { keepUids: plan.keepUids });
+  applyFx(p, fx, target);
+}
+/** v0.371 일기토: 시전자·상대 전장에서 살아 있는 유닛 중 랜덤 하나씩 (duel_random_keep 규칙과 동일) → uid 목록 */
+function pickDuelKeepUids(p) {
+  const out = [];
+  [p, opponent(p)].forEach(pl => {
+    const alive = ((pl && pl.board) || []).filter(m => m.hp > 0 && !m.dying);
+    if (!alive.length) return;
+    out.push(alive[Math.floor(Math.random() * alive.length)].uid);
+  });
+  return out;
 }
 
 
@@ -1268,7 +1296,9 @@ function applyFx(p, fx, target) {
     [p, e].forEach(pl => {
       const alive = pl.board.filter(m => m.hp > 0 && !m.dying);
       if (!alive.length) return;
-      const keep = alive[Math.floor(Math.random() * alive.length)];
+      // v0.371: 연출 전에 뽑은 생존 uid(fx.keepUids)가 이 전장에 살아 있으면 그대로, 없으면 랜덤
+      const pre = Array.isArray(fx.keepUids) ? alive.find(m => fx.keepUids.some(u => String(u) === String(m.uid))) : null;
+      const keep = pre || alive[Math.floor(Math.random() * alive.length)];
       alive.forEach(m => { if (m.uid !== keep.uid) destroyMinion(pl, m, { fromSpell: true }); });
     });
     log("일기토 · 양쪽 랜덤 하나씩만 남김");

@@ -1,0 +1,71 @@
+{
+ "id": "fs9",
+ "name": "일기토",
+ "concept": "C",
+ "description": "Duel Spotlight — a crimson-gold spotlight falls on each survivor while a curtain of crimson flame drops over every other unit and sinks into embers",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha",
+ "card": "cost 5 · fire · 내 전장과 적 전장에서 랜덤 유닛 하나씩만 남기고 나머지 처치 (spell.type duel_random_keep)",
+ "durationMs": 900,
+ "type": "aoe",
+ "targetMode": "aoe_all",
+ "playMode": "duelKeep",
+ "playModeNote": "NEW MODE duelKeep: needs the two survivors BEFORE the fx plays. Pick the kept unit of each side first (same random rule as duel_random_keep), pass their uids to the fx, and resolve with those same uids. Layer 'keep' plays on each survivor (both sides, at most 2); layer 'kill' plays on every other unit on both boards at its own delay. Sides with 0 units are skipped; a side with 1 unit only gets 'keep'.",
+ "keep": {
+  "file": "keep_strip.webp",
+  "layout": "horizontal",
+  "frames": 27,
+  "w": 384,
+  "h": 384,
+  "fps": 30,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 900,
+  "anchor": "each survivor's unit centre",
+  "anchorOffsetYPx@1080p": -60,
+  "displayBoxPx@1080p": 420
+ },
+ "kill": {
+  "file": "kill_strip.webp",
+  "layout": "horizontal",
+  "frames": 16,
+  "w": 320,
+  "h": 320,
+  "fps": 30,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 533,
+  "anchor": "each non-surviving unit centre (both sides)",
+  "anchorOffsetYPx@1080p": -10,
+  "displayBoxPx@1080p": 330,
+  "delayFormula": "delayMs = 100 + 0.12*hypot(unitX-960, unitY-540)",
+  "delaysMsAtReferenceBoard": {
+   "p1 임프 @[480, 719]": 161,
+   "p1 용암술사 @[930, 719]": 122,
+   "p1 여령기 @[1155, 719]": 132,
+   "p2 드라이어드 @[480, 311]": 164,
+   "p2 오크 @[930, 311]": 128,
+   "p2 스톤골렘 @[1155, 311]": 136,
+   "p2 만드라고라 @[1380, 311]": 157
+  },
+  "delay": {
+   "baseMs": 100,
+   "perPx@1080p": 0.12,
+   "origin": "center"
+  }
+ },
+ "referenceSurvivors": {
+  "p1": "불꽃여우 @[705, 719]",
+  "p2": "여포 @[705, 311]"
+ },
+ "afterEffect": "destroyed units are removed by the game as usual; preview fades each one out at delay+250..450ms",
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "hitAtMs": 220,
+  "loudnessLUFS": -17.8,
+  "truePeakDbTP": -4.0,
+  "source": "fs2 C-style: synth low brown-noise rumble with rising low-pass (slow amplitude sway) + soft pitch-drop sub thump(s), layered with this concept's own Kling clip audio low-passed ~0.6-0.7 kHz; final low-pass 1.7/2 kHz",
+  "note": "low warm swell under the survivors' aura + one heavy low thump when the other units fall"
+ }
+}

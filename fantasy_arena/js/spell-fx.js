@@ -369,6 +369,17 @@ const SpellFx = (() => {
   //   layers: [{ file, layout, frames, w, h, fps, startMs, durationMs, displayBoxPx@1080p, anchorOffsetYPx@1080p,
   //              oppAnchorOffsetYPx@1080p?, anchor: { selector, opp, fallbackPx@1080p, oppFallbackPx@1080p } }]
   //   → 시전자 UI 요소(선택자 rect 중심 + offsetY) 위에 한 번씩 재생. 상대가 쓰면 opp 선택자·opp 좌표
+  // E) meta.playMode "duelKeep"  (fs9 일기토, v0.371)
+  //   keep: { file, frames, w, h, fps, durationMs, displayBoxPx@1080p, anchorOffsetYPx@1080p } → 생존 유닛마다
+  //   kill: { ... , delay: { baseMs, perPx@1080p, origin: "center" } } → 양쪽 보드의 나머지 유닛마다
+  //   생존 uid는 게임이 효과 전에 정해 opts.keepUids로 넘기고, 같은 uid로 해결한다 (연출 = 실제 결과)
+  // F) meta.playMode "summon"  (es9 팔진도, v0.371)
+  //   formation: { file, frames, w, h, fps, durationMs, displayWidthPx@1080p, squashY } → 새 토큰 자리 중점에 납작한 타원
+  //   rise: { file, ..., displayBoxPx@1080p, anchorOffsetYPx@1080p, startMs, staggerMs, tokenFadeIn: { startMs, durationMs },
+  //           solidReveal: { durationMs } } → 토큰마다. 게임은 opts.resolveNow()로 먼저 해결하고 새 토큰 uid를 돌려준다
+  // B 추가) overlay.fitBox { sizePx@1080p, anchor: "targetBoard", offsetYPx@1080p } · unitImpact.delay.staggerMs (X 순서) (as9)
+  // B 추가) unitImpact.delay.origin "corner" (+corner, metric "manhattan", minMs, mirrorYWhenOppCasts) ·
+  //   overlay.opacity (0~1) · overlay.flipYWhenOppCasts  (v0.371 ns9 동남풍)
   // 공통) meta.screenShake (선택, v0.362 fs8): { startMs, durationMs, amplitudePx@1080p }
   //   → 캔버스가 아니라 보드(#game)의 기존 quake 클래스를 그 시각·길이·세기로 재생
   // ─────────────────────────────────────────────────────────────────────────
@@ -401,7 +412,13 @@ const SpellFx = (() => {
   function isAnchoredMeta(meta) {
     return !!(meta && String(meta.playMode || "") === "anchored" && Array.isArray(meta.layers) && meta.layers.length);
   }
-  function isCanvasMeta(meta) { return isProjectileMeta(meta) || isOverlayMeta(meta) || isFlowMeta(meta) || isAnchoredMeta(meta); }
+  function isDuelKeepMeta(meta) {
+    return !!(meta && String(meta.playMode || "") === "duelKeep" && meta.keep && meta.keep.file && meta.kill && meta.kill.file);
+  }
+  function isSummonMeta(meta) {
+    return !!(meta && String(meta.playMode || "") === "summon" && meta.formation && meta.formation.file && meta.rise && meta.rise.file);
+  }
+  function isCanvasMeta(meta) { return isProjectileMeta(meta) || isOverlayMeta(meta) || isFlowMeta(meta) || isAnchoredMeta(meta) || isDuelKeepMeta(meta) || isSummonMeta(meta); }
   function metaSfxUrl(meta, base) { return meta && meta.sfx && meta.sfx.file ? assetUrl(base, meta.sfx.file) : ""; }
   function projectileUrls(meta, base) {
     return {
@@ -485,8 +502,28 @@ const SpellFx = (() => {
       loadSfx(metaSfxUrl(meta, base))
     ]);
   }
+  function preloadDuelKeep(meta, base) {
+    if (!isDuelKeepMeta(meta)) return Promise.resolve(null);
+    const K = meta.keep, X = meta.kill;
+    return Promise.all([
+      loadFrames(assetUrl(base, K.file), K.frames, K.w, K.h, K.layout),
+      loadFrames(assetUrl(base, X.file), X.frames, X.w, X.h, X.layout),
+      loadSfx(metaSfxUrl(meta, base))
+    ]);
+  }
+  function preloadSummon(meta, base) {
+    if (!isSummonMeta(meta)) return Promise.resolve(null);
+    const F = meta.formation, R = meta.rise;
+    return Promise.all([
+      loadFrames(assetUrl(base, F.file), F.frames, F.w, F.h, F.layout),
+      loadFrames(assetUrl(base, R.file), R.frames, R.w, R.h, R.layout),
+      loadSfx(metaSfxUrl(meta, base))
+    ]);
+  }
   function preloadMetaFx(meta, base) {
     if (isProjectileMeta(meta)) return preloadProjectile(meta, base);
+    if (isSummonMeta(meta)) return preloadSummon(meta, base);
+    if (isDuelKeepMeta(meta)) return preloadDuelKeep(meta, base);
     if (isAnchoredMeta(meta)) return preloadAnchored(meta, base);
     if (isFlowMeta(meta)) return preloadFlow(meta, base);
     if (isOverlayMeta(meta)) return preloadOverlay(meta, base);
@@ -647,13 +684,26 @@ const SpellFx = (() => {
     return pts;
   }
   /** Per-unit start delay (ms). meta delay distance is @1080p px from the stage centre. */
-  function unitDelayMs(U, pt, k) {
+  function unitDelayMs(U, pt, k, opts) {
     const d = (U && U.delay) || {};
     const base = d.baseMs != null ? d.baseMs : 0;
     const per = d["perPx@1080p"] != null ? d["perPx@1080p"] : 0;
-    const c = screenCenter();
-    const dist = d.axis === "x" ? Math.abs(pt.x - c.x) : d.axis === "y" ? Math.abs(pt.y - c.y) : Math.hypot(pt.x - c.x, pt.y - c.y);
-    return base + per * dist / (k || 1);
+    let dist;
+    if (d.origin === "corner") {
+      // v0.371 ns9: 화면 모서리에서 쓸고 지나가는 지연 (기본 오른쪽 아래, manhattan = |dx|+|dy|).
+      // mirrorYWhenOppCasts: 상대가 쓰면 오버레이와 같이 위아래 반전 → 오른쪽 위 모서리 기준
+      const cw = window.innerWidth || 1920, ch = window.innerHeight || 1080;
+      let cn = String(d.corner || "bottomRight");
+      if (d.mirrorYWhenOppCasts && opts && opts.casterIsMe === false) cn = cn.indexOf("bottom") === 0 ? cn.replace("bottom", "top") : cn.replace("top", "bottom");
+      const cx = /Left$/.test(cn) ? 0 : cw, cy = cn.indexOf("top") === 0 ? 0 : ch;
+      const dx = Math.abs(pt.x - cx), dy = Math.abs(pt.y - cy);
+      dist = d.metric === "manhattan" ? dx + dy : Math.hypot(dx, dy);
+    } else {
+      const c = screenCenter();
+      dist = d.axis === "x" ? Math.abs(pt.x - c.x) : d.axis === "y" ? Math.abs(pt.y - c.y) : Math.hypot(pt.x - c.x, pt.y - c.y);
+    }
+    const ms = base + per * dist / (k || 1);
+    return d.minMs != null ? Math.max(d.minMs, ms) : ms;
   }
   /**
    * Generic full-screen overlay + per-unit impact player (AOE spells).
@@ -673,6 +723,18 @@ const SpellFx = (() => {
     const oDur = O ? (O.durationMs || Math.round((O.frames || 1) * 1000 / (O.fps || 24))) : 0;
     const oFps = O ? (O.fps || meta.fps || 24) : 24;
     const oN = O ? Math.max(1, O.frames || 1) : 1;
+    // v0.371: overlay.opacity (선택, 0~1) · overlay.flipYWhenOppCasts (상대 시전이면 위아래 반전)
+    const oAlpha = O && O.opacity != null ? Math.max(0, Math.min(1, +O.opacity || 0)) : 1;
+    const oFlip = !!(O && O.flipYWhenOppCasts && opts.casterIsMe === false);
+    // v0.371 as9: overlay.fitBox → 대상 보드 중심에 고정 크기 상자 (없으면 화면 전체)
+    let oBox = null;
+    if (O && O.fitBox) {
+      const F = O.fitBox, sz = F["sizePx@1080p"] || [1280, 720];
+      const c = F.anchor === "casterBoard" ? casterBoardCenter(opts.casterIsMe) : casterBoardCenter(opts.casterIsMe === false ? true : false);
+      const oy = (F["offsetYPx@1080p"] || 0) * k * (oFlip ? -1 : 1);
+      oBox = { w: sz[0] * k, h: sz[1] * k };
+      oBox.x = c.x - oBox.w / 2; oBox.y = c.y + oy - oBox.h / 2;
+    }
     const hits = [];
     let uDur = 0, uFps = 30, uN = 1, uBox = 0, uOffY = 0;
     if (U) {
@@ -681,15 +743,26 @@ const SpellFx = (() => {
       uN = Math.max(1, U.frames || 1);
       uBox = (U["displayBoxPx@1080p"] || 300) * k;
       uOffY = (U["anchorOffsetYPx@1080p"] || 0) * k;
-      (opts.points || aoeUnitPoints(meta.targetMode || "aoe_all", opts.casterIsMe)).forEach(pt => {
-        hits.push({ x: pt.x, y: pt.y + uOffY, at: unitDelayMs(U, pt, k) });
+      const upts = (opts.points || aoeUnitPoints(meta.targetMode || "aoe_all", opts.casterIsMe)).slice();
+      const st = U.delay && U.delay.staggerMs != null ? U.delay : null;
+      // v0.371 as9: delay.staggerMs → 화면 X 순서(왼→오)로 baseMs + i*staggerMs
+      if (st) upts.sort((a, b) => a.x - b.x);
+      upts.forEach((pt, i) => {
+        hits.push({ x: pt.x, y: pt.y + uOffY, at: st ? (st.baseMs || 0) + i * st.staggerMs : unitDelayMs(U, pt, k, opts) });
       });
     }
     const endMs = Math.max(O ? oStart + oDur : 0, hits.reduce((m, h) => Math.max(m, h.at + uDur), 0));
     return runCanvasFx(stage, endMs, metaSfxUrl(meta, base), S.startMs, (ctx, t, cw, ch) => {
       if (O) {
         const to = t - oStart;
-        if (to >= 0 && to < oDur) drawFrame(ctx, ovFr, Math.min(oN - 1, Math.floor(to * oFps / 1000)), 0, 0, cw, ch);
+        if (to >= 0 && to < oDur && oAlpha > 0) {
+          ctx.save();
+          ctx.globalAlpha = oAlpha;
+          const bx = oBox ? oBox.x : 0, by = oBox ? oBox.y : 0, bw = oBox ? oBox.w : cw, bh = oBox ? oBox.h : ch;
+          if (oFlip) { ctx.translate(0, 2 * by + bh); ctx.scale(1, -1); }
+          drawFrame(ctx, ovFr, Math.min(oN - 1, Math.floor(to * oFps / 1000)), bx, by, bw, bh);
+          ctx.restore();
+        }
       }
       if (U) {
         const bw = uBox, bh = uBox * unFr.h / unFr.w;
@@ -869,11 +942,148 @@ const SpellFx = (() => {
       });
     }, opts);
   }
+  /**
+   * v0.371 duelKeep player (fs9 일기토): 살아남을 유닛(uid)을 효과 전에 정해서 받는다.
+   * keep 레이어 = 생존 유닛마다(양쪽, 최대 2) · kill 레이어 = 양쪽 보드의 나머지 유닛마다 각자 지연.
+   * @param opts { keepUids: [uid...], sound?: bool }  (keepUids 없으면 전부 kill)
+   */
+  async function playDuelKeep(stage, meta, base, opts) {
+    opts = opts || {};
+    if (!stage || !isDuelKeepMeta(meta)) return false;
+    const [kFr, xFr] = await preloadDuelKeep(meta, base);
+    if (!kFr && !xFr) return false;
+    const K = meta.keep, X = meta.kill, S = meta.sfx || {};
+    const k = fxScale();
+    const keepSet = new Set((opts.keepUids || []).map(String));
+    const pts = opts.points || aoeUnitPoints(meta.targetMode || "aoe_all", opts.casterIsMe);
+    const layer = (L, fr) => ({
+      fr, dur: L.durationMs || Math.round((L.frames || 1) * 1000 / (L.fps || 30)), fps: L.fps || meta.fps || 30,
+      n: Math.max(1, L.frames || 1), box: (L["displayBoxPx@1080p"] || 320) * k, offY: (L["anchorOffsetYPx@1080p"] || 0) * k, start: L.startMs || 0
+    });
+    const KL = kFr ? layer(K, kFr) : null, XL = xFr ? layer(X, xFr) : null;
+    const keeps = [], kills = [];
+    pts.forEach(pt => {
+      if (keepSet.has(String(pt.uid))) { if (KL) keeps.push({ x: pt.x, y: pt.y + KL.offY, at: KL.start }); }
+      else if (XL) kills.push({ x: pt.x, y: pt.y + XL.offY, at: XL.start + unitDelayMs(X, pt, k, opts) });
+    });
+    if (!keeps.length && !kills.length) return false;
+    const endMs = Math.max(
+      keeps.reduce((m, h) => Math.max(m, h.at + KL.dur), 0),
+      kills.reduce((m, h) => Math.max(m, h.at + XL.dur), 0));
+    const drawSet = (ctx, t, L, list) => {
+      const bw = L.box, bh = L.box * L.fr.h / L.fr.w;
+      list.forEach(h => {
+        const ti = t - h.at;
+        if (ti < 0 || ti >= L.dur) return;
+        drawFrame(ctx, L.fr, Math.min(L.n - 1, Math.floor(ti * L.fps / 1000)), h.x - bw / 2, h.y - bh / 2, bw, bh);
+      });
+    };
+    return runCanvasFx(stage, endMs, metaSfxUrl(meta, base), S.startMs, (ctx, t) => {
+      if (XL) drawSet(ctx, t, XL, kills);   // 불꽃 장막 (나머지)
+      if (KL) drawSet(ctx, t, KL, keeps);   // 스포트라이트 (생존) — 위에
+    }, opts);
+  }
+  // v0.371 summon: 새 토큰을 연출 동안 숨겼다가 드러내기. render()로 DOM이 다시 만들어져도 유지되게 uid 선택자 스타일로 처리
+  const _hidden = {};
+  function hideStyleEl() {
+    let st = document.getElementById("spellFxHide");
+    if (!st) {
+      st = document.createElement("style");
+      st.id = "spellFxHide";
+      (document.head || document.body).appendChild(st);
+    }
+    return st;
+  }
+  function syncHideStyle() {
+    let css = "";
+    const kfs = {};
+    Object.keys(_hidden).forEach(uid => {
+      const h = _hidden[uid], sel = '.minion[data-uid="' + String(uid).replace(/"/g, "") + '"]';
+      if (h.state === "hide") { css += sel + "{opacity:0!important;}"; return; }
+      const pct = Math.max(1, Math.min(99, Math.round(h.fadeMs / h.total * 100)));
+      const name = "fxTokenReveal" + pct;
+      kfs[name] = "@keyframes " + name + "{0%{opacity:0;filter:brightness(1.9);scale:.94}" + pct +
+        "%{opacity:1;filter:brightness(1.7);scale:1.06}100%{opacity:1;filter:brightness(1);scale:1}}";
+      css += sel + "{animation:" + name + " " + h.total + "ms linear both;}";
+    });
+    hideStyleEl().textContent = Object.values(kfs).join("") + css;
+  }
+  function hideUnits(uids) {
+    (uids || []).forEach(u => { _hidden[u] = { state: "hide" }; });
+    syncHideStyle();
+  }
+  /** 토큰 드러내기: fadeMs 동안 나타나고 popMs 동안 실제 카드가 단단하게 튀어 보임(밝기·크기 복귀) */
+  function revealUnit(uid, fadeMs, popMs) {
+    if (!_hidden[uid]) return;
+    const total = Math.max(1, (fadeMs || 0) + (popMs || 0));
+    _hidden[uid] = { state: "reveal", fadeMs: fadeMs || 0, total };
+    syncHideStyle();
+    setTimeout(() => { if (_hidden[uid] && _hidden[uid].state === "reveal") { delete _hidden[uid]; syncHideStyle(); } }, total + 30);
+  }
+  function releaseHidden() {
+    const any = Object.keys(_hidden).length;
+    Object.keys(_hidden).forEach(u => delete _hidden[u]);
+    if (any) syncHideStyle();
+  }
+  /**
+   * v0.371 summon player (es9 팔진도): 게임이 먼저 해결(토큰 소환)하고 숨긴 뒤 호출.
+   * formation = 새 토큰 자리들의 중점(없으면 시전자 보드 중앙)에 납작한 타원 · rise = 토큰마다 startMs + i*staggerMs
+   * 토큰은 rise 시작 + tokenFadeIn.startMs 부터 fade, 이어서 solidReveal(실제 카드 팝)
+   * @param opts { tokenUids: [uid...], casterIsMe?, sound? }
+   */
+  async function playSummon(stage, meta, base, opts) {
+    opts = opts || {};
+    const uids = (opts.tokenUids || []).slice();
+    try {
+      if (!stage || !isSummonMeta(meta)) return false;
+      const [fFr, rFr] = await preloadSummon(meta, base);
+      if (!fFr && !rFr) return false;
+      const F = meta.formation, R = meta.rise, S = meta.sfx || {};
+      const k = fxScale();
+      const pts = [];
+      uids.forEach(u => {
+        const el = document.querySelector('.minion[data-uid="' + u + '"]');
+        const pt = rectCenter(el);
+        if (pt) pts.push({ uid: u, x: pt.x, y: pt.y });
+      });
+      const c = pts.length ? { x: pts.reduce((a, p) => a + p.x, 0) / pts.length, y: pts.reduce((a, p) => a + p.y, 0) / pts.length } : casterBoardCenter(opts.casterIsMe);
+      const fw = (F["displayWidthPx@1080p"] || 520) * k, fh = fw * (F.squashY || 1) * (fFr ? fFr.h / fFr.w : 1);
+      const fStart = F.startMs || 0, fDur = F.durationMs || Math.round((F.frames || 1) * 1000 / (F.fps || 30));
+      const fFps = F.fps || meta.fps || 30, fN = Math.max(1, F.frames || 1);
+      const rBox = (R["displayBoxPx@1080p"] || 380) * k, rOff = (R["anchorOffsetYPx@1080p"] || 0) * k;
+      const rDur = R.durationMs || Math.round((R.frames || 1) * 1000 / (R.fps || 30));
+      const rFps = R.fps || meta.fps || 30, rN = Math.max(1, R.frames || 1);
+      const fi = R.tokenFadeIn || { startMs: 220, durationMs: 200 };
+      const popMs = (R.solidReveal && R.solidReveal.durationMs) || 0;
+      const rises = pts.map((p, i) => ({ x: p.x, y: p.y + rOff, uid: p.uid, at: (R.startMs || 0) + i * (R.staggerMs || 0) }));
+      rises.forEach(r => setTimeout(() => revealUnit(r.uid, fi.durationMs || 200, popMs), r.at + (fi.startMs || 0)));
+      const endMs = Math.max(fFr ? fStart + fDur : 0,
+        rFr ? rises.reduce((m, r) => Math.max(m, r.at + rDur), 0) : 0,
+        rises.reduce((m, r) => Math.max(m, r.at + (fi.startMs || 0) + (fi.durationMs || 200) + popMs), 0));
+      return await runCanvasFx(stage, endMs, metaSfxUrl(meta, base), S.startMs, (ctx, t) => {
+        const tf = t - fStart;
+        if (fFr && tf >= 0 && tf < fDur) drawFrame(ctx, fFr, Math.min(fN - 1, Math.floor(tf * fFps / 1000)), c.x - fw / 2, c.y - fh / 2, fw, fh);
+        if (rFr) {
+          const bh = rBox * rFr.h / rFr.w;
+          rises.forEach(r => {
+            const tr = t - r.at;
+            if (tr < 0 || tr >= rDur) return;
+            drawFrame(ctx, rFr, Math.min(rN - 1, Math.floor(tr * rFps / 1000)), r.x - rBox / 2, r.y - bh / 2, rBox, bh);
+          });
+        }
+      }, opts);
+    } finally {
+      // 어떤 경우에도 토큰이 숨은 채로 남지 않게 (드러내는 중인 토큰은 애니메이션 끝까지 둠)
+      uids.forEach(u => { if (_hidden[u] && _hidden[u].state === "hide") revealUnit(u, 120, 0); });
+    }
+  }
   /** Dispatch a meta-driven canvas pack. */
   function playMetaFx(stage, meta, base, opts) {
     opts = opts || {};
     if (meta && meta.screenShake && !opts.shake) opts = Object.assign({}, opts, { shake: meta.screenShake });
     if (isAnchoredMeta(meta)) return playAnchored(stage, meta, base, opts);
+    if (isDuelKeepMeta(meta)) return playDuelKeep(stage, meta, base, opts);
+    if (isSummonMeta(meta)) return playSummon(stage, meta, base, opts);
     if (isProjectileMeta(meta)) return playProjectile(stage, meta, base, opts.to, opts);
     if (isFlowMeta(meta)) return playPerUnitFlow(stage, meta, base, opts);
     if (isOverlayMeta(meta)) return playOverlayPerUnit(stage, meta, base, opts);
@@ -892,6 +1102,14 @@ const SpellFx = (() => {
       if (labP) { labP.textContent = ""; labP.style.opacity = "0"; }
       layer.classList.add("pack-play");
       const mOpts = { casterIsMe: opts.casterIsMe };
+      if (opts.keepUids) mOpts.keepUids = opts.keepUids; // v0.371 duelKeep: 결과와 같은 생존 유닛
+      if (isSummonMeta(meta)) {
+        // v0.371 summon: 먼저 해결(토큰 소환·render) → 같은 동기 구간에서 새 토큰 숨김 → 연출 → 드러내기
+        let uids = [];
+        if (typeof opts.resolveNow === "function") { try { uids = opts.resolveNow() || []; } catch (e) { uids = []; } }
+        hideUnits(uids);
+        mOpts.tokenUids = uids;
+      }
       if (isProjectileMeta(meta)) mOpts.to = resolveFxAnchor(Object.assign({ targetMode: "unit" }, meta), target);
       const ok = await playMetaFx(stage, meta, ASSET_BASE + (meta.id || card.id) + "/", mOpts);
       if (fxCardP) fxCardP.style.opacity = "";
@@ -1401,6 +1619,8 @@ const SpellFx = (() => {
         }
       } finally {
         cleanupFx(layer, stage, fxCard);
+        // v0.371 summon 안전장치: 연출이 실패해도 숨긴 토큰은 보이게
+        setTimeout(() => { try { Object.keys(_hidden).forEach(u => { if (_hidden[u].state === "hide") revealUnit(u, 120, 0); }); } catch (e) {} }, 0);
         resolve();
       }
     });
@@ -1812,7 +2032,7 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, releaseHidden, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
 })();
 window.SpellFx = SpellFx;
 // v0.366: 타이틀 화면에서 미리 로드 → 첫 판 시작 연출이 로딩 없이 바로 뜨게

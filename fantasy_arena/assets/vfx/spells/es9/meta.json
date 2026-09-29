@@ -1,0 +1,79 @@
+{
+ "id": "es9",
+ "name": "팔진도",
+ "concept": "A",
+ "description": "Bagua Seal — an amber bagua octagon draws itself on my board, then two rune-carved standing stones rise in golden dust where the two 팔진석 appear",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha",
+ "card": "cost 8 · earth · 내 전장에 팔진석 (4/0/10) 2기 생성 (spell.type summon_n, summonId e43, count 2)",
+ "durationMs": 970,
+ "type": "summon",
+ "targetMode": "self",
+ "playMode": "summon",
+ "playModeNote": "NEW MODE summon: 1) formation strip on the caster's board, centred on the midpoint of the new token slots (fallback: caster board centre #myBoard / #oppBoard), drawn flat as an ellipse displayWidthPx wide and displayWidthPx*squashY tall. 2) rise strip on each new token's slot at startMs + i*staggerMs. Easiest integration: resolve summon_n first, keep the 2 new tokens hidden (opacity 0), play the fx on their rects, and fade the tokens in during riseFadeInMs. The preview does exactly that.",
+ "formation": {
+  "file": "formation_strip.webp",
+  "layout": "horizontal",
+  "frames": 23,
+  "w": 448,
+  "h": 448,
+  "fps": 30,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 767,
+  "displayWidthPx@1080p": 520,
+  "squashY": 0.72,
+  "anchor": "midpoint of the summoned token slots"
+ },
+ "rise": {
+  "file": "rise_strip.webp",
+  "layout": "horizontal",
+  "frames": 17,
+  "w": 384,
+  "h": 384,
+  "fps": 30,
+  "loop": false,
+  "durationMs": 567,
+  "anchor": "each summoned token's centre",
+  "anchorOffsetYPx@1080p": -30,
+  "displayBoxPx@1080p": 380,
+  "startMs": 300,
+  "staggerMs": 100,
+  "tokenFadeInMs": "start+220..start+420",
+  "tokenFadeIn": {
+   "startMs": 220,
+   "durationMs": 200
+  },
+  "solidReveal": {
+   "durationMs": 180,
+   "note": "v0.371 game: after the fade-in the real token card pops (brightness 1.7→1, scale 1.06→1) so the stone reads as a solid card, not a glowing outline"
+  }
+ },
+ "referencePointsPx@1080p": {
+  "tokenSlots": [
+   [
+    930,
+    719
+   ],
+   [
+    1155,
+    719
+   ]
+  ],
+  "formationCentre": [
+   1042,
+   719
+  ],
+  "note": "board with 2 own units before cast; tokens are appended at slots 3 and 4"
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "hitAtMs": 380,
+  "loudnessLUFS": -17.9,
+  "truePeakDbTP": -4.1,
+  "source": "fs2 C-style: synth low brown-noise rumble with rising low-pass (slow amplitude sway) + soft pitch-drop sub thump(s), layered with this concept's own Kling clip audio low-passed ~0.6-0.7 kHz; final low-pass 1.7/2 kHz",
+  "secondHitAtMs": 480,
+  "note": "low earth swell while the formation draws, two heavy low stone thuds as the stones rise"
+ }
+}

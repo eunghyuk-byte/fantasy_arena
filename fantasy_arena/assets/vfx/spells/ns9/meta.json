@@ -1,0 +1,100 @@
+{
+ "id": "ns9",
+ "name": "동남풍",
+ "concept": "A",
+ "description": "Southeast Gale — silver-jade wind ribbons sweep the whole field from bottom-right to top-left (south-east wind); each enemy unit is caught in a small rising wind helix and whisked away toward the enemy hand",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha",
+ "card": "cost 6 · wind · 적 전체 전장 유닛을 핸드로 이동 / 손패 10장 초과분은 파괴 (spell.type bounce_enemy_board)",
+ "durationMs": 950,
+ "type": "aoe",
+ "targetMode": "aoe_enemy",
+ "playMode": "overlay+perUnit",
+ "unitImpact": {
+  "file": "unit_impact_strip.webp",
+  "layout": "horizontal",
+  "frames": 15,
+  "w": 320,
+  "h": 320,
+  "fps": 30,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 500,
+  "anchor": "each unit on the TARGET side (enemy board; my board when the AI casts)",
+  "anchorOffsetYPx@1080p": -10,
+  "displayBoxPx@1080p": 340,
+  "delayFormula": "delayMs = 0.25*((1920-unitX)+(1080-unitY)) - 250  (sweep from the bottom-right corner; clamp >= 0)",
+  "delaysMsAtReferenceBoard": {
+   "드라이어드 @[480, 311]": 302,
+   "여포 @[705, 311]": 246,
+   "오크 @[930, 311]": 190,
+   "스톤골렘 @[1155, 311]": 134,
+   "만드라고라 @[1380, 311]": 77
+  },
+  "delay": {
+   "baseMs": -250,
+   "perPx@1080p": 0.25,
+   "origin": "corner",
+   "corner": "bottomRight",
+   "metric": "manhattan",
+   "minMs": 0,
+   "mirrorYWhenOppCasts": true
+  }
+ },
+ "overlay": {
+  "file": "overlay_strip.webp",
+  "layout": "vertical",
+  "frames": 22,
+  "w": 704,
+  "h": 396,
+  "fps": 24,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 917,
+  "fit": "stretch to the full 16:9 stage (1920x1080 at 1080p), top-left 0,0",
+  "blend": "normal alpha (source-over)",
+  "flipYWhenOppCasts": true,
+  "note": "drawn for my cast (wind blows toward the enemy side at the top); mirror vertically when the AI casts so it blows over my board",
+  "opacity": 0.72,
+  "opacityNote": "v0.371 game: overlay drawn at 72% alpha (Higgsfield note: original briefly covers the enemy row too heavily)"
+ },
+ "afterEffect": "game removes the enemy units / adds them to the hand as usual; preview fades each unit out at its delay+220..400ms and grows the enemy hand at 560-820ms",
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "hitAtMs": 300,
+  "loudnessLUFS": -17.8,
+  "truePeakDbTP": -3.7,
+  "source": "fs2 C-style: synth low brown-noise rumble with rising low-pass (slow amplitude sway) + soft pitch-drop sub thump(s), layered with this concept's own Kling clip audio low-passed ~0.6-0.7 kHz; final low-pass 1.7/2 kHz",
+  "secondHitAtMs": 620,
+  "note": "soft low wind swell, low thump as the wind catches the units, softer thump as they reach the hand"
+ },
+ "referencePointsPx@1080p": {
+  "enemyUnits": [
+   [
+    480,
+    311
+   ],
+   [
+    705,
+    311
+   ],
+   [
+    930,
+    311
+   ],
+   [
+    1155,
+    311
+   ],
+   [
+    1380,
+    311
+   ]
+  ],
+  "oppHand": [
+   960,
+   62
+  ]
+ }
+}

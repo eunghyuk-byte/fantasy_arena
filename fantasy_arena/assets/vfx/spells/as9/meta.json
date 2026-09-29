@@ -1,0 +1,90 @@
+{
+ "id": "as9",
+ "name": "연환계",
+ "concept": "C",
+ "description": "Binding Tide — water ribbons coil around each enemy one after another (left→right) while a long glowing wave rolls over the enemy row and crashes",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha",
+ "card": "cost 4 · water · 적 전체에게 적 유닛 수만큼 피해 (spell.type aoe_by_enemy_count)",
+ "type": "aoe",
+ "targetMode": "aoe_enemy",
+ "durationMs": 890,
+ "playMode": "overlay+perUnit",
+ "overlay": {
+  "file": "overlay_strip.webp",
+  "layout": "vertical",
+  "frames": 22,
+  "w": 704,
+  "h": 396,
+  "fps": 24,
+  "loop": false,
+  "startMs": 0,
+  "durationMs": 917,
+  "fit": "box 1280x720 @1080p centred on the target board (#oppBoard centre, offsetY -20; #myBoard when the AI casts, mirrored vertically)",
+  "blend": "normal alpha (source-over)",
+  "impactAtMs": 460,
+  "flipYWhenOppCasts": true,
+  "fitBox": {
+   "sizePx@1080p": [
+    1280,
+    720
+   ],
+   "anchor": "targetBoard",
+   "offsetYPx@1080p": -20
+  }
+ },
+ "unitImpact": {
+  "file": "unit_impact_strip.webp",
+  "layout": "horizontal",
+  "frames": 17,
+  "w": 320,
+  "h": 320,
+  "fps": 30,
+  "loop": false,
+  "durationMs": 567,
+  "anchor": "each target unit centre",
+  "anchorOffsetYPx@1080p": 0,
+  "displayBoxPx@1080p": 320,
+  "startMs": 40,
+  "staggerMs": 70,
+  "order": "target units sorted by screen X, left→right (index i = 0..n-1)",
+  "delay": {
+   "baseMs": 40,
+   "staggerMs": 70,
+   "order": "x"
+  }
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "hitAtMs": 460,
+  "loudnessLUFS": -17.8,
+  "truePeakDbTP": -3.5,
+  "source": "fs2 C-style: synth low brown-noise rumble with rising low-pass (slow amplitude sway) + soft pitch-drop sub thump(s), layered with this concept's own Kling clip audio low-passed ~0.6-0.7 kHz; final low-pass 1.7/2 kHz",
+  "note": "low swell under the binding coils, one heavy low wave crash thump"
+ },
+ "referencePointsPx@1080p": {
+  "enemyUnitsLeftToRight": [
+   [
+    480,
+    311
+   ],
+   [
+    705,
+    311
+   ],
+   [
+    930,
+    311
+   ],
+   [
+    1155,
+    311
+   ],
+   [
+    1380,
+    311
+   ]
+  ]
+ }
+}
