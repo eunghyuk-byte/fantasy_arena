@@ -321,9 +321,10 @@ function render() {
     });
   }
   // v0.372: 드로우 대기 중 다시 그려도(render) 아직 날아오지 않은 새 카드는 숨긴 채 (투명도만 · 레이아웃 변화 없음)
+  //   playable 카드의 `opacity:1 !important` CSS 를 이기도록 inline important
   if ((me._drawHideN || 0) > 0 && !dragging) {
     const cardsNow = mh.querySelectorAll(".card");
-    for (let i = Math.max(0, cardsNow.length - me._drawHideN); i < cardsNow.length; i++) cardsNow[i].style.opacity = "0";
+    for (let i = Math.max(0, cardsNow.length - me._drawHideN); i < cardsNow.length; i++) cardsNow[i].style.setProperty("opacity", "0", "important");
   }
 
   if (!(typeof _drag !== "undefined" && _drag)) {

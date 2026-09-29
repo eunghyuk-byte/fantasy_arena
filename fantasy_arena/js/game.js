@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.372";
+const GAME_VERSION = "0.373";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -182,7 +182,8 @@ function flyDrawCard(cardEl) {
     const target = cardEl || cards[cards.length - 1];
     const a = pile.getBoundingClientRect();
     const b = target ? target.getBoundingClientRect() : hand.getBoundingClientRect();
-    if (target) target.style.opacity = "0";
+    // v0.372: playable 카드의 `opacity:1 !important` 규칙을 이기도록 important (날아오는 동안 제자리 카드가 비치지 않게)
+    if (target) target.style.setProperty("opacity", "0", "important");
     const ghost = document.createElement("div");
     ghost.className = "draw-ghost";
     // Always use live deck card-back (empty face → translucent rect ghost)
@@ -229,12 +230,13 @@ async function playDrawSequence(n) {
   if (!handLen) return;
   const startIdx = Math.max(0, handLen - n);
   for (let i = startIdx; i < handLen; i++) {
-    if (cards[i]) cards[i].style.opacity = "0";
+    if (cards[i]) cards[i].style.setProperty("opacity", "0", "important");
   }
   for (let i = 0; i < n; i++) {
     const el = cards[startIdx + i];
     if (!el) continue;
-    await flyDrawCard(el);
+    try { await flyDrawCard(el); } catch (e) {}
+    try { el.style.removeProperty("opacity"); } catch (e) {} // 모션이 생략돼도 카드가 숨은 채 남지 않게
   }
 }
 

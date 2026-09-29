@@ -95,3 +95,13 @@ test("승리·패배: 다른 연출이 끝난 뒤 재생, 결과 화면 버튼�
   assert.match(fin, /fxP\.then\(showResult, showResult\);/);
   assert.doesNotMatch(fin, /setTimeout\(r, 3200\)/);
 });
+
+test("드로우 대기·모션 중 새 카드 숨김은 inline important (playable 카드의 opacity:1 !important 를 이김) · 끝나면 해제", () => {
+  const fs = require("node:fs"), path = require("node:path");
+  const R = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+  const render = R("js/render.js"), game = R("js/game.js");
+  assert.match(render, /cardsNow\[i\]\.style\.setProperty\("opacity", "0", "important"\)/);
+  const seq = game.slice(game.indexOf("async function playDrawSequence"), game.indexOf("function pickEnemyTribe"));
+  assert.match(seq, /cards\[i\]\.style\.setProperty\("opacity", "0", "important"\)/);
+  assert.match(seq, /el\.style\.removeProperty\("opacity"\)/);
+});
