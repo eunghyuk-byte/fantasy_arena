@@ -1,24 +1,43 @@
 {
-  "id": "fs3",
-  "name": "화염구",
-  "concept": "표면이 펄럭이는 대형 구체 비행 / 임팩트는 별도 불구름 팽창",
-  "fps": 14,
-  "loop": false,
-  "layout": "horizontal",
-  "targetMode": "unit",
-  "flight": true,
-  "cast": {
-    "file": "cast_strip.png",
-    "frames": 18,
-    "w": 720,
-    "h": 720
-  },
-  "impact": {
-    "file": "impact_strip.png",
-    "frames": 16,
-    "w": 720,
-    "h": 720
-  },
-  "durationMs": 2428,
-  "anchor": "target"
+ "id": "fs3",
+ "name": "화염구",
+ "type": "projectile",
+ "targetMode": "unit",
+ "anchor": "target",
+ "concept": "B — Gyro Fireball — fireball with two orbiting flame rings → rings snap outward + round billowing flame burst",
+ "fps": 30,
+ "durationMs": 930,
+ "projectile": {
+  "file": "projectile_strip.webp",
+  "frames": 15,
+  "w": 480,
+  "h": 200,
+  "loop": true,
+  "headX": 0.979,
+  "headY": 0.5,
+  "displayLengthPx@1080p": 440,
+  "flightMs": 350,
+  "easePow": 1.7,
+  "from": "center"
+ },
+ "impact": {
+  "file": "impact_strip.webp",
+  "frames": 18,
+  "w": 512,
+  "h": 512,
+  "anchorOffsetYPx@1080p": 0,
+  "displayBoxPx@1080p": 460,
+  "startMs": 330,
+  "durationMs": 600
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "hitAtMs": 350
+ },
+ "source": {
+  "projectile": "GPT Image 2.5 key image -> Kling 3.0 pro in-place flame loop, 15-frame seamless loop",
+  "impact": "Kling 3.0 pro (sound on) strike video, frames from the hit onward, retimed to 600ms (ease-out), alpha from luminance",
+  "sfx": "synth sub thump (pitch-drop sine) + low brown-noise whoosh, layered with the Kling strike clip's own audio low-passed ~0.8-1.1 kHz; low-passed 1.7/2 kHz; sfx.mp3 measures about -17.8 LUFS integrated, true peak <= -3.5 dBTP"
+ }
 }

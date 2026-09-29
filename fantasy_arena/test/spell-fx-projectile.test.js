@@ -73,3 +73,23 @@ test("SpellFx: 광역 공용 함수(overlay+perUnit) + 세로 스트립 + 공용
   assert.match(src, /function aoeUnitPoints\(targetMode, casterIsMe\)/);
   assert.match(src, /vertical \? createImageBitmap\(full, 0, i \* h, w, h\)/);
 });
+
+// v0.355 fs3 화염구: fs1과 같은 projectile 팩 (컨셉 B 고리 화염구)
+test("fs3 팩: projectile · 350ms 비행 · 타격 330~930ms · 2MB 이하", () => {
+  const P3 = path.join(ROOT, "assets/vfx/spells/fs3");
+  const m = JSON.parse(fs.readFileSync(path.join(P3, "meta.json"), "utf8"));
+  assert.equal(m.id, "fs3");
+  assert.equal(m.type, "projectile");
+  assert.equal(m.targetMode, "unit");
+  assert.equal(m.projectile.flightMs, 350);
+  assert.equal(m.projectile.from, "center");
+  assert.equal(m.projectile["displayLengthPx@1080p"], 440);
+  assert.equal(m.impact.startMs, 330);
+  assert.equal(m.impact.startMs + m.impact.durationMs, 930);
+  assert.equal(m.impact["displayBoxPx@1080p"], 460);
+  assert.equal(m.sfx.hitAtMs, 350);
+  for (const k of ["projectile", "impact", "sfx"]) assert.ok(fs.existsSync(path.join(P3, m[k].file)), m[k].file);
+  const total = fs.readdirSync(P3).reduce((s, f) => s + fs.statSync(path.join(P3, f)).size, 0);
+  assert.ok(total <= 2 * 1024 * 1024, "total " + total);
+  for (const old of ["cast.webp", "cast_strip.png", "impact.webp", "impact_strip.png"]) assert.ok(!fs.existsSync(path.join(P3, old)), old);
+});
