@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.348";
+const GAME_VERSION = "0.349";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1621,6 +1621,8 @@ function resolveDeath(owner, m) {
     m._deathCtx = null;
     delete m._turnRoll; // 환생 = 새 유닛: 이번 턴 코인 결과 없음
     log(`${m.name}이(가) 환생했다 (체력 1)`);
+    // v0.349 (9/29): 낀 아이템의 파괴: 효과도 발동 (아이템은 이미 해제 → 아이템 없이 환생)
+    resolveItemDeathFx(owner, deadItemFx);
     drsR.forEach(dfx => applyFx(owner, dfx, null));
     if (stealR) {
       const slot = owner.board.findIndex(x => x.uid === m.uid);
@@ -1639,20 +1641,25 @@ function resolveDeath(owner, m) {
   }
   if (ctx.killer && ctx.killerOwner) applyItemKillFx(ctx.killerOwner, ctx.killer, owner);
   if (ctx.killer && ctx.killerOwner) applyUnitKillFx(ctx.killerOwner, ctx.killer, owner);
-  // 파괴: 장착 아이템 효과 (환생으로 살아난 경우는 발동 안 함 · 아이템은 이미 해제됨)
-  if (deadItemFx === "destroy_summon_chitu") {
-    // 적토마 토큰(d40)은 아이템이 없어 재생성 루프 없음
-    applyFx(owner, { type: "summon_token", summonId: "d40" }, null);
-  } else if (deadItemFx === "destroy_enemy_atk_zero") {
-    const foe = opponent(owner);
-    foe.board.forEach(x => { x.atk = 0; });
-    log(`인어의하프 · 파괴: 적 전체 공=0 (${foe.board.length}기)`);
-  }
+  // 파괴: 장착 아이템 효과 (아이템은 이미 해제됨 · v0.349: 환생하는 경우에도 발동)
+  resolveItemDeathFx(owner, deadItemFx);
   // 기존 파괴: 효과 + 성흔 등 부여된 파괴: 효과 (중첩)
   const drs = [].concat(m.deathrattle ? [m.deathrattle] : [], m.deathrattles || []);
   drs.forEach(dfx => applyFx(owner, dfx, null));
 
   if (abs.includes("강탈")) resolveStealOnDeath(owner, m, ctx, fromSpell, deadSlot);
+}
+
+/** 파괴: 장착 아이템 효과 (적토마·인어의하프). v0.349 (9/29): 환생하는 유닛도 발동, 유닛은 아이템 없이 다시 나타난다. */
+function resolveItemDeathFx(owner, fx) {
+  if (fx === "destroy_summon_chitu") {
+    // 적토마 토큰(d40)은 아이템이 없어 재생성 루프 없음
+    applyFx(owner, { type: "summon_token", summonId: "d40" }, null);
+  } else if (fx === "destroy_enemy_atk_zero") {
+    const foe = opponent(owner);
+    foe.board.forEach(x => { x.atk = 0; });
+    log(`인어의하프 · 파괴: 적 전체 공=0 (${foe.board.length}기)`);
+  }
 }
 
 /** 파괴: 나를 파괴한 적을 탈취 (강탈). at = 넣을 칸 */
@@ -2896,7 +2903,7 @@ function abiName(ab) { return (typeof ABI_LABEL !== "undefined" && ABI_LABEL[ab]
 const ABI_HELP = {
   "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",
   "복수": "파괴될 때 나를 파괴한 적을 제거합니다.",
-  "환생": "죽으면 체력 1로 한 번 다시 살아납니다. 카드 기본 능력은 그대로 다시 가지며 환생만 사라집니다. 다시 나타날 때 소환: 효과는 발동하지 않고, 파괴: 효과는 다시 파괴될 때 또 발동합니다. 환생으로 나타나면 침묵은 풀리고 원래 능력이 돌아옵니다.",
+  "환생": "죽으면 체력 1로 한 번 다시 살아납니다. 카드 기본 능력은 그대로 다시 가지며 환생만 사라집니다. 다시 나타날 때 소환: 효과는 발동하지 않고, 파괴: 효과는 다시 파괴될 때 또 발동합니다. 환생으로 나타나면 침묵은 풀리고 원래 능력이 돌아옵니다. 환생하는 유닛이 낀 아이템의 파괴: 효과는 발동하고, 유닛은 아이템 없이 다시 나타납니다.",
   "강탈": "파괴될 때 나를 파괴한 적을 탈취합니다.",
   "출전": "낼 때 카드 1장을 뽑습니다.",
   "유언": "파괴될 때 카드 1장을 뽑습니다.",
