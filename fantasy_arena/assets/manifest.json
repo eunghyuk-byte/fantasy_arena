@@ -1,5 +1,5 @@
 {
-  "count": 724,
+  "count": 730,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -3460,6 +3460,36 @@
       "path": "assets/vfx/spells/ns9/unit_impact_strip.webp",
       "bytes": 198102,
       "name": "unit_impact_strip"
+    },
+    {
+      "path": "assets/vfx/legendary/f15/meta.json",
+      "bytes": 7561,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/f15/roar_strip.webp",
+      "bytes": 526120,
+      "name": "roar_strip"
+    },
+    {
+      "path": "assets/vfx/legendary/f15/seal_strip.webp",
+      "bytes": 318516,
+      "name": "seal_strip"
+    },
+    {
+      "path": "assets/vfx/legendary/f15/sfx.mp3",
+      "bytes": 33061,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/f15/sfx.ogg",
+      "bytes": 15710,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/f15/shock_strip.webp",
+      "bytes": 755270,
+      "name": "shock_strip"
     },
     {
       "path": "assets/vfx/ui/deck_draw/cast.webp",

@@ -1,0 +1,203 @@
+{
+ "id": "f15_summon",
+ "card": "f15 장비 (Zhang Fei) · fire · cost 10 · legendary · 10/2/10 · 소환: 적 전체 침묵 (battlecry silence_enemy_board)",
+ "concept": "A",
+ "description": "Changban Thunder Roar (장판교 일갈) — 장비 lands with a crimson aura and roars: gold shout lines burst from his card and three thunderous sound-wave rings roll up across the board; as the first ring reaches each enemy, a vermilion 默 (silence) seal stamps onto it and its colour drains",
+ "format": "WebP sprite strips (lossy RGB + alpha, straight / non-premultiplied alpha), q95 / alpha q100. Strips wider than the WebP 16383 px limit are stacked vertically (layout 'vertical').",
+ "durationMs": 2000,
+ "playMode": "legendarySummon",
+ "targetMode": "enemy_board",
+ "playModeNote": "NEW MODE legendarySummon (like the spell canvas FX, but 2.0 s and triggered by a unit): one full-screen canvas over the battlefield. At t=0 the summoned unit is already in its slot (optionally hidden and revealed with summonedReveal). Draw dim first, then layers in list order. Normal layers play once from startMs at their anchor. 'eachEnemy' layers play once per enemy unit, starting at that unit's hitMs (enemyHit). At each unit's hitMs apply enemyMute to its card element (CSS filter) and, if you defer the visual state, swap it to the silenced card at hitMs + swapAtMs. The whole effect ends at exactly 2000 ms and every layer is fully transparent by then.",
+ "suggestedTrigger": "In playCard (minion branch) the unit is spliced into the board and resolveBattlecry() silences the enemy board synchronously. Suggested: keep the game logic as is (silence resolves immediately), set state.busy while the 2.0 s fx plays, render once so the new 장비 card exists, then start the fx with anchors = the new unit's rect and the enemy units' rects (the units that were on the enemy board when the battlecry resolved). Optional polish: hold back the enemy cards' '침묵' re-render until each unit's hitMs + swapAtMs, so the silence visibly lands with the mark. Only when the card is f15 (or rarity legendary with a meta file). If the opponent (AI) plays 장비, swap roles: summonedUnit is on #oppBoard, eachEnemy = my units, enemyBoard = #myBoard, and apply flipYWhenOppCasts layers.",
+ "timing": {
+  "t0": "the moment 장비 is placed on the board (after the drop), before/at the same time as the battlecry",
+  "effectEndMs": 1878,
+  "allLayersEndByMs": 2000,
+  "note": "last visible pixel ends at effectEndMs; the effect slot (dim, sfx, busy lock) is exactly durationMs = 2000 ms"
+ },
+ "summonedReveal": {
+  "fadeMs": 160,
+  "popMs": 260,
+  "brightnessFrom": 1.8,
+  "scaleFrom": 1.08,
+  "note": "optional: new card fades in over fadeMs and pops (brightness brightnessFrom->1, scale scaleFrom->1, ease-out) over popMs; the preview does this"
+ },
+ "dim": {
+  "opacity": 0.4,
+  "inMs": 200,
+  "outStartMs": 1450,
+  "color": "#000000",
+  "endMs": 2000,
+  "note": "code-drawn full-stage black layer under the fx layers: opacity 0->opacity over 0..inMs, hold, then back to 0 from outStartMs to 2000 ms. Not baked into the strips."
+ },
+ "screenShake": {
+  "startMs": 380,
+  "durationMs": 320,
+  "amplitudePx@1080p": 7,
+  "note": "optional, same meaning as the spell meta screenShake (board quake)"
+ },
+ "enemyHit": {
+  "type": "ring",
+  "origin": "summonedUnit",
+  "baseMs": 380,
+  "pxPerMs": 1.6,
+  "squashY": 0.62,
+  "formula": "hitMs = baseMs + hypot(dx, dy/squashY) / pxPerMs, dx/dy = enemy unit centre - summoned unit centre (1080p px). This is exactly when the first sound-wave ring reaches the unit."
+ },
+ "enemyMute": {
+  "swapAtMs": 60,
+  "swapMs": 160,
+  "inMs": 80,
+  "holdMs": 350,
+  "outMs": 420,
+  "saturate": 0.35,
+  "brightness": 0.78,
+  "note": "per enemy card from its hitMs: CSS filter saturate(1->saturate) and brightness(1->brightness) over inMs, hold holdMs, back to normal over outMs (the glow is muted, then the card returns to normal showing its silenced text). swapAtMs/swapMs = when the preview cross-fades the card to its silenced render."
+ },
+ "layers": [
+  {
+   "name": "shock",
+   "anchor": "summonedUnit",
+   "fps": 24,
+   "startMs": 380,
+   "displayPx@1080p": [
+    2560,
+    1440
+   ],
+   "file": "shock_strip.webp",
+   "frames": 25,
+   "h": 450,
+   "w": 800,
+   "durationMs": 1042,
+   "layout": "vertical",
+   "note": "sound-wave rings centred on the summoned unit; stronger on the side facing the enemy board (up). Opp caster: flip vertically.",
+   "anchorNote": "centre of the summoned 장비 card",
+   "flipYWhenOppCasts": true,
+   "flipNote": "game copy: 상대(AI)가 낼 때 위아래 반전 (원본 note \"Opp caster: flip vertically\")"
+  },
+  {
+   "name": "roar",
+   "anchor": "summonedUnit",
+   "fps": 24,
+   "startMs": 0,
+   "displayPx@1080p": [
+    760,
+    760
+   ],
+   "file": "roar_strip.webp",
+   "frames": 24,
+   "h": 512,
+   "w": 512,
+   "durationMs": 1000,
+   "layout": "horizontal",
+   "note": "burst + shout lines on the summoned unit",
+   "anchorNote": "centre of the summoned 장비 card"
+  },
+  {
+   "name": "seal",
+   "anchor": "eachEnemy",
+   "fps": 30,
+   "displayPx@1080p": [
+    300,
+    300
+   ],
+   "file": "seal_strip.webp",
+   "frames": 30,
+   "h": 256,
+   "w": 256,
+   "durationMs": 1000,
+   "layout": "horizontal",
+   "note": "per enemy unit, starts at that unit's hitMs",
+   "anchorNote": "each enemy unit centre (all units on the opposing board at trigger time), starting at its hitMs"
+  }
+ ],
+ "referencePointsPx@1080p": {
+  "summonedUnit": [
+   930,
+   719
+  ],
+  "summonedUnitRect": [
+   822,
+   557,
+   215,
+   323
+  ],
+  "enemyUnits": [
+   [
+    480,
+    311
+   ],
+   [
+    705,
+    311
+   ],
+   [
+    930,
+    311
+   ],
+   [
+    1155,
+    311
+   ],
+   [
+    1380,
+    311
+   ]
+  ],
+  "enemyBoardCentre": [
+   942,
+   320
+  ],
+  "oppBoardRect": [
+   370,
+   158,
+   1143,
+   324
+  ],
+  "myBoardRect": [
+   370,
+   547,
+   1143,
+   324
+  ],
+  "boardDivider": [
+   942,
+   514
+  ],
+  "enemyHitMsInPreview": {
+   "드라이어드": 878,
+   "여포": 815,
+   "스톤골렘": 791,
+   "아이스드래곤": 815,
+   "만드라고라": 878
+  },
+  "note": "preview board: my 임프, 불꽃여우 + 장비 appended at slot 3; enemy board full (5 units: 드라이어드, 여포, 스톤골렘, 아이스드래곤, 만드라고라), all with abilities so the '침묵' text change is visible"
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "format": "MP3 128 kbps, mono, 44.1 kHz",
+  "startMs": 0,
+  "durationMs": 2000,
+  "loudnessLUFS": -17.7,
+  "truePeakDbTP": -5.0,
+  "containerNote": "decoded audio is exactly 2.000 s (LAME gapless header); ffprobe reports 2.038 s because of MP3 encoder padding. sfx.ogg is the same sound with an exact 2.000 s length.",
+  "alt": {
+   "file": "sfx.ogg",
+   "format": "Ogg Vorbis q5, mono, 48 kHz",
+   "durationMs": 2000,
+   "loudnessLUFS": -17.7,
+   "truePeakDbTP": -4.8
+  },
+  "note": "war cry (deep male '워어어—', pitched down) over a low thunder swell and one heavy sub boom at 360 ms; two soft low stamp thuds as the seals land",
+  "voiceSource": "Higgsfield text2speech_v2 (ElevenLabs engine), t7 (Gideon preset, text '우오오오오오!') -> rubberband pitch 0.80 / tempo 0.92, hall reverb",
+  "source": "voice + local synth (brown-noise swells with moving low-pass, pitch-drop sub thumps, noise whoosh), fs2 C-style low end, final low-pass"
+ },
+ "sizes": {
+  "shock_strip.webp": 755270,
+  "roar_strip.webp": 526120,
+  "seal_strip.webp": 318516,
+  "sfx.mp3": 33061,
+  "sfx.ogg": 15710,
+  "gameAssetsTotal(bytes, strips + sfx.mp3 + sfx.ogg, excl. meta/preview)": 1648677
+ }
+}

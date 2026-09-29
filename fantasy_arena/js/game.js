@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.380";
+const GAME_VERSION = "0.381";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -274,6 +274,7 @@ function startGame(vsAI) {
   try { if (typeof SpellFx !== "undefined" && SpellFx.overlayHold) releaseIntro = SpellFx.overlayHold(); } catch (e) {}
   showGame();
   render();
+  preloadLegendaryFx(state); // v0.381
   const matchState = state;
   try {
     (async () => {
@@ -764,7 +765,9 @@ function playCard(p, card, target) {
   p.soul -= payCost;
   p.hand = p.hand.filter(c => c.uid !== card.uid);
   if (card.type === "minion") {
-    try { Sfx.playSummon && Sfx.playSummon(); } catch (e) {}
+    // v0.381: 전설 소환 연출이 있는 유닛(LEGENDARY_SUMMON_FX)은 연출 sfx가 소환음 — 기본 소환음은 생략
+    const legendBase = legendarySummonFxBase(card);
+    if (!legendBase) { try { Sfx.playSummon && Sfx.playSummon(); } catch (e) {} }
     const m = card;
     delete m._turnRoll; // 새로 나온 유닛은 이번 턴 코인 결과 없음
     // 판마: 소환 수면 없음 — 이번 턴에 낸 유닛도 공격 가능 (공격불가 제외)
@@ -774,7 +777,10 @@ function playCard(p, card, target) {
     p.board.splice(at, 0, m);
     window._dropSlot = null;
     log(`${p.name}이(가) ${m.name}을(를) 소환`);
+    // v0.381 전설 소환 연출: 로직은 그대로(소환 효과 즉시 해결), 연출은 아래 render() 뒤 시작 · 적 카드 표시 갱신은 각자 히트 시점까지 미룸
+    const legendPlan = legendBase ? beginLegendarySummonFx(p, m, legendBase) : null;
     resolveBattlecry(p, m, target);
+    if (legendPlan) startLegendarySummonFx(legendPlan);
   } else if (card.type === "item") {
     if (isEquipItem(card)) {
       const unit = target.minion;
@@ -790,6 +796,103 @@ function playCard(p, card, target) {
   }
   checkWin();
   return true;
+}
+
+/* ---------- v0.381 전설 유닛 소환 연출 (meta.playMode "legendarySummon", 2초 이내) ----------
+ * 카드 id → 에셋 폴더. 새 전설 유닛 연출은 에셋 폴더(스트립·meta·sfx)를 넣고 여기에 한 줄 추가하면 같은 방식으로 재생된다. */
+const LEGENDARY_SUMMON_FX = {
+  f15: "assets/vfx/legendary/f15/", // 장비 「장판교 일갈」 (소환: 적 전체 침묵)
+};
+function legendarySummonFxBase(card) {
+  if (!card || card.type !== "minion") return null;
+  return Object.prototype.hasOwnProperty.call(LEGENDARY_SUMMON_FX, card.id) ? LEGENDARY_SUMMON_FX[card.id] : null;
+}
+// 연출 중 적 카드는 히트(링 도달) 전까지 소환 효과 전 모습(문구·능력)으로 그림 — 상태(로직)는 이미 바뀐 그대로
+const LEGEND_VIEW_KEYS = ["ability", "atkSkill", "keywords", "battlecry", "deathrattle", "deathrattles", "cannotAttack", "skipAttack", "silenced", "text", "_baseText"];
+let _fxDeferredView = {};
+/** render용: 연출이 표시 갱신을 미룬 유닛이면 이전 표시 필드를 덮은 사본, 아니면 그대로 */
+function fxDisplayUnit(m) {
+  const v = m && _fxDeferredView[m.uid];
+  return v ? Object.assign({}, m, v) : m;
+}
+/** 소환 효과 해결 전에 호출: 적 유닛 목록·표시 스냅샷, 새 유닛 숨김(render 전). SpellFx 없으면(테스트·헤드리스) null */
+function beginLegendarySummonFx(p, m, base) {
+  if (typeof SpellFx === "undefined" || !SpellFx || typeof SpellFx.playLegendarySummon !== "function") return null;
+  const e = opponent(p);
+  let casterIsMe = true;
+  try { casterIsMe = p === meView().me; } catch (err) {}
+  const enemyUids = (e.board || []).filter(u => u && u.hp > 0 && !u.dying).map(u => u.uid);
+  (e.board || []).forEach(u => {
+    if (!u || !enemyUids.includes(u.uid)) return;
+    const snap = {};
+    LEGEND_VIEW_KEYS.forEach(k => { snap[k] = Array.isArray(u[k]) ? u[k].slice() : u[k]; });
+    _fxDeferredView[u.uid] = snap;
+  });
+  try { if (SpellFx.hideUnits) SpellFx.hideUnits([m.uid]); } catch (err) {}
+  return { base, p, unitUid: m.uid, casterIsMe, enemyUids };
+}
+function releaseDeferredView(uid) {
+  if (!_fxDeferredView[uid]) return;
+  delete _fxDeferredView[uid];
+  // 전장 전체를 다시 그리지 않고 그 카드 얼굴만 교체 (다른 카드의 연출 필터 애니메이션이 끊기지 않게)
+  try {
+    const u = [state.p1, state.p2].map(pl => (pl.board || []).find(x => x.uid === uid)).find(Boolean);
+    if (u && typeof refreshMinionFace === "function") refreshMinionFace(u);
+  } catch (e) {}
+}
+/** 소환 효과 해결 뒤 호출: 입력 잠금(state.busy + 오버레이 게이트) → 다른 오버레이가 끝나면 연출 → 해제 */
+function startLegendarySummonFx(plan) {
+  if (!plan) return;
+  const st = state;
+  state.busy = true;
+  // 새 유닛 전장 얼굴 먼저 합성 (연출 t=0 에 카드가 비어 보이지 않게, 최대 600ms 대기) → 이어서 침묵 뒤 적 얼굴 (히트 순간 바로 교체)
+  let faceP = Promise.resolve();
+  try {
+    const u = (plan.p.board || []).find(x => x.uid === plan.unitUid);
+    if (u && typeof warmMinionFace === "function") faceP = Promise.resolve(warmMinionFace(u)).catch(() => {});
+  } catch (err) {}
+  try {
+    const e = opponent(plan.p);
+    (e.board || []).forEach(u => { if (plan.enemyUids.includes(u.uid) && typeof warmMinionFace === "function") warmMinionFace(u); });
+  } catch (err) {}
+  (async () => {
+    let release = null;
+    try {
+      if (SpellFx.whenOverlayIdle) await SpellFx.whenOverlayIdle();
+      if (SpellFx.overlayHold) release = SpellFx.overlayHold();
+      await Promise.race([faceP, new Promise(r => setTimeout(r, 600))]);
+      if (state !== st) return;
+      try { render(); } catch (err) {} // 장비 카드가 전장 DOM에 있게 (숨긴 채) → 그 rect 기준으로 연출
+      await SpellFx.playLegendarySummon(plan.base, {
+        unitUid: plan.unitUid,
+        enemyUids: plan.enemyUids.slice(),
+        casterIsMe: plan.casterIsMe,
+        onEnemySwap: uid => releaseDeferredView(uid),
+      });
+    } catch (err) {
+    } finally {
+      plan.enemyUids.forEach(uid => { delete _fxDeferredView[uid]; });
+      try { if (SpellFx.revealUnit) SpellFx.revealUnit(plan.unitUid, 120, 0); } catch (err) {}
+      if (state === st) state.busy = false;
+      if (release) release();
+      if (state === st) { try { checkWin(); } catch (err) {} try { render(); } catch (err) {} }
+    }
+  })();
+}
+/** 게임 시작 때: 양쪽 덱·손패에 있는 전설 연출 에셋 미리 로드 (첫 소환 때 로딩으로 늦지 않게) */
+function preloadLegendaryFx(s) {
+  try {
+    if (typeof SpellFx === "undefined" || !SpellFx.preloadLegendarySummon || !s) return;
+    const ids = new Set();
+    [s.p1, s.p2].forEach(pl => [].concat(pl.deck || [], pl.hand || []).forEach(c => { const id = typeof c === "string" ? c : c && c.id; if (id) ids.add(id); }));
+    ids.forEach(id => {
+      if (!LEGENDARY_SUMMON_FX[id]) return;
+      setTimeout(() => {
+        try { SpellFx.preloadLegendarySummon(LEGENDARY_SUMMON_FX[id]); } catch (e) {}
+        try { if (typeof warmMinionFace === "function") warmMinionFace(cloneCard(id)); } catch (e) {} // 전장 얼굴(기본 스탯) 캐시
+      }, 1500);
+    });
+  } catch (e) {}
 }
 
 async function runSpellCast(p, card, target) {

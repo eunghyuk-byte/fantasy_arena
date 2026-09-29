@@ -593,6 +593,12 @@ function aiTurn() {
 
   const step = () => {
     if (state.over) return;
+    // v0.381: 전설 소환 연출 등 오버레이 게이트 중이면 끝난 뒤 다음 행동 (연출끼리·전투와 겹치지 않게)
+    if (typeof SpellFx !== "undefined" && SpellFx.overlayBusy && SpellFx.overlayBusy()) {
+      const st = state;
+      SpellFx.whenOverlayIdle().then(() => { if (state === st) setTimeout(step, 280); });
+      return;
+    }
     if (tryPlay()) { setTimeout(step, 420); return; }
     // v0.319 소울 드로우: 낼 카드가 없고 3소울 이상 남았고 손패가 가득 차지 않았으면 사용 → 뽑은 카드로 다시 시도
     // (덱이 비었으면 피로 피해만 받으므로 쓰지 않음)

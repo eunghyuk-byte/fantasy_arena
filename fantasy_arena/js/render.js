@@ -1166,7 +1166,37 @@ function renderLane(p, who) {
   return cells.join("");
 }
 
+/** v0.381: 전장 카드 얼굴 옵션 (renderMinion · 전설 소환 연출의 히트 시점 얼굴 교체 공용) */
+function minionFaceOpts(m) {
+  return {
+    atk: m._fxAtk != null ? m._fxAtk : m.atk,
+    def: m._fxDef != null ? m._fxDef : m.def,
+    hp:  m._fxHp  != null ? m._fxHp  : m.hp,
+    // v0.316: 전장 유닛 현재 보호막 상태로만 오버레이 (인쇄 텍스트 X)
+    fieldShield: unitHasActiveShield(m),
+    // v0.323: 전장 유닛 현재 면역 상태 (침묵 등으로 잃으면 사라짐)
+    fieldImmune: unitHasActiveImmune(m),
+    // v0.326: 전장 유닛 미사용 환생 (아이템 모래시계·피닉스깃털·소생초 포함, 소모·침묵 시 사라짐)
+    fieldRebirth: unitHasActiveRebirth(m),
+    // v0.337: 아이템 착용중 장비 배지 (전장 전용)
+    fieldEquip: !!m.equippedItem,
+  };
+}
+/** v0.381: 얼굴 미리 합성 (캐시만) */
+function warmMinionFace(m) {
+  const v = (typeof fxDisplayUnit === "function") ? fxDisplayUnit(m) : m;
+  return faceSrc(v, minionFaceOpts(v), null);
+}
+/** v0.381: DOM을 다시 만들지 않고 그 전장 카드 얼굴만 현재 상태로 교체 */
+function refreshMinionFace(m) {
+  const el = document.getElementById("mface_" + m.uid);
+  const v = (typeof fxDisplayUnit === "function") ? fxDisplayUnit(m) : m;
+  return faceSrc(v, minionFaceOpts(v), el || null);
+}
+
 function renderMinion(m, side) {
+  // v0.381 전설 소환 연출: 히트 전까지 이전 표시(문구·능력)로 — 로직 상태는 그대로
+  if (typeof fxDisplayUnit === "function") m = fxDisplayUnit(m);
   const me = meView().me;
   const mine = side === "me";
   const canAtk = mine && current() === me && !current().isAI && m.canAttack && m.attacksLeft > 0 && m.atk > 0 && !ui.targeting;
@@ -1186,19 +1216,7 @@ function renderMinion(m, side) {
   ].join(" ");
   const uid = "mface_" + m.uid;
   // Combat FX: bake temp atk/def/hp on face; ±Δ overlays ABOVE gems (blue+/red−), not 「공 N」
-  const faceOpts = {
-    atk: m._fxAtk != null ? m._fxAtk : m.atk,
-    def: m._fxDef != null ? m._fxDef : m.def,
-    hp:  m._fxHp  != null ? m._fxHp  : m.hp,
-    // v0.316: 전장 유닛 현재 보호막 상태로만 오버레이 (인쇄 텍스트 X)
-    fieldShield: unitHasActiveShield(m),
-    // v0.323: 전장 유닛 현재 면역 상태 (침묵 등으로 잃으면 사라짐)
-    fieldImmune: unitHasActiveImmune(m),
-    // v0.326: 전장 유닛 미사용 환생 (아이템 모래시계·피닉스깃털·소생초 포함, 소모·침묵 시 사라짐)
-    fieldRebirth: unitHasActiveRebirth(m),
-    // v0.337: 아이템 착용중 장비 배지 (전장 전용)
-    fieldEquip: !!m.equippedItem,
-  };
+  const faceOpts = minionFaceOpts(m);
   const cacheKey = faceCacheKey(m, faceOpts);
   const cached = _faceDone.has(cacheKey) ? _faceDone.get(cacheKey) : "";
   setTimeout(() => {

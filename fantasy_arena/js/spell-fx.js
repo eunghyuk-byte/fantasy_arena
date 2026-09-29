@@ -1001,8 +1001,14 @@ const SpellFx = (() => {
       const h = _hidden[uid], sel = '.minion[data-uid="' + String(uid).replace(/"/g, "") + '"]';
       if (h.state === "hide") { css += sel + "{opacity:0!important;}"; return; }
       const pct = Math.max(1, Math.min(99, Math.round(h.fadeMs / h.total * 100)));
-      const name = "fxTokenReveal" + pct;
-      kfs[name] = "@keyframes " + name + "{0%{opacity:0;filter:brightness(1.9);scale:.94}" + pct +
+      let name = "fxTokenReveal" + pct;
+      if (h.brightnessFrom != null || h.scaleFrom != null) {
+        // v0.381 legendarySummon summonedReveal: brightnessFrom·scaleFrom 에서 fade 후 pop 으로 1 복귀 (ease-out)
+        const b = h.brightnessFrom != null ? h.brightnessFrom : 1.8, sc = h.scaleFrom != null ? h.scaleFrom : 1.08;
+        name = "fxUnitReveal" + pct + "_" + Math.round(b * 100) + "_" + Math.round(sc * 100);
+        kfs[name] = "@keyframes " + name + "{0%{opacity:0;filter:brightness(" + b + ");scale:" + sc + "}" + pct +
+          "%{opacity:1;filter:brightness(" + b + ");scale:" + sc + ";animation-timing-function:cubic-bezier(.33,1,.68,1)}100%{opacity:1;filter:brightness(1);scale:1}}";
+      } else kfs[name] = "@keyframes " + name + "{0%{opacity:0;filter:brightness(1.9);scale:.94}" + pct +
         "%{opacity:1;filter:brightness(1.7);scale:1.06}100%{opacity:1;filter:brightness(1);scale:1}}";
       css += sel + "{animation:" + name + " " + h.total + "ms linear both;}";
     });
@@ -1013,10 +1019,11 @@ const SpellFx = (() => {
     syncHideStyle();
   }
   /** 토큰 드러내기: fadeMs 동안 나타나고 popMs 동안 실제 카드가 단단하게 튀어 보임(밝기·크기 복귀) */
-  function revealUnit(uid, fadeMs, popMs) {
+  function revealUnit(uid, fadeMs, popMs, look) {
     if (!_hidden[uid]) return;
     const total = Math.max(1, (fadeMs || 0) + (popMs || 0));
     _hidden[uid] = { state: "reveal", fadeMs: fadeMs || 0, total };
+    if (look) { _hidden[uid].brightnessFrom = look.brightnessFrom; _hidden[uid].scaleFrom = look.scaleFrom; }
     syncHideStyle();
     setTimeout(() => { if (_hidden[uid] && _hidden[uid].state === "reveal") { delete _hidden[uid]; syncHideStyle(); } }, total + 30);
   }
@@ -1125,6 +1132,197 @@ const SpellFx = (() => {
     } finally {
       // 어떤 경우에도 토큰이 숨은 채로 남지 않게 (드러내는 중인 토큰은 애니메이션 끝까지 둠)
       uids.forEach(u => { if (_hidden[u] && _hidden[u].state === "hide") revealUnit(u, 120, 0); });
+    }
+  }
+  // ─── v0.381 legendarySummon: 전설 유닛 소환 연출 (f15 장비 「장판교 일갈」, 이후 전설 유닛도 같은 모드 · 2초 이내) ───
+  // 게임(playCard 유닛 분기)이 먼저 해결(소환 효과: 침묵 등)하고, 새 유닛을 숨긴 채 render → 여기서 전체 화면 캔버스 1장을 durationMs(2000) 동안 재생.
+  // 그리는 순서: dim(코드, 검정) → meta.layers 순서. 레이어 anchor:
+  //   summonedUnit = 새 유닛 카드 중심 · enemyBoard = 적 전장 중심 · boardDivider = 두 전장 사이 · eachEnemy = 적 유닛마다(링 도달 hitMs부터)
+  // 적마다 hitMs(enemyHit ring 공식)에 enemyMute(채도·밝기 CSS 필터) + onEnemyHit, hitMs+swapAtMs 에 onEnemySwap(침묵 표시 갱신).
+  // 상대(AI)가 내면 역할 반대: 적 = 내 전장(#myBoard), flipYWhenOppCasts 레이어는 위아래 반전.
+  const _legendMetaCache = {};
+  function loadLegendaryMeta(base) {
+    if (!base) return Promise.resolve(null);
+    if (_legendMetaCache[base]) return _legendMetaCache[base];
+    _legendMetaCache[base] = (async () => {
+      try {
+        const res = await fetch(base + "meta.json", { cache: "no-store" });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (e) { return null; }
+    })().then(m => { if (!m) delete _legendMetaCache[base]; return m; });
+    return _legendMetaCache[base];
+  }
+  function isLegendarySummonMeta(meta) {
+    return !!(meta && String(meta.playMode || "") === "legendarySummon" && Array.isArray(meta.layers) && meta.layers.length);
+  }
+  function legendaryLayerMs(L, meta) {
+    const fps = L.fps || meta.fps || 30, n = Math.max(1, L.frames || 1);
+    return L.durationMs || Math.round(n * 1000 / fps);
+  }
+  /** 에셋 폴더(base)의 meta + 스트립 프레임 + sfx 미리 디코드. → { meta, frames[] } | null */
+  async function preloadLegendarySummon(base) {
+    const meta = await loadLegendaryMeta(base);
+    if (!isLegendarySummonMeta(meta)) return null;
+    const [frames] = await Promise.all([
+      Promise.all(meta.layers.map(L => (L && L.file) ? loadFrames(assetUrl(base, L.file), L.frames, L.w, L.h, L.layout) : Promise.resolve(null))),
+      loadSfx(metaSfxUrl(meta, base))
+    ]);
+    return { meta, frames };
+  }
+  /** 순수 함수: enemyHit ring — hitMs = baseMs + hypot(dx, dy/squashY) / pxPerMs (dx·dy는 1080p px, k = 화면 배율) */
+  function legendaryHitMs(meta, from, to, k) {
+    const H = (meta && meta.enemyHit) || {};
+    const base = H.baseMs != null ? H.baseMs : 380;
+    const px = H.pxPerMs > 0 ? H.pxPerMs : 1.6;
+    const sq = H.squashY > 0 ? H.squashY : 1;
+    const kk = k > 0 ? k : 1;
+    const dx = (to.x - from.x) / kk, dy = (to.y - from.y) / kk;
+    return base + Math.hypot(dx, dy / sq) / px;
+  }
+  /** 순수 함수: 코드 dim 불투명도 (0→opacity over inMs, 유지, outStartMs→endMs 에 0) */
+  function legendaryDimAlpha(D, t) {
+    if (!D || !(D.opacity > 0)) return 0;
+    const op = D.opacity, inMs = D.inMs != null ? D.inMs : 200;
+    const outS = D.outStartMs != null ? D.outStartMs : 1450, end = D.endMs != null ? D.endMs : 2000;
+    if (t < 0 || t >= end) return 0;
+    if (t < inMs) return op * t / Math.max(1, inMs);
+    if (t < outS) return op;
+    return Math.max(0, op * (1 - (t - outS) / Math.max(1, end - outS)));
+  }
+  function boardRect(id) {
+    const b = document.getElementById(id);
+    const r = b && b.getBoundingClientRect();
+    return (r && r.width > 4 && r.height > 4) ? r : null;
+  }
+  /** 앵커 좌표 (client px). casterIsMe=false 면 적 = 내 전장 */
+  function legendaryAnchors(meta, opts) {
+    const opp = opts.casterIsMe === false;
+    const cw = window.innerWidth || 1920, ch = window.innerHeight || 1080;
+    const R = (meta && meta["referencePointsPx@1080p"]) || {};
+    const ref = (pt, dflt) => { const p = pt || dflt; return { x: p[0] * cw / 1920, y: opp ? ch - p[1] * ch / 1080 : p[1] * ch / 1080 }; };
+    const unitEl = opts.unitUid != null ? document.querySelector('.minion[data-uid="' + String(opts.unitUid).replace(/"/g, "") + '"]') : null;
+    const summonedUnit = rectCenter(unitEl) || casterBoardCenter(opts.casterIsMe) || ref(R.summonedUnit, [960, 719]);
+    const er = boardRect(opp ? "myBoard" : "oppBoard"), ar = boardRect(opp ? "oppBoard" : "myBoard");
+    const enemyBoard = er ? { x: er.left + er.width / 2, y: er.top + er.height / 2 } : ref(R.enemyBoardCentre, [942, 320]);
+    const top = boardRect("oppBoard"), bot = boardRect("myBoard");
+    const boardDivider = (top && bot)
+      ? { x: (top.left + top.width / 2 + bot.left + bot.width / 2) / 2, y: (top.bottom + bot.top) / 2 }
+      : ref(R.boardDivider, [942, 514]);
+    const enemies = [];
+    (opts.enemyUids || []).forEach(u => {
+      const el = document.querySelector((opp ? "#myBoard" : "#oppBoard") + ' .minion[data-uid="' + String(u).replace(/"/g, "") + '"]');
+      const r = el && el.getBoundingClientRect();
+      if (r && r.width > 4 && r.height > 4) enemies.push({ uid: u, x: r.left + r.width / 2, y: r.top + r.height / 2 });
+    });
+    return { summonedUnit, enemyBoard, boardDivider, enemies, allyBoard: ar };
+  }
+  // 적 카드 enemyMute: uid 선택자 스타일(render로 DOM이 다시 만들어져도 유지) · 채도·밝기 낮췄다 복귀
+  const _muted = {};
+  function syncMuteStyle() {
+    let st = document.getElementById("legendFxMute");
+    if (!st) { st = document.createElement("style"); st.id = "legendFxMute"; (document.head || document.body).appendChild(st); }
+    const kfs = {};
+    let css = "";
+    Object.keys(_muted).forEach(uid => {
+      const M = _muted[uid];
+      const a = Math.round(M.inMs / M.total * 1000) / 10, b = Math.round((M.inMs + M.holdMs) / M.total * 1000) / 10;
+      const name = ("fxEnemyMute_" + a + "_" + b + "_" + M.saturate + "_" + M.brightness).replace(/\./g, "p");
+      kfs[name] = "@keyframes " + name + "{0%{filter:saturate(1) brightness(1)}" + a + "%{filter:saturate(" + M.saturate + ") brightness(" + M.brightness + ")}" +
+        b + "%{filter:saturate(" + M.saturate + ") brightness(" + M.brightness + ")}100%{filter:saturate(1) brightness(1)}}";
+      css += '.minion[data-uid="' + String(uid).replace(/"/g, "") + '"]{animation:' + name + " " + M.total + "ms linear both!important;}";
+    });
+    st.textContent = Object.values(kfs).join("") + css;
+  }
+  function muteEnemy(uid, E) {
+    E = E || {};
+    const inMs = E.inMs != null ? E.inMs : 80, holdMs = E.holdMs != null ? E.holdMs : 350, outMs = E.outMs != null ? E.outMs : 420;
+    const total = Math.max(1, inMs + holdMs + outMs);
+    const tok = {};
+    _muted[uid] = { inMs, holdMs, outMs, total, saturate: E.saturate != null ? E.saturate : 0.35, brightness: E.brightness != null ? E.brightness : 0.78, tok };
+    syncMuteStyle();
+    setTimeout(() => { if (_muted[uid] && _muted[uid].tok === tok) { delete _muted[uid]; syncMuteStyle(); } }, total + 30);
+  }
+  function legendaryHost() {
+    let el = document.getElementById("legendFx");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "legendFx";
+      el.style.cssText = "position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden;";
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  /**
+   * @param base  에셋 폴더 (예: "assets/vfx/legendary/f15/")
+   * @param opts  { unitUid, enemyUids:[uid], casterIsMe?, onStart?(), onEnemyHit?(uid, ms), onEnemySwap?(uid), sound? }
+   * 새 유닛은 게임이 hideUnits([unitUid]) 로 숨겨 두면 t=0 에 summonedReveal 로 드러냄 (없어도 동작).
+   * @returns Promise<boolean> — durationMs(2000) 후 true, 에셋 실패면 false (숨긴 유닛·콜백은 어떤 경우에도 정리)
+   */
+  async function playLegendarySummon(base, opts) {
+    opts = opts || {};
+    const uid = opts.unitUid;
+    const swapped = new Set();
+    const fireSwap = (u) => { if (swapped.has(u)) return; swapped.add(u); try { opts.onEnemySwap && opts.onEnemySwap(u); } catch (e) {} };
+    try {
+      const pack = await preloadLegendarySummon(base);
+      if (!pack) return false;
+      const meta = pack.meta;
+      const k = fxScale();
+      const opp = opts.casterIsMe === false;
+      const A = legendaryAnchors(meta, opts);
+      const E = meta.enemyMute || {};
+      const hits = A.enemies.map(p => {
+        const ms = legendaryHitMs(meta, A.summonedUnit, p, k);
+        return { uid: p.uid, x: p.x, y: p.y, hitMs: ms, swapMs: ms + (E.swapAtMs != null ? E.swapAtMs : 60), hit: false };
+      });
+      const layers = [];
+      meta.layers.forEach((L, i) => {
+        const fr = pack.frames[i];
+        if (!L || !fr) return;
+        const d = L["displayPx@1080p"];
+        const w = (Array.isArray(d) ? d[0] : (L["displayBoxPx@1080p"] || 300)) * k;
+        const h = (Array.isArray(d) ? d[1] : (L["displayBoxPx@1080p"] || 300) * fr.h / fr.w) * k;
+        const pts = L.anchor === "eachEnemy" ? hits.map(hh => ({ x: hh.x, y: hh.y, at: hh.hitMs + (L.startMs || 0) }))
+          : [Object.assign({ at: L.startMs || 0 }, A[L.anchor] || A.summonedUnit)];
+        layers.push({ fr, w, h, pts, dur: legendaryLayerMs(L, meta), fps: L.fps || meta.fps || 30, n: Math.max(1, L.frames || 1), flip: opp && !!L.flipYWhenOppCasts });
+      });
+      const endMs = meta.durationMs || 2000;
+      const D = Object.assign({ endMs }, meta.dim || {});
+      const rv = meta.summonedReveal || null;
+      let started = false;
+      const host = legendaryHost();
+      const runOpts = { sound: opts.sound, shake: meta.screenShake || null };
+      const ok = await runCanvasFx(host, endMs, metaSfxUrl(meta, base), (meta.sfx || {}).startMs, (ctx, t, cw, ch) => {
+        if (!started) {
+          started = true;
+          if (uid != null) revealUnit(uid, rv ? rv.fadeMs : 120, rv ? rv.popMs : 0, rv || null);
+          try { opts.onStart && opts.onStart(); } catch (e) {}
+        }
+        hits.forEach(hh => {
+          if (!hh.hit && t >= hh.hitMs) { hh.hit = true; muteEnemy(hh.uid, E); try { opts.onEnemyHit && opts.onEnemyHit(hh.uid, hh.hitMs); } catch (e) {} }
+          if (t >= hh.swapMs) fireSwap(hh.uid);
+        });
+        const da = legendaryDimAlpha(D, t);
+        if (da > 0) { ctx.save(); ctx.globalAlpha = da; ctx.fillStyle = D.color || "#000"; ctx.fillRect(0, 0, cw, ch); ctx.restore(); }
+        layers.forEach(l => {
+          l.pts.forEach(p => {
+            const tl = t - p.at;
+            if (tl < 0 || tl >= l.dur) return;
+            const fi = Math.min(l.n - 1, Math.floor(tl * l.fps / 1000));
+            if (l.flip) {
+              ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, -1);
+              drawFrame(ctx, l.fr, fi, -l.w / 2, -l.h / 2, l.w, l.h);
+              ctx.restore();
+            } else drawFrame(ctx, l.fr, fi, p.x - l.w / 2, p.y - l.h / 2, l.w, l.h);
+          });
+        });
+      }, runOpts);
+      hits.forEach(hh => fireSwap(hh.uid));
+      return ok;
+    } finally {
+      (opts.enemyUids || []).forEach(u => fireSwap(u)); // 실패·중단해도 침묵 표시는 반드시 갱신
+      if (uid != null && _hidden[uid] && _hidden[uid].state === "hide") revealUnit(uid, 120, 0);
     }
   }
   /** Dispatch a meta-driven canvas pack. */
@@ -2131,7 +2329,7 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, summonFormationBox, summonHandGuard, releaseHidden, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, summonFormationBox, summonHandGuard, releaseHidden, hideUnits, revealUnit, playLegendarySummon, preloadLegendarySummon, isLegendarySummonMeta, legendaryHitMs, legendaryDimAlpha, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
 })();
 window.SpellFx = SpellFx;
 // v0.366: 타이틀 화면에서 미리 로드 → 첫 판 시작 연출이 로딩 없이 바로 뜨게
