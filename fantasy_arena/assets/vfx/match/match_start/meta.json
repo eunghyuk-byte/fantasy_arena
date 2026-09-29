@@ -1,17 +1,17 @@
 {
  "effect": "match_start_v2",
- "concept": "A_final",
+ "concept": "A_final_2s",
  "text": "MATCH START",
- "description": "Elemental Convergence (final) — the six element emblems pop in around a ring one by one (dark, fire, wind, light, earth, water), each flaring in its colour, then spiral inward and fuse into the FantasySoul crest with a flash and a six-colour shockwave; bold MATCH START slams in below; crest and lettering fade out smoothly",
- "durationMs": 1500,
+ "description": "Elemental Convergence (final) — the six element emblems pop in around a ring one by one (dark, fire, wind, light, earth, water), each flaring in its colour, then spiral inward and fuse into the FantasySoul crest with a flash and a six-colour shockwave; bold MATCH START slams in below; the fully formed crest and lettering hold with a gentle breathing glow and a soft shimmer sweep (~1.0-1.5 s), then fade out slowly (1.5-2.0 s)",
+ "durationMs": 2000,
  "fps": 60,
- "frames": 90,
+ "frames": 120,
  "overlay": {
   "file": "overlay.webm",
   "format": "WebM, VP9 video with alpha channel (yuva420p, alpha_mode=1), straight/non-premultiplied alpha, no audio track",
   "width": 1920,
   "height": 1080,
-  "bytes": 1580149,
+  "bytes": 1787463,
   "vp9Crf": 36,
   "blend": "normal (source-over)",
   "contentBoundsPx": {
@@ -41,22 +41,23 @@
    "easing": "ease-out (quadratic)"
   },
   "fadeOut": {
-   "startMs": 1080,
-   "endMs": 1500,
+   "startMs": 1500,
+   "endMs": 2000,
    "easing": "ease-in-out"
   },
-  "how": "full-stage black layer under the overlay, e.g. <div style='position:absolute;inset:0;background:#000;pointer-events:none'> with opacity animated as above"
+  "how": "full-stage black layer under the overlay, e.g. <div style='position:absolute;inset:0;background:#000;pointer-events:none'> with opacity animated as above",
+  "note": "dim done by game code under the overlay; it fades out together with the overlay's visual fade-out"
  },
- "endState": "overlay fades out smoothly from 1080 ms and is fully transparent by the last frame; remove it when the video ends",
+ "endState": "overlay fades out smoothly from 1500 ms and is fully transparent by the last frame; remove it when the video ends",
  "lastFrameAlphaMax": 0,
  "sfx": {
   "file": "sfx.ogg",
   "format": "Ogg Vorbis, mono, 48 kHz",
   "startMs": 0,
-  "durationMs": 1500,
+  "durationMs": 2000,
   "loudnessLUFS": -17.6,
-  "truePeakDbTP": -3.2,
-  "note": "start together with the overlay (t=0); its tail fades with the visual fade-out (from 1080 ms)"
+  "truePeakDbTP": -3.1,
+  "note": "start together with the overlay (t=0); its tail fades with the visual fade-out (from 1500 ms)"
  },
  "timelineMs": {
   "emblemsIgniteMs": [
@@ -73,9 +74,21 @@
   ],
   "crestSlamMs": 720,
   "textSlamMs": 800,
+  "shineSweepMs": [
+   920,
+   1200
+  ],
+  "holdMs": [
+   1000,
+   1500
+  ],
+  "holdShimmerSweepMs": [
+   1220,
+   1720
+  ],
   "fadeOutMs": [
-   1080,
-   1483
+   1500,
+   1983
   ]
  },
  "preview": {
@@ -95,12 +108,24 @@
   "sound": "re-timed native audio of v1 Kling clip ms_A, layered with synthesized sub thump / body hit / low swell / rumble; loudness-normalised; no sonilo/mirelo"
  },
  "fadeOut": {
-  "startMs": 1080,
-  "endMs": 1483,
+  "startMs": 1500,
+  "endMs": 1983,
   "curve": "cosine ease-in-out (opacity = (0.5+0.5cos(pi*u))^1.35); every layer (lettering, emblems, glows, particles) fades together; fully transparent on the last frame"
  },
+ "changesFromA_final": [
+  "duration 1500 -> 2000 ms at the user's request, so the lettering can be read: entrance (0-1000 ms) and lettering (Google Sans Flex wght 880, tracking 0.03) are identical to A_final",
+  "fully formed hold ~1000-1500 ms (A_final started fading at 1080 ms) with a subtle breathing glow on crest and lettering plus one soft, wide shimmer sweep (1220-1720 ms) so it is not frozen",
+  "slow natural fade-out 1500-1983 ms (cosine ease, all layers together), fully transparent on the last frame",
+  "dim still done in code, opacity 0.6 black, same fade-in 0-180 ms, fade-out moved to 1500-2000 ms with the visual fade",
+  "sound re-fitted to 2.0 s: same layers and hits, low rumble carries the hold, tail fades with the visual fade from 1500 ms"
+ ],
  "changesFromV2": [
   "lettering much bolder: Google Sans Flex wght 880 (v2: 550), stem/cap 0.168 -> ~0.28, tracking 0.02 -> 0.03; same logo-sampled gold texture, outline and bevel",
-  "natural fade-out 1080-1483 ms (cosine ease) replacing the late, steep fade"
+  "natural fade-out 1080-1483 ms (cosine ease) replacing the late, steep fade",
+  "(2.0 s version) duration 1500 -> 2000 ms at the user's request, so the lettering can be read: entrance (0-1000 ms) and lettering (Google Sans Flex wght 880, tracking 0.03) are identical to A_final",
+  "(2.0 s version) fully formed hold ~1000-1500 ms (A_final started fading at 1080 ms) with a subtle breathing glow on crest and lettering plus one soft, wide shimmer sweep (1220-1720 ms) so it is not frozen",
+  "(2.0 s version) slow natural fade-out 1500-1983 ms (cosine ease, all layers together), fully transparent on the last frame",
+  "(2.0 s version) dim still done in code, opacity 0.6 black, same fade-in 0-180 ms, fade-out moved to 1500-2000 ms with the visual fade",
+  "(2.0 s version) sound re-fitted to 2.0 s: same layers and hits, low rumble carries the hold, tail fades with the visual fade from 1500 ms"
  ]
 }

@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.365";
+const GAME_VERSION = "0.366";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -276,9 +276,13 @@ function startGame(vsAI) {
         if (typeof SpellFx !== "undefined" && SpellFx.playMatch) {
           // v0.364: 첫 내 턴 연출(비디오·사운드) 미리 로드 — match_start 재생 중에
           try { if (SpellFx.preloadMatch) SpellFx.preloadMatch("turn_start_me"); } catch (e) {}
+          // v0.366: 대기 상한은 meta durationMs 기반 (2.0초 버전 → 3.1초), 고정 1.5초 가정 제거
+          const startP = SpellFx.playMatch("match_start");
+          let startMs = 0;
+          try { if (SpellFx.matchDurationMs) startMs = await SpellFx.matchDurationMs("match_start"); } catch (e) {}
           await Promise.race([
-            SpellFx.playMatch("match_start"),
-            new Promise(r => setTimeout(r, 2600))
+            startP,
+            new Promise(r => setTimeout(r, (startMs || 2000) + 1100))
           ]);
         }
       } catch (e) {}

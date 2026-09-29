@@ -1545,15 +1545,61 @@ const SpellFx = (() => {
     });
   }
   /** 매치 팩 사전 로드 (비디오 캐시 + sfx 디코드) */
-  async function preloadMatch(id) {
-    try {
-      const meta = await loadPackMeta("match", id);
-      if (!isVideoPackMeta(meta)) return false;
-      const base = packBase("match", id);
-      const file = needsSafariFallback() ? (meta.overlay.safariFile || "overlay_safari.webp") : meta.overlay.file;
-      await Promise.all([fetch(assetUrl(base, file), { cache: "force-cache" }).then(r => r.blob()).catch(() => null), pickMatchSfxUrl(base, meta)]);
-      return true;
-    } catch (e) { return false; }
+  // v0.366: 미리 버퍼링해 둔 <video> (id별 1개, 재사용). 첫 판 시작 연출 지연(손패·보드 이미지 로딩과 경쟁) 제거용
+  const _readyVideo = {};
+  function makeOverlayVideo(src) {
+    const v = document.createElement("video");
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+    v.setAttribute("playsinline", "");
+    v.setAttribute("muted", "");
+    v.preload = "auto";
+    v.className = "mfx-overlay";
+    v.src = src;
+    return v;
+  }
+  const _preloading = {};
+  function preloadMatch(id) {
+    if (_preloading[id]) return _preloading[id];
+    const p = (async () => {
+      try {
+        const meta = await loadPackMeta("match", id);
+        if (!isVideoPackMeta(meta)) return false;
+        const base = packBase("match", id);
+        const sfxP = pickMatchSfxUrl(base, meta);
+        if (needsSafariFallback()) {
+          const file = meta.overlay.safariFile || "overlay_safari.webp";
+          await Promise.all([fetch(assetUrl(base, file), { cache: "force-cache" }).then(r => r.blob()).catch(() => null), sfxP]);
+        } else {
+          if (!_readyVideo[id]) {
+            // 파일 전체를 메모리(blob URL)로 받아 둠 → 재생 중 네트워크 대기(손패·보드 이미지와 경쟁) 없음
+            const url = assetUrl(base, meta.overlay.file);
+            let src = url;
+            try {
+              const res = await fetch(url, { cache: "force-cache" });
+              if (res.ok) src = URL.createObjectURL(await res.blob());
+            } catch (e) {}
+            if (!_readyVideo[id]) {
+              const v = makeOverlayVideo(src);
+              try { v.load(); } catch (e) {}
+              _readyVideo[id] = v;
+            }
+          }
+          const rv = _readyVideo[id];
+          await Promise.all([rv.readyState >= 4 ? null : waitEvent(rv, ["canplaythrough", "error"], 5000), sfxP]);
+        }
+        return true;
+      } catch (e) { return false; }
+    })();
+    _preloading[id] = p;
+    p.then(ok => { if (!ok) delete _preloading[id]; });
+    return p;
+  }
+  /** meta 기반 연출 길이(ms). 대기 시간 계산용 — 코드에 1.5초 등 고정값을 두지 않는다 */
+  async function matchDurationMs(id) {
+    const meta = await loadPackMeta("match", id);
+    return (meta && meta.durationMs) || 0;
   }
   const _sleep = (ms) => new Promise(r => setTimeout(r, ms));
   async function _playVideoPack(kind, id, meta, base, opts) {
@@ -1565,16 +1611,18 @@ const SpellFx = (() => {
     const safari = needsSafariFallback();
     let visual = null;
     let video = null;
+    let reused = false;
     if (!safari) {
-      video = document.createElement("video");
-      video.muted = true;
-      video.defaultMuted = true;
-      video.playsInline = true;
-      video.setAttribute("playsinline", "");
-      video.setAttribute("muted", "");
-      video.preload = "auto";
-      video.className = "mfx-overlay";
-      video.src = assetUrl(base, meta.overlay.file);
+      // 미리 버퍼링된 비디오가 있으면 그대로 사용 (처음부터 재생)
+      const rv = _readyVideo[id];
+      if (rv && !rv.parentNode && !rv.error) {
+        video = rv;
+        reused = true;
+        try { if (video.currentTime > 0) video.currentTime = 0; } catch (e) {}
+      } else {
+        video = makeOverlayVideo(assetUrl(base, meta.overlay.file));
+        if (!rv) _readyVideo[id] = video;
+      }
       visual = video;
     } else {
       const sf = meta.overlay.safariFile || "overlay_safari.webp";
@@ -1593,8 +1641,10 @@ const SpellFx = (() => {
       visual.style.opacity = "0";
       stage.appendChild(visual);
       if (video) {
-        try { video.load(); } catch (e) {}
-        await waitEvent(video, ["canplaythrough", "canplay", "error"], 700);
+        if (!reused || video.readyState < 3) {
+          if (!reused) { try { video.load(); } catch (e) {} }
+          await waitEvent(video, ["canplaythrough", "canplay", "error"], 700);
+        }
       } else {
         await (visual.decode ? visual.decode().catch(() => {}) : Promise.resolve());
       }
@@ -1762,6 +1812,13 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, isVideoPackMeta, needsSafariFallback };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
 })();
 window.SpellFx = SpellFx;
+// v0.366: 타이틀 화면에서 미리 로드 → 첫 판 시작 연출이 로딩 없이 바로 뜨게
+try {
+  const _mfxPre = () => setTimeout(() => {
+    try { SpellFx.preloadMatch("match_start"); SpellFx.preloadMatch("turn_start_me"); } catch (e) {}
+  }, 300);
+  if (document.readyState === "complete") _mfxPre(); else window.addEventListener("load", _mfxPre, { once: true });
+} catch (e) {}

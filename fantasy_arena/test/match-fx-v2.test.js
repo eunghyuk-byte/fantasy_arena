@@ -18,11 +18,12 @@ function loadDimFns() {
 }
 
 test("match_start·turn_start_me·victory·defeat: v2 비디오 팩 파일 + 구 스트립 제거", () => {
-  for (const [id, dur, fo] of [["match_start", 1500, [1080, 1483]], ["turn_start_me", 800, [500, 783]],
+  for (const [id, dur, fo] of [["match_start", 2000, [1500, 1983]], ["turn_start_me", 800, [500, 783]],
     ["victory", 1800, [1350, 1783]], ["defeat", 1800, [1350, 1783]]]) {
     const m = readMeta(id);
     assert.equal(m.durationMs, dur, id + " durationMs");
     assert.equal(m.fps, 60);
+    assert.equal(m.frames, dur * 60 / 1000, id + " frames");
     assert.equal(m.overlay.file, "overlay.webm");
     assert.equal(m.overlay.width, 1920);
     assert.equal(m.overlay.height, 1080);
@@ -51,14 +52,14 @@ test("manifest: 매치 v2 파일 등록·구 파일 제거·count 일치", () =>
   }
 });
 
-test("dim: match_start는 meta 값(0.6, 0→180ms, 1080→1500ms 페이드아웃)", () => {
+test("dim: match_start(2초판)는 meta 값(0.6, 0→180ms, 1500→2000ms 페이드아웃)", () => {
   const { resolveDim, isVideoPackMeta } = loadDimFns();
   const m = readMeta("match_start");
   assert.ok(isVideoPackMeta(m));
   const d = resolveDim("match_start", m);
   assert.equal(d.opacity, 0.6);
   assert.equal(d.fromMeta, true);
-  assert.deepEqual([d.fadeInStartMs, d.fadeInEndMs, d.fadeOutStartMs, d.fadeOutEndMs], [0, 180, 1080, 1500]);
+  assert.deepEqual([d.fadeInStartMs, d.fadeInEndMs, d.fadeOutStartMs, d.fadeOutEndMs], [0, 180, 1500, 2000]);
   assert.equal(d.hold, false);
 });
 
@@ -108,11 +109,11 @@ test("dim: 기본 0.4, meta dim 없는 구형 승리·패배는 결과 화면까
 
 test("SpellFx: 비디오 모드·dim 레이어·Safari 폴백·결과 화면 해제 연결", () => {
   assert.match(SRC, /if \(isVideoPackMeta\(meta\)\) return _playVideoPack\(kind, id, meta, base, opts\);/);
-  assert.match(SRC, /video\.muted = true;/);
-  assert.match(SRC, /video\.playsInline = true;/);
+  assert.match(SRC, /v\.muted = true;/);
+  assert.match(SRC, /v\.playsInline = true;/);
   assert.match(SRC, /canPlayType\('video\/webm; codecs="vp09\.00\.10\.08"'\)/);
   assert.match(SRC, /overlay_safari\.webp/);
-  assert.match(SRC, /resolveDim, releaseDim, preloadMatch, isVideoPackMeta, needsSafariFallback/);
+  assert.match(SRC, /resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback/);
   const css = fs.readFileSync(path.join(ROOT, "css/game.css"), "utf8");
   const block = css.slice(css.indexOf("#matchFx {"), css.indexOf("#matchFx .mfx-overlay"));
   assert.match(block, /pointer-events: none/);
@@ -127,4 +128,18 @@ test("SpellFx: 비디오 모드·dim 레이어·Safari 폴백·결과 화면 해
   const game = fs.readFileSync(path.join(ROOT, "js/game.js"), "utf8");
   assert.match(game, /SpellFx\.playMatch\("match_start"\)/);
   assert.match(game, /SpellFx\.playMatch\("turn_start_me", \{ label: "" \}\)/);
+});
+
+// v0.366: MATCH START 2초판 — 대기값은 meta 기반, 타이틀에서 미리 로드(첫 판 지연 제거)
+test("match_start 2초판: 고정 1.5초 대기 없음 · meta durationMs 기반 · 미리 로드", () => {
+  const game = fs.readFileSync(path.join(ROOT, "js/game.js"), "utf8");
+  const sg = game.slice(game.indexOf("function startGame("), game.indexOf("const SOUL_DRAW_COST"));
+  assert.doesNotMatch(sg, /setTimeout\(r, (1500|2200|2600)\)/, "고정 대기값 제거");
+  assert.match(sg, /SpellFx\.matchDurationMs\("match_start"\)/);
+  assert.match(sg, /\(startMs \|\| 2000\) \+ 1100/);
+  assert.match(SRC, /const _readyVideo = \{\};/);
+  assert.match(SRC, /SpellFx\.preloadMatch\("match_start"\); SpellFx\.preloadMatch\("turn_start_me"\);/);
+  assert.match(SRC, /matchDurationMs, isVideoPackMeta/);
+  const M = path.join(MATCH, "match_start");
+  assert.equal(fs.statSync(path.join(M, "overlay.webm")).size, readMeta("match_start").overlay.bytes);
 });

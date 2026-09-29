@@ -2398,27 +2398,27 @@
     },
     {
       "path": "assets/vfx/match/match_start/meta.json",
-      "bytes": 3894,
+      "bytes": 5831,
       "name": "meta"
     },
     {
       "path": "assets/vfx/match/match_start/overlay.webm",
-      "bytes": 1580149,
+      "bytes": 1787463,
       "name": "overlay"
     },
     {
       "path": "assets/vfx/match/match_start/overlay_safari.webp",
-      "bytes": 3194898,
+      "bytes": 4157160,
       "name": "overlay_safari"
     },
     {
       "path": "assets/vfx/match/match_start/sfx.mp3",
-      "bytes": 25004,
+      "bytes": 33068,
       "name": "sfx"
     },
     {
       "path": "assets/vfx/match/match_start/sfx.ogg",
-      "bytes": 15225,
+      "bytes": 19436,
       "name": "sfx"
     },
     {
