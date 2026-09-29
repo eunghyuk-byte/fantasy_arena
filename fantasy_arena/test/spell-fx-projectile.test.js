@@ -168,3 +168,38 @@ test("SpellFx: perUnit+flow 공용 재생 모드 (flow를 overlay보다 먼저 �
   assert.match(src, /opts\.emptyFlows \|\| 2/);
   assert.match(src, /#oppHand/, "상대 시전 시 상대 손패로");
 });
+
+// v0.360 fs6 광분: anchored (컨셉 C 영웅 기운 0~700ms → 소울 폭발 400~900ms)
+test("fs6 팩: anchored · self · 영웅 기운 0~700ms · 소울 폭발 400~900ms · 2MB 이하", () => {
+  const P6 = path.join(ROOT, "assets/vfx/spells/fs6");
+  const m = JSON.parse(fs.readFileSync(path.join(P6, "meta.json"), "utf8"));
+  assert.equal(m.id, "fs6");
+  assert.equal(m.concept, "C");
+  assert.equal(m.targetMode, "self");
+  assert.equal(m.playMode, "anchored");
+  const [hero, soul] = m.layers;
+  assert.equal(hero.anchor.selector, ".hero-portrait.mine");
+  assert.deepEqual([hero.startMs, hero.startMs + hero.durationMs], [0, 700]);
+  assert.equal(soul.anchor.selector, "#mySoulGem");
+  assert.equal(soul.anchor.opp, "#oppSoulGem");
+  assert.deepEqual([soul.startMs, soul.startMs + soul.durationMs], [400, 900]);
+  for (const f of [hero.file, soul.file, m.sfx.file]) assert.ok(fs.existsSync(path.join(P6, f)), f + " 존재");
+  const total = fs.readdirSync(P6).reduce((s, f) => s + fs.statSync(path.join(P6, f)).size, 0);
+  assert.ok(total <= 2 * 1024 * 1024, "total " + total);
+  for (const old of ["cast.webp", "cast_strip.png", "impact.webp", "impact_strip.png", "preview.mp4"]) {
+    assert.ok(!fs.existsSync(path.join(P6, old)), old + " 없음");
+  }
+  const man = JSON.parse(fs.readFileSync(path.join(ROOT, "assets/manifest.json"), "utf8"));
+  const inMan = man.items.filter(i => i.path.startsWith("assets/vfx/spells/fs6/")).map(i => i.path.split("/").pop()).sort();
+  assert.deepEqual(inMan, fs.readdirSync(P6).sort());
+  assert.equal(man.count, man.items.length);
+});
+
+test("SpellFx: anchored 공용 재생 모드 (시전자 선택자 · 상대면 opp 선택자/좌표 · 사운드)", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/spell-fx.js"), "utf8");
+  assert.match(src, /async function playAnchored\(stage, meta, base, opts\)/);
+  assert.match(src, /playAnchored, preloadAnchored, isAnchoredMeta/);
+  assert.match(src, /const sel = opp \? A\.opp : A\.selector;/);
+  assert.match(src, /oppFallbackPx@1080p/);
+  assert.match(src, /if \(isAnchoredMeta\(meta\)\) return playAnchored\(stage, meta, base, opts\);/);
+});

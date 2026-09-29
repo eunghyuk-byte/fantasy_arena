@@ -364,6 +364,11 @@ const SpellFx = (() => {
   //                 flightMs, easePow }  → 유닛마다 발사체 1개 (유닛 → 손패). 유닛이 없으면 보드 중앙에서 2개
   //   arrival:    { file, frames, w, h, fps, displayBoxPx@1080p, startMs, durationMs } → 손패 도착 지점
   //   AI(상대)가 쓰면 상대 보드 → #oppHand
+  // D) meta.playMode "anchored"  (fs6 광분 · 대상 없는 자기 강화 공용, v0.360)
+  //   targetMode: "self"
+  //   layers: [{ file, layout, frames, w, h, fps, startMs, durationMs, displayBoxPx@1080p, anchorOffsetYPx@1080p,
+  //              oppAnchorOffsetYPx@1080p?, anchor: { selector, opp, fallbackPx@1080p, oppFallbackPx@1080p } }]
+  //   → 시전자 UI 요소(선택자 rect 중심 + offsetY) 위에 한 번씩 재생. 상대가 쓰면 opp 선택자·opp 좌표
   // ─────────────────────────────────────────────────────────────────────────
   const _imgCache = {};
   function loadImg(url) {
@@ -391,7 +396,10 @@ const SpellFx = (() => {
     const pm = String((meta && meta.playMode) || "");
     return !!(meta && !isFlowMeta(meta) && (pm.indexOf("overlay") >= 0 || pm.indexOf("perUnit") >= 0) && (meta.overlay || meta.unitImpact));
   }
-  function isCanvasMeta(meta) { return isProjectileMeta(meta) || isOverlayMeta(meta) || isFlowMeta(meta); }
+  function isAnchoredMeta(meta) {
+    return !!(meta && String(meta.playMode || "") === "anchored" && Array.isArray(meta.layers) && meta.layers.length);
+  }
+  function isCanvasMeta(meta) { return isProjectileMeta(meta) || isOverlayMeta(meta) || isFlowMeta(meta) || isAnchoredMeta(meta); }
   function metaSfxUrl(meta, base) { return meta && meta.sfx && meta.sfx.file ? assetUrl(base, meta.sfx.file) : ""; }
   function projectileUrls(meta, base) {
     return {
@@ -468,8 +476,16 @@ const SpellFx = (() => {
       loadSfx(metaSfxUrl(meta, base))
     ]);
   }
+  function preloadAnchored(meta, base) {
+    if (!isAnchoredMeta(meta)) return Promise.resolve(null);
+    return Promise.all([
+      Promise.all(meta.layers.map(L => L && L.file ? loadFrames(assetUrl(base, L.file), L.frames, L.w, L.h, L.layout) : Promise.resolve(null))),
+      loadSfx(metaSfxUrl(meta, base))
+    ]);
+  }
   function preloadMetaFx(meta, base) {
     if (isProjectileMeta(meta)) return preloadProjectile(meta, base);
+    if (isAnchoredMeta(meta)) return preloadAnchored(meta, base);
     if (isFlowMeta(meta)) return preloadFlow(meta, base);
     if (isOverlayMeta(meta)) return preloadOverlay(meta, base);
     return Promise.resolve(null);
@@ -785,9 +801,56 @@ const SpellFx = (() => {
       }
     }, opts);
   }
+  /** anchored 레이어 기준점: 시전자 쪽 선택자 rect 중심 (없으면 @1080p 좌표를 화면 비율로) */
+  function anchorPoint(A, casterIsMe) {
+    A = A || {};
+    const opp = casterIsMe === false;
+    const cw = window.innerWidth || 1920, ch = window.innerHeight || 1080;
+    const sel = opp ? A.opp : A.selector;
+    let el = null;
+    if (sel) { try { el = document.querySelector(sel); } catch (e) { el = null; } }
+    const r = el && el.getBoundingClientRect();
+    if (r && r.width > 2 && r.height > 2) return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    const fb = (opp ? A["oppFallbackPx@1080p"] : A["fallbackPx@1080p"]) || A["fallbackPx@1080p"] || [960, 540];
+    return { x: fb[0] * cw / 1920, y: fb[1] * ch / 1080 };
+  }
+  /**
+   * Generic anchored player (대상 없는 스펠: 시전자 영웅·소울 등 UI 요소 위에 레이어별 1회 재생).
+   * @param opts { casterIsMe?: bool, sound?: bool }
+   */
+  async function playAnchored(stage, meta, base, opts) {
+    opts = opts || {};
+    if (!stage || !isAnchoredMeta(meta)) return false;
+    const [frs] = await preloadAnchored(meta, base);
+    const k = fxScale();
+    const opp = opts.casterIsMe === false;
+    const layers = [];
+    meta.layers.forEach((L, i) => {
+      const fr = frs && frs[i];
+      if (!L || !fr) return;
+      const pt = anchorPoint(L.anchor, opts.casterIsMe);
+      const offKey = opp && L["oppAnchorOffsetYPx@1080p"] != null ? "oppAnchorOffsetYPx@1080p" : "anchorOffsetYPx@1080p";
+      const box = (L["displayBoxPx@1080p"] || 300) * k;
+      const bw = box, bh = box * fr.h / fr.w;
+      let y = pt.y + (L[offKey] || 0) * k;
+      if (opp) y = Math.max(bh * 0.3, y); // 상대 쪽(화면 위 가장자리)에서 잘리지 않게
+      const fps = L.fps || meta.fps || 30, n = Math.max(1, L.frames || 1);
+      layers.push({ fr, x: pt.x, y, bw, bh, at: L.startMs || 0, dur: L.durationMs || Math.round(n * 1000 / fps), fps, n });
+    });
+    if (!layers.length) return false;
+    const endMs = layers.reduce((m, l) => Math.max(m, l.at + l.dur), 0);
+    return runCanvasFx(stage, endMs, metaSfxUrl(meta, base), (meta.sfx || {}).startMs, (ctx, t) => {
+      layers.forEach(l => {
+        const tl = t - l.at;
+        if (tl < 0 || tl >= l.dur) return;
+        drawFrame(ctx, l.fr, Math.min(l.n - 1, Math.floor(tl * l.fps / 1000)), l.x - l.bw / 2, l.y - l.bh / 2, l.bw, l.bh);
+      });
+    }, opts);
+  }
   /** Dispatch a meta-driven canvas pack. */
   function playMetaFx(stage, meta, base, opts) {
     opts = opts || {};
+    if (isAnchoredMeta(meta)) return playAnchored(stage, meta, base, opts);
     if (isProjectileMeta(meta)) return playProjectile(stage, meta, base, opts.to, opts);
     if (isFlowMeta(meta)) return playPerUnitFlow(stage, meta, base, opts);
     if (isOverlayMeta(meta)) return playOverlayPerUnit(stage, meta, base, opts);
@@ -1442,6 +1505,6 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts };
+  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playItem, playMatch, resolveFxAnchor, pointFromOpts };
 })();
 window.SpellFx = SpellFx;

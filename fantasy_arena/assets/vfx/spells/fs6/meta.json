@@ -1,22 +1,132 @@
 {
-  "id": "fs6",
-  "name": "광분",
-  "kind": "buff",
-  "durationMs": 1500,
-  "fps": 12,
-  "cast": {
-    "file": "cast.webp",
-    "frames": 12,
-    "w": 720,
-    "h": 720
+ "id": "fs6",
+ "name": "광분",
+ "concept": "C",
+ "description": "Frenzy Helix — a double helix of flame winds up around my hero and bursts, then a crown of flame tongues opens on my soul gem",
+ "format": "WebP sprite strip (lossy RGB + alpha), straight (non-premultiplied) alpha",
+ "fps": 30,
+ "durationMs": 900,
+ "card": "다음 턴 내 소울+3 (spell.type soul_next, value 3; no target)",
+ "type": "anchored",
+ "targetMode": "self",
+ "playMode": "anchored",
+ "playModeNote": "NEW MODE anchored: no target. Play each entry of 'layers' as a one-shot strip centred on a UI element of the CASTER, found by CSS selector (use rect centre + offsetY). If the selector is missing, use fallbackPx@1080p scaled like the other packs. For the AI caster, use the 'opp' selector/fallback.",
+ "layers": [
+  {
+   "name": "heroAura",
+   "file": "hero_aura_strip.webp",
+   "layout": "horizontal",
+   "frames": 21,
+   "w": 384,
+   "h": 384,
+   "fps": 30,
+   "loop": false,
+   "startMs": 0,
+   "durationMs": 700,
+   "anchor": {
+    "selector": ".hero-portrait.mine",
+    "opp": ".hero-portrait:not(.mine)",
+    "point": "rect centre",
+    "fallbackPx@1080p": [
+     1686,
+     716
+    ],
+    "oppFallbackPx@1080p": [
+     1686,
+     269
+    ]
+   },
+   "anchorOffsetYPx@1080p": -30,
+   "displayBoxPx@1080p": 400
   },
-  "impact": {
-    "file": "impact.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
+  {
+   "name": "soulBurst",
+   "file": "soul_burst_strip.webp",
+   "layout": "horizontal",
+   "frames": 15,
+   "w": 320,
+   "h": 320,
+   "fps": 30,
+   "loop": false,
+   "startMs": 400,
+   "durationMs": 500,
+   "anchor": {
+    "selector": "#mySoulGem",
+    "opp": "#oppSoulGem",
+    "point": "rect centre",
+    "fallbackPx@1080p": [
+     1363,
+     971
+    ],
+    "oppFallbackPx@1080p": [
+     1363,
+     45
+    ]
+   },
+   "anchorOffsetYPx@1080p": -40,
+   "displayBoxPx@1080p": 300
+  }
+ ],
+ "uiReferencePx@1080p": {
+  "myHeroPortrait": {
+   "rect": [
+    1640,
+    656,
+    93,
+    119
+   ],
+   "centre": [
+    1686,
+    716
+   ]
   },
-  "anchor": "self-board",
-  "sfxHint": "fire_rage",
-  "concept": "분노 오라가 소울을 달굼"
+  "mySoulGem(5/5 pill)": {
+   "rect": [
+    1262,
+    952,
+    202,
+    38
+   ],
+   "centre": [
+    1363,
+    971
+   ]
+  },
+  "mySoulDraw button": {
+   "rect": [
+    1633,
+    921,
+    106,
+    106
+   ]
+  },
+  "oppHeroPortrait": {
+   "rect": [
+    1640,
+    209,
+    93,
+    119
+   ]
+  },
+  "oppSoulGem": {
+   "rect": [
+    1262,
+    26,
+    202,
+    38
+   ]
+  },
+  "note": "measured with getBoundingClientRect at 1920x1080 on the reference board (heroes sit in the right HUD column; the soul pill is bottom-right of the board)"
+ },
+ "sfx": {
+  "file": "sfx.mp3",
+  "startMs": 0,
+  "durationMs": 950,
+  "hitAtMs": 420,
+  "loudnessLUFS": -17.8,
+  "truePeakDbTP": -3.8,
+  "source": "fs2 C-style: synth low brown-noise rumble with rising low-pass (slow amplitude sway) + soft pitch-drop sub thump(s), layered with this concept's own Kling clip audio low-passed ~0.6-0.65 kHz; final low-pass 1.7/2 kHz",
+  "note": "rising low swell into one soft sub thump at ~420ms, just as the soul burst starts"
+ },
+ "sequence": "after the centre card: hero aura 0-700ms (peak ~400) · soul burst 400-900ms · sound from 0ms"
 }

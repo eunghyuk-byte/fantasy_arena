@@ -1,5 +1,5 @@
 {
-  "count": 703,
+  "count": 702,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -2962,29 +2962,24 @@
       "name": "unit_impact_strip"
     },
     {
-      "path": "assets/vfx/spells/fs6/cast.webp",
-      "bytes": 664896,
-      "name": "cast"
-    },
-    {
-      "path": "assets/vfx/spells/fs6/cast_strip.png",
-      "bytes": 1022891,
-      "name": "cast_strip"
-    },
-    {
-      "path": "assets/vfx/spells/fs6/impact.webp",
-      "bytes": 744734,
-      "name": "impact"
-    },
-    {
-      "path": "assets/vfx/spells/fs6/impact_strip.png",
-      "bytes": 560791,
-      "name": "impact_strip"
+      "path": "assets/vfx/spells/fs6/hero_aura_strip.webp",
+      "bytes": 1073016,
+      "name": "hero_aura_strip"
     },
     {
       "path": "assets/vfx/spells/fs6/meta.json",
-      "bytes": 370,
+      "bytes": 3047,
       "name": "meta"
+    },
+    {
+      "path": "assets/vfx/spells/fs6/sfx.mp3",
+      "bytes": 16343,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/spells/fs6/soul_burst_strip.webp",
+      "bytes": 321076,
+      "name": "soul_burst_strip"
     },
     {
       "path": "assets/vfx/spells/fs7/cast.webp",
