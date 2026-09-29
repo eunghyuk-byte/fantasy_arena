@@ -4082,6 +4082,21 @@ html.is-desktop #game.active .my-hand .card.playable,
   color: #1c3524;
   text-shadow: 0 1px 0 rgba(220,255,200,.35), 0 0 3px rgba(255,255,200,.2);
 }
+/* v0.351: 마우스오버·누름 때 글자색도 확실히 바뀜 */
+#game.active .col-main > #endBtn.end-btn .end-btn-label { transition: color .12s ease, text-shadow .12s ease; }
+#game.active .col-main > #endBtn.end-btn.my-turn:hover {
+  color: #fff7d6;
+  text-shadow: 0 1px 1px rgba(0,0,0,.9), 0 0 8px rgba(255,214,120,.95), 0 0 16px rgba(255,190,60,.6);
+}
+#game.active .col-main > #endBtn.end-btn.my-turn.glow:hover {
+  color: #ffffff;
+  text-shadow: 0 1px 2px #0b2412, 0 0 3px #0b2412, 0 0 8px rgba(10,50,20,.9);
+}
+#game.active .col-main > #endBtn.end-btn.my-turn.holding,
+#game.active .col-main > #endBtn.end-btn.my-turn.glow.holding {
+  color: #ffc629;
+  text-shadow: 0 1px 1px #000, 0 0 6px rgba(255,160,0,.95), 0 0 14px rgba(255,120,0,.6);
+}
 
 
 /* v0.216 board HUD gems — soul/HP seated on baked board art; no rectangular hero chrome */
@@ -4261,24 +4276,44 @@ html.is-desktop #game.active .my-hand .card.playable,
 }
 
 
-/* ===== v0.222: playable glow INSIDE card (hand overflow stays locked hidden) =====
-   Outer box-shadow bloom was clipped by HAND LAYOUT LOCK overflow:hidden.
-   Keep HAND_ROW_FRAC / no negative .my-hand margins. */
+/* ===== v0.222 → v0.351: playable glow — 은은하게 맥동하는 노란 빛 (초기 playGlow 방식 복원) =====
+   HAND LAYOUT LOCK(.my-hand 위치·크기·overflow)은 건드리지 않는다. 카드 자체만 overflow visible로
+   바깥 번짐을 보이게 하고, 맥동은 ::before 가 opacity 로만 한다(앞선 !important 선언과 충돌 없음). */
 #game.active .my-hand .card.playable {
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 #game.active .my-hand .card.playable > .play-glow {
-  inset: 0 !important;
+  inset: -1px !important;
   width: auto !important;
   height: auto !important;
-  border: 2px solid rgba(255, 220, 90, 0.92) !important;
+  border: 2px solid rgba(255, 226, 140, 0.9) !important;
   border-radius: 10px 10px 16px 16px !important;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 180, 40, 0.85),
-    inset 0 0 14px 2px rgba(255, 200, 60, 0.55),
-    inset 0 0 28px rgba(255, 150, 20, 0.35) !important;
-  filter: brightness(1.08) saturate(1.2) !important;
-  animation: playGlowBurn 0.9s ease-in-out infinite !important;
+    0 0 6px 1px rgba(255, 214, 110, 0.45),
+    inset 0 0 8px rgba(255, 220, 120, 0.25) !important;
+  filter: none !important;
+  animation: none !important;
+  opacity: 1 !important;
+}
+#game.active .my-hand .card.playable > .play-glow::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 240, 190, 0.9),
+    0 0 14px 4px rgba(255, 216, 120, 0.75),
+    0 0 26px 8px rgba(255, 190, 70, 0.35);
+  opacity: 0.25;
+  animation: playGlowBreath 2.2s ease-in-out infinite;
+}
+@keyframes playGlowBreath {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #game.active .my-hand .card.playable > .play-glow::before { animation: none; opacity: 0.7; }
 }
 
 
@@ -4620,15 +4655,15 @@ html, body, body * {
 }
 #game.active #oppDeck .pile-count,
 #game.active #myDeck .pile-count {
-  font-size: 26px !important;
-  margin-top: 6px !important;
+  font-size: calc(26px * var(--deck-scale, 1)) !important; /* v0.351: 덱 더미 10% 축소 (DECK_SCALE) */
+  margin-top: calc(6px * var(--deck-scale, 1)) !important;
 }
 /* 3) 상대 손패 뒷면 2배 — 화면 위로 일부 잘리게 (하스스톤식) */
 #game.active .opp-hand .back {
-  height: 18.9cqh !important;
+  height: 17.955cqh !important; /* v0.351: 5% 축소 (18.9 × 0.95) */
   max-height: none !important;
   position: relative !important;
-  top: -6.2cqh !important;
+  top: -5.89cqh !important;     /* 잘리는 비율 유지 (−6.2 × 0.95) */
 }
 /* 4) 상대 소울 드로우 아이콘·비용 숨김 */
 #game.active #oppSoulDraw,

@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.350";
+const GAME_VERSION = "0.351";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1932,6 +1932,10 @@ function rollCoins(mod, unit) {
   const delta = n ? ((mod > 0 ? 1 : -1) * heads) : 0;
   return { flips, heads, delta };
 }
+/** v0.351 베타테스트: 코인플립 결과 화면을 자동으로 넘기지 않고 OK를 눌러야 진행 (버그 확인용).
+ *  내 턴·AI 턴 모두 적용. 끄려면 false (예전처럼 자동 진행). */
+const BETA_COIN_CONFIRM = true;
+window.BETA_COIN_CONFIRM = BETA_COIN_CONFIRM;
 function showCoinResult(title, rows, done) {
   rows = (rows || []).filter(r => r && r.flips && r.flips.length);
   if (!rows.length) { if (done) done(); return; }
@@ -1996,8 +2000,12 @@ function showCoinResult(title, rows, done) {
   const btn = document.getElementById("coinOk");
   if (btn) btn.onclick = finishCoin;
   // Auto-advance so AI / end-turn combat never softlocks waiting for OK
-  const autoMs = Math.max(900, 520 + flipsN * 300 + 380);
-  setTimeout(finishCoin, autoMs);
+  // v0.351: BETA_COIN_CONFIRM(window 값 우선)이면 자동 진행 없음 — OK를 눌러야 진행
+  const confirmOnly = (typeof window !== "undefined" && window.BETA_COIN_CONFIRM != null) ? !!window.BETA_COIN_CONFIRM : BETA_COIN_CONFIRM;
+  if (!confirmOnly) {
+    const autoMs = Math.max(900, 520 + flipsN * 300 + 380);
+    setTimeout(finishCoin, autoMs);
+  }
 }
 
 function confirmGiveUp() {

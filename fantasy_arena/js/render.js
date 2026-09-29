@@ -151,6 +151,7 @@ function layoutBoardDecks() {
   // v0.328: 덱 더미는 보드 배경(4:3 코어) 기준 비율로 — 배경 확대(1.15)와 같이 스케일·이동.
   // 값은 v0.327 1920×1080(코어 1440×1080, 확대 없음)에서의 자리: 왼쪽 32px · 상대 덱 top 346 h 238 · 내 덱 top 464 h 324 · 폭 84
   const u = core.h / 1080;
+  const DECK_SCALE = 0.9; // v0.351: 덱 더미(스택·숫자) 10% 축소 — 자리·세로 칸은 그대로
   // v0.340: 덱 더미 2배 (폭 84→168, 스택 72×104→144×208, 숫자 13→26px) — 금테 바깥 화면 왼쪽으로
   const place = (deck, top, h, justify) => {
     deck.style.setProperty("position", "absolute", "important");
@@ -169,7 +170,8 @@ function layoutBoardDecks() {
     deck.style.setProperty("box-sizing", "border-box", "important");
     deck.style.setProperty("padding-top", "0", "important");
     deck.style.setProperty("padding-bottom", justify === "flex-end" ? (6 * u) + "px" : "0", "important");
-    deck.style.setProperty("--deck-u", String(u));
+    deck.style.setProperty("--deck-u", String(u * DECK_SCALE));
+    deck.style.setProperty("--deck-scale", String(DECK_SCALE));
   };
   place(oppD, 262, 262, "flex-start");
   place(myD, 540, 300, "flex-end");
@@ -1289,7 +1291,9 @@ function layoutHudGems() {
   });
   // v0.321 소울 드로우 버튼 (~92px @1280×800, v0.319의 2배) → v0.324 보이는 판 ~46px (요소 ~62px, 왼쪽 위 기준 동일 위치). 내 버튼: 소울 표시 바로 아래(핸드 10장 오른쪽 끝 바깥 · 5번째 유닛 칸 아래).
   // 소울 표시 왼쪽은 핸드 10장 오른쪽 카드와, 위쪽은 5번째 유닛 칸과 겹쳐 빈 자리가 없다. 상대 버튼: 상대 소울 왼쪽, 비율 축소.
-  [["mySoulDraw", "mySoulGem", 1.0, "below"], ["oppSoulDraw", "oppSoulGem", 0.6, "left"]].forEach(([bid, gid, k, mode]) => {
+  // v0.351: 내 버튼은 10% 크게 · 자리는 내 영웅 초상 바로 아래 (영웅 자리 잡은 뒤 아래에서 다시 옮김)
+  const SOUL_DRAW_MY_SCALE = 1.1;
+  [["mySoulDraw", "mySoulGem", SOUL_DRAW_MY_SCALE, "below"], ["oppSoulDraw", "oppSoulGem", 0.6, "left"]].forEach(([bid, gid, k, mode]) => {
     const b = document.getElementById(bid);
     const g = document.getElementById(gid);
     if (!b || !g || !g.style.left) return;
@@ -1344,6 +1348,18 @@ function layoutHudGems() {
       const L = parseFloat(el.style.left);
       if (!Number.isNaN(L)) el.style.setProperty("left", (L + 15 * Z) + "px", "important");
     });
+    // v0.351: 소울 드로우(내 버튼) — 내 영웅 초상 바로 아래 가운데
+    const sdb = document.getElementById("mySoulDraw");
+    if (sdb && myHero && sdb.style.width) {
+      const hb = myHero.getBoundingClientRect();
+      const D = parseFloat(sdb.style.width) || 0;
+      if (hb.width > 4 && D > 4) {
+        sdb.style.setProperty("left", (hb.left + hb.width / 2 - D / 2 - mr.left) + "px", "important");
+        // 영웅 아치 테두리·체력 하트 아래 (보드 아트 기준 세로 0.80 — 금테 아치 끝)
+        const archBottom = contentTop + contentH * 0.80 - mr.top;
+        sdb.style.setProperty("top", Math.max(hb.bottom - mr.top + 4 * Z, archBottom) + "px", "important");
+      }
+    }
 
     // HP hearts — place relative to hero-slot after heroes are seated
     const HP_W = contentW * 0.032;
@@ -1636,6 +1652,7 @@ function updateEndBtn(myTurn) {
   const label = btn.querySelector(".end-btn-label");
   const { off: offSrc, glow: glowSrc, pressed: pressedSrc } = endBtnHudSrcs();
   btn.classList.remove("opp-turn", "my-turn", "glow", "go");
+  btn.classList.toggle("holding", !!(myTurn && btn._endBtnHolding));
   if (!myTurn) {
     btn.classList.add("opp-turn");
     btn.disabled = true;
@@ -1669,6 +1686,7 @@ function updateEndBtn(myTurn) {
     btn._endBtnPressBound = true;
     btn.tabIndex = -1; // v0.332: 키보드 포커스/Space·Enter 오발동 방지 (턴 종료는 마우스 누름+뗌만)
     const clearHold = () => {
+      btn.classList.remove("holding");
       if (!btn._endBtnHolding) return;
       btn._endBtnHolding = false;
       setEndBtnBg(btn, btn._endBtnDesiredSrc || endBtnHudSrcs().off);
@@ -1688,6 +1706,7 @@ function updateEndBtn(myTurn) {
       btn._endBtnHolding = true;
       btn._endBtnArmed = true;
       btn._endBtnPtr = e.pointerId;
+      btn.classList.add("holding"); // v0.351: 누름 글자색
       setEndBtnBg(btn, endBtnHudSrcs().off);
       try { btn.setPointerCapture(e.pointerId); } catch (err) {}
     });
