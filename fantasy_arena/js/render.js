@@ -831,14 +831,14 @@ const PROTECT_OVERLAY_SRC = "assets/img/fx/protect_overlay.webp?v=0.316";
 /** Live shield state (same rule the engine uses to consume a hit in game.js damage path). */
 function unitHasActiveShield(m) {
   if (!m) return false;
-  return m.ability === "보호" || (m.keywords || []).includes("shield");
+  return String(m.ability || "").split(",").map(x => x.trim()).includes("보호") || (m.keywords || []).includes("shield");
 }
 let IMMUNE_OVERLAY_BLEND = "source-over"; // v0.323
 const IMMUNE_OVERLAY_SRC = "assets/img/fx/immune_overlay.webp?v=0.323";
 /** Live immune state (same rule as isImmune() in game.js; silence clears ability+keywords). */
 function unitHasActiveImmune(m) {
   if (!m) return false;
-  return m.ability === "면역" || (m.keywords || []).includes("immune");
+  return String(m.ability || "").split(",").map(x => x.trim()).includes("면역") || (m.keywords || []).includes("immune");
 }
 async function paintImmuneOverlay(ctx, W, H) {
   // 상단 중앙 룬 원이 종족 헤더(H*0.0697) 글자를 덮지 않도록 타원형 소프트 홀 추가
@@ -993,7 +993,7 @@ function enqueueCompose(fn) {
   });
 }
 function faceCacheKey(c, opts) {
-  const shield = (c.ability === "보호") || ((c.keywords || []).includes("shield")) ? "sh1" : "sh0";
+  const shield = (String(c.ability || "").split(",").map(x => x.trim()).includes("보호")) || ((c.keywords || []).includes("shield")) ? "sh1" : "sh0";
   const version = (typeof GAME_VERSION !== "undefined")
     ? GAME_VERSION
     : (typeof window !== "undefined" ? window.GAME_VERSION : "");

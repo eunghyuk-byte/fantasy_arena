@@ -40,14 +40,14 @@ function kill(g, owner, m) {
   g.damageMinion(owner, m, 99, {});
   if (m.dying) g.resolveDeath(owner, m);
 }
-const hasShield = (m) => m.ability === "보호" || (m.keywords || []).includes("shield");
+const hasShield = (m) => String(m.ability || "").split(",").map(x => x.trim()).includes("보호") || (m.keywords || []).includes("shield");
 const hasRebirth = (m) => String(m.ability || "").includes("환생") || (m.keywords || []).includes("rebirth") || !!(m._itemBonuses && m._itemBonuses.extraAbility === "환생");
 
 const g = loadGame();
 
-test("성기사(보호) + 소생초(환생): 보호 소모 → 사망 → 환생 시 보호 다시 있음, 환생 없음", () => {
+test("골드골렘(보호) + 소생초(환생): 보호 소모 → 사망 → 환생 시 보호 다시 있음, 환생 없음", () => {
   const { p1 } = setup(g);
-  const m = place(g, p1, "l12");
+  const m = place(g, p1, "l11");
   assert.equal(m.ability, "보호");
   assert.ok(g.equipItemOnUnit(p1, g.cloneCard("li1"), m));
   assert.ok(hasRebirth(m));
@@ -68,9 +68,9 @@ test("성기사(보호) + 소생초(환생): 보호 소모 → 사망 → 환생
   assert.ok(!p1.board.includes(m), "두 번째 사망은 제거");
 });
 
-test("성기사 보호 미소모 + 환생: 부활 후에도 보호 유지, 환생 없음", () => {
+test("골드골렘 보호 미소모 + 환생: 부활 후에도 보호 유지, 환생 없음", () => {
   const { p1 } = setup(g);
-  const m = place(g, p1, "l12");
+  const m = place(g, p1, "l11");
   g.equipItemOnUnit(p1, g.cloneCard("ei5"), m);
   m.hp = 0; m.dying = true; m._deathCtx = {};
   g.resolveDeath(p1, m);
@@ -79,9 +79,9 @@ test("성기사 보호 미소모 + 환생: 부활 후에도 보호 유지, 환�
   assert.ok(!hasRebirth(m));
 });
 
-test("스펠로 능력이 환생으로 덮인 성기사: 부활 시 인쇄 능력 보호 복원", () => {
+test("스펠로 능력이 환생으로 덮인 골드골렘: 부활 시 인쇄 능력 보호 복원", () => {
   const { p1 } = setup(g);
-  const m = place(g, p1, "l12");
+  const m = place(g, p1, "l11");
   m.ability = "환생"; m.keywords.push("rebirth"); // 스펠 부여 (fx.ability 덮어쓰기)
   kill(g, p1, m);
   assert.ok(p1.board.includes(m));
@@ -103,7 +103,7 @@ test("인쇄 환생 유닛(피닉스): 부활 후 환생 없음, 문구에서도
 
 test("공격 능력(atkSkill) 인쇄 유닛 + 환생: 스펠로 바뀐 공격 능력 → 인쇄 공격 능력 복원, 버프는 기존 규칙대로 유지", () => {
   const { p1 } = setup(g);
-  const m = place(g, p1, "e8"); // 나무궁수 관통공격(2)
+  const m = place(g, p1, "n6"); // 매사냥꾼 관통공격(2) (v0.358: 나무궁수는 관통 제거)
   g.equipItemOnUnit(p1, g.cloneCard("li1"), m);
   m.atkSkill = 4; // 스펠로 연속 부여
   m.atk += 2; // 버프
@@ -129,9 +129,9 @@ test("면역 인쇄 유닛 + 환생 아이템: 부활 후 면역 유지, 환생 
   assert.ok(!hasRebirth(m));
 });
 
-test("환생 없는 성기사: 사망 시 제거 (변화 없음)", () => {
+test("환생 없는 골드골렘: 사망 시 제거 (변화 없음)", () => {
   const { p1 } = setup(g);
-  const m = place(g, p1, "l12");
+  const m = place(g, p1, "l11");
   g.damageMinion(p1, m, 1, {});
   kill(g, p1, m);
   assert.ok(!p1.board.includes(m));
@@ -206,9 +206,9 @@ test("파괴: 나를 파괴한 적을 탈취(조조) + 환생: 첫 파괴에 탈
   assert.ok(!p2.board.includes(killer));
 });
 
-test("침묵된 성기사 + 소생초(환생): 부활 시 침묵 풀리고 보호 돌아옴, 환생 없음", () => {
+test("침묵된 골드골렘 + 소생초(환생): 부활 시 침묵 풀리고 보호 돌아옴, 환생 없음", () => {
   const { p1 } = setup(g);
-  const m = place(g, p1, "l12");
+  const m = place(g, p1, "l11");
   g.silenceMinion(m, p1);
   assert.ok(m.silenced && !hasShield(m));
   assert.ok(g.equipItemOnUnit(p1, g.cloneCard("li1"), m));

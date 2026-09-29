@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.357";
+const GAME_VERSION = "0.358";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -884,6 +884,12 @@ function findOn(p, uid) { return p.board.find(m => m.uid === uid); }
 function abilityOf(m) {
   return (m && m.ability) || null;
 }
+/** v0.358: 유닛 자신의 능력 목록 (쉼표 구분 — 예: 성기사 「환생,보호」). 아이템 추가 능력은 제외. */
+function ownAbilities(m) {
+  if (!m || m.ability == null) return [];
+  return String(m.ability).split(",").map(x => x.trim()).filter(Boolean);
+}
+function hasOwnAbility(m, name) { return ownAbilities(m).includes(name); }
 /** v0.332: 유닛 능력 + (유닛 능력과 겹쳐 착용한) 아이템 능력 목록 */
 function abilityList(m) {
   if (!m) return [];
@@ -930,11 +936,11 @@ function silenceMinion(m, owner) {
 /** Permanent: skip dealing attack in end-of-turn combat / no attack rights. Still takes damage. */
 function unitCannotAttack(m) {
   if (!m) return false;
-  return !!(m.cannotAttack || abilityOf(m) === "공격불가");
+  return !!(m.cannotAttack || hasOwnAbility(m, "공격불가"));
 }
 function isImmune(m) {
   if (!m) return false;
-  return abilityOf(m) === "면역" || (m.keywords || []).includes("immune");
+  return hasOwnAbility(m, "면역") || (m.keywords || []).includes("immune");
 }
 
 function resolveBattlecry(p, m, target) {
@@ -953,9 +959,7 @@ function resolveBattlecry(p, m, target) {
 
 /** Play-time special abilities (낼 때). */
 function resolvePlayAbility(p, m) {
-  const ab = abilityOf(m);
-  if (!ab) return;
-  if (ab === "출전") {
+  if (hasOwnAbility(m, "출전")) {
     log(`${m.name} 소환: 드로우 1`);
     draw(p, 1);
   }
@@ -1545,9 +1549,12 @@ function damageMinion(owner, m, n, ctx) {
   ctx = ctx || {};
   n = Math.max(0, Number(n) || 0);
   // 보호: only real HP≥1 hits consume; 0-dmg & black-coin HP loss do not
-  const hasShield = abilityOf(m) === "보호" || (m.keywords || []).includes("shield");
+  const hasShield = hasOwnAbility(m, "보호") || (m.keywords || []).includes("shield");
   if (n > 0 && hasShield) {
-    if (abilityOf(m) === "보호") m.ability = null;
+    if (hasOwnAbility(m, "보호")) {
+      const rest = ownAbilities(m).filter(x => x !== "보호");
+      m.ability = rest.length ? rest.join(",") : null;
+    }
     m.keywords = (m.keywords || []).filter(k => k !== "shield");
     // Drop 「보호」 from on-card text so the face matches live shield state.
     if (m.text) {
