@@ -1545,16 +1545,97 @@ function bindSoulDrawPress(btn) {
     if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); e.stopPropagation(); }
   });
 }
+/* v0.353: 내 소울 드로우 툴팁 + 호버 강조.
+ * disabled 버튼은 마우스 이벤트를 안 받을 수 있어 window pointermove 좌표로 판정한다. */
+function soulDrawTipInfo() {
+  let me = null;
+  try { me = meView().me; } catch (e) {}
+  const cost = (typeof soulDrawCost === "function") ? soulDrawCost(me) : 3;
+  let why = "";
+  try {
+    if (!state || state.over || !me) why = "";
+    else if (me.isAI || (typeof current === "function" && current() !== me)) why = "내 턴이 아닙니다";
+    else if (me._soulDrawUsed) why = "이번 턴에 이미 사용했습니다";
+    else if ((me.soul | 0) < cost) why = `소울 부족 (${me.soul | 0}/${cost})`;
+    else if (state.busy || (typeof ui !== "undefined" && ui && ui.battling)) why = "진행 중에는 사용할 수 없습니다";
+  } catch (e) {}
+  return { title: "카드 드로우", desc: `${cost}소울을 내고 카드 1장을 드로우합니다.`, why };
+}
+function placeSoulDrawTip(tip, btn) {
+  const r = btn.getBoundingClientRect();
+  const vw = window.innerWidth || 1920, vh = window.innerHeight || 1080;
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  const gap = 10;
+  // 기본: 버튼 왼쪽, 아래 끝을 버튼 아래 끝에 맞춰 위로 펼침
+  let left = r.left - gap - tw;
+  let top = r.bottom - th;
+  if (left < 8) { left = Math.max(8, r.left + r.width / 2 - tw / 2); top = r.top - gap - th; } // 왼쪽 자리 없으면 위쪽
+  left = Math.min(Math.max(8, left), vw - tw - 8);
+  top = Math.min(Math.max(8, top), vh - th - 8);
+  tip.style.left = Math.round(left) + "px";
+  tip.style.top = Math.round(top) + "px";
+}
+function bindSoulDrawTip() {
+  if (window._sdTipBound) return;
+  window._sdTipBound = true;
+  let tip = null, on = false;
+  const ensure = () => {
+    if (!tip) {
+      tip = document.createElement("div");
+      tip.id = "soulDrawTip";
+      tip.setAttribute("role", "tooltip");
+      document.body.appendChild(tip);
+    }
+    return tip;
+  };
+  const hide = () => {
+    if (!on) return;
+    on = false;
+    const b = document.getElementById("mySoulDraw");
+    if (b) b.classList.remove("sd-hover");
+    if (tip) tip.classList.remove("show");
+  };
+  const show = (b) => {
+    const t = ensure();
+    const info = soulDrawTipInfo();
+    const html = `<div class="peek-tip"><b>${info.title}</b><span>${info.desc}</span>`
+      + (info.why ? `<span class="sd-tip-why">${info.why}</span>` : "") + `</div>`;
+    if (t._html !== html) { t.innerHTML = html; t._html = html; }
+    b.classList.add("sd-hover");
+    t.classList.add("show");
+    placeSoulDrawTip(t, b);
+    on = true;
+  };
+  window._soulDrawTipRefresh = () => { if (on) { const b = document.getElementById("mySoulDraw"); if (b) show(b); } };
+  window.addEventListener("pointermove", (e) => {
+    if (e.pointerType && e.pointerType !== "mouse") return; // 터치: 툴팁 없음
+    const b = document.getElementById("mySoulDraw");
+    const g = document.getElementById("game");
+    if (!b || !g || !g.classList.contains("active") || b.offsetParent === null) { hide(); return; }
+    if (document.body.classList.contains("dragging-card")) { hide(); return; }
+    const r = b.getBoundingClientRect();
+    // 확대(1.08) 전 원래 크기 기준으로 판정 — 가장자리에서 깜빡임 방지
+    const k = b.classList.contains("sd-hover") ? 1.08 : 1;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const hw = r.width / 2 / k * (on ? 1.04 : 1), hh = r.height / 2 / k * (on ? 1.04 : 1);
+    const inside = Math.abs(e.clientX - cx) <= hw && Math.abs(e.clientY - cy) <= hh;
+    if (inside) show(b); else hide();
+  }, { passive: true });
+  window.addEventListener("blur", hide);
+  document.addEventListener("pointerleave", hide);
+}
 function updateSoulDrawBtns(me, opp) {
   const mb = document.getElementById("mySoulDraw");
   const ob = document.getElementById("oppSoulDraw");
   initSoulDrawBtn(mb, true);
   initSoulDrawBtn(ob, false);
+  bindSoulDrawTip();
   const costOf = (p) => (typeof soulDrawCost === "function") ? soulDrawCost(p) : 3;
   if (mb) {
     paintSoulDrawCost(mb, costOf(me));
-    const t = `소울 드로우\n${costOf(me)}소울: 카드 1장을 뽑는다 (한 턴에 한 번)`;
-    if (mb.title !== t) mb.title = t;
+    // v0.353: 브라우저 기본 title 툴팁 대신 #soulDrawTip (겹쳐 뜨지 않게 title 비움)
+    if (mb.title) mb.title = "";
+    mb.setAttribute("aria-label", `카드 드로우: ${costOf(me)}소울을 내고 카드 1장을 드로우합니다.`);
   }
   if (ob) paintSoulDrawCost(ob, costOf(opp));
   if (mb) {
@@ -1573,7 +1654,7 @@ function updateSoulDrawBtns(me, opp) {
     ob.classList.toggle("ready", typeof canSoulDraw === "function" && canSoulDraw(opp));
     ob._sdDesired = "used";
     setSoulDrawArt(ob, "used");
-  }
+  }  try { window._soulDrawTipRefresh && window._soulDrawTipRefresh(); } catch (e) {}
 }
 
 /** Board mid-right end-turn button (single #endBtn in .col-main). */

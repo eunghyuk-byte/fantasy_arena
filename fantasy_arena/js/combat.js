@@ -6,7 +6,7 @@ function atkSkillOf(m) {
 
 function applyLifesteal(attacker, hpDealt) {
   if (!attacker || hpDealt <= 0 || attacker.hp <= 0 || attacker.dying) return 0;
-  const heal = Math.ceil(hpDealt / 2);
+  const heal = hpDealt; // v0.353 확정 규칙: 준 체력 피해만큼 회복 (옛: 절반 올림)
   const cap = (attacker.maxHp != null && attacker.maxHp > 0) ? attacker.maxHp : attacker.hp;
   const before = attacker.hp;
   attacker.hp = Math.min(cap, before + heal);

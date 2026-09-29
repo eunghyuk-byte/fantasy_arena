@@ -7,16 +7,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/game.css?v=0.352" />
-<link rel="stylesheet" href="css/lobby.css?v=0.352" />
+<link rel="stylesheet" href="css/game.css?v=0.353" />
+<link rel="stylesheet" href="css/lobby.css?v=0.353" />
 </head>
 <body>
 <button class="bgm-btn settings-gear-btn" id="settingsGearBtn" title="설정" aria-label="설정">⚙</button>
 <div id="app">
   <section id="title" class="screen active">
     <header class="title-brand" aria-label="판타지소울 FantasySoul">
-      <img class="title-emblem" src="assets/img/logos/logo_emblem.png?v=0.352" alt="" />
-      <img class="title-wordmark" src="assets/img/logos/logo_wordmark_stand.png?v=0.352" alt="판타지소울 FantasySoul" />
+      <img class="title-emblem" src="assets/img/logos/logo_emblem.png?v=0.353" alt="" />
+      <img class="title-wordmark" src="assets/img/logos/logo_wordmark_stand.png?v=0.353" alt="판타지소울 FantasySoul" />
     </header>
     <div class="title-body">
       <div class="title-menu" id="titleMenu">
@@ -151,7 +151,7 @@
       <li><b>돌진공격</b> — 내 방어력만큼 추가하여 공격합니다.</li>
       <li><b>연속공격</b> — 두 번 공격합니다. 처치 시 다음 생존 적에게 이어집니다.</li>
       <li><b>치명공격</b> — 체력을 1 이상 깎으면 적이 바로 죽습니다.</li>
-      <li><b>흡혈공격</b> — 준 피해의 절반만큼 체력을 회복합니다.</li>
+      <li><b>흡혈공격</b> — 준 체력 피해만큼 체력을 회복합니다.</li>
       <li><b>약화공격</b> — 공격 전에 적 공격·방어를 1씩 낮춥니다.</li>
       <li><b>석화공격</b> — 공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다.</li>
       <li><b>광역공격</b> — 적 유닛 전체를 공격합니다(영웅 제외). 반격을 받지 않습니다.</li>
@@ -244,7 +244,7 @@
         <div class="corner-soul opp" id="oppSoulGem">0/0</div>
         <div class="corner-soul me" id="mySoulGem">0/0</div>
         <div class="soul-draw-btn opp" id="oppSoulDraw" title="소울 드로우 · 3소울: 카드 1장을 뽑는다 (한 턴에 한 번)" aria-label="상대 소울 드로우"></div>
-        <button class="soul-draw-btn me" id="mySoulDraw" type="button" disabled title="소울 드로우&#10;3소울: 카드 1장을 뽑는다 (한 턴에 한 번)" aria-label="소울 드로우"></button>
+        <button class="soul-draw-btn me" id="mySoulDraw" type="button" disabled aria-label="카드 드로우"></button>
         <button class="end-btn opp-turn" id="endBtn" type="button" disabled><span class="end-btn-label">상대 턴</span></button>
         <div class="hero-row me" id="myHeroRow"></div>
         <div class="my-hand" id="myHand"></div>
@@ -297,16 +297,16 @@
 </div>
 
 
-<script src="js/cards-data.js?v=0.352"></script>
-<script src="js/vfx.js?v=0.352"></script>
-<script src="js/bgm.js?v=0.352"></script>
-<script src="js/sfx.js?v=0.352"></script>
-<script src="js/settings.js?v=0.352"></script>
-<script src="js/render.js?v=0.352"></script>
-<script src="js/combat.js?v=0.352"></script>
-<script src="js/spell-fx.js?v=0.352"></script>
-<script src="js/game.js?v=0.352"></script>
-<script src="js/net.js?v=0.352"></script>
-<script src="js/lobby.js?v=0.352"></script>
+<script src="js/cards-data.js?v=0.353"></script>
+<script src="js/vfx.js?v=0.353"></script>
+<script src="js/bgm.js?v=0.353"></script>
+<script src="js/sfx.js?v=0.353"></script>
+<script src="js/settings.js?v=0.353"></script>
+<script src="js/render.js?v=0.353"></script>
+<script src="js/combat.js?v=0.353"></script>
+<script src="js/spell-fx.js?v=0.353"></script>
+<script src="js/game.js?v=0.353"></script>
+<script src="js/net.js?v=0.353"></script>
+<script src="js/lobby.js?v=0.353"></script>
 </body>
 </html>

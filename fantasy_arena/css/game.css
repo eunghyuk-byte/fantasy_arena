@@ -3721,7 +3721,8 @@ html.is-desktop #game.active .my-hand .card.playable,
   width: min(240px, 28vw);
   max-width: min(280px, 36vw);
 }
-#cardPeek .peek-tip {
+#cardPeek .peek-tip,
+#soulDrawTip .peek-tip {
   background: rgba(18, 14, 10, 0.94);
   border: 1px solid #a88848;
   border-radius: 10px;
@@ -3733,7 +3734,8 @@ html.is-desktop #game.active .my-hand .card.playable,
   word-break: keep-all;
   overflow-wrap: break-word;
 }
-#cardPeek .peek-tip b {
+#cardPeek .peek-tip b,
+#soulDrawTip .peek-tip b {
   display: block;
   color: #f3e2b0;
   font-size: 16px;
@@ -3742,7 +3744,8 @@ html.is-desktop #game.active .my-hand .card.playable,
   white-space: normal;
   word-break: keep-all;
 }
-#cardPeek .peek-tip span {
+#cardPeek .peek-tip span,
+#soulDrawTip .peek-tip span {
   display: block;
   color: #d8c9a4;
   font-size: 13px;
@@ -3986,6 +3989,35 @@ html.is-desktop #game.active .my-hand .card.playable,
 /* v0.326: 상대 표시 버튼 숫자는 읽히게 (거의 원래 밝기) */
 #game .col-main > .soul-draw-btn.opp .sd-cost.dim { opacity: .92; filter: none; }
 #game .col-main > .soul-draw-btn.opp { cursor: default; pointer-events: auto; }
+/* v0.353: 내 소울 드로우 호버 강조 (JS가 좌표로 .sd-hover 토글 — disabled 버튼도 동작) */
+#game .col-main > .soul-draw-btn.me {
+  transform-origin: 50% 50%;
+  /* 위치 코드가 인라인 transform:none !important를 쓰므로 확대는 독립 속성 scale로 */
+  transition: filter .15s ease, scale .15s ease;
+}
+#game .col-main > .soul-draw-btn.me.sd-hover.ready {
+  filter: brightness(1.3) drop-shadow(0 0 3px rgba(255, 226, 140, 1)) drop-shadow(0 0 10px rgba(255, 186, 48, .85));
+  scale: 1.08;
+}
+#game .col-main > .soul-draw-btn.me.sd-hover:not(.ready) {
+  filter: brightness(1.08) drop-shadow(0 0 4px rgba(255, 210, 110, .35));
+  scale: 1.02;
+}
+/* v0.353: 소울 드로우 툴팁 — 키워드 툴팁(.peek-tip)과 같은 모양, 버튼 왼쪽 위 */
+#soulDrawTip {
+  position: fixed;
+  z-index: 140;
+  display: none;
+  pointer-events: none;
+  width: max-content;
+  max-width: min(280px, 36vw);
+}
+#soulDrawTip.show { display: block; }
+#soulDrawTip .peek-tip .sd-tip-why {
+  margin-top: 6px;
+  color: #ff9f7c;
+  font-weight: 700;
+}
 
 /* =====================================================================
    HAND LAYOUT LOCK v0.234 — DO NOT OVERRIDE BELOW THIS LINE
