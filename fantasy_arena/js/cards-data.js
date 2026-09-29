@@ -207,7 +207,7 @@ const CARDS = [
   { id:"d19", tribe:"dark", name:"그림자요정", cost:3, type:"minion", atk:3, def:0, hp:2, atkC:-2, defC:0, hpC:0, rarity:"common", ability:"출전", text:"소환: 드로우 1" },
   { id:"l17", tribe:"light", name:"황월영", cost:3, type:"minion", atk:2, def:0, hp:2, atkC:0, defC:5, hpC:0, rarity:"rare", text:"소환: 코인이 있는 아군 전체의 코인 수를 5로", battlecry:{ type:"set_coin_n", value:5 } },
   // --- tokens ---
-  { id:"n40", tribe:"wind", name:"섬의 파편", cost:1, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"uncommon", cannotAttack:true, ability:"공격불가", text:"공격불가" },
+  { id:"n40", tribe:"wind", name:"섬의 파편", cost:3, type:"minion", token:true, atk:1, def:0, hp:2, atkC:0, defC:0, hpC:0, rarity:"uncommon", cannotAttack:true, ability:"공격불가", text:"공격불가" },
   // --- spells / items ---
 { id:"fs1", tribe:"fire", name:"화염화살", cost:2, type:"spell", rarity:"common", text:"유닛 하나 피해 3", spell:{ type:"dmg", value:3, target:"any_minion" } },
   { id:"fs2", tribe:"fire", name:"화염폭풍", cost:4, type:"spell", rarity:"common", text:"유닛 전체 피해 3", spell:{ type:"aoe_pack", all:3 } },
@@ -294,9 +294,9 @@ const CARDS = [
   { id:"ds7", tribe:"dark", name:"전염병", cost:4, type:"spell", rarity:"common", text:"소울 4 이상 유닛 전체 공=1 체=1", spell:{ type:"plague", minCost:4 } },
   { id:"ds8", tribe:"dark", name:"13시의저주", cost:0, type:"spell", rarity:"uncommon", text:"유닛 하나 코인=0", spell:{ type:"set_one", coinZero:true, target:"any_minion" } },
   { id:"fs8", tribe:"fire", name:"메테오", cost:6, type:"spell", rarity:"rare", text:"유닛 전체 피해 4", spell:{ type:"aoe_pack", all:4 } },
-  { id:"e41", tribe:"earth", name:"마대", cost:1, type:"minion", token:true, atk:5, def:1, hp:5, atkC:0, defC:0, hpC:0, rarity:"legendary", text:"토큰" },
-  { id:"a40", tribe:"water", name:"소교", cost:1, type:"minion", token:true, atk:1, def:1, hp:1, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
-  { id:"e42", tribe:"earth", name:"미로", cost:1, type:"minion", token:true, atk:0, def:2, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", cannotAttack:true, ability:"공격불가", text:"공격불가" },
+  { id:"e41", tribe:"earth", name:"마대", cost:10, type:"minion", token:true, atk:5, def:1, hp:5, atkC:0, defC:0, hpC:0, rarity:"legendary", text:"토큰" },
+  { id:"a40", tribe:"water", name:"소교", cost:3, type:"minion", token:true, atk:1, def:1, hp:1, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
+  { id:"e42", tribe:"earth", name:"미로", cost:4, type:"minion", token:true, atk:0, def:2, hp:2, atkC:0, defC:0, hpC:0, rarity:"common", cannotAttack:true, ability:"공격불가", text:"공격불가" },
   { id:"di7", tribe:"dark", name:"적토마", cost:6, type:"item", rarity:"legendary", atk:4, def:1, hp:4, text:"파괴: 적토마 (4/1/4) 1기 생성", itemFx:"destroy_summon_chitu" },
   { id:"li7", tribe:"light", name:"백우선", cost:2, type:"item", rarity:"legendary", atk:0, def:1, hp:2, text:"내 턴 종료: 랜덤 빛 카드를 내 핸드에 생성", itemFx:"eot_random_light_hand" },
   { id:"ei7", tribe:"earth", name:"맹덕신서", cost:3, type:"item", rarity:"legendary", atk:0, def:1, hp:2, text:"상대가 사용하는 스펠을 내 핸드로 복사", itemFx:"copy_enemy_spell" },
@@ -314,10 +314,10 @@ const CARDS = [
   { id:"as10", tribe:"water", name:"안개장막", cost:2, type:"spell", rarity:"uncommon", text:"적 전체 다음 턴 공격 불가", spell:{ type:"enemy_skip_attack" } },
   { id:"ls10", tribe:"light", name:"성흔", cost:5, type:"spell", rarity:"rare", text:"유닛 하나에 파괴: 성흔사 (6/1/6) 1기 생성 부여", spell:{ type:"buff", target:"any_minion", addDeathrattle:{ type:"summon_token", summonId:"l40" }, deathText:"파괴: 성흔사 (6/1/6) 1기 생성" } },
   { id:"ds10", tribe:"dark", name:"시체더미", cost:6, type:"spell", rarity:"rare", text:"내 전장 빈칸 수만큼 스켈레톤 (2/0/3) 생성", spell:{ type:"summon_islands", summonId:"d9" } },
-  { id:"e43", tribe:"earth", name:"팔진석", cost:1, type:"minion", token:true, atk:4, def:0, hp:10, atkC:0, defC:0, hpC:0, rarity:"legendary", cannotAttack:true, ability:"공격불가", text:"공격불가" },
-  { id:"f40", tribe:"fire", name:"화산재", cost:1, type:"minion", token:true, atk:5, def:0, hp:1, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
-  { id:"l40", tribe:"light", name:"성흔사", cost:1, type:"minion", token:true, atk:6, def:1, hp:6, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
-  { id:"d40", tribe:"dark", name:"적토마", cost:1, type:"minion", token:true, atk:4, def:1, hp:4, atkC:0, defC:0, hpC:0, rarity:"legendary", text:"토큰" },
+  { id:"e43", tribe:"earth", name:"팔진석", cost:8, type:"minion", token:true, atk:4, def:0, hp:10, atkC:0, defC:0, hpC:0, rarity:"legendary", cannotAttack:true, ability:"공격불가", text:"공격불가" },
+  { id:"f40", tribe:"fire", name:"화산재", cost:6, type:"minion", token:true, atk:5, def:0, hp:1, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
+  { id:"l40", tribe:"light", name:"성흔사", cost:5, type:"minion", token:true, atk:6, def:1, hp:6, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
+  { id:"d40", tribe:"dark", name:"적토마", cost:6, type:"minion", token:true, atk:4, def:1, hp:4, atkC:0, defC:0, hpC:0, rarity:"legendary", text:"토큰" },
   { id:"ds9", tribe:"dark", name:"미인계", cost:9, type:"spell", rarity:"legendary", text:"적 유닛 하나 탈취", spell:{ type:"steal_minion", target:"enemy_minion" } }
 
 ];
