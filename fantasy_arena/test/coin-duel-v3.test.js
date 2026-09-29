@@ -129,15 +129,16 @@ test("에셋: 코인 8종(webm·timing·Safari sheet) · 사운드 ogg+mp3 · sh
   assert.ok(paths.has("assets/vfx/coin_duel/coins.json"));
 });
 
-test("연결: 전투가 두 카드·코인을 넘기고, 베타 OK 토글 유지, 예전 창은 대체용", () => {
+test("연결: 전투가 두 카드·코인을 넘기고, OK 없이 자동 진행, 예전 창은 대체용", () => {
   const combat = fs.readFileSync(path.join(ROOT, "js/combat.js"), "utf8");
   assert.match(combat, /attacker, attackerOwner: p, defender: target\.kind === "minion" \? def : null/);
   assert.match(combat, /\}, duel\);/);
   const game = fs.readFileSync(path.join(ROOT, "js/game.js"), "utf8");
-  assert.match(game, /const BETA_COIN_CONFIRM = true;/);
-  assert.match(game, /CoinDuel\.play\(\{ top: atkMine \? D : A, bottom: atkMine \? A : D, confirm: confirmOnly \}\)/);
-  assert.match(game, /function showCoinResultLegacy\(title, rows, done, confirmOnly\)/);
-  assert.match(SRC, /b\.id = "coinOk";/);
+  assert.doesNotMatch(game, /BETA_COIN_CONFIRM|confirmOnly|coinOk/);
+  assert.match(game, /CoinDuel\.play\(\{ top: atkMine \? D : A, bottom: atkMine \? A : D \}\)/);
+  assert.match(game, /function showCoinResultLegacy\(title, rows, done\)/);
+  assert.match(game, /setTimeout\(finishCoin, autoMs\);/);
+  assert.doesNotMatch(SRC, /coinOk|spec\.confirm|cd-ok|cd-detail/);
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
   assert.match(html, /<script src="js\/coin-duel\.js\?v=/);
   const css = fs.readFileSync(path.join(ROOT, "css/game.css"), "utf8");

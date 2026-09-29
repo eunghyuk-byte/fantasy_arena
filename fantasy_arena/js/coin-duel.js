@@ -209,7 +209,7 @@ const CoinDuel = (() => {
   let _playing = null;
 
   /**
-   * spec = { top: {unit, hpPre, flips, detail} | null, bottom: {...} | null, confirm: bool }
+   * spec = { top: {unit, hpPre, flips, detail} | null, bottom: {...} | null }
    * 반환 Promise<boolean> — false면 재생 못 함(호출 쪽이 예전 코인 창으로 대체)
    */
   async function play(spec) {
@@ -320,26 +320,6 @@ const CoinDuel = (() => {
     }
     await sleep(plan.outroStart * 1000 - (performance.now() - t0));
 
-    if (spec.confirm && _playing === token) {
-      // 베타: OK를 눌러야 진행 (window.BETA_COIN_CONFIRM) — 결과를 그대로 보여준 채 대기
-      await new Promise(res => {
-        [["top", spec.top], ["bottom", spec.bottom]].forEach(([side, s]) => {
-          if (!s || !s.detail || !(s.flips && s.flips.length)) return;
-          const d = document.createElement("div");
-          d.className = "cd-detail";
-          d.style.cssText = `left:${g.firstX - g.D / 2}px;top:${g.rowY[side] + g.D * 0.62}px;font-size:${Math.max(12, g.cardH * 0.05)}px;`;
-          d.innerHTML = s.detail;
-          layer.appendChild(d);
-        });
-        const b = document.createElement("button");
-        b.className = "menu-btn cd-ok";
-        b.id = "coinOk";
-        b.textContent = "OK";
-        b.style.cssText = `left:${g.firstX - g.D / 2}px;top:${(g.top.y + g.top.h + g.bottom.y) / 2}px;`;
-        b.onclick = () => res();
-        layer.appendChild(b);
-      });
-    }
     layer.style.transition = `opacity ${T.outro * 1000}ms linear`;
     layer.style.opacity = "0";
     await sleep(T.outro * 1000 + 20);

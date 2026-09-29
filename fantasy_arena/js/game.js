@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.369";
+const GAME_VERSION = "0.370";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1960,19 +1960,14 @@ function rollCoins(mod, unit) {
   const delta = n ? ((mod > 0 ? 1 : -1) * heads) : 0;
   return { flips, heads, delta };
 }
-/** v0.351 베타테스트: 코인플립 결과 화면을 자동으로 넘기지 않고 OK를 눌러야 진행 (버그 확인용).
- *  내 턴·AI 턴 모두 적용. 끄려면 false (예전처럼 자동 진행). */
-const BETA_COIN_CONFIRM = true;
-window.BETA_COIN_CONFIRM = BETA_COIN_CONFIRM;
 function showCoinResult(title, rows, done, duel) {
   rows = (rows || []).filter(r => r && r.flips && r.flips.length);
   if (!rows.length) { if (done) done(); return; }
-  const confirmOnly = (typeof window !== "undefined" && window.BETA_COIN_CONFIRM != null) ? !!window.BETA_COIN_CONFIRM : BETA_COIN_CONFIRM;
   // v0.369: 코인 듀얼 v3 B2 — 전장 위 오버레이 (위=상대 카드, 아래=내 카드, 각 카드 오른쪽에 그 카드의 코인)
   if (duel && typeof CoinDuel !== "undefined" && CoinDuel.play) {
     let fired = false;
     const finish = () => { if (fired) return; fired = true; if (done) done(); };
-    const fallback = () => { if (fired) return; showCoinResultLegacy(title, rows, finish, confirmOnly); };
+    const fallback = () => { if (fired) return; showCoinResultLegacy(title, rows, finish); };
     try {
       let me = null;
       try { me = meView().me; } catch (e) { me = state && state.p1; }
@@ -1984,15 +1979,15 @@ function showCoinResult(title, rows, done, duel) {
         return { unit: u, hpPre, flips: r ? r.flips.slice() : [], detail: r ? (r.detail || "") : "" };
       };
       const A = side(duel.attacker, duel.aHpPre), D = side(duel.defender, duel.dHpPre);
-      CoinDuel.play({ top: atkMine ? D : A, bottom: atkMine ? A : D, confirm: confirmOnly })
+      CoinDuel.play({ top: atkMine ? D : A, bottom: atkMine ? A : D })
         .then(ok => { if (ok) finish(); else fallback(); }, fallback);
     } catch (e) { fallback(); }
     return;
   }
-  showCoinResultLegacy(title, rows, done, confirmOnly);
+  showCoinResultLegacy(title, rows, done);
 }
 /** v0.351~v0.368 코인 창 (코인 듀얼을 못 쓸 때 대체) */
-function showCoinResultLegacy(title, rows, done, confirmOnly) {
+function showCoinResultLegacy(title, rows, done) {
   const layer = document.getElementById("coinLayer");
   const box = document.getElementById("coinBox");
   const gold = (typeof COIN_GOLD !== "undefined" && COIN_GOLD) ? COIN_GOLD : "assets/img/coins/gold.png";
@@ -2012,7 +2007,6 @@ function showCoinResultLegacy(title, rows, done, confirmOnly) {
     // Unit name only — do not append 「공유코인 N=…」
     return `<div>${r.label}</div><div class="coins">${coins}</div><div>${detail}</div>`;
   }).join("<hr style='border-color:#4a3a20'>");
-  box.innerHTML += `<button class="menu-btn" id="coinOk" style="margin-top:14px;min-width:120px">OK</button>`;
   layer.classList.add("show");
   // Coin modal can trip visualViewport/resize — reseat endBtn/heroes from boardBg box
   try { if (typeof layoutHudChrome === "function") layoutHudChrome(); } catch (e) {}
@@ -2051,14 +2045,9 @@ function showCoinResultLegacy(title, rows, done, confirmOnly) {
     try { if (typeof layoutHudChrome === "function") layoutHudChrome(); } catch (e) {}
     if (done) done();
   };
-  const btn = document.getElementById("coinOk");
-  if (btn) btn.onclick = finishCoin;
-  // Auto-advance so AI / end-turn combat never softlocks waiting for OK
-  // v0.351: BETA_COIN_CONFIRM(window 값 우선)이면 자동 진행 없음 — OK를 눌러야 진행
-  if (!confirmOnly) {
-    const autoMs = Math.max(900, 520 + flipsN * 300 + 380);
-    setTimeout(finishCoin, autoMs);
-  }
+  // v0.370: OK 버튼 없음 — 항상 자동 진행
+  const autoMs = Math.max(900, 520 + flipsN * 300 + 380);
+  setTimeout(finishCoin, autoMs);
 }
 
 function confirmGiveUp() {
