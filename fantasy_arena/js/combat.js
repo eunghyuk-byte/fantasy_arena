@@ -1,3 +1,10 @@
+/** v0.379: 이 유닛이 지금 죽으면 환생하는지 (game.js resolveDeath의 hasRebirth와 같은 판정 · 아이템 능력 포함). */
+function combatWillRebirth(m) {
+  if (!m) return false;
+  const ab = (typeof abilityOf === "function") ? abilityOf(m) : m.ability;
+  const abs = (typeof abilityList === "function") ? abilityList(m) : String(ab || "").split(",").map(x => x.trim()).filter(Boolean);
+  return (ab && String(ab).includes("환생")) || abs.includes("환생") || (m.keywords || []).includes("rebirth");
+}
 function atkSkillOf(m) {
   const v = m && m.atkSkill;
   return (v >= 2 && v <= 11) ? (v | 0) : 1;
@@ -385,6 +392,13 @@ function doAttack(p, attacker, target, auto) {
           try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: def.uid }); } catch (e) {}
           Vfx.death(deadEl);
           await waitMs(520);
+          // v0.379 (9/29 사용자): 연속 1타로 환생 유닛을 처치하면 그 자리에서 바로 환생시키고,
+          // 남은 타는 다음 유닛이 아니라 다시 나타난 그 유닛을 때린다.
+          if (sk === 4 && hit < hits && combatWillRebirth(def)) {
+            destroyMinion(target.owner, def, { fromSpell: false });
+            render();
+            await waitMs(260);
+          }
           // 연속: 남은 타가 있으면 break하지 않고 다음 루프에서 재지정
           if (!(sk === 4 && hit < hits)) break;
         }
