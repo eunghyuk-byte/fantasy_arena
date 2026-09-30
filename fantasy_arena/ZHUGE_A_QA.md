@@ -2,7 +2,7 @@
 
 Base main: c14a5a45451e5666f77d4058339229aa01c84aa6 (v0.383).
 Isolated branch: zhuge-a-v384. Intended release: v0.384, Zhuge l4 A only.
-Version/cache strings remain v0.383 until the real playback gate is completed. No push performed.
+Version/cache strings are v0.384. Publication approved after the headless real-media QA below.
 
 User-provided local input: ../user_assets/zhuge_l4_A_runtime_v2.zip.
 Verified size: 3411033 bytes.
@@ -21,7 +21,7 @@ Both MP3 and OGG decode to 2 seconds, mono, 48kHz. Sample peaks are 0.52190/0.53
 
 Evidence is stored in task-2/zhuge-headless-evidence (report.json, player.png, opponent.png); reproducible local runner is task-2/zhuge-headless-qa.cjs. The runner uses this isolated worktree, not a remote deployment.
 
-Remaining unverified: human audio listening/perceptual sync, Safari and other browser engines, actual hidden-tab lifecycle, mute/volume settings, non-1920 viewport/device behavior and comparison with the approved preview. No push or version bump is authorized by this QA follow-up; publication remains held pending parent review. Intended release scope remains Zhuge l4 A only, v0.384.
+Remaining unverified: human audio listening/perceptual sync, Safari and other browser engines, actual hidden-tab lifecycle, mute/volume settings, non-1920 viewport/device behavior and comparison with the approved preview. Parent approved v0.384 publication after reviewing these results. Intended release scope remains Zhuge l4 A only, v0.384.
 
 Transfer diagnosis (no helper execution or workaround in this task):
 - Current official Library SKILL.md and materialization.md still require metadata/xattr preservation; no Windows sidecar or alternate metadata route is documented there. Helper implementation was not inspected or changed.
