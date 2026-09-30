@@ -1,5 +1,5 @@
 {
-  "count": 766,
+  "count": 779,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -3830,6 +3830,71 @@
       "path": "assets/vfx/legendary/e14/sfx.ogg",
       "bytes": 36267,
       "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/n2/card_fragments.json",
+      "bytes": 5952,
+      "name": "card_fragments"
+    },
+    {
+      "path": "assets/vfx/legendary/n2/impact.webm",
+      "bytes": 2005394,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/legendary/n2/main.webm",
+      "bytes": 4254428,
+      "name": "main"
+    },
+    {
+      "path": "assets/vfx/legendary/n2/meta.json",
+      "bytes": 8934,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/n2/sfx.m4a",
+      "bytes": 33512,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/n2/sfx.mp3",
+      "bytes": 49679,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/n2/sfx.ogg",
+      "bytes": 40165,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/d7/death_fragments.json",
+      "bytes": 4946,
+      "name": "death_fragments"
+    },
+    {
+      "path": "assets/vfx/legendary/d7/impact.webm",
+      "bytes": 577076,
+      "name": "impact"
+    },
+    {
+      "path": "assets/vfx/legendary/d7/meta.json",
+      "bytes": 16782,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/d7/sfx.m4a",
+      "bytes": 33461,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/d7/sfx.ogg",
+      "bytes": 21135,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/d7/summon.webm",
+      "bytes": 847285,
+      "name": "summon"
     }
   ]
 }

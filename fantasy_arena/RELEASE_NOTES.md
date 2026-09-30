@@ -1,3 +1,9 @@
+# v0.390
+
+- Added approved Zhao Yun n2 A and Lu Bu d7 A grouped summon presentations. The existing engine supplies actual eligible/affected UID results and final death/rebirth/DEF/HP outcomes; rendering does not rerun selection, damage, death or RNG.
+- One impact decoder/frame and one main sound serve the whole event. Real composed card faces provide the six approved fragments only for actual destroyed result UIDs; zero-N Lu Bu units receive no impact or stat effect.
+- Preserves deathrattle/cleanup order and exact original gameplay. Other pending combat, match and spell media remain excluded.
+
 # v0.389
 
 - Added approved Ma Chao e14 A with one main video/sound and a secondary arrival bound only to the token UID returned by the original battlecry. Full board means no arrival; existing Ma Dai cards are never substituted.

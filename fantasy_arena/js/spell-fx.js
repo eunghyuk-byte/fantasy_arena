@@ -1158,7 +1158,8 @@ const SpellFx = (() => {
       try {
         const res = await fetch(base + "meta.json", { cache: "no-store" });
         if (!res.ok) return null;
-        return await res.json();
+        const meta=await res.json();
+        return typeof LegendaryOutcomeFx!=="undefined" ? LegendaryOutcomeFx.normalize(meta) : meta;
       } catch (e) { return null; }
     })().then(m => { if (!m) delete _legendMetaCache[base]; return m; });
     return _legendMetaCache[base];
@@ -1346,23 +1347,34 @@ const SpellFx = (() => {
     const uid = opts.unitUid;
     const swapped = new Set();
     const videoMutes = new Map();
-    let tokenPresentation=null;
+    let tokenPresentation=null, outcomePresentation=null;
     const fireSwap = (u) => { if (swapped.has(u)) return; swapped.add(u); try { opts.onEnemySwap && opts.onEnemySwap(u); } catch (e) {} };
     try {
       const pack = await preloadLegendarySummon(base);
       if (!pack || epoch !== _legendaryEpoch) return false;
       const meta = pack.meta;
       if (pack.video) {
+        if(meta.impact && typeof LegendaryOutcomeFx!=="undefined") {
+          let timer,cancel;
+          const stopped=new Promise(resolve=>{cancel=()=>resolve(null);_legendaryPreloads.add(cancel);timer=setTimeout(cancel,2500);});
+          try {outcomePresentation=await Promise.race([LegendaryOutcomeFx.prepare(base,meta,opts),stopped]);}
+          finally {clearTimeout(timer);_legendaryPreloads.delete(cancel);}
+          if(!outcomePresentation)return false;
+          if(epoch !== _legendaryEpoch)return false;
+          hideUnits(outcomePresentation.visible);
+        }
         tokenPresentation=await legendaryTokenPresentation(meta,opts);
         if(epoch !== _legendaryEpoch)return false;
-        const anchors = legendaryAnchors(meta,opts), scale = fxScale();
+        const anchors = legendaryAnchors(meta,opts), scale = outcomePresentation && outcomePresentation.scale || fxScale();
         const overlay = legendaryVideoOverlay(meta, pack.frames, anchors, scale);
         const E = meta.enemyMute;
         const hits = E ? anchors.enemies.map(p => ({uid:p.uid, hitMs:legendaryHitMs(meta, anchors.summonedUnit, p, scale), hit:false})) : [];
 
         return await LegendaryVideoFx.play(base, meta, Object.assign({}, opts, {
           anchor: anchors.summonedUnit, scale,
-          secondary:tokenPresentation && tokenPresentation.secondary,
+          secondary:outcomePresentation ? outcomePresentation.secondary : tokenPresentation && tokenPresentation.secondary,
+          drawUnder:outcomePresentation && outcomePresentation.under,
+          drawBeforeSecondary:outcomePresentation && outcomePresentation.over,
           drawOverlay:(ctx, t)=>{
             hits.forEach(h => {
               if (!h.hit && t >= h.hitMs) { h.hit=true; muteEnemy(h.uid,E); videoMutes.set(h.uid,_muted[h.uid]); try { opts.onEnemyHit && opts.onEnemyHit(h.uid,h.hitMs); } catch(e) {} }
@@ -1370,6 +1382,7 @@ const SpellFx = (() => {
             });
             overlay(ctx,t);
             if(tokenPresentation)tokenPresentation.draw(t);
+            if(outcomePresentation)outcomePresentation.pieces(ctx,t);
           },
           onStart:()=>{
             const rv=meta.summonedReveal||{};
@@ -1439,6 +1452,7 @@ const SpellFx = (() => {
       hits.forEach(hh => fireSwap(hh.uid));
       return ok;
     } finally {
+      if(outcomePresentation){outcomePresentation.visible.forEach(u=>{delete _hidden[u];});syncHideStyle();}
       if(tokenPresentation)tokenPresentation.clear();
       if(opts.tokenUid!=null && _hidden[opts.tokenUid]) {delete _hidden[opts.tokenUid];syncHideStyle();}
       if (videoMutes.size) { for (const [u,owned] of videoMutes) if (_muted[u] === owned) delete _muted[u]; syncMuteStyle(); }

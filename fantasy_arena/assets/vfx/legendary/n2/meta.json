@@ -1,0 +1,315 @@
+{
+  "id": "n2_summon",
+  "card": "n2 조운 · wind · legendary",
+  "concept": "A",
+  "durationMs": 2000,
+  "playMode": "legendarySummon",
+  "targetMode": "engineResolvedCurrentAtkGte5EnemyUnitUids",
+  "gameplayEffects": null,
+  "video": {
+    "file": "main.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "alphaMode": "straight",
+    "width": 1472,
+    "height": 912,
+    "fps": 30,
+    "frames": 60,
+    "durationMs": 2000,
+    "anchor": "actualSummonedN2Uid",
+    "displayPx@1080p": [
+      1265,
+      783.75
+    ],
+    "offsetPx@1080p": [
+      0,
+      -61.875
+    ],
+    "flipYWhenOppCasts": true,
+    "muted": true,
+    "loop": false,
+    "blendMode": "source-over",
+    "contentRectPx": [
+      96,
+      96,
+      1280,
+      720
+    ],
+    "transparentPaddingPx": 96,
+    "contentAnchorNormalized": [
+      0.5,
+      0.6
+    ],
+    "anchorSourcePx": [
+      736.0,
+      528.0
+    ],
+    "alphaEnvelopeBaked": true,
+    "applyAdditionalAlphaEnvelope": false,
+    "encoding": {
+      "quality": "high",
+      "crf": 18,
+      "pixelFormat": "yuva420p"
+    }
+  },
+  "impact": {
+    "video": {
+      "file": "impact.webm",
+      "codec": "vp9",
+      "alpha": true,
+      "alphaMode": "straight",
+      "width": 912,
+      "height": 912,
+      "fps": 30,
+      "frames": 27,
+      "durationMs": 900,
+      "anchor": "eachEngineResolvedEligibleEnemyUid",
+      "displayPx@1080p": [
+        380,
+        380
+      ],
+      "offsetPx@1080p": [
+        0,
+        -6
+      ],
+      "flipYWhenOppCasts": true,
+      "muted": true,
+      "loop": false,
+      "blendMode": "source-over",
+      "contentRectPx": [
+        96,
+        96,
+        720,
+        720
+      ],
+      "transparentPaddingPx": 96,
+      "contentAnchorNormalized": [
+        0.5,
+        0.52
+      ],
+      "anchorSourcePx": [
+        456.0,
+        470.40000000000003
+      ],
+      "alphaEnvelopeBaked": true,
+      "applyAdditionalAlphaEnvelope": false,
+      "encoding": {
+        "quality": "high",
+        "crf": 18,
+        "pixelFormat": "yuva420p"
+      }
+    },
+    "startMs": 450,
+    "endMs": 1350,
+    "durationMs": 900,
+    "decoderCount": 1,
+    "clockCount": 1,
+    "reuseDecodedFrameAcrossTargets": true,
+    "perTargetVideoInstances": false,
+    "perTargetEventQueue": false,
+    "perTargetSound": false,
+    "audio": null
+  },
+  "fragments": {
+    "file": "card_fragments.json",
+    "targetBinding": "Actual destroyed UID results supplied by the engine, intersected with the captured eligible group",
+    "snapshotSource": "Current rendered target card face before removal, supplied by engine",
+    "piecesPerVictim": 6,
+    "eventStartMs": 700,
+    "splitAtMs": 780,
+    "invisibleAtMs": 1550,
+    "clearAtMs": 1600,
+    "audio": null,
+    "useGenericDeathVideo": false,
+    "useGenericDeathSound": false,
+    "pivotNormalized": [
+      0,
+      0
+    ],
+    "pivot": "top-left of each full card-face masked media rectangle"
+  },
+  "bindings": {
+    "sourceUid": "Actual newly summoned n2 UID",
+    "selectionOwner": "Existing game engine; this export does not implement or rerun target selection/destruction",
+    "eligibilitySnapshot": "Enemy unit with current resolved attack >=5 at original ability resolution; never printed/base attack",
+    "exclude": [
+      "friendly units",
+      "heroes",
+      "empty slots",
+      "current attack <5",
+      "unrelated units",
+      "UIDs not returned by this actual event"
+    ],
+    "impactUids": "Captured eligible UIDs actually affected according to existing engine resolution",
+    "fragmentUids": "Actual destroyed UIDs from this resolution, intersected with the captured eligible group",
+    "requireActualOutcome": true,
+    "doNotFabricateDeath": true,
+    "currentCardSnapshotsRequired": true,
+    "fixedSlotTargetsForbidden": true,
+    "lookupByCardIdForbidden": true,
+    "targetListImmutableDuringPlayback": true,
+    "whenEmpty": "Main and its single SFX only; skip impact and fragments",
+    "duplicatePolicy": "One grouped event; dedupe actual target UID/death occurrence without scheduling one event per target",
+    "deathrattleOrder": "Preserve existing engine destruction/deathrattle resolution order; presentation only",
+    "doNotDelayGameResolution": true
+  },
+  "timeline": {
+    "clock": "one shared2000ms presentation clock",
+    "main": [
+      0,
+      2000
+    ],
+    "impact": [
+      450,
+      1350
+    ],
+    "deathPresentationEvent": [
+      700,
+      1600
+    ],
+    "actualCardPieces": [
+      780,
+      1600
+    ],
+    "fragmentMotion": [
+      780,
+      1430
+    ],
+    "fragmentOpacityHold": [
+      780,
+      1080
+    ],
+    "fragmentFade": [
+      1080,
+      1550
+    ],
+    "fragmentClear": 1600,
+    "audio": [
+      0,
+      2000
+    ]
+  },
+  "dim": {
+    "color": "#080c15",
+    "opacity": 0.32,
+    "inMs": 160,
+    "outStartMs": 1350,
+    "endMs": 2000,
+    "easing": "cubic-bezier(0.215,0.61,0.355,1)",
+    "keyframes": [
+      {
+        "atMs": 0,
+        "opacity": 0,
+        "outgoingEasing": "cubic-bezier(0.215,0.61,0.355,1)"
+      },
+      {
+        "atMs": 160,
+        "opacity": 0.32,
+        "outgoingEasing": "cubic-bezier(0.215,0.61,0.355,1)"
+      },
+      {
+        "atMs": 1350,
+        "opacity": 0.32,
+        "outgoingEasing": "cubic-bezier(0.215,0.61,0.355,1)"
+      },
+      {
+        "atMs": 2000,
+        "opacity": 0,
+        "outgoingEasing": "linear",
+        "terminal": true
+      }
+    ]
+  },
+  "summonedReveal": {
+    "startMs": 0,
+    "fadeMs": 160,
+    "popMs": 0,
+    "scaleFrom": 1,
+    "brightnessFrom": 1,
+    "positionAnimation": null,
+    "easing": "cubic-bezier(0.215,0.61,0.355,1)"
+  },
+  "drawOrderBackToFront": [
+    "board/current units and caster",
+    "eligible victim real-card snapshots through780ms",
+    "dim overlay",
+    "main summon ambience",
+    "unaffected enemy cards intact above ambience",
+    "shared impact frame drawn at each actual affected eligible UID",
+    "six clipped real-card fragments per actual destroyed UID"
+  ],
+  "sfx": {
+    "file": "sfx.m4a",
+    "alternatives": [
+      {
+        "file": "sfx.mp3",
+        "durationMs": 2000
+      },
+      {
+        "file": "sfx.ogg",
+        "durationMs": 2000
+      }
+    ],
+    "startMs": 0,
+    "durationMs": 2000,
+    "sampleRate": 48000,
+    "channels": 2,
+    "decodedSamplesPerChannel": 96000,
+    "playCountPerGroup": 1,
+    "source": "Approved A preview AAC stream-copied to M4A; MP3/Ogg alternatives use the same approved audio. Main source only.",
+    "impactSilent": true,
+    "fragmentsSilent": true,
+    "suppressLegacySfxForThisEventOnly": [
+      "attack",
+      "damage",
+      "death",
+      "combat"
+    ],
+    "doNotSuppressUnrelatedEvents": true
+  },
+  "compatibility": {
+    "safariFallbackBundled": false,
+    "safariAlphaPlaybackVerified": false,
+    "testedBrowserPlayback": false,
+    "fallbackPolicy": "Capability-test actual alpha. If unavailable, omit video overlays without blocking gameplay/visibility; no opaque substitute.",
+    "runtimeRequired": "One grouped multi-target legendary presentation clock, one main decoder, one shared impact decoder, engine-provided real-card fragments. This asset package does not modify game code."
+  },
+  "provenance": {
+    "approvedPreviewLibraryId": "libfile_9dcd97d888fc81918a438c00f76eb71c",
+    "approvedPreviewFile": "FantasySoul_ZhaoYun_A.mp4",
+    "approvedPreviewSha256": "eac72d1b18951b8298c13cd511cbd3ba9b4fa0bf5420392310232b1ec0db8862",
+    "mainGenerationJob": "0f9640e2-1b0e-4d52-bae9-60a81503c02f",
+    "impactGenerationJob": "63accd43-d54d-4004-819b-68d558bc59e1",
+    "mainMasterMovSha256": "4020f75a70f0265305e09470f594d950c69ac975d93bfe0b886466025fd1f514",
+    "impactMasterMovSha256": "bb6365e7e9cbb162d8235ad29db160548ad310cd345682ecf4bd95e939b99e32",
+    "mainRgbaSequenceSha256": "4606028f9180d19e55243476c4e6324f32502db51a2a4d4be233f215a21a7693",
+    "impactRgbaSequenceSha256": "d2edeeb7d2546b921420a0527f25ceac7306cdf5e481e081ef66d778cc064da0",
+    "masterHashMatchesApprovedEvidence": true,
+    "matte": "Preserved source alpha: RGB subtract.075, rounded radius112/feather72, ellipse center(.5,.5), radii(.485,.48), falloff.22, padding96. No new keying.",
+    "bakedFadesMs": {
+      "mainIn": 75,
+      "mainOut": 450,
+      "impactIn": 50,
+      "impactOut": 200
+    }
+  },
+  "note": "No board/card/portrait is baked into video. No invented damage numbers, extra buffs, silence, or game effects. Only actual engine outcomes are visualized. Do not reapply generic death alpha/volume/fade settings from death_a.json.",
+  "nativeDefaultEasing": {
+    "curve": [
+      0.215,
+      0.61,
+      0.355,
+      1
+    ],
+    "appliesTo": [
+      "caster opacity reveal",
+      "dim opacity segments",
+      "fragment translation",
+      "fragment rotation",
+      "fragment scale",
+      "fragment opacity keyframe segments"
+    ],
+    "bakedVideoAlphaUnaffected": true,
+    "terminalKeyframe": "linear; no following interval"
+  }
+}

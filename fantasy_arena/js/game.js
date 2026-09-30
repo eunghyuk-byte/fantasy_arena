@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.389";
+const GAME_VERSION = "0.390";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -780,6 +780,7 @@ function playCard(p, card, target) {
     // v0.381 전설 소환 연출: 로직은 그대로(소환 효과 즉시 해결), 연출은 아래 render() 뒤 시작 · 적 카드 표시 갱신은 각자 히트 시점까지 미룸
     const legendPlan = legendBase ? beginLegendarySummonFx(p, m, legendBase) : null;
     const battlecryResult = resolveBattlecry(p, m, target);
+    if (legendPlan) legendPlan.outcome = battlecryResult;
     if (legendPlan && m.id === "e14" && battlecryResult && battlecryResult.createdUid != null) {
       legendPlan.tokenUid = battlecryResult.createdUid;
       try { SpellFx.hideUnits([legendPlan.tokenUid]); } catch(e) {}
@@ -805,6 +806,8 @@ function playCard(p, card, target) {
 /* ---------- v0.381 전설 유닛 소환 연출 (meta.playMode "legendarySummon", 2초 이내) ----------
  * 카드 id → 에셋 폴더. 새 전설 유닛 연출은 에셋 폴더(스트립·meta·sfx)를 넣고 여기에 한 줄 추가하면 같은 방식으로 재생된다. */
 const LEGENDARY_SUMMON_FX = {
+  n2: "assets/vfx/legendary/n2/",
+  d7: "assets/vfx/legendary/d7/",
   e14: "assets/vfx/legendary/e14/",
   n13: "assets/vfx/legendary/n13/",
   a14: "assets/vfx/legendary/a14/",
@@ -844,7 +847,9 @@ function beginLegendarySummonFx(p, m, base) {
     _fxDeferredView[u.uid] = snap;
   });
   try { if (!LEGENDARY_KEEP_VISIBLE.has(m.id) && SpellFx.hideUnits) SpellFx.hideUnits([m.uid]); } catch (err) {}
-  return { base, p, unitUid: m.uid, casterIsMe, enemyUids, fxEpoch: SpellFx.legendaryEpoch ? SpellFx.legendaryEpoch() : null };
+  let snapshots=[];
+  try { if(["n2","d7"].includes(m.id) && typeof LegendaryOutcomeFx!=="undefined")snapshots=LegendaryOutcomeFx.capture(e.board); } catch(err) {}
+  return { base, p, snapshots, unitUid: m.uid, casterIsMe, enemyUids, fxEpoch: SpellFx.legendaryEpoch ? SpellFx.legendaryEpoch() : null };
 }
 function releaseDeferredView(uid) {
   if (!_fxDeferredView[uid]) return;
@@ -884,6 +889,9 @@ function startLegendarySummonFx(plan) {
       await SpellFx.playLegendarySummon(plan.base, {
         unitUid: plan.unitUid,
         tokenUid: plan.tokenUid,
+        snapshots: plan.snapshots,
+        outcome: plan.outcome,
+        isEnemyPresent: uid => state === st && (opponent(plan.p).board || []).some(u=>u.uid===uid && u.hp>0 && !u.dying),
         isUnitPresent: uid => state === st && (plan.p.board || []).some(u => u.uid === uid && u.hp > 0 && !u.dying),
         enemyUids: plan.enemyUids.slice(),
         casterIsMe: plan.casterIsMe,
@@ -1162,8 +1170,12 @@ function adjustSharedCoinN(m, delta) {
   m.hpC = scale(m.hpC || 0);
 }
 
+function visualOutcomeCopy(unit) {
+  return JSON.parse(JSON.stringify(unit,(key,value)=>key==='_deathCtx'?undefined:value));
+}
 function applyFx(p, fx, target) {
   let presentationResult;
+  const resolvedTargets=[];
   const e = opponent(p);
   if (!fx) return;
   // 면역(9/28): 단일 대상 지정 불가 — 혹시 대상으로 넘어와도 단일 대상 부분만 무효 (전체 부분은 적용)
@@ -1493,12 +1505,14 @@ function applyFx(p, fx, target) {
     [...e.board].forEach(m => {
       const n = coinPoolN(m);
       if (!n) return;
+      const before = visualOutcomeCopy(m);
       const prevDef = Math.max(0, Number(m.def) || 0);
       const prevHp = Number(m.hp) || 0;
       m.def = Math.max(0, prevDef - n);
       m.hp = prevHp - n;
       m.damaged = true;
       m._hurt = { from: prevHp, to: m.hp, dmg: n };
+      resolvedTargets.push({unit:m,before,n});
       if (m.hp <= 0) {
         m.dying = true;
         m._deathCtx = Object.assign({}, m._deathCtx || {}, { fromSpell: true });
@@ -1511,6 +1525,7 @@ function applyFx(p, fx, target) {
     const thr = fx.value != null ? fx.value : 5;
     const victims = e.board.filter(m => (Number(m.atk) || 0) >= thr);
     victims.forEach(m => {
+      if(e.board.some(u=>u.uid===m.uid))resolvedTargets.push({unit:m,before:visualOutcomeCopy(m)});
       log(`${m.name} 공격 ${m.atk} ≥ ${thr} · 파괴`);
       destroyMinion(e, m, { fromSpell: true });
     });
@@ -1685,6 +1700,9 @@ function applyFx(p, fx, target) {
     log(n ? `소환 · 적 ${n}기 체력 ${v}` : "소환 · 대상 적 없음");
   }
   cleanupBoards();
+  if (fx.type === "destroy_atk_ge" || fx.type === "reduce_by_coins") {
+    presentationResult={kind:fx.type,targets:resolvedTargets.map(({unit,before,n})=>({uid:unit.uid,before,after:visualOutcomeCopy(unit),n,destroyed:![state.p1,state.p2].some(p=>(p.board||[]).some(u=>u.uid===unit.uid))}))};
+  }
   return presentationResult;
 }
 

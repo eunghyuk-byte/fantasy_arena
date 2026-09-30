@@ -1,0 +1,721 @@
+{
+  "schemaVersion": 1,
+  "id": "d7_summon_A",
+  "cardId": "d7",
+  "concept": "A 패왕의 위압",
+  "approvedPreviewLibraryId": "libfile_97a2163c4df08191b73fcecb01de8302",
+  "durationMs": 2000,
+  "strictEndMs": 2000,
+  "gameplayMutations": false,
+  "status": "exported; engine integration pending",
+  "main": {
+    "file": "summon.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "alphaMode": "straight",
+    "blendMode": "source-over",
+    "width": 736,
+    "height": 456,
+    "fps": 30,
+    "frames": 60,
+    "durationMs": 2000,
+    "startMs": 0,
+    "hardClearMs": 2000,
+    "muted": true,
+    "loop": false,
+    "anchor": "actualSummonedCasterUID",
+    "displayPxAt1080p": [
+      1265,
+      783.75
+    ],
+    "contentDisplayPxAt1080p": [
+      1100,
+      618.75
+    ],
+    "sourceContentRectPx": [
+      48,
+      48,
+      640,
+      360
+    ],
+    "transparentPaddingPx": 48,
+    "contentAnchorNormalized": [
+      0.5,
+      0.82
+    ],
+    "anchorSourcePx": [
+      368.0,
+      343.2
+    ],
+    "anchorNormalized": [
+      0.5,
+      0.7526315789473684
+    ],
+    "alphaEnvelopeBaked": true,
+    "applyAdditionalFade": false,
+    "opacity": 1,
+    "firstFrameAlphaMax": 0,
+    "lastFrameAlphaMax": 0,
+    "outer32pxAlphaMaxAllFrames": 0,
+    "topLeftRelativeToAnchorPxAt1080p": [
+      -632.5,
+      -589.875
+    ],
+    "centerOffsetRelativeToAnchorPxAt1080p": [
+      0,
+      -198
+    ]
+  },
+  "impact": {
+    "file": "impact.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "alphaMode": "straight",
+    "blendMode": "source-over",
+    "width": 456,
+    "height": 456,
+    "fps": 30,
+    "frames": 27,
+    "durationMs": 900,
+    "startMs": 450,
+    "hardClearMs": 1350,
+    "muted": true,
+    "loop": false,
+    "anchor": "capturedActualTargetUIDCenter",
+    "displayPxAt1080p": [
+      380,
+      380
+    ],
+    "contentDisplayPxAt1080p": [
+      300,
+      300
+    ],
+    "sourceContentRectPx": [
+      48,
+      48,
+      360,
+      360
+    ],
+    "transparentPaddingPx": 48,
+    "contentAnchorNormalized": [
+      0.5,
+      0.5
+    ],
+    "anchorSourcePx": [
+      228.0,
+      228.0
+    ],
+    "anchorNormalized": [
+      0.5,
+      0.5
+    ],
+    "alphaEnvelopeBaked": true,
+    "applyAdditionalFade": false,
+    "opacity": 1,
+    "firstFrameAlphaMax": 0,
+    "lastFrameAlphaMax": 0,
+    "outer32pxAlphaMaxAllFrames": 0,
+    "topLeftRelativeToAnchorPxAt1080p": [
+      -190,
+      -190
+    ],
+    "centerOffsetRelativeToAnchorPxAt1080p": [
+      0,
+      0
+    ],
+    "sharedDecoder": true
+  },
+  "geometry": {
+    "referenceCanvasPx": [
+      1920,
+      1080
+    ],
+    "referenceCardPx": [
+      198,
+      297
+    ],
+    "scaleRule": "scale display dimensions and anchor offsets by actual card width / 198; preserve aspect ratio and visible core size",
+    "positionRule": "topLeft=actual anchor center - normalized encoded anchor * scaled padded display size",
+    "opponentCaster": "Mirror vertical visual offsets and effect texture together around the actual caster/target anchors when viewing an opponent cast; never mirror card-face text or gameplay state. Opponent integration requires in-engine QA."
+  },
+  "dim": {
+    "color": "#080c15",
+    "keyframesMs": [
+      [
+        0,
+        0
+      ],
+      [
+        160,
+        0.32
+      ],
+      [
+        1350,
+        0.32
+      ],
+      [
+        2000,
+        0
+      ]
+    ],
+    "outgoingSegmentEasing": [
+      0.215,
+      0.61,
+      0.355,
+      1
+    ]
+  },
+  "casterCard": {
+    "source": "actual rendered d7 card",
+    "position": "fixed actual slot",
+    "scale": 1,
+    "translation": [
+      0,
+      0
+    ],
+    "opacityKeyframesMs": [
+      [
+        0,
+        0
+      ],
+      [
+        160,
+        1
+      ]
+    ],
+    "easing": [
+      0.215,
+      0.61,
+      0.355,
+      1
+    ],
+    "noArtCutIn": true
+  },
+  "layerOrder": [
+    "game board and friendly cards",
+    "actual caster card with reveal",
+    "dim overlay",
+    "main effect",
+    "captured/current target faces with engine outcomes",
+    "shared per-target impact on N>0 targets",
+    "real dying-card fragments"
+  ],
+  "outcomeContract": {
+    "input": "engine-resolved eventId, battleId, casterUID, actual targetUID list, before/after stats, effective coin modifiers/N, death flags, card-face snapshots and screen rectangles",
+    "formulaReference": "N=max(abs(atkC),abs(defC),abs(hpC)); DEF_after=max(0,DEF_before-N); HP_after=HP_before-N. Use engine-clamped display/death values where applicable.",
+    "rendererRecomputesGameplay": false,
+    "enemyMinionsOnly": true,
+    "excludeHeroes": true,
+    "defenseAbsorption": false,
+    "attackUnchanged": true,
+    "coinModifiersAndPipsUnchanged": true,
+    "coinFlip": false,
+    "coinHeadsUsed": false,
+    "removeCoins": false,
+    "NZero": "no target impact, stat update, recoil or death; main still plays",
+    "emptyTargetList": "main only",
+    "targets": "capture actual UIDs/outcomes before DOM removal, never fixed slots or preview card IDs",
+    "statDisplayResolveMs": 750,
+    "logicOrdering": "preserve actual gameplay/death/deathrattle resolution order; common visual timeline never reorders or delays gameplay",
+    "previewExamplesOnly": [
+      {
+        "id": "f22",
+        "coinModifiers": [
+          -3,
+          0,
+          0
+        ],
+        "N": 3,
+        "atk": 10,
+        "defBefore": 0,
+        "hpBefore": 8,
+        "defAfter": 0,
+        "hpAfter": 5,
+        "rect": [
+          420,
+          165,
+          198,
+          297
+        ]
+      },
+      {
+        "id": "e20",
+        "coinModifiers": [
+          0,
+          -2,
+          -2
+        ],
+        "N": 2,
+        "atk": 2,
+        "defBefore": 2,
+        "hpBefore": 7,
+        "defAfter": 0,
+        "hpAfter": 5,
+        "rect": [
+          633,
+          165,
+          198,
+          297
+        ]
+      },
+      {
+        "id": "a1",
+        "coinModifiers": [
+          -1,
+          1,
+          1
+        ],
+        "N": 1,
+        "atk": 4,
+        "defBefore": 4,
+        "hpBefore": 7,
+        "defAfter": 3,
+        "hpAfter": 6,
+        "rect": [
+          846,
+          165,
+          198,
+          297
+        ]
+      },
+      {
+        "id": "e8",
+        "coinModifiers": [
+          0,
+          0,
+          2
+        ],
+        "N": 2,
+        "atk": 1,
+        "defBefore": 1,
+        "hpBefore": 2,
+        "defAfter": 0,
+        "hpAfter": 0,
+        "dead": true,
+        "rect": [
+          1059,
+          165,
+          198,
+          297
+        ]
+      },
+      {
+        "id": "e41",
+        "coinModifiers": [
+          0,
+          0,
+          0
+        ],
+        "N": 0,
+        "atk": 5,
+        "defBefore": 1,
+        "hpBefore": 5,
+        "defAfter": 1,
+        "hpAfter": 5,
+        "rect": [
+          1272,
+          165,
+          198,
+          297
+        ]
+      }
+    ]
+  },
+  "death": {
+    "enabledOnlyForActualDeaths": true,
+    "source": "actual target card-face texture captured before removal, with engine-resolved labels for the 750ms display phase",
+    "eventStartMs": 750,
+    "splitAtMs": 830,
+    "opacityHoldUntilMs": 1130,
+    "invisibleAtMs": 1600,
+    "removeAllFragmentsAtMs": 1650,
+    "allVictimsSimultaneous": true,
+    "appendPerVictimWindow": false,
+    "disableLegacyDeathAnimationForOwnedVictims": true,
+    "pieces": [
+      {
+        "polygon": [
+          [
+            0.0,
+            0
+          ],
+          [
+            0.0,
+            0.2
+          ],
+          [
+            0.0,
+            0.4
+          ],
+          [
+            0.0,
+            0.5
+          ],
+          [
+            0.3450385144561614,
+            0.5
+          ],
+          [
+            0.31533350961542067,
+            0.4
+          ],
+          [
+            0.3451590921102715,
+            0.2
+          ],
+          [
+            0.33587349347841094,
+            0
+          ]
+        ],
+        "translateCardWidths": -0.3489406449820903,
+        "translateCardHeights": -0.16874999999999998,
+        "rotationDeg": -14.954599070661013,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.6
+          ],
+          [
+            0.0,
+            0.8
+          ],
+          [
+            0.0,
+            1
+          ],
+          [
+            0.35054810004461434,
+            1
+          ],
+          [
+            0.31810136605818023,
+            0.8
+          ],
+          [
+            0.33603112310726646,
+            0.6
+          ],
+          [
+            0.3450385144561614,
+            0.5
+          ]
+        ],
+        "translateCardWidths": -0.3478493676438083,
+        "translateCardHeights": 0.16874999999999998,
+        "rotationDeg": -14.907830041877498,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.33587349347841094,
+            0
+          ],
+          [
+            0.3451590921102715,
+            0.2
+          ],
+          [
+            0.31533350961542067,
+            0.4
+          ],
+          [
+            0.3450385144561614,
+            0.5
+          ],
+          [
+            0.6531488962247765,
+            0.5
+          ],
+          [
+            0.6844975990691743,
+            0.4
+          ],
+          [
+            0.656874286670658,
+            0.2
+          ],
+          [
+            0.661637187699086,
+            0
+          ]
+        ],
+        "translateCardWidths": -0.00031991146373034073,
+        "translateCardHeights": -0.16874999999999998,
+        "rotationDeg": -0.013710491302728889,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.3450385144561614,
+            0.5
+          ],
+          [
+            0.33603112310726646,
+            0.6
+          ],
+          [
+            0.31810136605818023,
+            0.8
+          ],
+          [
+            0.35054810004461434,
+            1
+          ],
+          [
+            0.6488820974329951,
+            1
+          ],
+          [
+            0.6803927187752995,
+            0.8
+          ],
+          [
+            0.6665073430994394,
+            0.6
+          ],
+          [
+            0.6531488962247765,
+            0.5
+          ]
+        ],
+        "translateCardWidths": -0.00017716660516630677,
+        "translateCardHeights": 0.16874999999999998,
+        "rotationDeg": -0.007592854507127433,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.661637187699086,
+            0
+          ],
+          [
+            0.656874286670658,
+            0.2
+          ],
+          [
+            0.6844975990691743,
+            0.4
+          ],
+          [
+            0.6531488962247765,
+            0.5
+          ],
+          [
+            1.0,
+            0.5
+          ],
+          [
+            1.0,
+            0.4
+          ],
+          [
+            1.0,
+            0.2
+          ],
+          [
+            1.0,
+            0
+          ]
+        ],
+        "translateCardWidths": 0.3486207335183599,
+        "translateCardHeights": -0.16874999999999998,
+        "rotationDeg": 14.940888579358282,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.6531488962247765,
+            0.5
+          ],
+          [
+            0.6665073430994394,
+            0.6
+          ],
+          [
+            0.6803927187752995,
+            0.8
+          ],
+          [
+            0.6488820974329951,
+            1
+          ],
+          [
+            1.0,
+            1
+          ],
+          [
+            1.0,
+            0.8
+          ],
+          [
+            1.0,
+            0.6
+          ],
+          [
+            1.0,
+            0.5
+          ]
+        ],
+        "translateCardWidths": 0.347672201038642,
+        "translateCardHeights": 0.16874999999999998,
+        "rotationDeg": 14.90023718737037,
+        "delayMs": 0
+      }
+    ],
+    "motion": {
+      "localOriginMs": 830,
+      "translationDurationMs": 650,
+      "rotationDurationMs": 650,
+      "scaleKeyframesLocalMs": [
+        [
+          0,
+          1
+        ],
+        [
+          650,
+          0.75
+        ]
+      ],
+      "opacityKeyframesLocalMs": [
+        [
+          0,
+          1
+        ],
+        [
+          300,
+          1
+        ],
+        [
+          770,
+          0
+        ]
+      ],
+      "outgoingSegmentEasing": [
+        0.215,
+        0.61,
+        0.355,
+        1
+      ],
+      "translationUnits": "piece.translateCardWidths * actual card width and translateCardHeights * actual card height",
+      "rotationDegrees": "piece.rotationDeg",
+      "transformPivot": "top-left of full card-face media layer; native anchor=(0,0)",
+      "transformOrder": "translate actual card top-left plus world offsets, rotate clockwise, scale",
+      "clearAtLocalMs": 820
+    }
+  },
+  "playback": {
+    "clock": "one monotonic event timeline",
+    "decoderCountPrimary": 2,
+    "mainDecoderCount": 1,
+    "impactDecoderCount": 1,
+    "impactDraws": "draw the same decoded impact frame at every eligible captured target; no per-target video, queue, timer or audio",
+    "formatsMutuallyExclusive": true,
+    "doNotLoadAllFormatAlternatives": true,
+    "cache": "reuse decoder/current video frame; never cache every full RGBA frame",
+    "lateStart": "seek to current event time or skip stale event; never extend strict end or append a second impact/death phase",
+    "cancel": "on battle/screen/event cancellation stop the single sound, pause/reset shared decoders, clear all layers and snapshots",
+    "dedupe": "battleId+eventId and actual target UID/death occurrence"
+  },
+  "sfx": {
+    "file": "sfx.m4a",
+    "codec": "AAC",
+    "source": "stream-copy of approved preview audio; exact AAC payload SHA-256 matches",
+    "startMs": 0,
+    "stopMs": 2000,
+    "presentationDurationMs": 2000,
+    "sampleRate": 48000,
+    "channels": 1,
+    "presentationSamples": 96000,
+    "rawDecodedSamples": 96256,
+    "codecTailPaddingSamples": 256,
+    "encoderPrimingSkipSamples": 1024,
+    "alternate": {
+      "file": "sfx.ogg",
+      "codec": "Vorbis",
+      "decodedSamples": 96000,
+      "durationMs": 2000,
+      "source": "trimmed decoded approved AAC, never a separately retimed raw source"
+    },
+    "onePlaybackPerEvent": true,
+    "perTargetAudio": false,
+    "fragmentAudio": false,
+    "legacyAudioSuppressed": [
+      "attack",
+      "damage",
+      "block",
+      "death",
+      "other duplicate combat SFX"
+    ],
+    "muteAndCancellationRequired": true
+  },
+  "nativeEasingVerification": {
+    "defaultRawAnimateEasing": [
+      0.215,
+      0.61,
+      0.355,
+      1
+    ],
+    "confirmedBy": "isolated Higgsedit build of identical opacity chain; compiled project keyframes explicitly cubic-bezier",
+    "linearAssumptionRejected": true
+  },
+  "experimentalFallback": {
+    "kind": "H264 packed RGB and grayscale alpha",
+    "availableFiles": true,
+    "supportedByExistingEngine": false,
+    "integrationRequired": true,
+    "experimental": true,
+    "autoSelect": false,
+    "safariBrowserTested": false,
+    "mainFile": "experimental/packed_h264/summon_rgba_packed.mp4",
+    "impactFile": "experimental/packed_h264/impact_rgba_packed.mp4",
+    "decodedDimensionsMain": [
+      1472,
+      456
+    ],
+    "decodedDimensionsImpact": [
+      912,
+      456
+    ],
+    "layout": "RGB in left half; grayscale alpha in right half; reconstruct one RGBA frame from one video decoder per role",
+    "alphaRead": "read red channel of right half as linear byte alpha; alpha<=2/255 is zero; straight RGB from left half",
+    "defaultPath": "VP9 alpha only; these are unconnected alternatives, not automatic Safari support",
+    "loadRule": "after explicit integration and browser QA select exactly one representation for both roles; never load/decode primary and alternative together"
+  },
+  "provenance": {
+    "previewFile": "FantasySoul_LuBu_A.mp4",
+    "previewSha256": "84fe951c4f89a472b157f3347369f0847804be3c2b39a55e2f6afbcd70d27dbd",
+    "sourceEffects": [
+      "lubu-v2/masters/alpha0",
+      "lubu-v2/masters/alpha1"
+    ],
+    "fullSourceRetiming": {
+      "rawDurationSeconds": 3.041667,
+      "mainSeconds": 2,
+      "impactSeconds": 0.9
+    },
+    "runtimeRasterOptimization": "50% linear raster resolution; display geometry unchanged. RGBA alpha<=2/255 cleared; alpha rounded to 2/255; low-alpha RGB coarsened only below16/255. No whole-effect blur.",
+    "originalMasterCanvasPx": {
+      "main": [
+        1472,
+        912
+      ],
+      "impact": [
+        912,
+        912
+      ]
+    },
+    "localReconstructionCaveat": "Visual masters were deterministically reconstructed from approved raw and matte script; approved audio is retained directly from preview AAC. Offline scene QA is not a browser runtime test."
+  }
+}

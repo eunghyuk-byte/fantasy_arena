@@ -1,0 +1,303 @@
+{
+  "id": "n2_A_card_fragments",
+  "source": "Engine-provided current rendered face of each actual destroyed enemy unit, captured before removal",
+  "units": "Polygon points normalized to the whole card rectangle; translation expressed in card widths/heights; angles in degrees",
+  "pivotNormalized": [
+    0,
+    0
+  ],
+  "startMs": 780,
+  "endMs": 1600,
+  "motionDurationMs": 650,
+  "translationEasing": "cubic-bezier(0.215,0.61,0.355,1)",
+  "rotationEasing": "cubic-bezier(0.215,0.61,0.355,1)",
+  "scale": {
+    "from": 1,
+    "to": 0.75,
+    "durationMs": 650,
+    "easing": "cubic-bezier(0.215,0.61,0.355,1)"
+  },
+  "opacityKeyframesMs": [
+    [
+      0,
+      1
+    ],
+    [
+      300,
+      1
+    ],
+    [
+      770,
+      0
+    ]
+  ],
+  "invisibleAtMs": 1550,
+  "clearAtMs": 1600,
+  "pieces": [
+    {
+      "polygon": [
+        [
+          0.0,
+          0
+        ],
+        [
+          0.0,
+          0.2
+        ],
+        [
+          0.0,
+          0.4
+        ],
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.3450385144561614,
+          0.5
+        ],
+        [
+          0.31533350961542067,
+          0.4
+        ],
+        [
+          0.3451590921102715,
+          0.2
+        ],
+        [
+          0.33587349347841094,
+          0
+        ]
+      ],
+      "translateCardWidths": -0.3489406449820903,
+      "translateCardHeights": -0.16874999999999998,
+      "rotationDeg": -14.954599070661013,
+      "delayMs": 0
+    },
+    {
+      "polygon": [
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.6
+        ],
+        [
+          0.0,
+          0.8
+        ],
+        [
+          0.0,
+          1
+        ],
+        [
+          0.35054810004461434,
+          1
+        ],
+        [
+          0.31810136605818023,
+          0.8
+        ],
+        [
+          0.33603112310726646,
+          0.6
+        ],
+        [
+          0.3450385144561614,
+          0.5
+        ]
+      ],
+      "translateCardWidths": -0.3478493676438083,
+      "translateCardHeights": 0.16874999999999998,
+      "rotationDeg": -14.907830041877498,
+      "delayMs": 0
+    },
+    {
+      "polygon": [
+        [
+          0.33587349347841094,
+          0
+        ],
+        [
+          0.3451590921102715,
+          0.2
+        ],
+        [
+          0.31533350961542067,
+          0.4
+        ],
+        [
+          0.3450385144561614,
+          0.5
+        ],
+        [
+          0.6531488962247765,
+          0.5
+        ],
+        [
+          0.6844975990691743,
+          0.4
+        ],
+        [
+          0.656874286670658,
+          0.2
+        ],
+        [
+          0.661637187699086,
+          0
+        ]
+      ],
+      "translateCardWidths": -0.00031991146373034073,
+      "translateCardHeights": -0.16874999999999998,
+      "rotationDeg": -0.013710491302728889,
+      "delayMs": 0
+    },
+    {
+      "polygon": [
+        [
+          0.3450385144561614,
+          0.5
+        ],
+        [
+          0.33603112310726646,
+          0.6
+        ],
+        [
+          0.31810136605818023,
+          0.8
+        ],
+        [
+          0.35054810004461434,
+          1
+        ],
+        [
+          0.6488820974329951,
+          1
+        ],
+        [
+          0.6803927187752995,
+          0.8
+        ],
+        [
+          0.6665073430994394,
+          0.6
+        ],
+        [
+          0.6531488962247765,
+          0.5
+        ]
+      ],
+      "translateCardWidths": -0.00017716660516630677,
+      "translateCardHeights": 0.16874999999999998,
+      "rotationDeg": -0.007592854507127433,
+      "delayMs": 0
+    },
+    {
+      "polygon": [
+        [
+          0.661637187699086,
+          0
+        ],
+        [
+          0.656874286670658,
+          0.2
+        ],
+        [
+          0.6844975990691743,
+          0.4
+        ],
+        [
+          0.6531488962247765,
+          0.5
+        ],
+        [
+          1.0,
+          0.5
+        ],
+        [
+          1.0,
+          0.4
+        ],
+        [
+          1.0,
+          0.2
+        ],
+        [
+          1.0,
+          0
+        ]
+      ],
+      "translateCardWidths": 0.3486207335183599,
+      "translateCardHeights": -0.16874999999999998,
+      "rotationDeg": 14.940888579358282,
+      "delayMs": 0
+    },
+    {
+      "polygon": [
+        [
+          0.6531488962247765,
+          0.5
+        ],
+        [
+          0.6665073430994394,
+          0.6
+        ],
+        [
+          0.6803927187752995,
+          0.8
+        ],
+        [
+          0.6488820974329951,
+          1
+        ],
+        [
+          1.0,
+          1
+        ],
+        [
+          1.0,
+          0.8
+        ],
+        [
+          1.0,
+          0.6
+        ],
+        [
+          1.0,
+          0.5
+        ]
+      ],
+      "translateCardWidths": 0.347672201038642,
+      "translateCardHeights": 0.16874999999999998,
+      "rotationDeg": 14.90023718737037,
+      "delayMs": 0
+    }
+  ],
+  "audio": null,
+  "bakedCardArt": false,
+  "sourceDefinitionSha256": "6c0b0a65b36d64f61d1cbee33224575f416da6c5ab3e85d2d95771be62358037",
+  "note": "Only the six polygon/motion definitions are reused. Generic death video, sound, size, fade, and old duration settings are deliberately not part of this n2 event.",
+  "opacitySegmentEasing": "cubic-bezier(0.215,0.61,0.355,1)",
+  "opacityKeyframes": [
+    {
+      "atMs": 0,
+      "value": 1,
+      "outgoingEasing": "cubic-bezier(0.215,0.61,0.355,1)"
+    },
+    {
+      "atMs": 300,
+      "value": 1,
+      "outgoingEasing": "cubic-bezier(0.215,0.61,0.355,1)"
+    },
+    {
+      "atMs": 770,
+      "value": 0,
+      "outgoingEasing": "linear",
+      "terminal": true
+    }
+  ],
+  "easingInterpretation": "Outgoing easing controls the next interval. The terminal keyframe is marked linear by the native compiler and has no subsequent interpolated interval.",
+  "pivotDescription": "Top-left of the full card-face media rectangle, matching the measured native default anchor. Not polygon centroid or card center."
+}

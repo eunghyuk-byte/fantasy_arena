@@ -85,6 +85,7 @@ var LegendaryVideoFx = (() => {
           if(token!==epoch||document.hidden){finish(false);return;}
           const t=video.currentTime*1000,D=meta.dim||{};
           ctx.clearRect(0,0,canvas.width,canvas.height);
+          try { if(opts.drawUnder)opts.drawUnder(ctx,t); } catch(e){finish(false);return;}
           let dim=t<(D.inMs||1)?t/(D.inMs||1):t<(D.outStartMs||0)?1:Math.max(0,1-(t-D.outStartMs)/Math.max(1,(D.endMs||meta.durationMs)-D.outStartMs));
           if(D.easing==='cubic-bezier(0.215,0.61,0.355,1)') {
             dim=t<D.inMs?ease(t/D.inMs):t<D.outStartMs?1:1-ease((t-D.outStartMs)/(D.endMs-D.outStartMs));
@@ -92,14 +93,15 @@ var LegendaryVideoFx = (() => {
           if(D.opacity){ctx.fillStyle=D.color||'#000';ctx.globalAlpha=D.opacity*dim;ctx.fillRect(0,0,canvas.width,canvas.height);}
           ctx.globalAlpha=1;ctx.save();ctx.translate(a.x+off[0]*k,a.y+(flip?-off[1]:off[1])*k);if(flip)ctx.scale(1,-1);
           ctx.drawImage(video,-size[0]*k/2,-size[1]*k/2,size[0]*k,size[1]*k);ctx.restore();
+          try {if(opts.drawBeforeSecondary)opts.drawBeforeSecondary(ctx,t);}catch(e){finish(false);return;}
           if(secondary && !secondaryDone) {
             if(t>=layer.endMs || (layer.isValid && !layer.isValid())) {dispose(secondary);secondaryDone=true;}
             else if(t>=layer.startMs) {
               const local=(t-layer.startMs)/1000;
               if(!secondaryStarted){secondaryStarted=true;secondary.currentTime=local;secondary.play().catch(()=>finish(false));}
               if(Math.abs(secondary.currentTime-local)>.075 && !secondary.seeking)secondary.currentTime=local;
-              const lv=layer.video,sz=lv['displayPx@1080p'],of=lv['offsetPx@1080p']||[0,0],la=layer.anchor,lf=opts.casterIsMe===false&&lv.flipYWhenOppCasts;
-              if(secondary.readyState>=2){ctx.save();ctx.translate(la.x+of[0]*k,la.y+(lf?-of[1]:of[1])*k);if(lf)ctx.scale(1,-1);ctx.drawImage(secondary,-sz[0]*k/2,-sz[1]*k/2,sz[0]*k,sz[1]*k);ctx.restore();}
+              const lv=layer.video,sz=lv['displayPx@1080p'],of=lv['offsetPx@1080p']||[0,0],lf=opts.casterIsMe===false&&lv.flipYWhenOppCasts;
+              if(secondary.readyState>=2)(layer.anchors||[layer.anchor]).forEach(la=>{const sk=la.scale||k;ctx.save();ctx.translate(la.x+of[0]*sk,la.y+(lf?-of[1]:of[1])*sk);if(lf)ctx.scale(1,-1);ctx.drawImage(secondary,-sz[0]*sk/2,-sz[1]*sk/2,sz[0]*sk,sz[1]*sk);ctx.restore();});
             }
           }
           // Upright enemy sprites share the video clock and cleanup.
