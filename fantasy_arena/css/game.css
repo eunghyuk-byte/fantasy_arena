@@ -4207,11 +4207,11 @@ html.is-desktop #game.active .my-hand .card.playable,
 #game.active .col-main > .corner-soul {
   display: flex !important;
   align-items: center !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
   position: absolute !important;
   z-index: 7 !important;
   margin: 0 !important;
-  padding: 0 0 0 14% !important;
+  padding: 0 !important;
   min-width: 0 !important;
   border: none !important;
   border-radius: 0 !important;
@@ -4222,7 +4222,7 @@ html.is-desktop #game.active .my-hand .card.playable,
   font-weight: 900 !important;
   font-size: clamp(16px, 1.85cqh, 23px) !important;
   line-height: 1 !important;
-  text-align: left !important;
+  text-align: center !important;
   white-space: nowrap !important;
   pointer-events: none !important;
   text-shadow:
@@ -4315,7 +4315,7 @@ html.is-desktop #game.active .my-hand .card.playable,
   align-items: center !important;
   justify-content: center !important;
   margin: 0 !important;
-  padding: 6% 0 14% 0 !important; /* slight down bias in heart bowl; no left pad */
+  padding: 0 !important; /* the artwork seat owns the digit center */
   min-width: 0 !important;
   border: none !important;
   border-radius: 0 !important;

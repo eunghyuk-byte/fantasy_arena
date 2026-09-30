@@ -1304,20 +1304,15 @@ function layoutHudGems() {
     el.style.setProperty("transform", "none", "important");
   }
 
-  // 4000×3000 board — purple pill gems on right frame rail; hearts at arch BR; arches on right
+  // Digit seats measured in board_169.jpg (3840×2160); its 4:3 core is x=480..3360.
+  // Use art coordinates for every resolution, rather than viewport-pixel nudges.
   const SOUL_W = contentW * 0.055;
-  const SOUL_H = Math.max(18, SOUL_W * 0.42);
-  placeIn(document.getElementById("oppSoulGem"), mr, 0.828, 0.095, SOUL_W, SOUL_H);
-  placeIn(document.getElementById("mySoulGem"), mr, 0.828, 0.841, SOUL_W, SOUL_H);
-  // v0.236: soul cost numbers LEFT ~130px total
+  const SOUL_H = SOUL_W * 0.42;
+  placeIn(document.getElementById("oppSoulGem"), mr, (2812 - 480) / 2880, 200 / 2160, SOUL_W, SOUL_H);
+  placeIn(document.getElementById("mySoulGem"), mr, (2812 - 480) / 2880, 1813 / 2160, SOUL_W, SOUL_H);
   ["oppSoulGem", "mySoulGem"].forEach(id => {
     const el = document.getElementById(id);
-    if (!el || !el.style.left) return;
-    const L = parseFloat(el.style.left);
-    if (!Number.isNaN(L)) el.style.setProperty("left", (L - 170 * Z) + "px", "important");
-    // v0.328: 소울 숫자 글자도 배경과 같이 확대 (소울 드로우 숫자가 이 크기를 따름)
-    if (el._baseFs == null) { el.style.removeProperty("font-size"); el._baseFs = parseFloat(getComputedStyle(el).fontSize) || 16; }
-    el.style.setProperty("font-size", (el._baseFs * Z).toFixed(2) + "px", "important");
+    if (el) el.style.setProperty("font-size", (contentH * 40 / 2160).toFixed(2) + "px", "important");
   });
   // v0.321 소울 드로우 버튼 (~92px @1280×800, v0.319의 2배) → v0.324 보이는 판 ~46px (요소 ~62px, 왼쪽 위 기준 동일 위치). 내 버튼: 소울 표시 바로 아래(핸드 10장 오른쪽 끝 바깥 · 5번째 유닛 칸 아래).
   // 소울 표시 왼쪽은 핸드 10장 오른쪽 카드와, 위쪽은 5번째 유닛 칸과 겹쳐 빈 자리가 없다. 상대 버튼: 상대 소울 왼쪽, 비율 축소.
@@ -1395,9 +1390,8 @@ function layoutHudGems() {
     const HP_W = contentW * 0.032;
     const HP_H = HP_W;
     const hearts = [
-      /* v0.219: nudge HP heart slightly left/down toward portrait bottom-left */
-      { sel: "#oppStrip .hero-hp", CX: 0.968, CY: 0.348 },
-      { sel: "#myStrip .hero-hp", CX: 0.967, CY: 0.708 }
+      { sel: "#oppStrip .hero-hp", CX: (3264 - 480) / 2880, CY: 774 / 2160 },
+      { sel: "#myStrip .hero-hp", CX: (3260 - 480) / 2880, CY: 1552 / 2160 }
     ];
     hearts.forEach(({ sel, CX, CY }) => {
       const hp = document.querySelector(sel);
@@ -1406,16 +1400,8 @@ function layoutHudGems() {
       if (!slot) return;
       const sr = slot.getBoundingClientRect();
       if (sr.width < 4 || sr.height < 4) return;
-      const vx = contentLeft + contentW * CX - HP_W / 2;
-      const vy = contentTop + contentH * CY - HP_H / 2;
-      // v0.236: hero HP numbers DOWN ~9px and LEFT ~7px
-      hp.style.setProperty("left", (vx - sr.left - 6 * Z) + "px", "important");
-      hp.style.setProperty("top", (vy - sr.top + 9 * Z) + "px", "important");
-      hp.style.setProperty("width", HP_W + "px", "important");
-      hp.style.setProperty("height", HP_H + "px", "important");
-      hp.style.setProperty("right", "auto", "important");
-      hp.style.setProperty("bottom", "auto", "important");
-      hp.style.setProperty("transform", "none", "important");
+      placeIn(hp, sr, CX, CY, HP_W, HP_H);
+      hp.style.setProperty("font-size", (contentH * 40 / 2160).toFixed(2) + "px", "important");
     });
 
   }
@@ -1477,11 +1463,13 @@ function paintSoulDrawCost(btn, cost) {
     if (w > maxW) { size = Math.max(8, Math.floor(size * maxW / w)); setFont(); }
   } catch (e) {}
   c2.textAlign = "center";
-  c2.textBaseline = "middle";
+  // actualBoundingBox metrics are relative to the current baseline. Measure and
+  // draw in alphabetic mode so the glyph's ink, not its line box, is centered.
+  c2.textBaseline = "alphabetic";
   c2.lineJoin = "round";
   c2.lineWidth = Math.max(2, size * 0.10);
   c2.strokeStyle = "#120800";
-  // 글리프 세로 중심 보정 (middle 기준선은 숫자 높이 중앙보다 살짝 아래)
+  // Center the visible numeral vertically within the gem.
   let dy = 0;
   try { const m = c2.measureText(txt); if (m.actualBoundingBoxAscent != null) dy = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2; } catch (e) {}
   c2.textBaseline = dy ? "alphabetic" : "middle";
