@@ -6,5 +6,6 @@
 
 ## 패키지 내용
 - 유닛·주문·아이템 데이터: `fantasy_arena/js/cards-data.js` (및 레거시 `cards-minions.js`)
-- 목록 참고(xlsx): 저장소 루트 `판타지아레나_유닛목록.xlsx`, `판타지아레나_주문목록.xlsx`
+- 현재 카드 이름·ID·수치·효과: `fantasy_arena/js/cards-data.js`
+- 유닛 목록 참고(xlsx): 저장소 루트 `판타지아레나_유닛목록.xlsx`
 - 일러스트 경로: `fantasy_arena/assets/img/art/{id}.jpg` — 이 업로드 패키지에는 JPG 없음.
