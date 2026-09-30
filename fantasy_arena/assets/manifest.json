@@ -1,5 +1,5 @@
 {
-  "count": 742,
+  "count": 744,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -3463,7 +3463,7 @@
     },
     {
       "path": "assets/vfx/legendary/f15/meta.json",
-      "bytes": 7561,
+      "bytes": 2855,
       "name": "meta"
     },
     {
@@ -3473,17 +3473,17 @@
     },
     {
       "path": "assets/vfx/legendary/f15/seal_strip.webp",
-      "bytes": 318516,
+      "bytes": 504340,
       "name": "seal_strip"
     },
     {
       "path": "assets/vfx/legendary/f15/sfx.mp3",
-      "bytes": 33061,
+      "bytes": 33069,
       "name": "sfx"
     },
     {
       "path": "assets/vfx/legendary/f15/sfx.ogg",
-      "bytes": 15710,
+      "bytes": 21731,
       "name": "sfx"
     },
     {
@@ -3710,6 +3710,16 @@
       "path": "assets/vfx/legendary/e3/sfx.ogg",
       "bytes": 21600,
       "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/f15/FONT_LICENSE.txt",
+      "bytes": 4397,
+      "name": "FONT_LICENSE"
+    },
+    {
+      "path": "assets/vfx/legendary/f15/summon.webm",
+      "bytes": 4266629,
+      "name": "summon"
     }
   ]
 }

@@ -48,43 +48,24 @@ function abilityUnits(g, n) {
   return all.slice(0, n).map(c => c.id);
 }
 
-test("f15 에셋: 게임 파일만(preview.mp4 없음) · legendarySummon 2000ms · dim 0.4 · shock 세로 스트립 · manifest", () => {
-  const files = fs.readdirSync(DIR).sort();
-  assert.deepEqual(files, ["meta.json", "roar_strip.webp", "seal_strip.webp", "sfx.mp3", "sfx.ogg", "shock_strip.webp"]);
-  const inMan = man.items.filter(i => i.path.startsWith("assets/vfx/legendary/f15/"));
-  assert.deepEqual(inMan.map(i => i.path.split("/").pop()).sort(), files);
-  inMan.forEach(i => assert.equal(i.bytes, fs.statSync(path.join(ROOT, i.path)).size, i.path));
-  assert.equal(man.count, man.items.length);
-  assert.equal(meta.playMode, "legendarySummon");
-  assert.equal(meta.durationMs, 2000);
-  assert.equal(meta.dim.opacity, 0.4);
-  assert.ok(meta.dim.endMs <= 2000);
-  const shock = meta.layers.find(l => l.name === "shock");
-  assert.equal(shock.layout, "vertical");
-  assert.equal(shock.flipYWhenOppCasts, true, "상대가 내면 위아래 반전 (게임 사본 필드)");
-  assert.deepEqual(meta.layers.map(l => l.anchor), ["summonedUnit", "summonedUnit", "eachEnemy"]);
-  meta.layers.forEach(l => {
-    assert.ok(files.includes(l.file));
-    assert.ok((l.startMs || 0) + l.durationMs <= 2000 || l.anchor === "eachEnemy", l.name);
-  });
+test("f15 approved video and upright brush sprite are manifest-listed", () => {
+  assert.equal(meta.durationMs,2000); assert.equal(meta.dim.opacity,.32);
+  assert.equal(meta.video.file,'summon.webm'); assert.equal(meta.video.flipYWhenOppCasts,true);
+  assert.equal(meta.layers.length,1); const L=meta.layers[0];
+  assert.equal(L.anchor,'eachEnemy'); assert.deepEqual(L['offsetPx@1080p'],[0,-20.5]);
+  for(const file of ['meta.json','summon.webm','seal_strip.webp','sfx.mp3','sfx.ogg','FONT_LICENSE.txt']) {
+    const item=man.items.find(i=>i.path==='assets/vfx/legendary/f15/'+file);
+    assert.ok(item,file);assert.equal(item.bytes,fs.statSync(path.join(DIR,file)).size);
+  }
 });
-
-test("SpellFx legendary 순수 함수: 링 도달 hitMs = preview 값 · dim 0→0.4→0 (2000ms)", () => {
-  const S = loadSpellFx(1920, 1080);
-  assert.equal(typeof S.playLegendarySummon, "function");
+test("ring timing scales with actual positions and dim follows selected metadata",()=>{
+  const S=loadSpellFx(1920,1080);
   assert.ok(S.isLegendarySummonMeta(meta));
-  const R = meta["referencePointsPx@1080p"];
-  const from = { x: R.summonedUnit[0], y: R.summonedUnit[1] };
-  const got = R.enemyUnits.map(p => Math.round(S.legendaryHitMs(meta, from, { x: p[0], y: p[1] }, 1)));
-  assert.deepEqual(got, Object.values(R.enemyHitMsInPreview));
-  // 화면 배율 k: 같은 비율 좌표면 같은 시간
-  assert.equal(Math.round(S.legendaryHitMs(meta, { x: from.x / 2, y: from.y / 2 }, { x: 240, y: 155.5 }, 0.5)), 878);
-  const D = Object.assign({ endMs: 2000 }, meta.dim);
-  assert.equal(S.legendaryDimAlpha(D, 0), 0);
-  assert.ok(Math.abs(S.legendaryDimAlpha(D, 100) - 0.2) < 1e-9);
-  assert.equal(S.legendaryDimAlpha(D, 800), 0.4);
-  assert.ok(Math.abs(S.legendaryDimAlpha(D, 1725) - 0.2) < 1e-9);
-  assert.equal(S.legendaryDimAlpha(D, 2000), 0);
+  assert.equal(S.legendaryHitMs(meta,{x:0,y:0},{x:160,y:0},1),480);
+  assert.equal(S.legendaryHitMs(meta,{x:0,y:0},{x:80,y:0},.5),480);
+  assert.equal(S.legendaryDimAlpha(meta.dim,80),.16);
+  assert.equal(S.legendaryDimAlpha(meta.dim,800),.32);
+  assert.equal(S.legendaryDimAlpha(meta.dim,2000),0);
 });
 
 test("표: LEGENDARY_SUMMON_FX = { f15 → assets/vfx/legendary/f15/ } · 유닛 카드만", () => {

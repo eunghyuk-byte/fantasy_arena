@@ -77,6 +77,9 @@ var LegendaryVideoFx = (() => {
           if(D.opacity){ctx.fillStyle=D.color||'#000';ctx.globalAlpha=D.opacity*dim;ctx.fillRect(0,0,canvas.width,canvas.height);}
           ctx.globalAlpha=1;ctx.save();ctx.translate(a.x+off[0]*k,a.y+(flip?-off[1]:off[1])*k);if(flip)ctx.scale(1,-1);
           ctx.drawImage(video,-size[0]*k/2,-size[1]*k/2,size[0]*k,size[1]*k);ctx.restore();
+          // Upright enemy sprites share the video clock and cleanup.
+          try { if(opts.drawOverlay)opts.drawOverlay(ctx,t); } catch(e){finish(false);return;}
+          if(ended||token!==epoch)return;
           if(video.ended||t>=meta.durationMs-1)finish(true);else raf=requestAnimationFrame(draw);
         };
         raf=requestAnimationFrame(draw);

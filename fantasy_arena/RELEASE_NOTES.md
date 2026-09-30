@@ -1,3 +1,9 @@
+# v0.387
+
+- Replaced Zhang Fei f15 summon with approved A alpha video/audio and upright brush-calligraphic 默 sprites attached to each actual enemy.
+- Video and sprites share playback/cancellation; retained silence battlecry, ring hit timing and deferred display swap. Applied the approved glyph offset without flipping enemy lettering.
+- No other pending legendary, combat, match or spell media is included.
+
 # v0.386
 
 - Added approved Green Dragon e3 B two-second alpha video and sound, replacing no published gameplay rules. No enemy silence, damage, buff, immunity or deferred-view changes.

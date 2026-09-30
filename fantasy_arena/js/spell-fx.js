@@ -1154,6 +1154,7 @@ const SpellFx = (() => {
     return _legendMetaCache[base];
   }
   let _legendaryEpoch = 0;
+  const _legendaryPreloads = new Set();
   function isLegendarySummonMeta(meta) {
     return !!(meta && String(meta.playMode || "") === "legendarySummon" && ((Array.isArray(meta.layers) && meta.layers.length) || (meta.video && meta.video.file)));
   }
@@ -1167,7 +1168,24 @@ const SpellFx = (() => {
     if (!isLegendarySummonMeta(meta)) return null;
     if (meta.video) {
       if(typeof LegendaryVideoFx === "undefined") return null;
-      return await LegendaryVideoFx.preload(base, meta) ? {meta, video:true} : null;
+      const work = Promise.all([
+        LegendaryVideoFx.preload(base, meta),
+        Promise.all((meta.layers || []).map(L => L && L.anchor === 'eachEnemy' && L.file
+          ? loadFrames(assetUrl(base, L.file), L.frames, L.w, L.h, L.layout) : Promise.resolve(null)))
+      ]);
+      let cancel, timer;
+      const cancelled = new Promise(resolve => {
+        cancel = () => resolve(null);
+        _legendaryPreloads.add(cancel);
+        timer = setTimeout(cancel, 2500);
+      });
+      try {
+        const result = await Promise.race([work, cancelled]);
+        if (!result || !result[0]) return null;
+        if ((meta.layers || []).some((L,i) => L && L.anchor === 'eachEnemy' && L.file && !result[1][i])) return null;
+        return {meta, video:true, frames:result[1]};
+      } catch (e) { return null; }
+      finally { clearTimeout(timer); _legendaryPreloads.delete(cancel); }
     }
     const [frames] = await Promise.all([
       Promise.all(meta.layers.map(L => (L && L.file) ? loadFrames(assetUrl(base, L.file), L.frames, L.w, L.h, L.layout) : Promise.resolve(null))),
@@ -1264,19 +1282,52 @@ const SpellFx = (() => {
    * 새 유닛은 게임이 hideUnits([unitUid]) 로 숨겨 두면 t=0 에 summonedReveal 로 드러냄 (없어도 동작).
    * @returns Promise<boolean> — durationMs(2000) 후 true, 에셋 실패면 false (숨긴 유닛·콜백은 어떤 경우에도 정리)
    */
+  function legendaryVideoOverlay(meta, frames, anchors, scale) {
+    // Video replaces main sprite layers. Enemy glyphs remain upright for both casters.
+    const layers = (meta.layers || []).map((L, i) => {
+      const fr = frames && frames[i];
+      if (!L || L.anchor !== 'eachEnemy' || !fr) return null;
+      const d = L['displayPx@1080p'];
+      const w = (Array.isArray(d) ? d[0] : (L['displayBoxPx@1080p'] || 300)) * scale;
+      const h = (Array.isArray(d) ? d[1] : (L['displayBoxPx@1080p'] || 300) * fr.h / fr.w) * scale;
+      const offset = L['offsetPx@1080p'] || [0, 0];
+      return {L, fr, w, h, dx:offset[0]*scale, dy:offset[1]*scale, duration:legendaryLayerMs(L, meta)};
+    }).filter(Boolean);
+    return (ctx, videoMs) => {
+      layers.forEach(({L, fr, w, h, dx, dy, duration}) => {
+        const t = videoMs - (L.startMs || 0);
+        if (t < 0 || t >= duration) return;
+        const frame = Math.min(Math.max(1, L.frames || 1) - 1, Math.floor(t * (L.fps || meta.fps || 30) / 1000));
+        anchors.enemies.forEach(p => drawFrame(ctx, fr, frame, p.x + dx - w/2, p.y + dy - h/2, w, h));
+      });
+    };
+  }
   async function playLegendarySummon(base, opts) {
     const epoch = _legendaryEpoch;
     opts = opts || {};
     const uid = opts.unitUid;
     const swapped = new Set();
+    const videoMutes = new Map();
     const fireSwap = (u) => { if (swapped.has(u)) return; swapped.add(u); try { opts.onEnemySwap && opts.onEnemySwap(u); } catch (e) {} };
     try {
       const pack = await preloadLegendarySummon(base);
       if (!pack || epoch !== _legendaryEpoch) return false;
       const meta = pack.meta;
       if (pack.video) {
+        const anchors = legendaryAnchors(meta,opts), scale = fxScale();
+        const overlay = legendaryVideoOverlay(meta, pack.frames, anchors, scale);
+        const E = meta.enemyMute;
+        const hits = E ? anchors.enemies.map(p => ({uid:p.uid, hitMs:legendaryHitMs(meta, anchors.summonedUnit, p, scale), hit:false})) : [];
+
         return await LegendaryVideoFx.play(base, meta, Object.assign({}, opts, {
-          anchor: legendaryAnchors(meta,opts).summonedUnit, scale:fxScale(),
+          anchor: anchors.summonedUnit, scale,
+          drawOverlay:(ctx, t)=>{
+            hits.forEach(h => {
+              if (!h.hit && t >= h.hitMs) { h.hit=true; muteEnemy(h.uid,E); videoMutes.set(h.uid,_muted[h.uid]); try { opts.onEnemyHit && opts.onEnemyHit(h.uid,h.hitMs); } catch(e) {} }
+              if (t >= h.hitMs + (E.swapAtMs != null ? E.swapAtMs : 60)) fireSwap(h.uid);
+            });
+            overlay(ctx,t);
+          },
           onStart:()=>{ const rv=meta.summonedReveal||{}; if(uid!=null)revealUnit(uid,rv.fadeMs||120,rv.popMs||0,rv);try{opts.onStart&&opts.onStart();}catch(e){} }
         }));
       }
@@ -1333,6 +1384,7 @@ const SpellFx = (() => {
       hits.forEach(hh => fireSwap(hh.uid));
       return ok;
     } finally {
+      if (videoMutes.size) { for (const [u,owned] of videoMutes) if (_muted[u] === owned) delete _muted[u]; syncMuteStyle(); }
       (opts.enemyUids || []).forEach(u => fireSwap(u)); // 실패·중단해도 침묵 표시는 반드시 갱신
       if (uid != null && _hidden[uid] && _hidden[uid].state === "hide") revealUnit(uid, 120, 0);
     }
@@ -2331,6 +2383,7 @@ const SpellFx = (() => {
 
   function clear() {
     _legendaryEpoch++;
+    for (const cancel of [..._legendaryPreloads]) cancel();
     if(typeof LegendaryVideoFx !== "undefined") LegendaryVideoFx.clear();
     const layer = document.getElementById("spellFx");
     const stage = document.getElementById("fxStage");
