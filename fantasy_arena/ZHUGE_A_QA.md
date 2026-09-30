@@ -13,7 +13,15 @@ Installed the four unchanged l4 runtime files (meta.json, summon.webm, sfx.mp3, 
 
 Automated validation: 156 frontend tests pass, including both sides' l4 state preservation, enemyUids=[], input/overlay lock release on failed assets, manifest sizes, real metadata dimensions and a synthetic repeat/opaque-decoder test. Existing f15 and Red regressions remain passing. Tests simulate video events: they do not decode or display the real WebM.
 
-Remaining publication gate: real browser alpha and actual player/AI slot alignment, vertical flip/offset, 2-second sound/video synchronization, repeat and screen/state cancellation, hidden tab, missing-video fallback and sound settings. No supported PC browser/computer QA tool is exposed in this session; no real playback success is claimed. After that gate, update GAME_VERSION and cache URLs to 0.384, write release notes, rerun checks, verify remote main has not moved, then use an ordinary fast-forward push.
+Headless real-media QA is now available using the preinstalled Playwright package and Chrome 154.0.8037.58, with a fresh temporary browser context and localhost-only requests. The initially restricted execution stalled during initialization; the authorized local QA run outside that execution restriction completed. No user browser session, credentials, browser/OS installation or settings were used.
+
+Actual WebM decoding: 1280x720, 2 seconds; sampled frame has 614393 fully transparent, 305848 partial-alpha and 1359 opaque pixels. Four real game summons (player/opponent twice each) all returned true. Recorded canvas dimensions were 1500x843.75; player offset -219.375 and opponent +219.375/vertical flip matched actual card-slot centers. Two 1920x1080 screenshots were inspected. Each normal run started one owned audio handle, left enemy state unchanged and ended with no canvas, pending job or input/overlay lock. First summon elapsed about 2.47s including preparation; subsequent runs about 2.04s. Clear and hideScreens during playback and an aborted video request also released ownership. No page errors.
+
+Both MP3 and OGG decode to 2 seconds, mono, 48kHz. Sample peaks are 0.52190/0.53428 and RMS 0.08020/0.08388. These are decode/sample checks, not listening or perceptual audiovisual synchronization approval.
+
+Evidence is stored in task-2/zhuge-headless-evidence (report.json, player.png, opponent.png); reproducible local runner is task-2/zhuge-headless-qa.cjs. The runner uses this isolated worktree, not a remote deployment.
+
+Remaining unverified: human audio listening/perceptual sync, Safari and other browser engines, actual hidden-tab lifecycle, mute/volume settings, non-1920 viewport/device behavior and comparison with the approved preview. No push or version bump is authorized by this QA follow-up; publication remains held pending parent review. Intended release scope remains Zhuge l4 A only, v0.384.
 
 Transfer diagnosis (no helper execution or workaround in this task):
 - Current official Library SKILL.md and materialization.md still require metadata/xattr preservation; no Windows sidecar or alternate metadata route is documented there. Helper implementation was not inspected or changed.
