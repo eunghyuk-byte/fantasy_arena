@@ -1,0 +1,110 @@
+{
+  "id": "d27_summon",
+  "card": "d27 블랙드래곤 · dark · legendary",
+  "concept": "C 흑요의 균열",
+  "description": "Approved Black Dragon C effect and synchronized SFX. The approved purple-sensitive corrected matte, asymmetric anchor, fixed card, and two-second timing are preserved.",
+  "format": "VP9 alpha WebM; 1472x912 padded canvas, 30fps, 60frames, 2.000sec; straight alpha",
+  "durationMs": 2000,
+  "playMode": "legendarySummon",
+  "targetMode": "none",
+  "video": {
+    "file": "summon.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "width": 1472,
+    "height": 912,
+    "fps": 30,
+    "frames": 60,
+    "durationMs": 2000,
+    "anchor": "summonedUnit",
+    "displayPx@1080p": [
+      1610,
+      997.5
+    ],
+    "offsetPx@1080p": [
+      -98,
+      -236.25
+    ],
+    "flipYWhenOppCasts": true,
+    "flipXWhenOppCasts": false,
+    "muted": true,
+    "loop": false,
+    "blendMode": "source-over",
+    "alphaMode": "straight",
+    "sourceContentRectPx": [
+      96,
+      96,
+      1280,
+      720
+    ],
+    "transparentPaddingPx": 96,
+    "contentDisplayPx@1080p": [
+      1400,
+      787.5
+    ],
+    "anchorSourcePx": [
+      825.6,
+      672
+    ],
+    "anchorNormalized": [
+      0.5608695652173913,
+      0.7368421052631579
+    ],
+    "contentAnchorNormalized": [
+      0.57,
+      0.8
+    ],
+    "alphaEnvelopeBaked": true,
+    "applyAdditionalAlphaEnvelope": false,
+    "firstFrameAlphaMax": 0,
+    "lastFrameAlphaMax": 0
+  },
+  "dim": {
+    "opacity": 0.32,
+    "inMs": 160,
+    "outStartMs": 1350,
+    "endMs": 2000,
+    "color": "#080c15",
+    "easing": "linear"
+  },
+  "summonedReveal": {
+    "enabled": false,
+    "keepSummonedCardVisible": true,
+    "fadeMs": 0,
+    "popMs": 0,
+    "brightnessFrom": 1,
+    "scaleFrom": 1,
+    "offsetYFromPx@1080p": 0,
+    "offsetYToPx@1080p": 0,
+    "note": "Approved Black C card is fully visible and stationary. Do not inherit another summon fade, pop, slide, or enlarged-card cut-in."
+  },
+  "sfx": {
+    "file": "sfx.mp3",
+    "startMs": 0,
+    "durationMs": 2000,
+    "alt": {
+      "file": "sfx.ogg",
+      "durationMs": 2000
+    },
+    "sampleRate": 48000,
+    "channels": 1,
+    "decodedSamples": 96000,
+    "source": "Exact approved Black C sfx2.wav; synchronized source audio, retimed with pitch preserved and authored tail. No added music or sound."
+  },
+  "gameplayEffects": null,
+  "provenance": {
+    "generationJob": "271c5fa0-51f5-4c27-986f-29d284ada8cd",
+    "approvedPreviewLibraryId": "libfile_5980cf566fe0819187d779c075fafddc",
+    "approvedPreviewFile": "FantasySoul_BlackDragon_C.mp4",
+    "approvedPreviewSha256": "c51f2d43c26548b8ee5743482e220816e17ae4d40afb3f6c7412227dea938fe4",
+    "sourceDurationSeconds": 3.041667,
+    "effectDurationSeconds": 2,
+    "fullSourceRetimeSpeed": 1.5208335,
+    "sourceVideoSha256": "23162fce0fccaca1110bc7416842a8a1d6d9a59204e6daa6d38503fc88b121f9",
+    "sourceRGBAFramesSha256": "116b4fad791c1f7bef61b39ea016b8767b48525649af625fe5ac9690da2254c0",
+    "sourceSfxWavSha256": "264eaab31e6eb9f2379fc410b62e462443738f288b5f030868bed42e51ae631b",
+    "matteRevision": "Approved corrected purple-sensitive chromatic/luma confidence matte; RGB subtraction 0.045, confidence smoothstep(clamp(max((R-G-0.010)/0.065,(maxRGB-0.32)/0.18),0,1)); 72px rounded feather, radius112, padding96. Already baked; no runtime keying."
+  },
+  "note": "Pure summon visual. No artwork/portrait cut-in, added damage, buff, shield, immunity, silence, critical-attack trigger, enemyUids, or deferred enemy state. Existing d27 critical-attack and immunity abilities remain unchanged. The final 0.35-second alpha exit is baked; no second fade.",
+  "runtimeCompatibility": "Use the streamed VP9-alpha legendarySummon video branch shared by approved Red f1, Zhuge l4, Green e3, Storm n13, and Ice a14. A sprite-only loader cannot consume this package unchanged. Do not retain all 60 decoded RGBA frames."
+}

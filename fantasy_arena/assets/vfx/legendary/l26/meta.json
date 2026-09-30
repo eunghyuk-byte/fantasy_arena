@@ -1,0 +1,109 @@
+{
+  "id": "l26_summon",
+  "card": "l26 골드드래곤 · light · legendary",
+  "concept": "A 태양의 광휘",
+  "description": "Approved Gold Dragon A effect and synchronized SFX, with its corrected gold/brightness confidence matte, elliptical edge falloff, fixed card, and two-second timing preserved.",
+  "format": "VP9 alpha WebM; 1472x912 padded canvas, 30fps, 60frames, 2.000sec; straight alpha",
+  "durationMs": 2000,
+  "playMode": "legendarySummon",
+  "targetMode": "none",
+  "video": {
+    "file": "summon.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "width": 1472,
+    "height": 912,
+    "fps": 30,
+    "frames": 60,
+    "durationMs": 2000,
+    "anchor": "summonedUnit",
+    "displayPx@1080p": [
+      1610,
+      997.5
+    ],
+    "offsetPx@1080p": [
+      0,
+      -47.25
+    ],
+    "flipYWhenOppCasts": true,
+    "muted": true,
+    "loop": false,
+    "blendMode": "source-over",
+    "alphaMode": "straight",
+    "sourceContentRectPx": [
+      96,
+      96,
+      1280,
+      720
+    ],
+    "transparentPaddingPx": 96,
+    "contentDisplayPx@1080p": [
+      1400,
+      787.5
+    ],
+    "anchorSourcePx": [
+      736,
+      499.2
+    ],
+    "anchorNormalized": [
+      0.5,
+      0.5473684210526316
+    ],
+    "contentAnchorNormalized": [
+      0.5,
+      0.56
+    ],
+    "alphaEnvelopeBaked": true,
+    "applyAdditionalAlphaEnvelope": false,
+    "firstFrameAlphaMax": 0,
+    "lastFrameAlphaMax": 0
+  },
+  "dim": {
+    "opacity": 0.32,
+    "inMs": 160,
+    "outStartMs": 1350,
+    "endMs": 2000,
+    "color": "#080c15",
+    "easing": "linear"
+  },
+  "summonedReveal": {
+    "enabled": false,
+    "keepSummonedCardVisible": true,
+    "fadeMs": 0,
+    "popMs": 0,
+    "brightnessFrom": 1,
+    "scaleFrom": 1,
+    "offsetYFromPx@1080p": 0,
+    "offsetYToPx@1080p": 0,
+    "note": "Approved Gold A card is fully visible and stationary. Do not inherit another summon fade, pop, slide, or enlarged-card cut-in."
+  },
+  "sfx": {
+    "file": "sfx.mp3",
+    "startMs": 0,
+    "durationMs": 2000,
+    "alt": {
+      "file": "sfx.ogg",
+      "durationMs": 2000
+    },
+    "sampleRate": 48000,
+    "channels": 1,
+    "decodedSamples": 96000,
+    "source": "Exact approved Gold A sfx0.wav; synchronized source audio retimed with pitch preserved and the authored tail. No added music or sound."
+  },
+  "gameplayEffects": null,
+  "provenance": {
+    "generationJob": "39786274-b811-4d97-ad5b-6698c76efcc0",
+    "approvedPreviewLibraryId": "libfile_2bb27f9386e0819192b487ead4156b06",
+    "approvedPreviewFile": "FantasySoul_GoldDragon_A.mp4",
+    "approvedPreviewSha256": "20ad857314695089e2fbbaf1088f448e5c81e389802070b4507df523764ae4ab",
+    "sourceDurationSeconds": 3.041667,
+    "effectDurationSeconds": 2,
+    "fullSourceRetimeSpeed": 1.5208335,
+    "sourceVideoSha256": "1b0096595fd2c8fb75efafa9337b7e6867414a7130143bf6e4a8180cde2fb1a9",
+    "sourceRGBAFramesSha256": "f0bd7dc6e2294ad8b642b320c9a42362fbf0afef6fcf109dbb0600c3951ef938",
+    "sourceSfxWavSha256": "5e7f15a326f589315172a2508a404119a67ce11df5c51c6e5ea716c945f91844",
+    "matteRevision": "Approved corrected gold/brightness confidence: smoothstep(clamp(max((R-B-0.035)/0.080,(maxRGB-0.24)/0.16),0,1)); RGB subtraction0.045; rounded edge feather72px/radius112; elliptical falloff center(0.5,0.56), radii(0.485,0.42), width0.28; padding96px. All baked; no runtime keying."
+  },
+  "note": "Pure summon visual. No artwork/portrait cut-in, added damage, heal, buff, shield, immunity, silence, enemyUids, or deferred enemy state. Existing l26 abilities and gameplay remain unchanged. The final 0.45-second alpha exit is baked; no second fade.",
+  "runtimeCompatibility": "Use the streamed VP9-alpha legendarySummon video branch shared by the approved dragon packages. A sprite-only loader cannot consume this package unchanged. Do not retain all 60 decoded RGBA frames."
+}

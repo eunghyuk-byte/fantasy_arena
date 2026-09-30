@@ -1,5 +1,5 @@
 {
-  "count": 744,
+  "count": 760,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -3719,6 +3719,86 @@
     {
       "path": "assets/vfx/legendary/f15/summon.webm",
       "bytes": 4266629,
+      "name": "summon"
+    },
+    {
+      "path": "assets/vfx/legendary/n13/meta.json",
+      "bytes": 3323,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/n13/sfx.mp3",
+      "bytes": 33068,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/n13/sfx.ogg",
+      "bytes": 21159,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/n13/summon.webm",
+      "bytes": 6214797,
+      "name": "summon"
+    },
+    {
+      "path": "assets/vfx/legendary/a14/meta.json",
+      "bytes": 3501,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/a14/sfx.mp3",
+      "bytes": 33068,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/a14/sfx.ogg",
+      "bytes": 22107,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/a14/summon.webm",
+      "bytes": 7747832,
+      "name": "summon"
+    },
+    {
+      "path": "assets/vfx/legendary/d27/meta.json",
+      "bytes": 3912,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/d27/sfx.mp3",
+      "bytes": 33068,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/d27/sfx.ogg",
+      "bytes": 22254,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/d27/summon.webm",
+      "bytes": 2509697,
+      "name": "summon"
+    },
+    {
+      "path": "assets/vfx/legendary/l26/meta.json",
+      "bytes": 3838,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/l26/sfx.mp3",
+      "bytes": 33068,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/l26/sfx.ogg",
+      "bytes": 21665,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/l26/summon.webm",
+      "bytes": 3939249,
       "name": "summon"
     }
   ]

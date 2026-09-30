@@ -1,3 +1,9 @@
+# v0.388
+
+- Added approved Storm n13 B, Ice a14 B, Black d27 C and Gold l26 A two-second alpha video/audio summon packs. No card abilities or battle results changed.
+- Honors padded display sizes, card-relative offsets and AI vertical flip; Black X stays -98 on both sides. Ice/Black/Gold cards remain visible and stationary; Storm uses the selected 33px vertical entrance with opposite-side reversal.
+- Other pending media and combat preparation remain excluded.
+
 # v0.387
 
 - Replaced Zhang Fei f15 summon with approved A alpha video/audio and upright brush-calligraphic 默 sprites attached to each actual enemy.

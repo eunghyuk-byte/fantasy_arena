@@ -72,3 +72,15 @@ test('missing required enemy sprite rejects partial video pack',async()=>{
  isLegendarySummonMeta:()=>true,LegendaryVideoFx:{preload:async()=>true},loadFrames:async()=>null,assetUrl:(b,f)=>b+f,Promise};
  vm.createContext(ctx);extract(ctx,'preloadLegendarySummon');assert.equal(await ctx.preloadLegendarySummon('fixture/'),null);
 });
+
+test('approved reveal contract preserves zero/off and flips only Storm vertical slide',async()=>{
+ for(const side of [true,false]) for(const id of ['n13','a14','d27','l26']) {
+  const meta=JSON.parse(fs.readFileSync(path.join(__dirname,`../assets/vfx/legendary/${id}/meta.json`)));const reveals=[];
+  const ctx={_legendaryEpoch:0,_hidden:{},preloadLegendarySummon:async()=>({meta,video:true,frames:[]}),legendaryAnchors:()=>({summonedUnit:{x:400,y:600},enemies:[]}),fxScale:()=>.5,
+  revealUnit:(...a)=>reveals.push(a),legendaryLayerMs:()=>0,drawFrame(){},LegendaryVideoFx:{play:async(b,m,o)=>{o.onStart();return true}}};
+  vm.createContext(ctx);extract(ctx,'legendaryVideoOverlay');extract(ctx,'playLegendarySummon');
+  await ctx.playLegendarySummon('fixture/',{unitUid:'card',casterIsMe:side});
+  if(id==='n13') { assert.equal(reveals.length,1);assert.equal(reveals[0][1],160);assert.equal(reveals[0][2],240);assert.equal(reveals[0][3].offsetYFrom,side?16.5:-16.5);assert.equal(Math.abs(reveals[0][3].offsetYTo),0); }
+  else assert.equal(reveals.length,0,'fixed card has no inherited fade/pop/slide');
+ }
+});

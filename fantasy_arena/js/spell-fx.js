@@ -1010,7 +1010,13 @@ const SpellFx = (() => {
           "%{opacity:1;filter:brightness(" + b + ");scale:" + sc + ";animation-timing-function:cubic-bezier(.33,1,.68,1)}100%{opacity:1;filter:brightness(1);scale:1}}";
       } else kfs[name] = "@keyframes " + name + "{0%{opacity:0;filter:brightness(1.9);scale:.94}" + pct +
         "%{opacity:1;filter:brightness(1.7);scale:1.06}100%{opacity:1;filter:brightness(1);scale:1}}";
-      css += sel + "{animation:" + name + " " + h.total + "ms linear both;}";
+      let animation = name + " " + h.total + "ms linear both";
+      if (h.offsetYFrom != null) {
+        const slide = "fxUnitSlide" + String(h.offsetYFrom).replace(/[^0-9]/g,"_") + "_" + String(h.offsetYTo).replace(/[^0-9]/g,"_") + (h.offsetYFrom < 0 ? "up" : "down");
+        kfs[slide] = "@keyframes " + slide + "{from{translate:0 " + h.offsetYFrom + "px}to{translate:0 " + h.offsetYTo + "px}}";
+        animation += "," + slide + " " + h.total + "ms ease-out both";
+      }
+      css += sel + "{animation:" + animation + ";}";
     });
     hideStyleEl().textContent = Object.values(kfs).join("") + css;
   }
@@ -1023,7 +1029,7 @@ const SpellFx = (() => {
     if (!_hidden[uid]) return;
     const total = Math.max(1, (fadeMs || 0) + (popMs || 0));
     _hidden[uid] = { state: "reveal", fadeMs: fadeMs || 0, total };
-    if (look) { _hidden[uid].brightnessFrom = look.brightnessFrom; _hidden[uid].scaleFrom = look.scaleFrom; }
+    if (look) { _hidden[uid].brightnessFrom = look.brightnessFrom; _hidden[uid].scaleFrom = look.scaleFrom; _hidden[uid].offsetYFrom = look.offsetYFrom; _hidden[uid].offsetYTo = look.offsetYTo; }
     syncHideStyle();
     setTimeout(() => { if (_hidden[uid] && _hidden[uid].state === "reveal") { delete _hidden[uid]; syncHideStyle(); } }, total + 30);
   }
@@ -1328,7 +1334,19 @@ const SpellFx = (() => {
             });
             overlay(ctx,t);
           },
-          onStart:()=>{ const rv=meta.summonedReveal||{}; if(uid!=null)revealUnit(uid,rv.fadeMs||120,rv.popMs||0,rv);try{opts.onStart&&opts.onStart();}catch(e){} }
+          onStart:()=>{
+            const rv=meta.summonedReveal||{};
+            if(uid!=null && rv.enabled !== false && !rv.keepSummonedCardVisible) {
+              const look=Object.assign({},rv);
+              if (rv['offsetYFromPx@1080p'] != null) {
+                const sign=opts.casterIsMe===false && rv.flipOffsetYWhenOppCasts ? -1 : 1;
+                look.offsetYFrom=rv['offsetYFromPx@1080p']*scale*sign;
+                look.offsetYTo=(rv['offsetYToPx@1080p']||0)*scale*sign;
+              }
+              revealUnit(uid,rv.fadeMs != null ? rv.fadeMs : 120,rv.popMs||0,look);
+            }
+            try{opts.onStart&&opts.onStart();}catch(e){}
+          }
         }));
       }
       const k = fxScale();

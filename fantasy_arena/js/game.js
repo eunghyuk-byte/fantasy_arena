@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.387";
+const GAME_VERSION = "0.388";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -801,11 +801,17 @@ function playCard(p, card, target) {
 /* ---------- v0.381 전설 유닛 소환 연출 (meta.playMode "legendarySummon", 2초 이내) ----------
  * 카드 id → 에셋 폴더. 새 전설 유닛 연출은 에셋 폴더(스트립·meta·sfx)를 넣고 여기에 한 줄 추가하면 같은 방식으로 재생된다. */
 const LEGENDARY_SUMMON_FX = {
+  n13: "assets/vfx/legendary/n13/",
+  a14: "assets/vfx/legendary/a14/",
+  d27: "assets/vfx/legendary/d27/",
+  l26: "assets/vfx/legendary/l26/",
   e3: "assets/vfx/legendary/e3/",
   l4: "assets/vfx/legendary/l4/",
   f15: "assets/vfx/legendary/f15/",
   f1: "assets/vfx/legendary/f1/", // 장비 「장판교 일갈」 (소환: 적 전체 침묵)
 };
+// Synchronous pre-render mirror of approved metadata; contract-tested against each pack.
+const LEGENDARY_KEEP_VISIBLE = new Set(["a14", "d27", "l26"]);
 function legendarySummonFxBase(card) {
   if (!card || card.type !== "minion") return null;
   return Object.prototype.hasOwnProperty.call(LEGENDARY_SUMMON_FX, card.id) ? LEGENDARY_SUMMON_FX[card.id] : null;
@@ -832,7 +838,7 @@ function beginLegendarySummonFx(p, m, base) {
     LEGEND_VIEW_KEYS.forEach(k => { snap[k] = Array.isArray(u[k]) ? u[k].slice() : u[k]; });
     _fxDeferredView[u.uid] = snap;
   });
-  try { if (SpellFx.hideUnits) SpellFx.hideUnits([m.uid]); } catch (err) {}
+  try { if (!LEGENDARY_KEEP_VISIBLE.has(m.id) && SpellFx.hideUnits) SpellFx.hideUnits([m.uid]); } catch (err) {}
   return { base, p, unitUid: m.uid, casterIsMe, enemyUids };
 }
 function releaseDeferredView(uid) {
