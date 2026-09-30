@@ -1,0 +1,60 @@
+{
+  "id": "e3_summon",
+  "card": "e3 그린드래곤 · earth · legendary",
+  "concept": "B 생명의 숨결 · high-quality remake",
+  "durationMs": 2000,
+  "playMode": "legendarySummon",
+  "targetMode": "none",
+  "format": "VP9 alpha WebM,1280x720,30fps,60frames,2seconds",
+  "video": {
+    "file": "summon.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "frames": 60,
+    "durationMs": 2000,
+    "anchor": "summonedUnit",
+    "displayPx@1080p": [
+      1500,
+      843.75
+    ],
+    "offsetPx@1080p": [
+      0,
+      -168.75
+    ],
+    "flipYWhenOppCasts": true,
+    "muted": true
+  },
+  "dim": {
+    "opacity": 0.32,
+    "inMs": 160,
+    "outStartMs": 1350,
+    "endMs": 2000,
+    "color": "#080c15"
+  },
+  "summonedReveal": {
+    "fadeMs": 160,
+    "popMs": 240,
+    "brightnessFrom": 1,
+    "scaleFrom": 1
+  },
+  "sfx": {
+    "file": "sfx.mp3",
+    "startMs": 0,
+    "durationMs": 2000,
+    "alt": {
+      "file": "sfx.ogg",
+      "durationMs": 2000
+    },
+    "source": "Selected new GreenB synchronized generation audio,2second retime with pitch preserved"
+  },
+  "gameplayEffects": null,
+  "provenance": {
+    "generationJob": "5f55153c-ea41-484a-80f3-93a10cbc37e3",
+    "model": "kling3_0 pro",
+    "approvedPreviewLibraryId": "libfile_b8727a0f004481919e0e489d106c38e1"
+  },
+  "note": "REPLACES previous native GreenA. Do not play both. No cut-in, added damage/buff/shield/immunity/silence, or deferred enemy state."
+}

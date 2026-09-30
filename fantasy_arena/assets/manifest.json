@@ -1,5 +1,5 @@
 {
-  "count": 738,
+  "count": 742,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -3690,6 +3690,26 @@
       "path": "assets/vfx/legendary/l4/summon.webm",
       "bytes": 3355942,
       "name": "summon"
+    },
+    {
+      "path": "assets/vfx/legendary/e3/meta.json",
+      "bytes": 1485,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/e3/summon.webm",
+      "bytes": 3087932,
+      "name": "summon"
+    },
+    {
+      "path": "assets/vfx/legendary/e3/sfx.mp3",
+      "bytes": 33069,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/e3/sfx.ogg",
+      "bytes": 21600,
+      "name": "sfx"
     }
   ]
 }

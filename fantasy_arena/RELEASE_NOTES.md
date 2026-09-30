@@ -1,3 +1,8 @@
+# v0.386
+
+- Added approved Green Dragon e3 B two-second alpha video and sound, replacing no published gameplay rules. No enemy silence, damage, buff, immunity or deferred-view changes.
+- Existing Red/Zhuge/MyTurn fixes are retained. Other pending media and combat preparation are excluded.
+
 # v0.385
 
 - Fixed unwanted background dimming during the existing MyTurn animation: explicit dim disabled/zero metadata is now respected instead of falling back to 0.3.
