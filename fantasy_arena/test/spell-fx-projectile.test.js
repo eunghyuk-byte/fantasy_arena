@@ -119,7 +119,7 @@ test("fs4 팩: projectile · 350ms 비행 · 타격 330~930ms · 2MB 이하", ()
 test("턴 시작 연출: turn_start_enemy 삭제, 내 턴만 문구 없이, 첫 턴은 match_start 뒤", () => {
   const src = fs.readFileSync(path.join(ROOT, "js/game.js"), "utf8");
   assert.doesNotMatch(src, /turn_start_enemy/);
-  assert.match(src, /SpellFx\.playMatch\("turn_start_me", \{ label: "" \}\)/);
+  assert.match(src, /SpellFx\.playMatch\("turn_start_me", \{ label: "", dim: false \}\)/);
   assert.match(src, /beginTurn\(first, \{ noTurnFx: true \}\)/);
   const ms = src.indexOf('SpellFx.playMatch("match_start")');
   const after = src.indexOf("playTurnStartFx(first)");

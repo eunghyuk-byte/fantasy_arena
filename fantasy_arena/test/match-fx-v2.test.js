@@ -18,7 +18,7 @@ function loadDimFns() {
 }
 
 test("match_start·turn_start_me·victory·defeat: v2 비디오 팩 파일 + 구 스트립 제거", () => {
-  for (const [id, dur, fo] of [["match_start", 2000, [1500, 1983]], ["turn_start_me", 800, [500, 783]],
+  for (const [id, dur, fo] of [["match_start", 2000, [1500, 1983]], ["turn_start_me", 1050, [700, 1033.3333333333333]],
     ["victory", 1800, [1350, 1783]], ["defeat", 1800, [1350, 1783]]]) {
     const m = readMeta(id);
     assert.equal(m.durationMs, dur, id + " durationMs");
@@ -129,7 +129,7 @@ test("SpellFx: 비디오 모드·dim 레이어·Safari 폴백·결과 화면 해
   assert.match(fin, /fxP\.then\(showResult, showResult\)/);
   const game = fs.readFileSync(path.join(ROOT, "js/game.js"), "utf8");
   assert.match(game, /SpellFx\.playMatch\("match_start"\)/);
-  assert.match(game, /SpellFx\.playMatch\("turn_start_me", \{ label: "" \}\)/);
+  assert.match(game, /SpellFx\.playMatch\("turn_start_me", \{ label: "", dim: false \}\)/);
 });
 
 // v0.366: MATCH START 2초판 — 대기값은 meta 기반, 타이틀에서 미리 로드(첫 판 지연 제거)

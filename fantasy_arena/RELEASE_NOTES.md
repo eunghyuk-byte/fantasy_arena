@@ -1,3 +1,9 @@
+# v0.392
+
+- Added approved MyTurn A (1050ms), reference-contained full-canvas placement (-6,-30 at 1920x1080), explicit dim off, no duplicate label or fade.
+- Loads one supported visual/audio pair: WebM/Ogg or WebP/MP3. Repeated playback owns and releases its media/audio; cancellation prevents stale legacy match playback from dimming or replacing a new overlay.
+- Existing packs without reference metadata retain their 0.72 display. Combat/gameplay/legendary results unchanged. Other pending match/spell assets remain excluded.
+
 # v0.391
 
 - Connected the approved padded attack A and defense A videos/sounds to one awaited 900ms combat timeline. At 1080p the padded display widths are 399.36px and 561.6px; counters reuse attack A. Actual resolved HP loss selects sword sound for positive loss, defense only for zero loss; no attempted strike is silent.

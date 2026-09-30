@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.391";
+const GAME_VERSION = "0.392";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -364,7 +364,7 @@ function playTurnStartFx(p) {
     try { if (typeof meView === "function") isMe = (p === meView().me); } catch (e) {}
     if (!isMe) return;
     // Fire-and-forget; label "" = 상단 문구(팩 concept 이름) 표시 안 함
-    SpellFx.playMatch("turn_start_me", { label: "" });
+    SpellFx.playMatch("turn_start_me", { label: "", dim: false });
   } catch (e) {}
 }
 function beginTurn(p, opts) {

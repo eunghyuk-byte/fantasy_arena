@@ -4,7 +4,7 @@ const src=fs.readFileSync(path.join(__dirname,'../js/spell-fx.js'),'utf8');
 function extract(ctx,name){const start=src.indexOf('function '+name+'(');assert.ok(start>=0,name);const end=src.indexOf('\n  }',start)+4;vm.runInContext((src.slice(start-6,start)==='async '?'async ':'')+src.slice(start,end),ctx);}
 test('video preload loads only enemy sprites and preserves layer indices',async()=>{
  const layers=[{file:'old-main',anchor:'summonedUnit'},{file:'mute',anchor:'eachEnemy',frames:2,w:10,h:20}];const loaded=[];
- const ctx={_legendaryPreloads:new Set(),setTimeout,clearTimeout,loadLegendaryMeta:async()=>({video:{file:'main'},layers}),isLegendarySummonMeta:()=>true,LegendaryVideoFx:{preload:async()=>true},loadFrames:async file=>{loaded.push(file);return {file}},assetUrl:(base,file)=>base+file,Promise};vm.createContext(ctx);extract(ctx,'preloadLegendarySummon');
+ const ctx={_legendaryPreloads:new Set(),_legacyMatchJobs:new Set(),_matchWaiters:new Set(),_packQueue:Promise.resolve(),setTimeout,clearTimeout,loadLegendaryMeta:async()=>({video:{file:'main'},layers}),isLegendarySummonMeta:()=>true,LegendaryVideoFx:{preload:async()=>true},loadFrames:async file=>{loaded.push(file);return {file}},assetUrl:(base,file)=>base+file,Promise};vm.createContext(ctx);extract(ctx,'preloadLegendarySummon');
  const pack=await ctx.preloadLegendarySummon('pack/');assert.deepEqual(loaded,['pack/mute']);assert.equal(pack.frames[0],null);assert.equal(pack.frames[1].file,'pack/mute');
 });
 test('video enemy sprites use actual arbitrary anchors, common video time and upright drawing',()=>{
@@ -38,7 +38,7 @@ test('cancelled sprite preload cannot start a stale video overlay',async()=>{
 });
 test('stalled enemy sprite loading settles on clear or bounded deadline',async()=>{
  for(const mode of ['clear','deadline']){
-  let deadline;const ctx={_legendaryEpoch:0,_legendaryPreloads:new Set(),setTimeout:f=>{deadline=f;return 1},clearTimeout(){},
+  let deadline;const ctx={_legendaryEpoch:0,_legendaryPreloads:new Set(),_legacyMatchJobs:new Set(),_matchWaiters:new Set(),_packQueue:Promise.resolve(),setTimeout:f=>{deadline=f;return 1},clearTimeout(){},
    loadLegendaryMeta:async()=>({video:{file:'main'},layers:[{anchor:'eachEnemy',file:'mute'}]}),isLegendarySummonMeta:()=>true,
    LegendaryVideoFx:{preload:async()=>true,clear(){}},loadFrames:()=>new Promise(()=>{}),assetUrl:(b,f)=>b+f,Promise,
    document:{getElementById:()=>null},cleanupFx(){}};
@@ -68,7 +68,7 @@ test('video preserves explicit ring mute and deferred swap timing, cleaning owne
  assert.equal(ctx._muted.a,undefined);assert.deepEqual(calls,['mute','hit','swap','clean']);
 });
 test('missing required enemy sprite rejects partial video pack',async()=>{
- const ctx={_legendaryPreloads:new Set(),setTimeout,clearTimeout,loadLegendaryMeta:async()=>({video:{file:'main'},layers:[{anchor:'eachEnemy',file:'missing'}]}),
+ const ctx={_legendaryPreloads:new Set(),_legacyMatchJobs:new Set(),_matchWaiters:new Set(),_packQueue:Promise.resolve(),setTimeout,clearTimeout,loadLegendaryMeta:async()=>({video:{file:'main'},layers:[{anchor:'eachEnemy',file:'missing'}]}),
  isLegendarySummonMeta:()=>true,LegendaryVideoFx:{preload:async()=>true},loadFrames:async()=>null,assetUrl:(b,f)=>b+f,Promise};
  vm.createContext(ctx);extract(ctx,'preloadLegendarySummon');assert.equal(await ctx.preloadLegendarySummon('fixture/'),null);
 });

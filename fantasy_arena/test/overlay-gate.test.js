@@ -23,7 +23,7 @@ function loadSpellFx() {
   ctx.window = ctx;
   vm.createContext(ctx);
   vm.runInContext(read("js/spell-fx.js"), ctx, { filename: "spell-fx.js" });
-  return { S: ctx.SpellFx, els };
+  return { S: ctx.SpellFx, els, ctx };
 }
 const tick = (ms) => new Promise(r => setTimeout(r, ms || 0));
 
@@ -51,7 +51,6 @@ test("게이트: hold 중엔 대기, 풀리면 진행 · 연속 연출(MATCH STA
 
 test("게이트: playMatch가 재생 동안 hold를 잡음 + 상한(7초)으로 영원히 잠기지 않음", () => {
   const src = read("js/spell-fx.js");
-  assert.match(src, /function playMatch\(id, opts\) \{\s*const release = overlayHold\(\);\s*const p = playPack\("match", id, opts\);\s*p\.then\(release, release\);/);
   assert.match(src, /const OVERLAY_HOLD_CAP_MS = 7000;/);
   assert.match(src, /document\.addEventListener\("keydown", \(e\) => \{ if \(_ovCount > 0\)/);
 });
@@ -105,3 +104,5 @@ test("드로우 대기·모션 중 새 카드 숨김은 inline important (playab
   assert.match(seq, /cards\[i\]\.style\.setProperty\("opacity", "0", "important"\)/);
   assert.match(seq, /el\.style\.removeProperty\("opacity"\)/);
 });
+
+test('clearing a stalled match metadata load releases its input hold immediately',async()=>{const {S,ctx,els}=loadSpellFx();ctx.fetch=()=>new Promise(()=>{});const p=S.playMatch('turn_start_me');await tick();assert.equal(S.overlayBusy(),true);S.clear();assert.equal(await p,false);await tick();assert.equal(S.overlayBusy(),false);assert.equal(els.fxInputBlock.style.display,'none');});

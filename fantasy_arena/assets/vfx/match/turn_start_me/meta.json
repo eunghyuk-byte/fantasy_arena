@@ -1,87 +1,201 @@
 {
- "effect": "my_turn_v2",
- "concept": "B_final",
- "text": "MY TURN",
- "description": "Emblem Row Slam (final, 0.8 s) — bold MY TURN slams in from 2x with a gold shockwave; the logo divider snaps open and the six element emblems pop out along it from the centre outward, hold, then everything fades out smoothly",
- "durationMs": 800,
- "fps": 60,
- "frames": 48,
- "overlay": {
-  "file": "overlay.webm",
-  "format": "WebM, VP9 video with alpha channel (yuva420p, alpha_mode=1), straight/non-premultiplied alpha, no audio track",
-  "width": 1920,
-  "height": 1080,
-  "bytes": 478758,
-  "vp9Crf": 36,
-  "blend": "normal (source-over)",
-  "contentBoundsPx": {
-   "x": 0,
-   "y": 229,
-   "w": 1920,
-   "h": 608
-  }
- },
- "anchor": {
-  "type": "battlefield-centre",
-  "pivot": "canvas centre (960,540)",
-  "positionAtRef1080p": [
-   954,
-   510
-  ],
-  "placement": "draw the 1920x1080 canvas unscaled at 1080p (scale 1:1 with the stage) with its centre on the battlefield centre; in the reference layout that is (954,510), the centre gem of the board divider, i.e. canvas top-left at (-6,-30). Plain stage centre (960,540) also works."
- },
- "dim": {
-  "includedInOverlay": false,
-  "doInCode": false,
-  "opacity": 0,
-  "note": "no dim: the battlefield stays fully visible; overlay is pointer-events:none and gone after 800 ms"
- },
- "endState": "overlay fades out smoothly from 500 ms and is fully transparent by the last frame; remove it when the video ends",
- "lastFrameAlphaMax": 0,
- "sfx": {
-  "file": "sfx.ogg",
-  "format": "Ogg Vorbis, mono, 48 kHz",
-  "startMs": 0,
-  "durationMs": 800,
-  "loudnessLUFS": -17.6,
-  "truePeakDbTP": -3.1,
-  "note": "start together with the overlay (t=0); its tail fades with the visual fade-out (from 500 ms)"
- },
- "timelineMs": {
-  "textSlamMs": 100,
-  "emblemsPopMs": [
-   100,
-   240
-  ],
-  "fadeOutMs": [
-   500,
-   783
-  ]
- },
- "preview": {
-  "file": "preview.mp4",
-  "format": "H.264 + AAC, 1920x1080, 60 fps",
-  "leadInMs": 300,
-  "tailMs": 300,
-  "background": "real battlefield screenshot (spell_anim/common/bg_board.png), no dim"
- },
- "sources": {
-  "gameArt": [
-   "fantasy_arena/assets/img/logos/logo_wordmark_stand.png (divider)",
-   "fantasy_arena/assets/img/emblems/composites/*.png (all 6)"
-  ],
-  "fxElements": "Kling 3.0 pro clip mt_A from the v1 batch (reused, no new generation), keyed from black to additive light; element-colour glows, rings and sparks rendered in code",
-  "lettering": "rendered in code in the logo typeface, bold: Google Sans Flex weight 880 (v2 used 550) (SIL OFL, the open release of the Product Sans / Google Sans design the wordmark uses), per-glyph width tuned to the wordmark; gold grain texture sampled from logo_wordmark_stand.png, its measured gradient, dark-red outline and inner rim",
-  "sound": "re-timed native audio of v1 Kling clip mt_A, layered with synthesized sub thump / body hit / low swell / rumble; loudness-normalised; no sonilo/mirelo"
- },
- "fadeOut": {
-  "startMs": 500,
-  "endMs": 783,
-  "curve": "cosine ease-in-out (opacity = (0.5+0.5cos(pi*u))^1.35); every layer (lettering, emblems, glows, particles) fades together; fully transparent on the last frame"
- },
- "changesFromV2": [
-  "duration 500 -> 800 ms (hold extended; entrance timing unchanged); divider moved 8 px lower for the taller bold letters; sound re-fitted to 800 ms with a low bloom and fading tail",
-  "lettering much bolder: Google Sans Flex wght 880 (v2: 550), stem/cap 0.168 -> ~0.28, tracking 0.02 -> 0.03; same logo-sampled gold texture, outline and bevel",
-  "natural fade-out 500-783 ms (cosine ease) replacing the late, steep fade"
- ]
+  "effect": "turn_start_me_refined_A",
+  "concept": "A",
+  "text": "MY TURN",
+  "durationMs": 1050,
+  "fps": 60,
+  "frames": 63,
+  "description": "Selected preservation-first refinement of the existing Kling-based composition; piecewise hold/exit timing and original audio. No new generation.",
+  "overlay": {
+    "file": "overlay.webm",
+    "safariFile": "overlay_safari.webp",
+    "format": "VP9 CRF8 YUVA420P alpha, silent; straight source-over",
+    "width": 1920,
+    "height": 1080,
+    "bytes": 2736654,
+    "blend": "normal (source-over)",
+    "alphaMode": "straight",
+    "vp9Crf": 8,
+    "noAdditionalOpacityEnvelope": true,
+    "safari": {
+      "format": "High-quality animated WebP with lossless alpha",
+      "frames": 62,
+      "logicalFrames": 63,
+      "durationMs": 1050,
+      "frameDurationsMs": [
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        16,
+        17,
+        17,
+        33
+      ],
+      "loop": 1
+    }
+  },
+  "anchor": {
+    "mode": "reference-contain",
+    "container": "matchStage",
+    "referenceSizePx": [
+      1920,
+      1080
+    ],
+    "fit": "contain",
+    "pivotPx": [
+      960,
+      540
+    ],
+    "type": "battlefield-centre",
+    "pivot": "canvas centre (960,540)",
+    "positionAtRef1080p": [
+      954,
+      510
+    ],
+    "canvasTopLeftAtRef1080p": [
+      -6,
+      -30
+    ],
+    "displaySizeAtRef1080p": [
+      1920,
+      1080
+    ],
+    "scale": 1,
+    "placement": "The pixels are unshifted on the full source canvas. Apply top-left (-6,-30) ONCE at 1920x1080 reference scale. For matchStage W,H: s=min(W/1920,H/1080); origin=((W-1920*s)/2,(H-1080*s)/2); top-left=origin+(-6*s,-30*s); size=(1920*s,1080*s). Do not crop, stretch, or apply the derived top-left twice."
+  },
+  "dim": {
+    "enabled": false,
+    "includedInOverlay": false,
+    "doInCode": false,
+    "opacity": 0,
+    "color": "#000000",
+    "fadeIn": {
+      "startMs": 0,
+      "endMs": 0,
+      "easing": "ease-out"
+    },
+    "fadeOut": {
+      "startMs": 700.0,
+      "endMs": 1033.3333333333333,
+      "easing": "ease-in-out"
+    },
+    "hold": false,
+    "note": "MUST call playMatch with dim:false; doInCode:false/opacity:0 alone still triggers the old 0.3 fallback."
+  },
+  "runtimeOptions": {
+    "label": "",
+    "dim": false
+  },
+  "fadeOut": {
+    "startMs": 700.0,
+    "endMs": 1033.3333333333333,
+    "curve": "Original authored cosine alpha exit, extended by the source-time map; baked in both visual formats. Do not fade twice."
+  },
+  "endState": "Fully transparent final frame; stop visual and audio and clean up on shared duration boundary or cancellation. No held result dim.",
+  "lastFrameAlphaMax": 0,
+  "sfx": {
+    "file": "sfx.ogg",
+    "fallbackFile": "sfx.mp3",
+    "losslessReferenceFile": "sfx.wav",
+    "startMs": 0,
+    "durationMs": 1050,
+    "sampleRate": 48000,
+    "channels": 1,
+    "decodedSamples": 50400,
+    "source": "Exact approved retimed WAV, encoded without further timing/gain edits. Play only one audio format. MP3 container includes encoder padding; gapless decoded duration is the shared duration."
+  },
+  "timelineMs": {
+    "sourceTimeMap": {
+      "destinationMs": [
+        0,
+        250.0,
+        700.0,
+        1033.333333
+      ],
+      "sourceMs": [
+        0,
+        250.0,
+        500.0,
+        783.333333
+      ]
+    },
+    "fadeOutMs": [
+      700.0,
+      1033.3333333333333
+    ],
+    "cleanupMs": 1050,
+    "textSlamMs": 100,
+    "emblemsPopMs": [
+      100,
+      240
+    ],
+    "holdMs": [
+      250,
+      700
+    ]
+  },
+  "provenance": {
+    "approvedPreviewLibraryId": "libfile_b0af32ff00888191baf3b810747acab4",
+    "approvedPreviewSHA256": "655ec308fe19bb984a0b99b9a7ec8161f5f974360320117dfc26b22d5a4d02f8",
+    "approvedAlphaMasterSHA256": "0fd5cc8cb3aab1672dc6e44cd451e54323711df6a177c184b7fc4b893fa1487b",
+    "approvedAudioWavSHA256": "0b5d85c15adc8b7b495c2f369602282ce5a442f4ddeeabdfb5072d7274f581fe",
+    "repositoryCommit": "53f02918415064ee9a41564bb4dead59f8e14449",
+    "sourceIdentity": "Original composition preserved; registered genuine source-art detail only inside existing emblem silhouettes"
+  },
+  "integrationStatus": "Asset-only export. Repository and game unchanged. See INTEGRATION.txt for required no-dim/placement handling; metadata anchors are not automatically honored by the current loader."
 }

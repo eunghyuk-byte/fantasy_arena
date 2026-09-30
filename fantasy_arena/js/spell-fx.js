@@ -2031,8 +2031,25 @@ const SpellFx = (() => {
     return [Math.max(0, dur - 300), dur];
   }
   /** 순수 함수 (테스트용): 연출 id + meta + opts → dim 타임라인. null = dim 없음 */
+  function applyMatchPresentation(visual, meta, opts, viewportWidth, viewportHeight) {
+    const style = visual.style;
+    ['left','top','width','height','aspectRatio','transform'].forEach(key => { style[key] = ''; });
+    const anchor = meta && meta.anchor;
+    if (!anchor || anchor.mode !== 'reference-contain' || anchor.container !== 'matchStage' || anchor.fit !== 'contain') return false;
+    const reference = anchor.referenceSizePx, center = anchor.positionAtRef1080p;
+    const size = anchor.displaySizeAtRef1080p, pivot = anchor.pivotPx, factor = anchor.scale;
+    const pair = v => Array.isArray(v) && v.length === 2 && v.every(Number.isFinite);
+    if (![reference,center,size,pivot].every(pair) || reference.some(v=>v<=0) || size.some(v=>v<=0) || !Number.isFinite(factor) || factor<=0
+      || !Number.isFinite(viewportWidth) || !Number.isFinite(viewportHeight) || viewportWidth<=0 || viewportHeight<=0) return false;
+    const scale = Math.min(viewportWidth/reference[0], viewportHeight/reference[1]);
+    style.left = ((viewportWidth-reference[0]*scale)/2 + (center[0]-pivot[0]*factor)*scale) + 'px';
+    style.top = ((viewportHeight-reference[1]*scale)/2 + (center[1]-pivot[1]*factor)*scale) + 'px';
+    style.width = size[0]*scale*factor + 'px'; style.height = size[1]*scale*factor + 'px';
+    style.aspectRatio = 'auto'; style.transform = 'none';
+    return true;
+  }
   function resolveDim(id, meta, opts) {
-    opts = opts || {};
+    opts = Object.assign({}, meta && meta.runtimeOptions, opts || {});
     if (opts.dim === false || opts.dim === 0 || opts.dimOpacity === 0) return null;
     const dur = (meta && meta.durationMs) || 1500;
     const d = meta && meta.dim;
@@ -2048,7 +2065,7 @@ const SpellFx = (() => {
       fadeInEndMs = d.fadeIn.endMs;
     }
     const hold = opts.holdDim != null ? !!opts.holdDim
-      : (useMeta ? d.fadeOut === null : !!DIM_HOLD_IDS[id]);
+      : (useMeta ? (d.hold != null ? !!d.hold : d.fadeOut === null) : !!DIM_HOLD_IDS[id]);
     let fadeOutStartMs = null, fadeOutEndMs = null;
     if (!hold) {
       if (useMeta && d.fadeOut && d.fadeOut.endMs != null) {
@@ -2171,6 +2188,7 @@ const SpellFx = (() => {
         const meta = await loadPackMeta("match", id);
         if (!isVideoPackMeta(meta)) return false;
         const base = packBase("match", id);
+        if(meta.anchor?.mode === "reference-contain")return MatchReferenceFx.preload(base,meta,needsSafariFallback());
         const sfxP = pickMatchSfxUrl(base, meta);
         if (needsSafariFallback()) {
           const file = meta.overlay.safariFile || "overlay_safari.webp";
@@ -2206,16 +2224,29 @@ const SpellFx = (() => {
     return (meta && meta.durationMs) || 0;
   }
   const _sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const _legacyMatchJobs=new Set();
   async function _playVideoPack(kind, id, meta, base, opts) {
     const dur = meta.durationMs || 1500;
     const layer = ensureMatchLayer();
     const stage = document.getElementById("matchStage");
+    if(meta.anchor?.mode === 'reference-contain'){
+      return MatchReferenceFx.play(base,meta,{...meta.runtimeOptions,...opts,safari:needsSafariFallback()},{
+        mount(visual){stage.innerHTML='';layer.classList.add('on');clearDimTimers();dimTo(document.getElementById('matchDim'),0,0);const r=stage.getBoundingClientRect();applyMatchPresentation(visual,meta,opts,r.width,r.height);stage.appendChild(visual);},
+        start(){startDim(resolveDim(id,meta,opts));},
+        finish(){clearDimTimers();dimTo(document.getElementById('matchDim'),0,0);layer.classList.remove('on','held');}
+      });
+    }
     // 이전 판에서 유지 중이던 dim/마지막 프레임 정리
     if (stage) stage.innerHTML = "";
     const safari = needsSafariFallback();
     let visual = null;
     let video = null;
-    let reused = false;
+    let reused = false, cancelled=false, soundHandle=null;
+    const generation=_legendaryEpoch;
+    const stale=()=>cancelled||generation!==_legendaryEpoch;
+    const cancel=()=>{if(cancelled)return;cancelled=true;try{video?.pause();soundHandle?.stop();visual?.remove();}catch(e){}};
+    _legacyMatchJobs.add(cancel);
+    try {
     if (!safari) {
       // 미리 버퍼링된 비디오가 있으면 그대로 사용 (처음부터 재생)
       const rv = _readyVideo[id];
@@ -2241,6 +2272,7 @@ const SpellFx = (() => {
       }
     }
     const sfxP = opts.sound === false ? Promise.resolve(null) : pickMatchSfxUrl(base, meta);
+    if(stale())return false;
     if (visual && stage) {
       visual.style.opacity = "0";
       stage.appendChild(visual);
@@ -2254,20 +2286,23 @@ const SpellFx = (() => {
       }
     }
     const sfxUrl = await Promise.race([sfxP, _sleep(400).then(() => null)]);
+    if(stale())return false;
     let ok = !!visual;
     if (video) {
       try { await video.play(); } catch (e) { ok = false; }
       if (!ok) { try { video.remove(); } catch (e) {} visual = null; }
     }
+    if(stale()){cancel();return false;}
     if (visual) visual.style.opacity = "1";
     // t0: 비디오·dim·사운드 동시 시작
     const dim = resolveDim(id, meta, opts);
     startDim(dim);
     if (sfxUrl && typeof Sfx !== "undefined" && Sfx.playUrl) {
-      try { Sfx.playUrl(sfxUrl, { duckMs: dur }); } catch (e) {}
+      try { Sfx.playUrl(sfxUrl, { duckMs: dur,returnHandle:true,durationMs:dur }).then(h=>{soundHandle=h;if(stale())try{h?.stop();}catch(e){}}); } catch (e) {}
     }
     if (video && ok) await Promise.race([waitEvent(video, ["ended"], dur + 250), _sleep(dur + 250)]);
     else await _sleep(dur);
+    if(stale())return false;
     if (dim && dim.hold) {
       // 결과 화면까지 유지: 모달(.overlay z20) 아래로 내림. 마지막 프레임이 실제로 보이는 팩(lastFrameAlphaMax≥128)만 남김
       // (DEFEAT v2 처럼 알파 2/255 잔상만 남는 팩은 제거)
@@ -2282,6 +2317,7 @@ const SpellFx = (() => {
       }, tailMs + 40));
     }
     return ok;
+    } finally {_legacyMatchJobs.delete(cancel);if(stale())cancel();}
   }
 
   let _packQueue = Promise.resolve();
@@ -2290,6 +2326,7 @@ const SpellFx = (() => {
     opts = opts || {};
     if (!kind || !id) return false;
     const meta = await loadPackMeta(kind, id);
+    if(opts._packEpoch != null && opts._packEpoch !== _legendaryEpoch)return false;
     const base = packBase(kind, id);
     // v0.364: 매치 팩 v2 = 알파 비디오 오버레이 + 공용 dim
     if (isVideoPackMeta(meta)) return _playVideoPack(kind, id, meta, base, opts);
@@ -2379,7 +2416,8 @@ const SpellFx = (() => {
     opts = opts || {};
     // Early-resolve before enqueue so muted packs never block the queue
     if (isPackMuted(kind, id)) return Promise.resolve(false);
-    const run = () => _playPackInner(kind, id, opts);
+    const token=_legendaryEpoch;
+    const run = () => token===_legendaryEpoch?_playPackInner(kind,id,{...opts,_packEpoch:token}):false;
     if (opts.skipQueue) return run();
     const p = _packQueue.then(run, run);
     _packQueue = p.catch(() => {});
@@ -2433,11 +2471,11 @@ const SpellFx = (() => {
   try {
     document.addEventListener("keydown", (e) => { if (_ovCount > 0) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
   } catch (e) {}
+  const _matchWaiters = new Set();
   function playMatch(id, opts) {
     const release = overlayHold();
-    const p = playPack("match", id, opts);
-    p.then(release, release);
-    return p;
+    let cancel;const cancelled=new Promise(r=>cancel=()=>r(false));_matchWaiters.add(cancel);
+    return Promise.race([playPack("match",id,opts),cancelled]).finally(()=>{_matchWaiters.delete(cancel);release();});
   }
 
   function cleanupFx(layer, stage, fxCard) {
@@ -2453,6 +2491,10 @@ const SpellFx = (() => {
   }
 
   function clear() {
+    for(const cancel of [..._legacyMatchJobs])cancel();
+    for(const cancel of [..._matchWaiters])cancel();
+    _packQueue=Promise.resolve();
+    if (typeof MatchReferenceFx !== "undefined") MatchReferenceFx.clear();
     if (typeof CombatFx !== "undefined") CombatFx.clear();
     _legendaryEpoch++;
     for (const cancel of [..._legendaryPreloads]) cancel();
