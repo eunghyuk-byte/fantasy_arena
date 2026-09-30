@@ -27,14 +27,14 @@ test('video dispatch wires enemy overlay without invoking sprite playback or ene
    legendaryLayerMs:L=>L.durationMs,drawFrame:(...a)=>draws.push(a),revealUnit(){},
    muteEnemy(){throw Error('unexpected enemy mutation')},
    LegendaryVideoFx:{play:async(base,m,opts)=>{invoked=opts;opts.onStart();opts.drawOverlay({},0);return true}}};
-  vm.createContext(ctx);extract(ctx,'legendaryVideoOverlay');extract(ctx,'playLegendarySummon');
+  vm.createContext(ctx);extract(ctx,'legendaryVideoOverlay');extract(ctx,'legendaryTokenPresentation');extract(ctx,'playLegendarySummon');
   assert.equal(await ctx.playLegendarySummon('fixture/',{casterIsMe,enemyUids:['a'],onEnemySwap:u=>swaps.push(u)}),true);
   assert.equal(invoked.casterIsMe,casterIsMe);assert.equal(invoked.anchor.y,casterIsMe?800:280);assert.equal(draws.length,1);assert.deepEqual(swaps,['a']);
  }
 });
 test('cancelled sprite preload cannot start a stale video overlay',async()=>{
  let resolve;let starts=0;const ctx={_legendaryEpoch:0,_hidden:{},Set,preloadLegendarySummon:()=>new Promise(r=>resolve=r),LegendaryVideoFx:{play:()=>starts++}};
- vm.createContext(ctx);extract(ctx,'playLegendarySummon');const p=ctx.playLegendarySummon('fixture/',{});ctx._legendaryEpoch++;resolve({meta:{},video:true,frames:[]});assert.equal(await p,false);assert.equal(starts,0);
+ vm.createContext(ctx);extract(ctx,'legendaryTokenPresentation');extract(ctx,'playLegendarySummon');const p=ctx.playLegendarySummon('fixture/',{});ctx._legendaryEpoch++;resolve({meta:{},video:true,frames:[]});assert.equal(await p,false);assert.equal(starts,0);
 });
 test('stalled enemy sprite loading settles on clear or bounded deadline',async()=>{
  for(const mode of ['clear','deadline']){
@@ -63,7 +63,7 @@ test('video preserves explicit ring mute and deferred swap timing, cleaning owne
  legendaryHitMs:()=>480,legendaryLayerMs:()=>0,drawFrame(){},revealUnit(){},syncMuteStyle(){calls.push('clean')},
  muteEnemy(u){ctx._muted[u]={owned:true};calls.push('mute')},
  LegendaryVideoFx:{play:async(b,m,o)=>{o.drawOverlay({},479);assert.deepEqual(calls,[]);o.drawOverlay({},480);assert.deepEqual(calls,['mute','hit']);o.drawOverlay({},539);assert.deepEqual(calls,['mute','hit']);o.drawOverlay({},540);assert.deepEqual(calls,['mute','hit','swap']);return true;}}};
- vm.createContext(ctx);extract(ctx,'legendaryVideoOverlay');extract(ctx,'playLegendarySummon');
+ vm.createContext(ctx);extract(ctx,'legendaryVideoOverlay');extract(ctx,'legendaryTokenPresentation');extract(ctx,'playLegendarySummon');
  assert.equal(await ctx.playLegendarySummon('fixture/',{enemyUids:['a'],onEnemyHit:()=>calls.push('hit'),onEnemySwap:()=>calls.push('swap')}),true);
  assert.equal(ctx._muted.a,undefined);assert.deepEqual(calls,['mute','hit','swap','clean']);
 });
@@ -78,7 +78,7 @@ test('approved reveal contract preserves zero/off and flips only Storm vertical 
   const meta=JSON.parse(fs.readFileSync(path.join(__dirname,`../assets/vfx/legendary/${id}/meta.json`)));const reveals=[];
   const ctx={_legendaryEpoch:0,_hidden:{},preloadLegendarySummon:async()=>({meta,video:true,frames:[]}),legendaryAnchors:()=>({summonedUnit:{x:400,y:600},enemies:[]}),fxScale:()=>.5,
   revealUnit:(...a)=>reveals.push(a),legendaryLayerMs:()=>0,drawFrame(){},LegendaryVideoFx:{play:async(b,m,o)=>{o.onStart();return true}}};
-  vm.createContext(ctx);extract(ctx,'legendaryVideoOverlay');extract(ctx,'playLegendarySummon');
+  vm.createContext(ctx);extract(ctx,'legendaryVideoOverlay');extract(ctx,'legendaryTokenPresentation');extract(ctx,'playLegendarySummon');
   await ctx.playLegendarySummon('fixture/',{unitUid:'card',casterIsMe:side});
   if(id==='n13') { assert.equal(reveals.length,1);assert.equal(reveals[0][1],160);assert.equal(reveals[0][2],240);assert.equal(reveals[0][3].offsetYFrom,side?16.5:-16.5);assert.equal(Math.abs(reveals[0][3].offsetYTo),0); }
   else assert.equal(reveals.length,0,'fixed card has no inherited fade/pop/slide');

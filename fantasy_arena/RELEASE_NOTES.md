@@ -1,3 +1,9 @@
+# v0.389
+
+- Added approved Ma Chao e14 A with one main video/sound and a secondary arrival bound only to the token UID returned by the original battlecry. Full board means no arrival; existing Ma Dai cards are never substituted.
+- Both streams share the main clock and cleanup. The actual created card face fades in above both effects at 800-940ms; native easing, padded geometry and AI vertical offsets follow the supplied package.
+- No gameplay rules changed. Zhao Yun, Lu Bu, combat and other pending media remain excluded.
+
 # v0.388
 
 - Added approved Storm n13 B, Ice a14 B, Black d27 C and Gold l26 A two-second alpha video/audio summon packs. No card abilities or battle results changed.

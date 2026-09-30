@@ -13,7 +13,7 @@ function fixture({opaque=false,fail=false,rejectPlay=false}={}){
  const videos=[],canvases=[];let stops=0,starts=0;
  const document={hidden:false,body:{appendChild(){}},createElement(kind){
   if(kind==='video'){
-   const v=new EventTarget();Object.assign(v,{videoWidth:1280,videoHeight:720,currentTime:0,ended:false,canPlayType:()=> 'probably',removeAttribute(){},remove(){this.removed=true;},pause(){this.playing=false;},load(){if(!this.removed)queueMicrotask(()=>this.dispatchEvent(new Event(fail?'error':'loadeddata')));},play(){if(rejectPlay)return Promise.reject(Error('blocked'));this.playing=true;return Promise.resolve();}});videos.push(v);return v;
+   const v=new EventTarget();Object.assign(v,{videoWidth:1280,videoHeight:720,readyState:2,currentTime:0,ended:false,canPlayType:()=> 'probably',removeAttribute(){},remove(){this.removed=true;},pause(){this.playing=false;},load(){if(!this.removed)queueMicrotask(()=>this.dispatchEvent(new Event(fail?'error':'loadeddata')));},play(){if(rejectPlay)return Promise.reject(Error('blocked'));this.playing=true;return Promise.resolve();}});videos.push(v);return v;
   }
   const c={style:{},remove(){this.removed=true;},getContext:()=>({drawImage(){},getImageData:()=>({data:new Uint8ClampedArray(16).fill(opaque?255:0)}),clearRect(){},fillRect(){},save(){},restore(){},translate(){},scale(){}})};canvases.push(c);return c;
  }};
@@ -23,3 +23,20 @@ function fixture({opaque=false,fail=false,rejectPlay=false}={}){
 test('streamed video repeats with fresh decoder and owned audio cleanup',async()=>{const f=fixture();assert.equal(await f.fx.preload('pack/',meta),true);for(let i=0;i<3;i++)assert.equal(await f.fx.play('pack/',meta),true);assert.equal(f.fx.pending(),0);assert.ok(f.videos.every(v=>v.removed));assert.deepEqual(f.audio(),{starts:3,stops:3});});
 test('opaque decoder and missing media fallback before playback',async()=>{for(const options of [{opaque:true},{fail:true}]){const f=fixture(options);assert.equal(await f.fx.preload('pack/',meta),false);assert.equal(await f.fx.play('pack/',meta),false);assert.equal(f.fx.pending(),0);assert.equal(f.audio().starts,0);}});
 test('cancel during load prevents stale start; sound off and rejected play clean up',async()=>{const f=fixture();let n=0;const p=f.fx.play('pack/',meta,{onStart:()=>n++});f.fx.clear();assert.equal(await p,false);assert.equal(n,0);assert.equal(f.fx.pending(),0);assert.equal(await f.fx.play('pack/',meta,{sound:false}),true);assert.equal(f.audio().starts,0);const blocked=fixture({rejectPlay:true});assert.equal(await blocked.fx.play('pack/',meta),false);assert.equal(blocked.fx.pending(),0);});
+
+test('secondary stream shares main lifetime and one sound; missing UID omits decoder',async()=>{
+ for(const present of [true,false]){
+  const f=fixture();const secondary={video:meta.video,startMs:550,endMs:1800,anchor:{x:120,y:300},isValid:()=>present};
+  assert.equal(await f.fx.play('pack/',meta,{secondary}),true);
+  assert.equal(f.videos.length,present?2:1);assert.ok(f.videos.every(v=>v.removed));assert.deepEqual(f.audio(),{starts:1,stops:1});assert.equal(f.fx.pending(),0);
+ }
+});
+test('cancellation disposes both shared streams and stops owned sound',async()=>{
+ const f=fixture();assert.equal(await f.fx.play('pack/',meta,{secondary:{video:meta.video,startMs:550,endMs:1800,anchor:{x:0,y:0}},onStart:()=>f.fx.clear()}),false);
+ assert.equal(f.videos.length,2);assert.ok(f.videos.every(v=>v.removed));assert.deepEqual(f.audio(),{starts:1,stops:1});assert.equal(f.fx.pending(),0);
+});
+test('native reveal easing is bounded monotonic with exact endpoints',()=>{
+ const f=fixture();assert.equal(f.fx.ease(0),0);assert.equal(f.fx.ease(1),1);let last=0;
+ for(let i=0;i<=100;i++){const y=f.fx.ease(i/100);assert.ok(y>=last&&y<=1);last=y;}
+ assert.ok(f.fx.ease(.5)>.5);
+});

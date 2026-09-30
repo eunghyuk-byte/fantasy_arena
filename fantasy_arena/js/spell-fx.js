@@ -1011,6 +1011,10 @@ const SpellFx = (() => {
       } else kfs[name] = "@keyframes " + name + "{0%{opacity:0;filter:brightness(1.9);scale:.94}" + pct +
         "%{opacity:1;filter:brightness(1.7);scale:1.06}100%{opacity:1;filter:brightness(1);scale:1}}";
       let animation = name + " " + h.total + "ms linear both";
+      if(h.easing==='cubic-bezier(0.215,0.61,0.355,1)') {
+        name='fxNativeOpacity';kfs[name]='@keyframes '+name+'{from{opacity:0}to{opacity:1}}';
+        animation=name+' '+h.total+'ms '+h.easing+' both';
+      }
       if (h.offsetYFrom != null) {
         const slide = "fxUnitSlide" + String(h.offsetYFrom).replace(/[^0-9]/g,"_") + "_" + String(h.offsetYTo).replace(/[^0-9]/g,"_") + (h.offsetYFrom < 0 ? "up" : "down");
         kfs[slide] = "@keyframes " + slide + "{from{translate:0 " + h.offsetYFrom + "px}to{translate:0 " + h.offsetYTo + "px}}";
@@ -1029,7 +1033,7 @@ const SpellFx = (() => {
     if (!_hidden[uid]) return;
     const total = Math.max(1, (fadeMs || 0) + (popMs || 0));
     _hidden[uid] = { state: "reveal", fadeMs: fadeMs || 0, total };
-    if (look) { _hidden[uid].brightnessFrom = look.brightnessFrom; _hidden[uid].scaleFrom = look.scaleFrom; _hidden[uid].offsetYFrom = look.offsetYFrom; _hidden[uid].offsetYTo = look.offsetYTo; }
+    if (look) { _hidden[uid].brightnessFrom = look.brightnessFrom; _hidden[uid].scaleFrom = look.scaleFrom; _hidden[uid].offsetYFrom = look.offsetYFrom; _hidden[uid].offsetYTo = look.offsetYTo; _hidden[uid].easing = look.easing; }
     syncHideStyle();
     setTimeout(() => { if (_hidden[uid] && _hidden[uid].state === "reveal") { delete _hidden[uid]; syncHideStyle(); } }, total + 30);
   }
@@ -1308,18 +1312,49 @@ const SpellFx = (() => {
       });
     };
   }
+  async function legendaryTokenPresentation(meta, opts) {
+    const uid=opts.tokenUid;
+    const valid=()=>uid!=null && (!opts.isUnitPresent || opts.isUnitPresent(uid));
+    if(!meta.arrival || !valid())return null;
+    const el=document.querySelector('.minion[data-uid="'+String(uid).replace(/"/g,'')+'"]');
+    if(!el)return null;
+    const imgs=[...el.querySelectorAll('img')];
+    let timer;
+    try { await Promise.race([Promise.all(imgs.map(img=>img.decode())),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('token face decode timeout')),2000);})]); }
+    finally { clearTimeout(timer); }
+    if(!valid())return null;
+    const r=el.getBoundingClientRect(), copy=el.cloneNode(true);
+    const originals=[el,...el.querySelectorAll('*')],clones=[copy,...copy.querySelectorAll('*')];
+    originals.forEach((src,i)=>{
+      const dst=clones[i],cs=getComputedStyle(src);
+      for(const prop of cs)dst.style.setProperty(prop,cs.getPropertyValue(prop));
+      dst.removeAttribute('id');dst.removeAttribute('data-uid');
+      if(src.tagName==='CANVAS') {dst.width=src.width;dst.height=src.height;dst.getContext('2d').drawImage(src,0,0);}
+    });
+    Object.assign(copy.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',margin:'0',transform:'none',translate:'none',scale:'none',animation:'none',opacity:'0',zIndex:'2147482001',pointerEvents:'none'});
+    copy.classList.add('legendary-token-copy');document.body.appendChild(copy);
+    let invalid=false;
+    return {
+      secondary:Object.assign({},meta.arrival,{anchor:{x:r.left+r.width/2,y:r.top+r.height/2},isValid:()=>!invalid&&valid()}),
+      draw(t){if(!valid())invalid=true;if(invalid){copy.remove();return;}const rv=meta.tokenReveal;copy.style.opacity=String(LegendaryVideoFx.ease((t-rv.startMs)/rv.fadeMs));},
+      clear(){copy.remove();}
+    };
+  }
   async function playLegendarySummon(base, opts) {
     const epoch = _legendaryEpoch;
     opts = opts || {};
     const uid = opts.unitUid;
     const swapped = new Set();
     const videoMutes = new Map();
+    let tokenPresentation=null;
     const fireSwap = (u) => { if (swapped.has(u)) return; swapped.add(u); try { opts.onEnemySwap && opts.onEnemySwap(u); } catch (e) {} };
     try {
       const pack = await preloadLegendarySummon(base);
       if (!pack || epoch !== _legendaryEpoch) return false;
       const meta = pack.meta;
       if (pack.video) {
+        tokenPresentation=await legendaryTokenPresentation(meta,opts);
+        if(epoch !== _legendaryEpoch)return false;
         const anchors = legendaryAnchors(meta,opts), scale = fxScale();
         const overlay = legendaryVideoOverlay(meta, pack.frames, anchors, scale);
         const E = meta.enemyMute;
@@ -1327,12 +1362,14 @@ const SpellFx = (() => {
 
         return await LegendaryVideoFx.play(base, meta, Object.assign({}, opts, {
           anchor: anchors.summonedUnit, scale,
+          secondary:tokenPresentation && tokenPresentation.secondary,
           drawOverlay:(ctx, t)=>{
             hits.forEach(h => {
               if (!h.hit && t >= h.hitMs) { h.hit=true; muteEnemy(h.uid,E); videoMutes.set(h.uid,_muted[h.uid]); try { opts.onEnemyHit && opts.onEnemyHit(h.uid,h.hitMs); } catch(e) {} }
               if (t >= h.hitMs + (E.swapAtMs != null ? E.swapAtMs : 60)) fireSwap(h.uid);
             });
             overlay(ctx,t);
+            if(tokenPresentation)tokenPresentation.draw(t);
           },
           onStart:()=>{
             const rv=meta.summonedReveal||{};
@@ -1402,6 +1439,8 @@ const SpellFx = (() => {
       hits.forEach(hh => fireSwap(hh.uid));
       return ok;
     } finally {
+      if(tokenPresentation)tokenPresentation.clear();
+      if(opts.tokenUid!=null && _hidden[opts.tokenUid]) {delete _hidden[opts.tokenUid];syncHideStyle();}
       if (videoMutes.size) { for (const [u,owned] of videoMutes) if (_muted[u] === owned) delete _muted[u]; syncMuteStyle(); }
       (opts.enemyUids || []).forEach(u => fireSwap(u)); // 실패·중단해도 침묵 표시는 반드시 갱신
       if (uid != null && _hidden[uid] && _hidden[uid].state === "hide") revealUnit(uid, 120, 0);
@@ -2415,7 +2454,7 @@ const SpellFx = (() => {
     }
   }
 
-  return { play, clear, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, summonFormationBox, summonHandGuard, releaseHidden, hideUnits, revealUnit, playLegendarySummon, preloadLegendarySummon, isLegendarySummonMeta, legendaryHitMs, legendaryDimAlpha, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
+  return { play, clear, legendaryEpoch:()=>_legendaryEpoch, T, playProjectile, preloadProjectile, isProjectileMeta, playOverlayPerUnit, preloadOverlay, isOverlayMeta, playPerUnitFlow, preloadFlow, isFlowMeta, playAnchored, preloadAnchored, isAnchoredMeta, playDuelKeep, preloadDuelKeep, isDuelKeepMeta, playSummon, preloadSummon, isSummonMeta, summonFormationBox, summonHandGuard, releaseHidden, hideUnits, revealUnit, playLegendarySummon, preloadLegendarySummon, isLegendarySummonMeta, legendaryHitMs, legendaryDimAlpha, unitDelayMs, playMetaFx, preloadMetaFx, aoeUnitPoints, elemOf, spellKind, playPack, playUi, playCombat, playCoin, playMatch, overlayHold, overlayBusy, overlayBusyCount, whenOverlayIdle, resolveFxAnchor, pointFromOpts, resolveDim, releaseDim, preloadMatch, matchDurationMs, isVideoPackMeta, needsSafariFallback };
 })();
 window.SpellFx = SpellFx;
 // v0.366: 타이틀 화면에서 미리 로드 → 첫 판 시작 연출이 로딩 없이 바로 뜨게

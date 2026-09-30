@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.388";
+const GAME_VERSION = "0.389";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -779,7 +779,11 @@ function playCard(p, card, target) {
     log(`${p.name}이(가) ${m.name}을(를) 소환`);
     // v0.381 전설 소환 연출: 로직은 그대로(소환 효과 즉시 해결), 연출은 아래 render() 뒤 시작 · 적 카드 표시 갱신은 각자 히트 시점까지 미룸
     const legendPlan = legendBase ? beginLegendarySummonFx(p, m, legendBase) : null;
-    resolveBattlecry(p, m, target);
+    const battlecryResult = resolveBattlecry(p, m, target);
+    if (legendPlan && m.id === "e14" && battlecryResult && battlecryResult.createdUid != null) {
+      legendPlan.tokenUid = battlecryResult.createdUid;
+      try { SpellFx.hideUnits([legendPlan.tokenUid]); } catch(e) {}
+    }
     if (legendPlan) startLegendarySummonFx(legendPlan);
   } else if (card.type === "item") {
     if (isEquipItem(card)) {
@@ -801,6 +805,7 @@ function playCard(p, card, target) {
 /* ---------- v0.381 전설 유닛 소환 연출 (meta.playMode "legendarySummon", 2초 이내) ----------
  * 카드 id → 에셋 폴더. 새 전설 유닛 연출은 에셋 폴더(스트립·meta·sfx)를 넣고 여기에 한 줄 추가하면 같은 방식으로 재생된다. */
 const LEGENDARY_SUMMON_FX = {
+  e14: "assets/vfx/legendary/e14/",
   n13: "assets/vfx/legendary/n13/",
   a14: "assets/vfx/legendary/a14/",
   d27: "assets/vfx/legendary/d27/",
@@ -839,7 +844,7 @@ function beginLegendarySummonFx(p, m, base) {
     _fxDeferredView[u.uid] = snap;
   });
   try { if (!LEGENDARY_KEEP_VISIBLE.has(m.id) && SpellFx.hideUnits) SpellFx.hideUnits([m.uid]); } catch (err) {}
-  return { base, p, unitUid: m.uid, casterIsMe, enemyUids };
+  return { base, p, unitUid: m.uid, casterIsMe, enemyUids, fxEpoch: SpellFx.legendaryEpoch ? SpellFx.legendaryEpoch() : null };
 }
 function releaseDeferredView(uid) {
   if (!_fxDeferredView[uid]) return;
@@ -859,7 +864,10 @@ function startLegendarySummonFx(plan) {
   let faceP = Promise.resolve();
   try {
     const u = (plan.p.board || []).find(x => x.uid === plan.unitUid);
-    if (u && typeof warmMinionFace === "function") faceP = Promise.resolve(warmMinionFace(u)).catch(() => {});
+    if (u && typeof warmMinionFace === "function") {
+      const token=(plan.p.board || []).find(x=>x.uid===plan.tokenUid);
+      faceP=Promise.all([warmMinionFace(u),token ? warmMinionFace(token) : null]).catch(()=>{});
+    }
   } catch (err) {}
   try {
     const e = opponent(plan.p);
@@ -871,10 +879,12 @@ function startLegendarySummonFx(plan) {
       if (SpellFx.whenOverlayIdle) await SpellFx.whenOverlayIdle();
       if (SpellFx.overlayHold) release = SpellFx.overlayHold();
       await Promise.race([faceP, new Promise(r => setTimeout(r, 600))]);
-      if (state !== st) return;
+      if (state !== st || (plan.fxEpoch != null && SpellFx.legendaryEpoch && plan.fxEpoch !== SpellFx.legendaryEpoch())) return;
       try { render(); } catch (err) {} // 장비 카드가 전장 DOM에 있게 (숨긴 채) → 그 rect 기준으로 연출
       await SpellFx.playLegendarySummon(plan.base, {
         unitUid: plan.unitUid,
+        tokenUid: plan.tokenUid,
+        isUnitPresent: uid => state === st && (plan.p.board || []).some(u => u.uid === uid && u.hp > 0 && !u.dying),
         enemyUids: plan.enemyUids.slice(),
         casterIsMe: plan.casterIsMe,
         onEnemySwap: uid => releaseDeferredView(uid),
@@ -883,6 +893,7 @@ function startLegendarySummonFx(plan) {
     } finally {
       plan.enemyUids.forEach(uid => { delete _fxDeferredView[uid]; });
       try { if (SpellFx.revealUnit) SpellFx.revealUnit(plan.unitUid, 120, 0); } catch (err) {}
+      try { if (plan.tokenUid != null && SpellFx.revealUnit) SpellFx.revealUnit(plan.tokenUid, 0, 0); } catch(e) {}
       if (state === st) state.busy = false;
       if (release) release();
       if (state === st) { try { checkWin(); } catch (err) {} try { render(); } catch (err) {} }
@@ -1100,7 +1111,7 @@ function resolveBattlecry(p, m, target) {
     const dmg = Math.max(0, Number(m.def) || 0);
     applyFx(p, { type: "aoe_by_def", value: dmg }, target);
   } else {
-    applyFx(p, fx, target);
+    return applyFx(p, fx, target);
   }
 }
 
@@ -1152,6 +1163,7 @@ function adjustSharedCoinN(m, delta) {
 }
 
 function applyFx(p, fx, target) {
+  let presentationResult;
   const e = opponent(p);
   if (!fx) return;
   // 면역(9/28): 단일 대상 지정 불가 — 혹시 대상으로 넘어와도 단일 대상 부분만 무효 (전체 부분은 적용)
@@ -1510,6 +1522,7 @@ function applyFx(p, fx, target) {
       else { tok.canAttack = true; tok.attacksLeft = 1; }
       p.board.push(tok);
       log(`${tok.name} 소환`);
+      presentationResult = { createdUid: tok.uid };
     } else log("전장이 가득 차 토큰을 소환할 수 없습니다");
   } else if (fx.type === "summon_n") {
     const sid = fx.summonId || "e42";
@@ -1672,6 +1685,7 @@ function applyFx(p, fx, target) {
     log(n ? `소환 · 적 ${n}기 체력 ${v}` : "소환 · 대상 적 없음");
   }
   cleanupBoards();
+  return presentationResult;
 }
 
 

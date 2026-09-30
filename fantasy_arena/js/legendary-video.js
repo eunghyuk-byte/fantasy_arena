@@ -41,15 +41,27 @@ var LegendaryVideoFx = (() => {
     }finally{jobs.delete(cancel);}})();
     warmed.set(key,promise);const ok=await promise;if(!ok)warmed.delete(key);return ok;
   }
+  function ease(t) {
+    t=Math.max(0,Math.min(1,t));let lo=0,hi=1,u=t;
+    const bez=(x,a,b)=>3*(1-x)*(1-x)*x*a+3*(1-x)*x*x*b+x*x*x;
+    for(let i=0;i<18;i++){u=(lo+hi)/2;if(bez(u,.215,.355)<t)lo=u;else hi=u;}
+    return t===0||t===1?t:bez(u,.61,1);
+  }
   async function play(base,meta,opts={}) {
     const token=epoch,controller=new AbortController();let video=null,canvas=null,raf=null,cap=null,audio=null,settle;
-    let ended=false;
-    const finish=ok=>{if(ended)return;ended=true;controller.abort();if(raf!=null)cancelAnimationFrame(raf);if(cap!=null)clearTimeout(cap);if(video)dispose(video);if(canvas)canvas.remove();try{if(audio&&audio.stop)audio.stop();}catch(e){}if(settle)settle(ok);};
+    let ended=false, secondary=null, secondaryStarted=false, secondaryDone=false;
+    const finish=ok=>{if(ended)return;ended=true;controller.abort();if(raf!=null)cancelAnimationFrame(raf);if(cap!=null)clearTimeout(cap);if(video)dispose(video);if(secondary)dispose(secondary);if(canvas)canvas.remove();try{if(audio&&audio.stop)audio.stop();}catch(e){}if(settle)settle(ok);};
     const cancel=()=>finish(false);jobs.add(cancel);
     try {
       if(document.hidden)return false;
       video=await ready(base,meta,controller.signal);
       if(!video||token!==epoch||ended)return false;
+      const layer=opts.secondary;
+      if(layer && (!layer.isValid || layer.isValid())) {
+        secondary=await ready(base,{video:layer.video},controller.signal);
+        if(!secondary||token!==epoch||ended)return false;
+        secondary.addEventListener("error",()=>finish(false),{once:true});
+      }
       const soundPromise=opts.sound===false||typeof Sfx==='undefined'?Promise.resolve(null):Sfx.loadUrl(url(base,meta.sfx.file));
       // Audio preparation cannot hold gameplay indefinitely.
       let soundTimer;
@@ -73,10 +85,23 @@ var LegendaryVideoFx = (() => {
           if(token!==epoch||document.hidden){finish(false);return;}
           const t=video.currentTime*1000,D=meta.dim||{};
           ctx.clearRect(0,0,canvas.width,canvas.height);
-          const dim=t<(D.inMs||1)?t/(D.inMs||1):t<(D.outStartMs||0)?1:Math.max(0,1-(t-D.outStartMs)/Math.max(1,(D.endMs||meta.durationMs)-D.outStartMs));
+          let dim=t<(D.inMs||1)?t/(D.inMs||1):t<(D.outStartMs||0)?1:Math.max(0,1-(t-D.outStartMs)/Math.max(1,(D.endMs||meta.durationMs)-D.outStartMs));
+          if(D.easing==='cubic-bezier(0.215,0.61,0.355,1)') {
+            dim=t<D.inMs?ease(t/D.inMs):t<D.outStartMs?1:1-ease((t-D.outStartMs)/(D.endMs-D.outStartMs));
+          }
           if(D.opacity){ctx.fillStyle=D.color||'#000';ctx.globalAlpha=D.opacity*dim;ctx.fillRect(0,0,canvas.width,canvas.height);}
           ctx.globalAlpha=1;ctx.save();ctx.translate(a.x+off[0]*k,a.y+(flip?-off[1]:off[1])*k);if(flip)ctx.scale(1,-1);
           ctx.drawImage(video,-size[0]*k/2,-size[1]*k/2,size[0]*k,size[1]*k);ctx.restore();
+          if(secondary && !secondaryDone) {
+            if(t>=layer.endMs || (layer.isValid && !layer.isValid())) {dispose(secondary);secondaryDone=true;}
+            else if(t>=layer.startMs) {
+              const local=(t-layer.startMs)/1000;
+              if(!secondaryStarted){secondaryStarted=true;secondary.currentTime=local;secondary.play().catch(()=>finish(false));}
+              if(Math.abs(secondary.currentTime-local)>.075 && !secondary.seeking)secondary.currentTime=local;
+              const lv=layer.video,sz=lv['displayPx@1080p'],of=lv['offsetPx@1080p']||[0,0],la=layer.anchor,lf=opts.casterIsMe===false&&lv.flipYWhenOppCasts;
+              if(secondary.readyState>=2){ctx.save();ctx.translate(la.x+of[0]*k,la.y+(lf?-of[1]:of[1])*k);if(lf)ctx.scale(1,-1);ctx.drawImage(secondary,-sz[0]*k/2,-sz[1]*k/2,sz[0]*k,sz[1]*k);ctx.restore();}
+            }
+          }
           // Upright enemy sprites share the video clock and cleanup.
           try { if(opts.drawOverlay)opts.drawOverlay(ctx,t); } catch(e){finish(false);return;}
           if(ended||token!==epoch)return;
@@ -90,6 +115,6 @@ var LegendaryVideoFx = (() => {
     finally{finish(false);if(video)dispose(video);jobs.delete(cancel);}
   }
   function clear(){epoch++;for(const cancel of [...jobs])cancel();}
-  return {preload,play,clear,pending:()=>jobs.size};
+  return {preload,play,clear,ease,pending:()=>jobs.size};
 })();
 window.LegendaryVideoFx=LegendaryVideoFx;

@@ -1,0 +1,246 @@
+{
+  "id": "e14_summon",
+  "card": "e14 마초 · earth · legendary",
+  "concept": "A 서량의 호응",
+  "durationMs": 2000,
+  "playMode": "legendarySummon",
+  "targetMode": "actualBattlecryCreatedTokenUid",
+  "gameplayEffects": null,
+  "video": {
+    "file": "main.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "alphaMode": "straight",
+    "width": 1472,
+    "height": 912,
+    "fps": 30,
+    "frames": 60,
+    "durationMs": 2000,
+    "anchor": "summonedE14Uid",
+    "displayPx@1080p": [
+      1610,
+      997.5
+    ],
+    "offsetPx@1080p": [
+      0,
+      -39.375
+    ],
+    "flipYWhenOppCasts": true,
+    "muted": true,
+    "loop": false,
+    "blendMode": "source-over",
+    "contentRectPx": [
+      96,
+      96,
+      1280,
+      720
+    ],
+    "transparentPaddingPx": 96,
+    "contentAnchorNormalized": [
+      0.5,
+      0.55
+    ],
+    "anchorSourcePx": [
+      736.0,
+      492.00000000000006
+    ],
+    "alphaEnvelopeBaked": true,
+    "applyAdditionalAlphaEnvelope": false,
+    "encoding": {
+      "quality": "high",
+      "crf": 18,
+      "pixelFormat": "yuva420p"
+    }
+  },
+  "arrival": {
+    "startMs": 550,
+    "endMs": 1800,
+    "durationMs": 1250,
+    "video": {
+      "file": "madai_arrival.webm",
+      "codec": "vp9",
+      "alpha": true,
+      "alphaMode": "straight",
+      "width": 1472,
+      "height": 912,
+      "fps": 40,
+      "frames": 50,
+      "durationMs": 1250,
+      "anchor": "actualCreatedE41Uid",
+      "displayPx@1080p": [
+        828,
+        513
+      ],
+      "offsetPx@1080p": [
+        0,
+        -8.1
+      ],
+      "flipYWhenOppCasts": true,
+      "muted": true,
+      "loop": false,
+      "blendMode": "source-over",
+      "contentRectPx": [
+        96,
+        96,
+        1280,
+        720
+      ],
+      "transparentPaddingPx": 96,
+      "contentAnchorNormalized": [
+        0.5,
+        0.52
+      ],
+      "anchorSourcePx": [
+        736.0,
+        470.40000000000003
+      ],
+      "alphaEnvelopeBaked": true,
+      "applyAdditionalAlphaEnvelope": false,
+      "encoding": {
+        "quality": "high",
+        "crf": 18,
+        "pixelFormat": "yuva420p"
+      }
+    },
+    "whenMissing": "skip entire arrival layer and token reveal; never fabricate a token or substitute another unit",
+    "audio": null,
+    "decoderCountMax": 1
+  },
+  "bindings": {
+    "mainUid": "actual newly summoned e14 UID",
+    "arrivalUid": "actual e41 UID returned by the original e14 battlecry resolution",
+    "requireSameResolution": true,
+    "lookupByCardIdForbidden": true,
+    "neighborFallbackForbidden": true,
+    "emptySlotFailure": "Original battlecry creates no token; omit arrival and reveal. Main effect and its SFX may play normally.",
+    "mutateGameRules": false,
+    "delayGameResolution": false
+  },
+  "timeline": {
+    "clock": "one shared 2000ms presentation clock",
+    "main": [
+      0,
+      2000
+    ],
+    "arrival": [
+      550,
+      1800
+    ],
+    "mainCardReveal": [
+      0,
+      160
+    ],
+    "tokenCardReveal": [
+      800,
+      940
+    ],
+    "audio": [
+      0,
+      2000
+    ]
+  },
+  "dim": {
+    "color": "#080c15",
+    "opacity": 0.32,
+    "inMs": 160,
+    "outStartMs": 1350,
+    "endMs": 2000,
+    "easing": "cubic-bezier(0.215,0.61,0.355,1)"
+  },
+  "summonedReveal": {
+    "startMs": 0,
+    "fadeMs": 160,
+    "popMs": 0,
+    "scaleFrom": 1,
+    "brightnessFrom": 1,
+    "positionAnimation": null,
+    "layer": "below dim and both effect videos",
+    "easing": "cubic-bezier(0.215,0.61,0.355,1)"
+  },
+  "tokenReveal": {
+    "bind": "actualCreatedE41Uid",
+    "startMs": 800,
+    "fadeMs": 140,
+    "popMs": 0,
+    "scaleFrom": 1,
+    "brightnessFrom": 1,
+    "positionAnimation": null,
+    "layer": "above dim and both effect videos",
+    "visualOnly": true,
+    "restoreVisibilityOnCancel": true,
+    "easing": "cubic-bezier(0.215,0.61,0.355,1)"
+  },
+  "drawOrderBackToFront": [
+    "existing board and units",
+    "real e14 card with 0–160ms opacity reveal",
+    "dim overlay",
+    "main alpha video",
+    "arrival alpha video if actual created e41 UID exists",
+    "real e41 card with 800–940ms opacity reveal"
+  ],
+  "sfx": {
+    "file": "sfx.m4a",
+    "alternatives": [
+      {
+        "file": "sfx.mp3",
+        "durationMs": 2000
+      },
+      {
+        "file": "sfx.ogg",
+        "durationMs": 2000
+      }
+    ],
+    "startMs": 0,
+    "durationMs": 2000,
+    "sampleRate": 48000,
+    "channels": 2,
+    "playCount": 1,
+    "source": "Primary M4A is an exact AAC packet/timestamp stream copy from approved A preview, which contains main-source sound only. MP3/Ogg alternatives are transcoded from that approved sound. No arrival audio, music, or extra summon sound.",
+    "approvedAacPacketsAndTimingIdentical": true,
+    "decodedSamplesPerChannel": 96000
+  },
+  "compatibility": {
+    "safariFallbackBundled": false,
+    "safariAlphaPlaybackVerified": false,
+    "testedBrowserPlayback": false,
+    "fallbackPolicy": "Capability-test actual alpha playback. If unavailable, skip media overlays without blocking gameplay or card visibility; never use an opaque fallback.",
+    "runtimeRequired": "Bounded two-video/multi-UID legendarySummon rendering with a shared clock; this metadata alone does not implement engine integration."
+  },
+  "provenance": {
+    "approvedPreviewLibraryId": "libfile_f6730c9383d88191800c45a78e0821ed",
+    "approvedPreviewFile": "FantasySoul_MaChao_A.mp4",
+    "approvedPreviewSha256": "b7236a54a14e89d10ad48caa478d53769faba61dc78671443b3d551d00c1eccb",
+    "mainGenerationJob": "83811002-0ea8-409b-b4fb-e20368b189f0",
+    "arrivalGenerationJob": "4494c51c-96a4-4ece-8f2f-ddc458248f52",
+    "mainSourceSha256": "c0473b2ca84633a9a3e8124b5c216b831ab41970725229939263b8df84f79740",
+    "arrivalSourceSha256": "7bf364eae5ec4d8093f09faa2f90366a880910960b68c06c87592b496faf95fb",
+    "mainRgbaSequenceSha256": "8f73bfc9124b9d22474fdfd39212677a1bad8d3dbf9a51d199753cea4e073247",
+    "arrivalRgbaSequenceSha256": "627aed6828884f1598591ef6de88b797f397a850bad6f73f95d08d6c9ad5a3ee",
+    "sourcePcmWavSha256": "80b1c87679c1d4e41379baa3e952b6c40b7da16c355ee7624b436ca4ea7af949",
+    "sourceRetention": "Original compressed source videos match the recorded approval audit. RGBA masters restored from the exact approved timing/matte script; old remote PNG masters unavailable.",
+    "matte": "RGB subtract0.075; rounded edge radius112/feather72; elliptical center(.5,.5), radii(.485,.48), width.22; padding96; no runtime keying.",
+    "bakedFadesMs": {
+      "mainIn": 75,
+      "mainOut": 350,
+      "arrivalIn": 50,
+      "arrivalOut": 250
+    },
+    "primaryAacPacketsAndTimestampsIdentical": true,
+    "primaryM4aSha256": "34e28b395e03b95fd3d72965519998c561e366dd8746c9013840d0654a8dccc7"
+  },
+  "note": "Alpha layers contain no board, card, portrait, label, or gameplay. Existing original e14 battlecry and actual e41 generation are unchanged. Do not add damage, buffs, shield, healing, silence, or another ability. Source RGBA comparison is documented in QUALITY_REPORT.json; do not load a full frame cache.",
+  "nativeDefaultEasing": {
+    "curve": [
+      0.215,
+      0.61,
+      0.355,
+      1
+    ],
+    "appliesTo": [
+      "dim opacity segments",
+      "main card opacity reveal",
+      "token card opacity reveal"
+    ],
+    "bakedVideoAlphaUnaffected": true
+  }
+}

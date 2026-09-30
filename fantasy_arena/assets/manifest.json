@@ -1,5 +1,5 @@
 {
-  "count": 760,
+  "count": 766,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -3800,6 +3800,36 @@
       "path": "assets/vfx/legendary/l26/summon.webm",
       "bytes": 3939249,
       "name": "summon"
+    },
+    {
+      "path": "assets/vfx/legendary/e14/madai_arrival.webm",
+      "bytes": 2810734,
+      "name": "madai_arrival"
+    },
+    {
+      "path": "assets/vfx/legendary/e14/main.webm",
+      "bytes": 4030630,
+      "name": "main"
+    },
+    {
+      "path": "assets/vfx/legendary/e14/meta.json",
+      "bytes": 7290,
+      "name": "meta"
+    },
+    {
+      "path": "assets/vfx/legendary/e14/sfx.m4a",
+      "bytes": 33204,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/e14/sfx.mp3",
+      "bytes": 49679,
+      "name": "sfx"
+    },
+    {
+      "path": "assets/vfx/legendary/e14/sfx.ogg",
+      "bytes": 36267,
+      "name": "sfx"
     }
   ]
 }
