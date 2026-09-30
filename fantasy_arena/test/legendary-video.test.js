@@ -1,0 +1,17 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const meta=JSON.parse(fs.readFileSync(path.join(__dirname,'../assets/vfx/legendary/f1/meta.json')));
+test('legendary dispatch accepts video-only metadata without changing anchored spell schema',()=>{const src=fs.readFileSync(path.join(__dirname,'../js/spell-fx.js'),'utf8');const ctx={};vm.createContext(ctx);for(const name of ['isLegendarySummonMeta','isAnchoredMeta']){const start=src.indexOf('function '+name+'('),end=src.indexOf('\n  }',start)+4;vm.runInContext(src.slice(start,end),ctx);}assert.equal(ctx.isLegendarySummonMeta(meta),true);assert.equal(ctx.isAnchoredMeta({...meta,playMode:'anchored'}),false);});
+function fixture({opaque=false,fail=false,rejectPlay=false}={}){
+ const videos=[],canvases=[];let stops=0,starts=0;
+ const document={hidden:false,body:{appendChild(){}},createElement(kind){
+  if(kind==='video'){
+   const v=new EventTarget();Object.assign(v,{videoWidth:1280,videoHeight:720,currentTime:0,ended:false,canPlayType:()=> 'probably',removeAttribute(){},remove(){this.removed=true;},pause(){this.playing=false;},load(){if(!this.removed)queueMicrotask(()=>this.dispatchEvent(new Event(fail?'error':'loadeddata')));},play(){if(rejectPlay)return Promise.reject(Error('blocked'));this.playing=true;return Promise.resolve();}});videos.push(v);return v;
+  }
+  const c={style:{},remove(){this.removed=true;},getContext:()=>({drawImage(){},getImageData:()=>({data:new Uint8ClampedArray(16).fill(opaque?255:0)}),clearRect(){},fillRect(){},save(){},restore(){},translate(){},scale(){}})};canvases.push(c);return c;
+ }};
+ const ctx={document,AbortController,setTimeout,clearTimeout,Promise,Map,Set,Math,innerWidth:1920,innerHeight:1080,Sfx:{loadUrl:async()=>({}),playBuf:()=>{starts++;return{stop:()=>stops++}}},requestAnimationFrame:f=>setTimeout(()=>{for(const v of videos)if(v.playing){v.currentTime+=.3;v.ended=v.currentTime>=2;}f();},0),cancelAnimationFrame:clearTimeout};ctx.window=ctx;vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../js/legendary-video.js'),'utf8'),ctx);
+ return{fx:ctx.LegendaryVideoFx,videos,canvases,audio:()=>({starts,stops})};
+}
+test('streamed video repeats with fresh decoder and owned audio cleanup',async()=>{const f=fixture();assert.equal(await f.fx.preload('pack/',meta),true);for(let i=0;i<3;i++)assert.equal(await f.fx.play('pack/',meta),true);assert.equal(f.fx.pending(),0);assert.ok(f.videos.every(v=>v.removed));assert.deepEqual(f.audio(),{starts:3,stops:3});});
+test('opaque decoder and missing media fallback before playback',async()=>{for(const options of [{opaque:true},{fail:true}]){const f=fixture(options);assert.equal(await f.fx.preload('pack/',meta),false);assert.equal(await f.fx.play('pack/',meta),false);assert.equal(f.fx.pending(),0);assert.equal(f.audio().starts,0);}});
+test('cancel during load prevents stale start; sound off and rejected play clean up',async()=>{const f=fixture();let n=0;const p=f.fx.play('pack/',meta,{onStart:()=>n++});f.fx.clear();assert.equal(await p,false);assert.equal(n,0);assert.equal(f.fx.pending(),0);assert.equal(await f.fx.play('pack/',meta,{sound:false}),true);assert.equal(f.audio().starts,0);const blocked=fixture({rejectPlay:true});assert.equal(await blocked.fx.play('pack/',meta),false);assert.equal(blocked.fx.pending(),0);});

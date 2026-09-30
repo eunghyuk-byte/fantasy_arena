@@ -1,0 +1,74 @@
+{
+  "id": "f1_summon",
+  "card": "f1 레드드래곤 · fire · legendary",
+  "concept": "A 지맥의 분화",
+  "description": "Approved cinematic lava fissures and eruption, unchanged source and 2-second timeline. No artwork cut-in.",
+  "format": "VP9 alpha WebM; 1280x720,30fps,60frames,2.000sec; straight alpha",
+  "durationMs": 2000,
+  "playMode": "legendarySummon",
+  "targetMode": "none",
+  "dim": {
+    "opacity": 0.35,
+    "inMs": 160,
+    "outStartMs": 1350,
+    "color": "#150504",
+    "endMs": 2000
+  },
+  "summonedReveal": {
+    "fadeMs": 160,
+    "popMs": 240,
+    "brightnessFrom": 1,
+    "scaleFrom": 1
+  },
+  "sfx": {
+    "file": "sfx.mp3",
+    "startMs": 0,
+    "durationMs": 2000,
+    "alt": {
+      "file": "sfx.ogg",
+      "durationMs": 2000
+    },
+    "source": "Same soundtrack as approved red_dragon_summon_A.mp4; transcoded from approved preview audio."
+  },
+  "gameplayEffects": null,
+  "note": "Pure summon visual; no damage/buff/enemyMute/deferred enemy snapshot. No portrait or artwork cut-in. Render source-over; no second alpha fade beyond this baked envelope.",
+  "provenance": {
+    "model": "kling3_0 pro",
+    "generationJob": "f4692c5a-fb52-4e98-a0b3-00d17df675ff",
+    "approvedPreviewLibraryId": "libfile_2bef778540dc819189cf1c0e3a7af298",
+    "sourceDurationSeconds": 3.041667,
+    "effectDurationSeconds": 2,
+    "sourceOrigin": [
+      960,
+      713
+    ],
+    "sourceCrop": [
+      0,
+      1,
+      1920,
+      1424
+    ]
+  },
+  "video": {
+    "file": "summon.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "frames": 60,
+    "durationMs": 2000,
+    "anchor": "summonedUnit",
+    "displayPx@1080p": [
+      1500,
+      843.75
+    ],
+    "offsetPx@1080p": [
+      0,
+      -135
+    ],
+    "flipYWhenOppCasts": true,
+    "muted": true
+  },
+  "runtimeCompatibility": "Requires a video branch in legendarySummon; existing sprite-only loader cannot consume this package unchanged. Prefer this over 7.74MB/105MB-decoded sprite export."
+}

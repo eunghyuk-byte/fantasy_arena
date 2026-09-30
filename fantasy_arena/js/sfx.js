@@ -67,6 +67,13 @@ const Sfx = (() => {
     if (opts.rate && opts.rate > 0) src.playbackRate.value = opts.rate;
     src.connect(g); g.connect(opts.dest || sfxGain);
     src.start(c.currentTime + (opts.when || 0));
+    if (opts.returnHandle) {
+      let stopped=false;
+      const stop=()=>{if(stopped)return;stopped=true;try{src.stop();}catch(e){}src.disconnect();g.disconnect();};
+      src.onended=stop;
+      if(opts.durationMs>0)src.stop(c.currentTime+(opts.when||0)+opts.durationMs/1000);
+      return {stop};
+    }
     return true;
   }
   /** v0.369: 전용 버스 (게인 dB → 가벼운 리미터 → sfx 마스터). 코인 듀얼 사운드 합계용 */

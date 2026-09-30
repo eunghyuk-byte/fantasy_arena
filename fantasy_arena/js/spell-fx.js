@@ -1153,8 +1153,9 @@ const SpellFx = (() => {
     })().then(m => { if (!m) delete _legendMetaCache[base]; return m; });
     return _legendMetaCache[base];
   }
+  let _legendaryEpoch = 0;
   function isLegendarySummonMeta(meta) {
-    return !!(meta && String(meta.playMode || "") === "legendarySummon" && Array.isArray(meta.layers) && meta.layers.length);
+    return !!(meta && String(meta.playMode || "") === "legendarySummon" && ((Array.isArray(meta.layers) && meta.layers.length) || (meta.video && meta.video.file)));
   }
   function legendaryLayerMs(L, meta) {
     const fps = L.fps || meta.fps || 30, n = Math.max(1, L.frames || 1);
@@ -1164,6 +1165,10 @@ const SpellFx = (() => {
   async function preloadLegendarySummon(base) {
     const meta = await loadLegendaryMeta(base);
     if (!isLegendarySummonMeta(meta)) return null;
+    if (meta.video) {
+      if(typeof LegendaryVideoFx === "undefined") return null;
+      return await LegendaryVideoFx.preload(base, meta) ? {meta, video:true} : null;
+    }
     const [frames] = await Promise.all([
       Promise.all(meta.layers.map(L => (L && L.file) ? loadFrames(assetUrl(base, L.file), L.frames, L.w, L.h, L.layout) : Promise.resolve(null))),
       loadSfx(metaSfxUrl(meta, base))
@@ -1260,14 +1265,21 @@ const SpellFx = (() => {
    * @returns Promise<boolean> — durationMs(2000) 후 true, 에셋 실패면 false (숨긴 유닛·콜백은 어떤 경우에도 정리)
    */
   async function playLegendarySummon(base, opts) {
+    const epoch = _legendaryEpoch;
     opts = opts || {};
     const uid = opts.unitUid;
     const swapped = new Set();
     const fireSwap = (u) => { if (swapped.has(u)) return; swapped.add(u); try { opts.onEnemySwap && opts.onEnemySwap(u); } catch (e) {} };
     try {
       const pack = await preloadLegendarySummon(base);
-      if (!pack) return false;
+      if (!pack || epoch !== _legendaryEpoch) return false;
       const meta = pack.meta;
+      if (pack.video) {
+        return await LegendaryVideoFx.play(base, meta, Object.assign({}, opts, {
+          anchor: legendaryAnchors(meta,opts).summonedUnit, scale:fxScale(),
+          onStart:()=>{ const rv=meta.summonedReveal||{}; if(uid!=null)revealUnit(uid,rv.fadeMs||120,rv.popMs||0,rv);try{opts.onStart&&opts.onStart();}catch(e){} }
+        }));
+      }
       const k = fxScale();
       const opp = opts.casterIsMe === false;
       const A = legendaryAnchors(meta, opts);
@@ -1300,7 +1312,7 @@ const SpellFx = (() => {
           try { opts.onStart && opts.onStart(); } catch (e) {}
         }
         hits.forEach(hh => {
-          if (!hh.hit && t >= hh.hitMs) { hh.hit = true; muteEnemy(hh.uid, E); try { opts.onEnemyHit && opts.onEnemyHit(hh.uid, hh.hitMs); } catch (e) {} }
+          if (!hh.hit && t >= hh.hitMs) { hh.hit = true; if (meta.enemyMute) muteEnemy(hh.uid, E); try { opts.onEnemyHit && opts.onEnemyHit(hh.uid, hh.hitMs); } catch (e) {} }
           if (t >= hh.swapMs) fireSwap(hh.uid);
         });
         const da = legendaryDimAlpha(D, t);
@@ -2317,6 +2329,8 @@ const SpellFx = (() => {
   }
 
   function clear() {
+    _legendaryEpoch++;
+    if(typeof LegendaryVideoFx !== "undefined") LegendaryVideoFx.clear();
     const layer = document.getElementById("spellFx");
     const stage = document.getElementById("fxStage");
     const fxCard = document.getElementById("fxCard");
