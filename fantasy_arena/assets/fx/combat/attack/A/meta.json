@@ -1,0 +1,246 @@
+{
+  "id": "attack",
+  "concept": "A",
+  "durationMs": 900,
+  "fps": 30,
+  "loop": false,
+  "video": {
+    "file": "effect.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "width": 832,
+    "height": 832,
+    "fps": 30,
+    "frames": 27,
+    "durationMs": 900,
+    "muted": true
+  },
+  "sfx": {
+    "file": "sfx.ogg",
+    "startMs": 0,
+    "durationMs": 900,
+    "source": "short uncompressed blade-foley window",
+    "playbackRate": 1,
+    "highpassHz": 520,
+    "lowpassHz": 7800,
+    "peakLinear": 0.45,
+    "audibleTailBeforeMs": 650,
+    "silencePadded": true
+  },
+  "bakedFade": true,
+  "appendFadeMs": 0,
+  "displayBoxPx@1080p": 399.36,
+  "cardHeightScale": 1.3446464646464646,
+  "anchor": "targetUnit",
+  "soundPolicy": "For one real resolved strike: actualHpDamage===0 plays only defend; actualHpDamage>0 plays only attack; no attack attempt plays neither. Never layer legacy or attack-windup SFX.",
+  "noCutIn": true,
+  "gameplayEffects": null,
+  "note": "Requires combat meta.video branch on one900ms cancellable timeline. No second impact phase, legacy280ms fade, or full27frame RGBA cache.",
+  "encodingNote": "Corrected padded master; perimeter-only smooth alpha falloff, no RGB blur, zero invisible RGB; alpha rounded at2/255 steps. Native preview is rendered from decoded runtime VP9 frames.",
+  "encoding": {
+    "codec": "VP9 alpha",
+    "crf": 32,
+    "sourceAlphaSize": [
+      832,
+      832
+    ]
+  },
+  "reviewStatus": "Padded transparent perimeter correction for user review; core size and audio unchanged; not integrated",
+  "cardWidthScale": 2.016969696969697,
+  "renderOpacity": 1,
+  "followVictimCardMotion": true,
+  "referenceCardPx": {
+    "width": 198,
+    "height": 297
+  },
+  "cardMotionPreserved": true,
+  "cardMotion": {
+    "attackCaster": [
+      [
+        0,
+        0
+      ],
+      [
+        100,
+        0
+      ],
+      [
+        230,
+        -95
+      ],
+      [
+        390,
+        0
+      ],
+      [
+        900,
+        0
+      ]
+    ],
+    "attackVictimX": [
+      [
+        0,
+        0
+      ],
+      [
+        250,
+        0
+      ],
+      [
+        310,
+        8
+      ],
+      [
+        370,
+        -6
+      ],
+      [
+        440,
+        0
+      ]
+    ],
+    "counterRetaliatorY": [
+      [
+        0,
+        0
+      ],
+      [
+        160,
+        0
+      ],
+      [
+        300,
+        70
+      ],
+      [
+        430,
+        0
+      ]
+    ],
+    "counterVictimY": [
+      [
+        0,
+        0
+      ],
+      [
+        310,
+        0
+      ],
+      [
+        380,
+        10
+      ],
+      [
+        440,
+        -6
+      ],
+      [
+        520,
+        0
+      ]
+    ]
+  },
+  "effectDurationMs": 900,
+  "audioAuditionStatus": "Not perceptually auditioned by assistant; playable preview supplied for user review",
+  "hardClearAtMs": 900,
+  "scaleEvidence": {
+    "reference": "first original480px; immediately previous approved-direction preview384px",
+    "originalLinearBoxPx": [
+      480,
+      480
+    ],
+    "previousLinearBoxPx": [
+      384,
+      384
+    ],
+    "newLinearBoxPx": [
+      307.2,
+      307.2
+    ],
+    "linearScaleFromOriginal": 0.64,
+    "linearScaleFromPrevious": 0.8,
+    "areaScaleFromOriginal": 0.4096
+  },
+  "audioApproval": "User approved revised attack blade sound; defense remains original sound",
+  "noCompactClip": true,
+  "soundExclusive": true,
+  "soundRoutingFile": "../../sound-routing.json",
+  "soundCondition": "real resolved strike && actualHpDamage > 0",
+  "contentDisplayBoxPx@1080p": 307.2,
+  "contentCardHeightScale": 1.0343434343434343,
+  "contentCardWidthScale": 1.5515151515151515,
+  "transparentPaddingPx": 96,
+  "originalContentRectPx": [
+    96,
+    96,
+    640,
+    640
+  ],
+  "paddedCanvasScale": 1.3,
+  "contentScalePreserved": true,
+  "edgeCorrection": {
+    "kind": "attack",
+    "crf": 32,
+    "webmBytes": 812129,
+    "canvasPx": [
+      832,
+      832
+    ],
+    "sourceContentRectPx": [
+      96,
+      96,
+      640,
+      640
+    ],
+    "displayContentPx": 307.2,
+    "displayPaddedPx": 399.36,
+    "contentScalePreserved": true,
+    "frames": 27,
+    "durationMs": 900,
+    "decodedOuterBorderMaxAlpha": 0,
+    "decodedOuter64pxMaxAlpha": 0,
+    "decodedOriginal640BoundaryMaxAlpha": 2,
+    "decodedBorderMaxByFrame": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "masterLastFrameBlank": true,
+    "perimeterOnly": {
+      "roundedCornerRadiusPx": 112,
+      "featherPxRange": [
+        64,
+        112
+      ],
+      "curve": "smoothstep",
+      "alphaQuantizationStep": 2
+    },
+    "coreRgbUnblurred": true,
+    "previewUsesRuntimeDecodedFrames": true
+  },
+  "mask": null
+}

@@ -2386,7 +2386,7 @@ const SpellFx = (() => {
     return p;
   }
   function playUi(id, opts) { return playPack("ui", id, opts); }
-  function playCombat(id, opts) { return playPack("combat", id, opts); }
+  function playCombat(id, opts) { return typeof CombatFx !== "undefined" ? CombatFx.play(id, opts) : Promise.resolve(false); }
   function playCoin(id, opts) { return Promise.resolve(false); }
   // v0.377: 아이템 연출(아이템 팩 10종) 전부 삭제 — 사용자 요청. playItem 없음
   // ─── v0.372 매치 연출 게이트: MATCH START·MY TURN·VICTORY·DEFEAT 재생 중에는 다른 진행(드로우 모션·AI·결과 화면·입력)을 막는다 ───
@@ -2453,6 +2453,7 @@ const SpellFx = (() => {
   }
 
   function clear() {
+    if (typeof CombatFx !== "undefined") CombatFx.clear();
     _legendaryEpoch++;
     for (const cancel of [..._legendaryPreloads]) cancel();
     if(typeof LegendaryVideoFx !== "undefined") LegendaryVideoFx.clear();

@@ -1224,7 +1224,7 @@ function renderMinion(m, side) {
     if (el) faceSrc(m, faceOpts, el);
   }, 0);
   const hurt = m._hurt && m._hurt.dmg ? ` hurt` : "";
-  const rip = m.dying ? " rip" : "";
+  const rip = m.dying ? " " + (typeof combatDeathClass === 'function' ? combatDeathClass(m) : 'rip') : "";
   const tick = m._hurt && m._hurt.dmg ? `<div class="hp-tick">-${m._hurt.dmg}</div>` : "";
   function deltaChip(d, kind) {
     if (!d) return "";

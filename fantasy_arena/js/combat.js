@@ -66,7 +66,31 @@ function combatKillCtx(attacker, owner) {
   return { killer: attacker, killerOwner: owner, fromSpell: false };
 }
 
-function doAttack(p, attacker, target, auto) {
+const combatOwners = new WeakMap();
+const combatDeathPending = new WeakSet();
+function combatDeathClass(unit) { return combatDeathPending.has(unit) ? 'combat-death-hidden' : 'rip'; }
+async function doAttack(p, attacker, target, auto) {
+  const owner = state;
+  if (combatOwners.has(owner)) return;
+  const token = {};
+  const hiddenDeaths = new Set();
+  const gen = typeof CombatFx !== 'undefined' ? CombatFx.generation() : 0;
+  const valid = () => state === owner && combatOwners.get(owner) === token && (typeof CombatFx === 'undefined' || CombatFx.generation() === gen);
+  const guard = () => { if (!valid()) throw new Error('Combat cancelled'); };
+  combatOwners.set(owner, token);
+  const wasBusy = owner.busy;
+  owner.busy = true;
+  let unsubscribe = () => {};
+  const cancelled = new Promise(resolve => { if(typeof CombatFx !== 'undefined') unsubscribe = CombatFx.onCancel(resolve); });
+  try { await Promise.race([doAttackCore(p, attacker, target, auto, {valid,guard,hiddenDeaths}), cancelled]); }
+  catch (e) { if (valid()) console.warn('Combat action failed', e); }
+  finally {
+    unsubscribe();
+    for (const unit of hiddenDeaths) combatDeathPending.delete(unit);
+    if (combatOwners.get(owner) === token) { combatOwners.delete(owner); if (state === owner) owner.busy = wasBusy; }
+  }
+}
+function doAttackCore(p, attacker, target, auto, action) {
   return new Promise(resolve => {
   if (!attacker || attacker.hp <= 0) { resolve(); return; }
   // R7: auto combat must obey the same attack rights as manual attacks
@@ -94,6 +118,49 @@ function doAttack(p, attacker, target, auto) {
     }
   }
 
+  const deaths = new Map();
+  const shots = new Map();
+  function holdDeath(unit) {
+    if (!shots.has(unit) && typeof CombatFx !== 'undefined') shots.set(unit, CombatFx.snapshot(unit.uid));
+    combatDeathPending.add(unit); action.hiddenDeaths.add(unit);
+  }
+  async function pause(ms) { await waitMs(ms); action.guard(); }
+  async function deathGroup(units) {
+    action.guard();
+    const fresh=units.filter(unit=>!(deaths.has(unit)&&deaths.get(unit)===unit._deathCtx));
+    if(!fresh.length)return;
+    for(const unit of fresh){deaths.set(unit,unit._deathCtx);holdDeath(unit);}
+    render();
+    if(typeof CombatFx !== 'undefined'){
+      const snapshots=fresh.map(unit=>shots.get(unit)).filter(Boolean);
+      const result=await CombatFx.play('death',{snapshots,valid:action.valid});
+      action.guard();if(result.error)throw result.error;
+    }
+  }
+  async function death(unit) { return deathGroup([unit]); }
+  async function strike(kind, unit, el, amount, apply) {
+    action.guard();
+    const shield = unit && (hasOwnAbility(unit, '보호') || (unit.keywords || []).includes('shield'));
+    const blocked = amount <= 0 || shield;
+    const shot = typeof CombatFx !== 'undefined' ? CombatFx.snapshot(unit && unit.uid, el) : null;
+    if (unit) shots.set(unit, shot);
+    let applied = false, dealt = 0;
+    const health = unit || target.owner;
+    const impact = () => {
+      if (applied) return dealt;
+      action.guard(); applied = true;
+      const before = Math.max(0, Number(health.hp) || 0);
+      apply();
+      dealt = Math.max(0, before - Math.max(0, Number(health.hp) || 0));
+      return dealt;
+    };
+    if (typeof CombatFx !== 'undefined') {
+      const sourceEl = kind === 'counter' ? Vfx.elOf(def && def.uid) : Vfx.elOf(attacker.uid);
+      const result = await CombatFx.play(blocked ? 'defend' : 'attack', {snapshot:shot,el,sourceEl,attempted:true,damage:blocked?0:amount,valid:action.valid,onImpact:impact});
+      action.guard(); if(result.error)throw result.error;
+    } else impact();
+    if(unit && (unit.hp<=0 || unit.dying)) await death(unit);
+  }
   const sk0 = atkSkillOf(attacker);
   // ON ATTACK START: weaken / petrify before rolls (primary only; aoe applies per-target without 7/8)
   if (target.kind === "minion" && target.minion && sk0 !== 9) {
@@ -170,7 +237,10 @@ function doAttack(p, attacker, target, auto) {
     attacker, attackerOwner: p, defender: target.kind === "minion" ? def : null,
     aHpPre: aHpSnap ? aHpSnap.pre : attacker.hp, dHpPre: dHpSnap ? dHpSnap.pre : (def ? def.hp : null)
   };
+  for (const snap of [aHpSnap, dHpSnap]) if (snap && snap.coinKilled) holdDeath(snap.unit);
   showCoinResult("코인 배틀", rows, async () => {
+    try {
+    action.guard();
     // Temp combat presentation: bake rolled values on face numbers + ±Δ overlays ABOVE gems (no 「공 N」)
     function armFx(u, atkVal, defV, dA, dD, dH) {
       if (!u) return;
@@ -186,7 +256,7 @@ function doAttack(p, attacker, target, auto) {
       armFx(def, dAtk, defVal, (dShared && dShared.dAtk) || 0, (dShared && dShared.dDef) || 0, (dShared && dShared.dHp) || 0);
     }
     render();
-    await waitMs(280);
+    await pause(280);
     const atkEl = Vfx.elOf(attacker.uid);
     let aDefNow = window._pendingAtkDef || 0;
     const sk = atkSkillOf(attacker);
@@ -228,6 +298,7 @@ function doAttack(p, attacker, target, auto) {
         const dmg = calc.hpDmg;
         if (hits > 1) log(`${cu.name} 연속 반격 ${h}/${hits}`);
         if (dmg <= 0) {
+          await strike('counter', attacker, Vfx.elOf(attacker.uid), 0, () => {});
           log(`${cu.name} 반격` + (skName ? ` [${skName}]` : "") + (csk === 2 ? ` (관통 흡수 ${calc.absorbed})` : "") + ` → 체력피해 0`);
           continue;
         }
@@ -235,8 +306,7 @@ function doAttack(p, attacker, target, auto) {
         const atkNow = Vfx.elOf(attacker.uid);
         const defNow = Vfx.elOf(cu.uid);
         const cCrit = csk === 5 || dmg >= cAtk + 2;
-        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("counter", { uid: attacker.uid }); } catch (e) {}
-        await Vfx.parrySeq(defNow, atkNow, dmg, cCrit);
+        await strike("counter", attacker, atkNow, dmg, () => {
         const hpBefore = attacker.hp;
         if (csk === 5) {
           const shielded = hasOwnAbility(attacker, "보호") || (attacker.keywords || []).includes("shield");
@@ -247,8 +317,9 @@ function doAttack(p, attacker, target, auto) {
         }
         const dealt = Math.max(0, hpBefore - Math.max(0, attacker.hp));
         if (csk === 6) applyLifesteal(cu, dealt);
+        });
         render();
-        await waitMs(360);
+        action.guard();
       }
       if (!(attacker.hp > 0) || attacker.dying) log(`${attacker.name} 반격으로 격파`);
     }
@@ -258,13 +329,10 @@ function doAttack(p, attacker, target, auto) {
     const aCoinDead = !!(aHpSnap && aHpSnap.coinKilled);
     const coinDead = [aHpSnap, dHpSnap].filter(sn => sn && sn.coinKilled).map(sn => sn.unit);
     if (coinDead.length) {
-      for (const cu of coinDead) {
-        log(`${cu.name} 코인으로 체력 0 · 전투 전 파괴`);
-        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: cu.uid }); } catch (e) {}
-        Vfx.death(Vfx.elOf(cu.uid));
-      }
+      for(const cu of coinDead) log(`${cu.name} 코인으로 체력 0 · 전투 전 파괴`);
+      await deathGroup(coinDead);
       render();
-      await waitMs(520);
+      action.guard();
     }
     const aoeAfterCoin = coinDead.length && !aCoinDead && sk === 9;
     if (coinDead.length && !aoeAfterCoin) {
@@ -280,19 +348,18 @@ function doAttack(p, attacker, target, auto) {
         const hpDmg = calc.hpDmg;
         log(`${vic.name} 방어 ${blocked} → 체력피해 ${hpDmg}`);
         const defEl = Vfx.elOf(vic.uid);
-        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { uid: vic.uid }); } catch (e) {}
-        await Vfx.attackSeq(atkEl, defEl, hpDmg, hpDmg >= attacker.atk + 2);
+        await strike("attack", vic, defEl, hpDmg, () => {
         damageMinion(foe, vic, hpDmg, combatKillCtx(attacker, p));
+        });
         if (!(vic.hp > 0 && !vic.dying)) {
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: vic.uid }); } catch (e) {}
-          Vfx.death(Vfx.elOf(vic.uid));
+          await death(vic);
         }
         render();
-        await waitMs(220);
+        action.guard();
       }
       log(`${attacker.name} 광역공격 · 반격 없음`);
       render();
-      await waitMs(360);
+      action.guard();
     } else if (target.kind === "hero") {
       const hits = (sk === 4) ? 2 : 1;
       for (let hit = 1; hit <= hits; hit++) {
@@ -306,12 +373,12 @@ function doAttack(p, attacker, target, auto) {
         if (hits > 1) log(`${attacker.name} 연속 ${hit}/${hits}`);
         // 영웅: 치명·관통·약화·석화·광역 안 통함 (돌진·흡혈·연속은 통함)
         const crit = hpDmg >= attacker.atk + 3;
-        try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { hero: isMeHero ? "me" : "opp" }); } catch (e) {}
-        await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
-        dealHero(target.owner, hpDmg);
+        await strike("attack", null, defEl, hpDmg, () => {
+        dealHero(target.owner, hpDmg, { sound: false });
         if (sk === 6) applyLifesteal(attacker, hpDmg);
+        });
         render();
-        await waitMs(hits > 1 ? 300 : 420);
+        action.guard();
       }
     } else {
       // single minion: 연속(4)=two hits with counter each (kill→retarget next living)
@@ -338,12 +405,12 @@ function doAttack(p, attacker, target, auto) {
             let hpDmgH = calcH.hpDmg;
             if (hits > 1) log(`${attacker.name} 연속 ${hit}/${hits}`);
             const critH = hpDmgH >= attacker.atk + 3;
-            try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("attack", { hero: isMeHero ? "me" : "opp" }); } catch (e) {}
-            await Vfx.attackSeq(atkEl, defElH, hpDmgH, critH);
-            dealHero(nextH.owner, hpDmgH);
+            await strike("attack", null, defElH, hpDmgH, () => {
+            dealHero(nextH.owner, hpDmgH, { sound: false });
             if (sk === 6) applyLifesteal(attacker, hpDmgH);
+            });
             render();
-            await waitMs(hits > 1 ? 300 : 420);
+            await pause(hits > 1 ? 300 : 420);
             continue;
           } else {
             break;
@@ -357,13 +424,8 @@ function doAttack(p, attacker, target, auto) {
         log(`${def.name} 방어 ${blocked}` + (sk === 2 ? ` (관통 흡수 ${calc.absorbed})` : "") + ` → 체력피해 ${hpDmg}`);
         const defEl = Vfx.elOf(def.uid);
         const crit = hpDmg >= attacker.atk + 2 || sk === 5;
-        try {
-          if (typeof SpellFx !== "undefined" && SpellFx.playCombat) {
-            SpellFx.playCombat("attack", { uid: def.uid });
-            SpellFx.playCombat("defend", { uid: def.uid });
-          }
-        } catch (e) {}
-        await Vfx.attackSeq(atkEl, defEl, hpDmg, crit);
+
+        await strike("attack", def, defEl, hpDmg, () => {
 
         const hpBefore = def.hp;
         if (sk === 5 && hpDmg >= 1) {
@@ -374,8 +436,9 @@ function doAttack(p, attacker, target, auto) {
         }
         const hpDealt = Math.max(0, hpBefore - Math.max(0, def.hp));
         if (sk === 6) applyLifesteal(attacker, hpDealt);
+        });
         render();
-        await waitMs(360);
+        action.guard();
         const survived = def && def.hp > 0 && !def.dying;
         // counter uses this hit's defender current atk if retargeted mid-연속
         const counterAtk = (hit === 1) ? dAtk : clampAtk(Number(def.atk) || 0);
@@ -389,15 +452,16 @@ function doAttack(p, attacker, target, auto) {
         } else if (!survived) {
           log(`${def.name} 격파 · 반격 없음`);
           const deadEl = Vfx.elOf(def.uid);
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: def.uid }); } catch (e) {}
-          Vfx.death(deadEl);
-          await waitMs(520);
+          await death(def);
+          action.guard();
           // v0.379 (9/29 사용자): 연속 1타로 환생 유닛을 처치하면 그 자리에서 바로 환생시키고,
           // 남은 타는 다음 유닛이 아니라 다시 나타난 그 유닛을 때린다.
           if (sk === 4 && hit < hits && combatWillRebirth(def)) {
+            combatDeathPending.delete(def); action.hiddenDeaths.delete(def);
             destroyMinion(target.owner, def, { fromSpell: false });
+            deaths.delete(def); shots.delete(def);
             render();
-            await waitMs(260);
+            await pause(260);
           }
           // 연속: 남은 타가 있으면 break하지 않고 다음 루프에서 재지정
           if (!(sk === 4 && hit < hits)) break;
@@ -408,14 +472,13 @@ function doAttack(p, attacker, target, auto) {
     // Fantasy Masters: strip remaining gold HP coin bonus; black/damage already stuck
     settleCombatHpCoin(aHpSnap);
     settleCombatHpCoin(dHpSnap);
-    await waitMs(240);
+    action.guard();
+    const dying = [state.p1,state.p2].flatMap(pl => pl.board.filter(mm => mm.dying));
+    await deathGroup(dying);
+    action.guard();
     [state.p1, state.p2].forEach(pl => {
       pl.board.filter(mm => mm.dying).forEach(mm => {
-        const el = Vfx.elOf(mm.uid);
-        if (el && !el.classList.contains("fx-dissolve")) {
-          try { if (typeof SpellFx !== "undefined" && SpellFx.playCombat) SpellFx.playCombat("death", { uid: mm.uid }); } catch (e) {}
-          Vfx.death(el);
-        }
+
         destroyMinion(pl, mm, { fromSpell: false });
       });
       pl._hurt = null;
@@ -430,7 +493,8 @@ function doAttack(p, attacker, target, auto) {
     cleanupBoards();
     checkWin();
     render();
-    resolve();
+    } catch (e) { if(action.valid()) console.warn("Combat callback failed", e); }
+    finally { resolve(); }
   }, duel);
   });
 }
@@ -510,6 +574,7 @@ function clearDrag() {
   if (typeof clearInsertPreview === "function") clearInsertPreview();
 }
 function hideScreens() {
+  try { if (typeof CombatFx !== 'undefined') CombatFx.clear(); } catch (e) {}
   clearDrag();
   document.getElementById("title").classList.remove("active");
   document.getElementById("game").classList.remove("active");
@@ -551,6 +616,9 @@ function showBuilder() {
 /* ---------- AI ---------- */
 function aiTurn() {
   if (state.over) return;
+  const owner = state;
+  const generation = typeof CombatFx !== 'undefined' ? CombatFx.generation() : 0;
+  const valid = () => state === owner && (typeof CombatFx === 'undefined' || CombatFx.generation() === generation);
   const p = current();
   if (!p.isAI) return;
   // v0.372: 매치 연출(MATCH START·MY TURN·승패) 중이면 끝난 뒤 시작 (연출과 AI 행동·사운드가 겹치지 않게)
@@ -592,7 +660,7 @@ function aiTurn() {
   };
 
   const step = () => {
-    if (state.over) return;
+    if (!valid() || state.over) return;
     // v0.381: 전설 소환 연출 등 오버레이 게이트 중이면 끝난 뒤 다음 행동 (연출끼리·전투와 겹치지 않게)
     if (typeof SpellFx !== "undefined" && SpellFx.overlayBusy && SpellFx.overlayBusy()) {
       const st = state;
@@ -608,7 +676,7 @@ function aiTurn() {
       setTimeout(step, 420);
       return;
     }
-    runAutoCombat(p).then(() => passTurn());
+    runAutoCombat(p).then(ok => { if (ok && valid()) passTurn(); }).catch(e => console.warn(e));
   };
   setTimeout(step, 280);
 }

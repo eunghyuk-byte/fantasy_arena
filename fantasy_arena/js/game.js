@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.390";
+const GAME_VERSION = "0.391";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -406,7 +406,11 @@ function renderHeroSlot(p, isMe) {
 function waitMs(ms) { return new Promise(res => setTimeout(res, ms)); }
 async function runAutoCombat(p) {
   if (!p || state.over) return;
+  const owner = state, ownerUi = ui;
+  const generation = typeof CombatFx !== 'undefined' ? CombatFx.generation() : 0;
+  const valid = () => state === owner && (typeof CombatFx === 'undefined' || CombatFx.generation() === generation);
   ui.battling = true;
+  try {
   render();
   const e = opponent(p);
   const wave = p.board.slice();
@@ -423,20 +427,22 @@ async function runAutoCombat(p) {
     const ok = legal.some(t => t.kind === target.kind && (t.kind === "hero" || t.minion.uid === target.minion.uid));
     if (!ok) continue;
     await doAttack(p, m, target, true);
+    if (!valid()) return false;
     render();
-    await waitMs(480);
   }
   try { applyItemEndTurnFx(p); } catch (err) { console.warn(err); }
-  ui.battling = false;
+  return valid();
+  } finally { if (state === owner && ui === ownerUi) ownerUi.battling = false; }
 }
 function endTurn() {
   try { hidePeek(); } catch (e) {}
-  try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   if (state.over || ui.battling || state.busy) return;
+  try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   const p = current();
   if (p.isAI) return;
   ui.targeting = null; ui.attacker = null;
-  runAutoCombat(p).then(() => passTurn());
+  const owner = state;
+  runAutoCombat(p).then(ok => { if(ok && state === owner) passTurn(); }).catch(e => console.warn(e));
 }
 
 function passTurn() {
@@ -1727,10 +1733,10 @@ function dealToTarget(srcOwner, target, n, ctx) {
   else damageMinion(target.owner, target.minion, n, ctx);
 }
 
-function dealHero(p, n) {
+function dealHero(p, n, opts = {}) {
   n = Number(n) || 0;
   if (!n) return;
-  try { Sfx.playHeroHit && Sfx.playHeroHit(); } catch (e) {}
+  try { if (opts.sound !== false) Sfx.playHeroHit && Sfx.playHeroHit(); } catch (e) {}
   const from = p.hp;
   p.hp -= n;
   p._hurt = { from, to: p.hp, dmg: n };
@@ -3663,4 +3669,3 @@ document.addEventListener("click", (e) => {
   const g = document.getElementById("game");
   if (g) g.addEventListener("contextmenu", block, { capture: true });
 })();
-

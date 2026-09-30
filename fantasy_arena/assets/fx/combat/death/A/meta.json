@@ -1,0 +1,292 @@
+{
+  "id": "death",
+  "concept": "A",
+  "durationMs": 900,
+  "fps": 30,
+  "loop": false,
+  "video": {
+    "file": "effect.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "width": 512,
+    "height": 512,
+    "fps": 30,
+    "frames": 27,
+    "durationMs": 900,
+    "muted": true,
+    "opacity": 0.55,
+    "layerOrder": "behindCardFragments"
+  },
+  "sfx": {
+    "file": "sfx.ogg",
+    "startMs": 0,
+    "durationMs": 900
+  },
+  "bakedFade": true,
+  "appendFadeMs": 0,
+  "displayBoxPx@1080p": 540,
+  "cardHeightScale": 1.82,
+  "anchor": "targetUnit",
+  "soundPolicy": "Use matching SFX once; do not also play legacy slash/parry/death audio.",
+  "noCutIn": true,
+  "gameplayEffects": null,
+  "note": "Requires combat meta.video branch on one900ms cancellable timeline. No second impact phase, legacy280ms fade, or full27frame RGBA cache. Video is accent only; tear the real card snapshot using these polygons. Group simultaneous deaths. Dedupe by event+uid+death occurrence for rebirth.",
+  "fragments": {
+    "source": "current rendered card face snapshot before removal",
+    "pieces": [
+      {
+        "polygon": [
+          [
+            0.0,
+            0
+          ],
+          [
+            0.0,
+            0.2
+          ],
+          [
+            0.0,
+            0.4
+          ],
+          [
+            0.0,
+            0.5
+          ],
+          [
+            0.3450385144561614,
+            0.5
+          ],
+          [
+            0.31533350961542067,
+            0.4
+          ],
+          [
+            0.3451590921102715,
+            0.2
+          ],
+          [
+            0.33587349347841094,
+            0
+          ]
+        ],
+        "translateCardWidths": -0.3489406449820903,
+        "translateCardHeights": -0.16874999999999998,
+        "rotationDeg": -14.954599070661013,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.6
+          ],
+          [
+            0.0,
+            0.8
+          ],
+          [
+            0.0,
+            1
+          ],
+          [
+            0.35054810004461434,
+            1
+          ],
+          [
+            0.31810136605818023,
+            0.8
+          ],
+          [
+            0.33603112310726646,
+            0.6
+          ],
+          [
+            0.3450385144561614,
+            0.5
+          ]
+        ],
+        "translateCardWidths": -0.3478493676438083,
+        "translateCardHeights": 0.16874999999999998,
+        "rotationDeg": -14.907830041877498,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.33587349347841094,
+            0
+          ],
+          [
+            0.3451590921102715,
+            0.2
+          ],
+          [
+            0.31533350961542067,
+            0.4
+          ],
+          [
+            0.3450385144561614,
+            0.5
+          ],
+          [
+            0.6531488962247765,
+            0.5
+          ],
+          [
+            0.6844975990691743,
+            0.4
+          ],
+          [
+            0.656874286670658,
+            0.2
+          ],
+          [
+            0.661637187699086,
+            0
+          ]
+        ],
+        "translateCardWidths": -0.00031991146373034073,
+        "translateCardHeights": -0.16874999999999998,
+        "rotationDeg": -0.013710491302728889,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.3450385144561614,
+            0.5
+          ],
+          [
+            0.33603112310726646,
+            0.6
+          ],
+          [
+            0.31810136605818023,
+            0.8
+          ],
+          [
+            0.35054810004461434,
+            1
+          ],
+          [
+            0.6488820974329951,
+            1
+          ],
+          [
+            0.6803927187752995,
+            0.8
+          ],
+          [
+            0.6665073430994394,
+            0.6
+          ],
+          [
+            0.6531488962247765,
+            0.5
+          ]
+        ],
+        "translateCardWidths": -0.00017716660516630677,
+        "translateCardHeights": 0.16874999999999998,
+        "rotationDeg": -0.007592854507127433,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.661637187699086,
+            0
+          ],
+          [
+            0.656874286670658,
+            0.2
+          ],
+          [
+            0.6844975990691743,
+            0.4
+          ],
+          [
+            0.6531488962247765,
+            0.5
+          ],
+          [
+            1.0,
+            0.5
+          ],
+          [
+            1.0,
+            0.4
+          ],
+          [
+            1.0,
+            0.2
+          ],
+          [
+            1.0,
+            0
+          ]
+        ],
+        "translateCardWidths": 0.3486207335183599,
+        "translateCardHeights": -0.16874999999999998,
+        "rotationDeg": 14.940888579358282,
+        "delayMs": 0
+      },
+      {
+        "polygon": [
+          [
+            0.6531488962247765,
+            0.5
+          ],
+          [
+            0.6665073430994394,
+            0.6
+          ],
+          [
+            0.6803927187752995,
+            0.8
+          ],
+          [
+            0.6488820974329951,
+            1
+          ],
+          [
+            1.0,
+            1
+          ],
+          [
+            1.0,
+            0.8
+          ],
+          [
+            1.0,
+            0.6
+          ],
+          [
+            1.0,
+            0.5
+          ]
+        ],
+        "translateCardWidths": 0.347672201038642,
+        "translateCardHeights": 0.16874999999999998,
+        "rotationDeg": 14.90023718737037,
+        "delayMs": 0
+      }
+    ],
+    "splitAtMs": 80,
+    "opacityHoldUntilMs": 380,
+    "clearAtMs": 850,
+    "durationMs": 900
+  },
+  "encodingNote": "Zeroed invisible RGB and rounded alpha to 64 levels; preserves visible shape while removing alpha-channel noise. Max opacity rounding2/255 except opaque endpoint.",
+  "encoding": {
+    "codec": "VP9 alpha",
+    "crf": 28,
+    "sourceAlphaSize": [
+      640,
+      640
+    ]
+  }
+}

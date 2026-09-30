@@ -496,6 +496,10 @@
     animation: cardRip .6s ease-in forwards;
     pointer-events: none;
   }
+  .minion.combat-death-hidden {
+    visibility: hidden !important;
+    pointer-events: none;
+  }
   /* Combat temp Δ overlays — ABOVE base gem digits (not covering them). v0.253 */
   .stat-delta {
     position: absolute;

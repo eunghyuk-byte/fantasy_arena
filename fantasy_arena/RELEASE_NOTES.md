@@ -1,3 +1,10 @@
+# v0.391
+
+- Connected the approved padded attack A and defense A videos/sounds to one awaited 900ms combat timeline. At 1080p the padded display widths are 399.36px and 561.6px; counters reuse attack A. Actual resolved HP loss selects sword sound for positive loss, defense only for zero loss; no attempted strike is silent.
+- Added selected death A: six fragments of the actual pre-removal card face, with its accent video/sound. Simultaneous deaths share one decoder, sound and clock. Cancellation/restart removes owned visuals, sounds and pending work.
+- Preserves gameplay, rebirth, continuous attacks and RNG. Removes duplicate legacy strike/hero-hit audio from combat only. A video failure retains the approved outcome sound and gameplay completion.
+- MyTurn A, remaining spells and missing packages are excluded. Chrome headless verification is recorded in COMBAT_V391_QA.md; Safari and human audio listening were not verified.
+
 # v0.390
 
 - Added approved Zhao Yun n2 A and Lu Bu d7 A grouped summon presentations. The existing engine supplies actual eligible/affected UID results and final death/rebirth/DEF/HP outcomes; rendering does not rerun selection, damage, death or RNG.
