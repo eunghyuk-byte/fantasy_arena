@@ -1,5 +1,13 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const meta=JSON.parse(fs.readFileSync(path.join(__dirname,'../assets/vfx/legendary/f1/meta.json')));
+test('l4 actual metadata repeats on the synthetic video player and releases failed decoding',async()=>{
+ const l4=JSON.parse(fs.readFileSync(path.join(__dirname,'../assets/vfx/legendary/l4/meta.json')));
+ assert.deepEqual(l4.video['offsetPx@1080p'],[0,-219.375]);assert.deepEqual(l4.video['displayPx@1080p'],[1500,843.75]);
+ assert.equal(l4.enemyMute,undefined);assert.equal(l4.gameplayEffects,null);
+ const f=fixture();for(const casterIsMe of [true,false,true])assert.equal(await f.fx.play('l4/',l4,{casterIsMe}),true);
+ assert.equal(f.fx.pending(),0);assert.ok(f.videos.every(v=>v.removed));assert.deepEqual(f.audio(),{starts:3,stops:3});
+ const bad=fixture({opaque:true});assert.equal(await bad.fx.play('l4/',l4),false);assert.equal(bad.fx.pending(),0);assert.equal(bad.audio().starts,0);
+});
 test('legendary dispatch accepts video-only metadata without changing anchored spell schema',()=>{const src=fs.readFileSync(path.join(__dirname,'../js/spell-fx.js'),'utf8');const ctx={};vm.createContext(ctx);for(const name of ['isLegendarySummonMeta','isAnchoredMeta']){const start=src.indexOf('function '+name+'('),end=src.indexOf('\n  }',start)+4;vm.runInContext(src.slice(start,end),ctx);}assert.equal(ctx.isLegendarySummonMeta(meta),true);assert.equal(ctx.isAnchoredMeta({...meta,playMode:'anchored'}),false);});
 function fixture({opaque=false,fail=false,rejectPlay=false}={}){
  const videos=[],canvases=[];let stops=0,starts=0;

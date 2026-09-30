@@ -1,0 +1,62 @@
+{
+  "id": "l4_summon",
+  "card": "l4 제갈량 · light · legendary",
+  "concept": "A 칠성의 진법 · high-quality remake",
+  "durationMs": 2000,
+  "playMode": "legendarySummon",
+  "targetMode": "none",
+  "format": "VP9 alpha WebM,1280x720,30fps,60frames,2seconds",
+  "video": {
+    "file": "summon.webm",
+    "codec": "vp9",
+    "alpha": true,
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "frames": 60,
+    "durationMs": 2000,
+    "anchor": "summonedUnit",
+    "displayPx@1080p": [
+      1500,
+      843.75
+    ],
+    "offsetPx@1080p": [
+      0,
+      -219.375
+    ],
+    "flipYWhenOppCasts": true,
+    "muted": true
+  },
+  "dim": {
+    "opacity": 0.32,
+    "inMs": 160,
+    "outStartMs": 1350,
+    "endMs": 2000,
+    "color": "#080c15"
+  },
+  "summonedReveal": {
+    "fadeMs": 160,
+    "popMs": 240,
+    "brightnessFrom": 1,
+    "scaleFrom": 1
+  },
+  "sfx": {
+    "file": "sfx.mp3",
+    "startMs": 0,
+    "durationMs": 2000,
+    "alt": {
+      "file": "sfx.ogg",
+      "durationMs": 2000
+    },
+    "source": "Kling Pro synchronized sound from the selected new A, compressed to2seconds with pitch preserved and normalized to safe peak"
+  },
+  "gameplayEffects": null,
+  "provenance": {
+    "generationJob": "72727e8b-4e3f-4a81-afec-6193b14b73fd",
+    "model": "kling3_0 pro",
+    "approvedPreviewLibraryId": "libfile_795c4b5d65c88191abbd1d37186d5312",
+    "sourceDurationSeconds": 3,
+    "effectDurationSeconds": 2
+  },
+  "note": "REPLACES earlier native-graphics l4 A, never play both. No cut-in, no added damage/buff/silence or deferred enemy state."
+}
