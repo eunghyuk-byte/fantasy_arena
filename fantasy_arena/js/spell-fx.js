@@ -1910,9 +1910,10 @@ const SpellFx = (() => {
   /** 순수 함수 (테스트용): 연출 id + meta + opts → dim 타임라인. null = dim 없음 */
   function resolveDim(id, meta, opts) {
     opts = opts || {};
-    if (opts.dim === false) return null;
+    if (opts.dim === false || opts.dim === 0 || opts.dimOpacity === 0) return null;
     const dur = (meta && meta.durationMs) || 1500;
     const d = meta && meta.dim;
+    if (d === false || d === 0 || (d && (d.enabled === false || d.doInCode === false || d.opacity === 0))) return null;
     const useMeta = !!(d && d.doInCode !== false && typeof d.opacity === "number" && d.opacity > 0);
     const opacity = useMeta ? d.opacity
       : (typeof opts.dimOpacity === "number" ? opts.dimOpacity

@@ -1,3 +1,9 @@
+# v0.385
+
+- Fixed unwanted background dimming during the existing MyTurn animation: explicit dim disabled/zero metadata is now respected instead of falling back to 0.3.
+- Existing MyTurn video, sound, duration and centered 0.72 display scale are unchanged. The selected new MyTurn A media is NOT included.
+- No combat preparation, new legendary/match media, layout-adapter or other pending changes are included.
+
 # v0.384
 
 - Added approved Zhuge Liang l4 A: two-second alpha video with matching sound. No gameplay, enemy silence, damage or deferred enemy views were added.

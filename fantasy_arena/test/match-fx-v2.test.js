@@ -63,13 +63,12 @@ test("dim: match_start(2초판)는 meta 값(0.6, 0→180ms, 1500→2000ms 페이
   assert.equal(d.hold, false);
 });
 
-test("dim: MY TURN은 meta dim 없음(doInCode:false) → 기본 0.3·150ms 페이드인·애니 페이드아웃(500→783ms)", () => {
+test("dim: MY TURN explicit metadata off preserves no dim", () => {
   const { resolveDim } = loadDimFns();
-  const d = resolveDim("turn_start_me", readMeta("turn_start_me"));
-  assert.equal(d.opacity, 0.3);
-  assert.equal(d.fromMeta, false);
-  assert.deepEqual([d.fadeInStartMs, d.fadeInEndMs, d.fadeOutStartMs, d.fadeOutEndMs], [0, 150, 500, 783]);
-  assert.equal(d.hold, false);
+  assert.equal(resolveDim("turn_start_me", readMeta("turn_start_me")), null);
+  for (const dim of [false, 0, {enabled:false,opacity:0.4}, {doInCode:false,opacity:0.4}, {opacity:0}]) assert.equal(resolveDim("turn_start_me", {dim}), null);
+  for (const opts of [{dim:false},{dim:0},{dimOpacity:0}]) assert.equal(resolveDim("turn_start_me", {}, opts), null);
+  assert.equal(resolveDim("turn_start_me", {}).opacity, 0.3);
 });
 
 test("dim: 승리·패배 v2는 meta 값(0.4, 페이드인 250/350ms, 1350→1800ms 페이드아웃, 유지 안 함)", () => {
