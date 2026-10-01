@@ -10,11 +10,12 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('.shop-product').count(),3,'three approved pack options');
   assert.deepEqual(await page.locator('.shop-product h2').allTextContents(),['1팩','5팩','10팩']);
   assert.deepEqual(await page.locator('.shop-card-count').allTextContents(),['카드 5장','카드 25장','카드 50장']);
-  assert.deepEqual(await page.locator('.shop-price').allTextContents(),['1,500원','5,500원','10,000원']);
+  assert.deepEqual(await page.locator('.shop-price').allTextContents(),['1,500원','5,900원','9,900원']);
+  assert.deepEqual(await page.locator('.shop-discount').allTextContents(),['약 21% 할인','34% 할인']);
   assert.match(await page.locator('#shopAvailability').innerText(),/결제.*미연동/);
   assert.match(await page.locator('#ownedPackCount').innerText(),/미연동/);
   await page.waitForTimeout(800);const storage=await page.evaluate(()=>JSON.stringify({...localStorage}));
-  for(const [i,price] of ['1,500원','5,500원','10,000원'].entries()){
+  for(const [i,price] of ['1,500원','5,900원','9,900원'].entries()){
     const button=page.locator('.shop-buy').nth(i);await button.click();
     assert.equal(await page.locator('#shopInfo').evaluate(el=>el.open),true);
     assert.match(await page.locator('#shopInfoText').innerText(),new RegExp(price));
