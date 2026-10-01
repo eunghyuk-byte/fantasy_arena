@@ -418,7 +418,41 @@ const SpellFx = (() => {
   function isSummonMeta(meta) {
     return !!(meta && String(meta.playMode || "") === "summon" && meta.formation && meta.formation.file && meta.rise && meta.rise.file);
   }
-  function isCanvasMeta(meta) { return isProjectileMeta(meta) || isOverlayMeta(meta) || isFlowMeta(meta) || isAnchoredMeta(meta) || isDuelKeepMeta(meta) || isSummonMeta(meta); }
+  function isVideoSpellMeta(meta) {
+    return !!(meta && meta.playMode === "perUnitVideo" && meta.video);
+  }
+  function targetUnitPoints(target) {
+    const uid = target && target.minion && target.minion.uid;
+    if (uid == null) return [];
+    const el = document.querySelector('.minion[data-uid="' + uid + '"]');
+    if (!el) return [];
+    const r = el.getBoundingClientRect();
+    if (r.width < 4 || r.height < 4) return [];
+    return [{ uid, x: r.left + r.width / 2, y: r.top + r.height / 2, width: r.width, height: r.height }];
+  }
+  async function playVideoSpell(meta, base, opts) {
+    opts = opts || {};
+    if (opts.fxEpoch != null && opts.fxEpoch !== _legendaryEpoch) return true;
+    if (typeof LegendaryVideoFx === "undefined") return false;
+    const V = meta.video;
+    const points = meta.targetMode === "unit" ? targetUnitPoints(opts.target) : aoeUnitPoints(meta.targetMode, opts.casterIsMe);
+    const anchors = points.map(p => ({ ...p, scale: Math.max(p.width * V.cardWidthScale, V.cardHeightScale > 0 ? p.height * V.cardHeightScale : 0) / V["displayPx@1080p"][0] }));
+    return LegendaryVideoFx.play(base, meta, { anchors, casterIsMe: opts.casterIsMe, sound: opts.sound });
+  }
+  function waitSpellMeta(promise) {
+    return new Promise(resolve => {
+      let done = false;
+      const finish = value => {
+        if (done) return; done = true;
+        clearTimeout(timer); _legendaryPreloads.delete(cancel); resolve(value);
+      };
+      const cancel = () => finish(null);
+      const timer = setTimeout(cancel, 3000);
+      _legendaryPreloads.add(cancel);
+      Promise.resolve(promise).then(finish, cancel);
+    });
+  }
+  function isCanvasMeta(meta) { return isVideoSpellMeta(meta) || isProjectileMeta(meta) || isOverlayMeta(meta) || isFlowMeta(meta) || isAnchoredMeta(meta) || isDuelKeepMeta(meta) || isSummonMeta(meta); }
   function metaSfxUrl(meta, base) { return meta && meta.sfx && meta.sfx.file ? assetUrl(base, meta.sfx.file) : ""; }
   function projectileUrls(meta, base) {
     return {
@@ -521,6 +555,7 @@ const SpellFx = (() => {
     ]);
   }
   function preloadMetaFx(meta, base) {
+    if (isVideoSpellMeta(meta)) return typeof LegendaryVideoFx === "undefined" ? Promise.resolve(false) : LegendaryVideoFx.preload(base, meta);
     if (isProjectileMeta(meta)) return preloadProjectile(meta, base);
     if (isSummonMeta(meta)) return preloadSummon(meta, base);
     if (isDuelKeepMeta(meta)) return preloadDuelKeep(meta, base);
@@ -678,7 +713,7 @@ const SpellFx = (() => {
       b.querySelectorAll(".minion[data-uid]").forEach(el => {
         const r = el.getBoundingClientRect();
         if (r.width < 4 || r.height < 4) return;
-        pts.push({ uid: el.getAttribute("data-uid"), x: r.left + r.width / 2, y: r.top + r.height / 2 });
+        pts.push({ uid: el.getAttribute("data-uid"), x: r.left + r.width / 2, y: r.top + r.height / 2, width: r.width, height: r.height });
       });
     });
     return pts;
@@ -1462,6 +1497,7 @@ const SpellFx = (() => {
   }
   /** Dispatch a meta-driven canvas pack. */
   function playMetaFx(stage, meta, base, opts) {
+    if (isVideoSpellMeta(meta)) return playVideoSpell(meta, base, opts);
     opts = opts || {};
     if (meta && meta.screenShake && !opts.shake) opts = Object.assign({}, opts, { shake: meta.screenShake });
     if (isAnchoredMeta(meta)) return playAnchored(stage, meta, base, opts);
@@ -1476,7 +1512,8 @@ const SpellFx = (() => {
   async function playAssetPack(card, layer, stage, opts) {
     opts = opts || {};
     const target = opts.target || null;
-    const meta = await loadSpellMeta(card && card.id);
+    const meta = await waitSpellMeta(loadSpellMeta(card && card.id));
+    if (opts.fxEpoch != null && opts.fxEpoch !== _legendaryEpoch) return true;
     if (!meta) return false;
     if (isCanvasMeta(meta)) {
       const fxCardP = document.getElementById("fxCard");
@@ -1484,7 +1521,7 @@ const SpellFx = (() => {
       const labP = document.getElementById("fxName");
       if (labP) { labP.textContent = ""; labP.style.opacity = "0"; }
       layer.classList.add("pack-play");
-      const mOpts = { casterIsMe: opts.casterIsMe };
+      const mOpts = { casterIsMe: opts.casterIsMe, target, fxEpoch: opts.fxEpoch, sound: opts.sound };
       if (opts.keepUids) mOpts.keepUids = opts.keepUids; // v0.371 duelKeep: 결과와 같은 생존 유닛
       if (isSummonMeta(meta)) {
         // v0.371 summon: 먼저 해결(토큰 소환·render) → 같은 동기 구간에서 새 토큰 숨김 → 연출 → 드러내기
@@ -1495,7 +1532,9 @@ const SpellFx = (() => {
       }
       if (isProjectileMeta(meta)) mOpts.to = resolveFxAnchor(Object.assign({ targetMode: "unit" }, meta), target);
       const ok = await playMetaFx(stage, meta, ASSET_BASE + (meta.id || card.id) + "/", mOpts);
+      if (opts.fxEpoch != null && opts.fxEpoch !== _legendaryEpoch) return true;
       if (fxCardP) fxCardP.style.opacity = "";
+      if (isVideoSpellMeta(meta)) return !!ok;
       if (ok) return true;
     }
     const base = ASSET_BASE + meta.id + "/";
@@ -1939,7 +1978,7 @@ const SpellFx = (() => {
   }
 
   function play(card, opts) {
-    opts = opts || {};
+    opts = Object.assign({}, opts || {}, { fxEpoch: _legendaryEpoch });
     return new Promise(async resolve => {
       const layer = ensureLayer();
       const stage = document.getElementById("fxStage");
@@ -1950,6 +1989,7 @@ const SpellFx = (() => {
       const low = lowSpec();
       // v0.352: fetch pack meta + warm projectile assets during the card showcase
       loadSpellMeta(card && card.id).then(m => {
+        if (opts.fxEpoch !== _legendaryEpoch) return m;
         if (isCanvasMeta(m)) preloadMetaFx(m, ASSET_BASE + (m.id || card.id) + "/");
         return m;
       }, () => null);
@@ -1968,6 +2008,7 @@ const SpellFx = (() => {
             new Promise(r => setTimeout(() => r(""), 300))
           ]);
         } catch (e) { faceSrc = ""; }
+        if (opts.fxEpoch !== _legendaryEpoch) return;
         paintCard(faceSrc || "", card.name || "");
         if (fxCard) {
           fxCard.classList.remove("out");
@@ -1975,10 +2016,12 @@ const SpellFx = (() => {
           fxCard.classList.add("in");
         }
         await new Promise(r => setTimeout(r, 650));
+        if (opts.fxEpoch !== _legendaryEpoch) return;
 
         if (fxCard) {
           fxCard.classList.add("out");
           await new Promise(r => setTimeout(r, 220));
+          if (opts.fxEpoch !== _legendaryEpoch) return;
           fxCard.style.opacity = "0";
         }
 
@@ -2001,7 +2044,7 @@ const SpellFx = (() => {
           if (game) game.classList.remove("quake");
         }
       } finally {
-        cleanupFx(layer, stage, fxCard);
+        if (opts.fxEpoch === _legendaryEpoch) cleanupFx(layer, stage, fxCard);
         // v0.371 summon 안전장치: 연출이 실패해도 숨긴 토큰은 보이게
         setTimeout(() => { try { Object.keys(_hidden).forEach(u => { if (_hidden[u].state === "hide") revealUnit(u, 120, 0); }); } catch (e) {} }, 0);
         resolve();

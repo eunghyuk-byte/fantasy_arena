@@ -1,22 +1,171 @@
 {
   "id": "es2",
   "name": "어스퀘이크",
-  "kind": "aoe",
-  "durationMs": 2000,
-  "fps": 12,
-  "cast": {
-    "file": "cast.webp",
-    "frames": 12,
-    "w": 720,
-    "h": 720
+  "concept": "B",
+  "playMode": "perUnitVideo",
+  "targetMode": "aoe_enemy",
+  "durationMs": 1607,
+  "visualDurationMs": 1200,
+  "video": {
+    "parts": [
+      {
+        "file": "video-4203d9a27b04.part000.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part001.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part002.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part003.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part004.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part005.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part006.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part007.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part008.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part009.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part010.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part011.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part012.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part013.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part014.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part015.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part016.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part017.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part018.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part019.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part020.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part021.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part022.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part023.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part024.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part025.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part026.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part027.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-4203d9a27b04.part028.bin",
+        "bytes": 65896
+      }
+    ],
+    "bytes": 3985896,
+    "sha256": "4203d9a27b048ff0bab14c2c4a9c8c9cb9a70f9e164ef42c30e422efb2453d4f",
+    "codec": "vp9",
+    "alpha": true,
+    "alphaMode": "straight",
+    "width": 1440,
+    "height": 1440,
+    "fps": 30,
+    "frames": 49,
+    "visualFrames": 36,
+    "visualDurationMs": 1200,
+    "transparentTailFrames": 13,
+    "displayPx@1080p": [
+      1440,
+      1440
+    ],
+    "offsetPx@1080p": [
+      0,
+      0
+    ],
+    "cardWidthScale": 1.65,
+    "cardHeightScale": 0,
+    "flipYWhenOppCasts": false
   },
-  "aoe": {
-    "file": "aoe.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
+  "sfx": {
+    "file": "sfx-572706231b14.wav",
+    "startMs": 785,
+    "durationMs": 822,
+    "sha256": "572706231b145c0cf94a74eba1a8698d85989fe13c551af22afc37d4f5f1d46e"
   },
-  "anchor": "board-center",
-  "sfxHint": "earth_quake",
-  "concept": "지진 균열이 전장을 가름"
+  "provenance": {
+    "jobId": "2134c554-8db8-4d4a-967b-43e3baeb8d8a",
+    "sourcePixels": [
+      1440,
+      1440
+    ],
+    "sourceFps": 24,
+    "sourceFrames": 73,
+    "sourceDurationMs": 3042,
+    "processing": "Alpha keyed directly from1440px generation source; no low-resolution upscaling. Approved framing,padding,motion and end fade preserved. VP9alpha CRF18; transparent tail keyframe.",
+    "contentPx": 1208,
+    "audio": "Exact selected native-source WAV; natural speed and user master volume."
+  }
 }

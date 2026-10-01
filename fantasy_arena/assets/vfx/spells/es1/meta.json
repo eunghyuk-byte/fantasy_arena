@@ -1,22 +1,131 @@
 {
   "id": "es1",
   "name": "거인의봉인",
-  "kind": "single",
-  "durationMs": 1800,
-  "fps": 12,
-  "cast": {
-    "file": "cast.webp",
-    "frames": 12,
-    "w": 720,
-    "h": 720
+  "concept": "C",
+  "playMode": "perUnitVideo",
+  "targetMode": "unit",
+  "durationMs": 1338,
+  "visualDurationMs": 1200,
+  "video": {
+    "parts": [
+      {
+        "file": "video-be8cfafc25bf.part000.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part001.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part002.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part003.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part004.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part005.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part006.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part007.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part008.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part009.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part010.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part011.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part012.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part013.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part014.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part015.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part016.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part017.bin",
+        "bytes": 140000
+      },
+      {
+        "file": "video-be8cfafc25bf.part018.bin",
+        "bytes": 15903
+      }
+    ],
+    "bytes": 2535903,
+    "sha256": "be8cfafc25bf2d0b86e9ad1f62db8a07bc83900d583976983c506626e3ba9a7b",
+    "codec": "vp9",
+    "alpha": true,
+    "alphaMode": "straight",
+    "width": 1440,
+    "height": 1440,
+    "fps": 30,
+    "frames": 41,
+    "visualFrames": 36,
+    "visualDurationMs": 1200,
+    "transparentTailFrames": 5,
+    "displayPx@1080p": [
+      1440,
+      1440
+    ],
+    "offsetPx@1080p": [
+      0,
+      0
+    ],
+    "cardWidthScale": 2.1,
+    "cardHeightScale": 1.55,
+    "flipYWhenOppCasts": false
   },
-  "impact": {
-    "file": "impact.webp",
-    "frames": 10,
-    "w": 560,
-    "h": 560
+  "sfx": {
+    "file": "sfx-62e15112b94e.wav",
+    "startMs": 538,
+    "durationMs": 800,
+    "sha256": "62e15112b94e78d8e34849176f6702077b2f7f29a46025ae109c004743a3c51f"
   },
-  "anchor": "target",
-  "sfxHint": "earth_seal",
-  "concept": "거인 봉인 룬이 내려찍힘"
+  "provenance": {
+    "jobId": "24b89835-e5dd-4987-bfe6-3d4cb70f4279",
+    "sourcePixels": [
+      1440,
+      1440
+    ],
+    "sourceFps": 24,
+    "sourceFrames": 73,
+    "sourceDurationMs": 3042,
+    "processing": "Alpha keyed directly from1440px generation source; no low-resolution upscaling. Approved framing,padding,motion and end fade preserved. VP9alpha CRF18; transparent tail keyframe.",
+    "contentPx": 1210,
+    "audio": "Exact selected native-source WAV; natural speed and user master volume."
+  }
 }

@@ -1,3 +1,10 @@
+# v0.394 (pending)
+
+- Added selected Giant Seal es1 C and Earthquake es2 B, re-keyed directly from1440×1440 generation sources. Both use1440px VP9alpha at30fps; no384/512px upscale or reduced-resolution production assets.
+- Preserves selected1.2second motion, card-relative placement and original sounds. Seal centers on the exact chosen UID at max(card width×2.1,card height×1.55); Earthquake plays once per opposing unit at1.65× card width. One shared decoder and one sound per cast.
+- Reuses the legendary video player. Small immutable file parts reassemble the original encoded video with byte-count and SHA256 verification. Owned URLs, decoder, audio and pending work are released on failure or cancellation.
+- Preserves v0.393 gameplay fixes and all existing legendary/spell packs. Verification is documented in SPELLS_V394_QA.md.
+
 # v0.393
 
 - Prevents an unfinished spell or its delayed summon callback from changing a restarted match or releasing its input lock.

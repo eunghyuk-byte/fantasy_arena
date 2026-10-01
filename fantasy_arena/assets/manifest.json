@@ -1,5 +1,5 @@
 {
-  "count": 780,
+  "count": 830,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -2762,11 +2762,6 @@
       "name": "impact"
     },
     {
-      "path": "assets/vfx/spells/es1/meta.json",
-      "bytes": 378,
-      "name": "meta"
-    },
-    {
       "path": "assets/vfx/spells/es2/aoe.webp",
       "bytes": 321244,
       "name": "aoe"
@@ -2775,11 +2770,6 @@
       "path": "assets/vfx/spells/es2/cast.webp",
       "bytes": 862850,
       "name": "cast"
-    },
-    {
-      "path": "assets/vfx/spells/es2/meta.json",
-      "bytes": 376,
-      "name": "meta"
     },
     {
       "path": "assets/vfx/spells/es3/cast.webp",
@@ -3894,6 +3884,214 @@
     {
       "path": "assets/vfx/match/turn_start_me/sfx.wav",
       "bytes": 100878
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part000.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part001.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part002.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part003.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part004.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part005.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part006.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part007.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part008.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part009.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part010.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part011.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part012.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part013.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part014.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part015.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part016.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part017.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es1/video-be8cfafc25bf.part018.bin",
+      "bytes": 15903
+    },
+    {
+      "path": "assets/vfx/spells/es1/meta.json",
+      "bytes": 3145
+    },
+    {
+      "path": "assets/vfx/spells/es1/sfx-62e15112b94e.wav",
+      "bytes": 153678
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part000.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part001.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part002.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part003.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part004.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part005.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part006.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part007.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part008.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part009.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part010.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part011.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part012.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part013.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part014.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part015.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part016.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part017.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part018.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part019.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part020.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part021.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part022.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part023.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part024.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part025.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part026.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part027.bin",
+      "bytes": 140000
+    },
+    {
+      "path": "assets/vfx/spells/es2/video-4203d9a27b04.part028.bin",
+      "bytes": 65896
+    },
+    {
+      "path": "assets/vfx/spells/es2/meta.json",
+      "bytes": 4059
+    },
+    {
+      "path": "assets/vfx/spells/es2/sfx-572706231b14.wav",
+      "bytes": 145046
     }
   ]
 }

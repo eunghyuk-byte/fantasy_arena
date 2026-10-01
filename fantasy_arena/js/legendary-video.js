@@ -3,7 +3,29 @@ var LegendaryVideoFx = (() => {
   let epoch = 0;
   const jobs = new Set(), warmed = new Map();
   const url = (base,file) => base.replace(/\/?$/, '/') + file;
-  function dispose(video) { try { video.pause();video.removeAttribute('src');video.load();video.remove(); } catch(e) {} }
+  function dispose(video) {
+    try { video.pause();video.removeAttribute('src');video.load();video.remove(); } catch(e) {}
+    if(video._ownedObjectUrl){URL.revokeObjectURL(video._ownedObjectUrl);video._ownedObjectUrl=null;}
+  }
+  async function videoSource(base,V,signal) {
+    if(!V.parts)return {src:url(base,V.file),owned:false};
+    const parts=V.parts;
+    if(!Array.isArray(parts)||!parts.length||parts.length>256||!Number.isInteger(V.bytes)||V.bytes<1||V.bytes>64*1024*1024
+      ||!/^[a-f0-9]{64}$/i.test(V.sha256||'')||parts.some(p=>!p.file||!Number.isInteger(p.bytes)||p.bytes<1)
+      ||parts.reduce((n,p)=>n+p.bytes,0)!==V.bytes)throw Error('Invalid video parts');
+    const chunks=await Promise.all(parts.map(async p=>{
+      const r=await fetch(url(base,p.file),{signal,cache:'force-cache'});
+      if(!r.ok)throw Error('Missing video part');
+      const b=await r.arrayBuffer();if(b.byteLength!==p.bytes)throw Error('Wrong video part size');return b;
+    }));
+    if(signal.aborted)throw Error('Cancelled video');
+    const data=new Uint8Array(V.bytes);let offset=0;
+    for(const b of chunks){data.set(new Uint8Array(b),offset);offset+=b.byteLength;}
+    const digest=await crypto.subtle.digest('SHA-256',data);
+    const sha=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+    if(signal.aborted||sha!==V.sha256.toLowerCase())throw Error('Invalid or cancelled video');
+    return {src:URL.createObjectURL(new Blob([data],{type:'video/webm'})),owned:true};
+  }
   function ready(base, meta, signal) {
     return new Promise(resolve => {
       const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';
@@ -21,24 +43,28 @@ var LegendaryVideoFx = (() => {
           finish(!meta.video.alpha||transparent);
         } catch(e){finish(false);}
       };
-      const timer=setTimeout(fail,1800);
+      const timer=setTimeout(fail,meta.video.parts?5000:1800);
       signal.addEventListener('abort',fail,{once:true});
       if(signal.aborted)return fail();
       v.addEventListener('loadeddata',check);v.addEventListener('error',fail);
       if(!v.canPlayType('video/webm; codecs="vp9"'))return fail();
-      v.src=url(base,meta.video.file);v.load();
+      videoSource(base,meta.video,signal).then(source=>{
+        if(done||signal.aborted){if(source.owned)URL.revokeObjectURL(source.src);return;}
+        if(source.owned)v._ownedObjectUrl=source.src;
+        v.src=source.src;v.load();
+      },fail);
     });
   }
   async function preload(base,meta) {
     try { if(typeof Sfx!=='undefined'&&meta.sfx)Sfx.loadUrl(url(base,meta.sfx.file)).catch(()=>{}); } catch(e) {}
-    const key=url(base,meta.video.file);
+    const key=url(base,meta.video.sha256||meta.video.file);
     if(warmed.has(key))return warmed.get(key);
     const controller=new AbortController();const token=epoch;
     const cancel=()=>controller.abort();jobs.add(cancel);
     const promise=(async()=>{try{
       const v=await ready(base,meta,controller.signal);if(!v)return false;dispose(v);
       return token===epoch;
-    }finally{jobs.delete(cancel);}})();
+    }finally{controller.abort();jobs.delete(cancel);}})();
     warmed.set(key,promise);const ok=await promise;if(!ok)warmed.delete(key);return ok;
   }
   function ease(t) {
@@ -78,7 +104,7 @@ var LegendaryVideoFx = (() => {
       video.currentTime=0;
       video.play().then(()=>{
         if(ended||token!==epoch)return;
-        if(sound&&typeof Sfx!=='undefined')audio=Sfx.playBuf(sound,{returnHandle:true,durationMs:meta.durationMs});
+        if(sound&&typeof Sfx!=='undefined')audio=Sfx.playBuf(sound,{returnHandle:true,when:Math.max(0,meta.sfx.startMs||0)/1000,durationMs:meta.sfx.durationMs||meta.durationMs});
         try{if(opts.onStart)opts.onStart();}catch(e){}
         const draw=()=>{
           if(ended)return;
@@ -91,8 +117,13 @@ var LegendaryVideoFx = (() => {
             dim=t<D.inMs?ease(t/D.inMs):t<D.outStartMs?1:1-ease((t-D.outStartMs)/(D.endMs-D.outStartMs));
           }
           if(D.opacity){ctx.fillStyle=D.color||'#000';ctx.globalAlpha=D.opacity*dim;ctx.fillRect(0,0,canvas.width,canvas.height);}
-          ctx.globalAlpha=1;ctx.save();ctx.translate(a.x+off[0]*k,a.y+(flip?-off[1]:off[1])*k);if(flip)ctx.scale(1,-1);
-          ctx.drawImage(video,-size[0]*k/2,-size[1]*k/2,size[0]*k,size[1]*k);ctx.restore();
+          ctx.globalAlpha=1;
+          const multi=Array.isArray(opts.anchors),anchors=multi?opts.anchors:[a];
+          anchors.forEach(point=>{
+            const sk=multi?(point.scale||k):k;
+            ctx.save();ctx.translate(point.x+off[0]*sk,point.y+(flip?-off[1]:off[1])*sk);if(flip)ctx.scale(1,-1);
+            ctx.drawImage(video,-size[0]*sk/2,-size[1]*sk/2,size[0]*sk,size[1]*sk);ctx.restore();
+          });
           try {if(opts.drawBeforeSecondary)opts.drawBeforeSecondary(ctx,t);}catch(e){finish(false);return;}
           if(secondary && !secondaryDone) {
             if(t>=layer.endMs || (layer.isValid && !layer.isValid())) {dispose(secondary);secondaryDone=true;}

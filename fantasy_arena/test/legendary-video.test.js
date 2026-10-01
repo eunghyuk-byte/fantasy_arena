@@ -10,15 +10,15 @@ test('l4 actual metadata repeats on the synthetic video player and releases fail
 });
 test('legendary dispatch accepts video-only metadata without changing anchored spell schema',()=>{const src=fs.readFileSync(path.join(__dirname,'../js/spell-fx.js'),'utf8');const ctx={};vm.createContext(ctx);for(const name of ['isLegendarySummonMeta','isAnchoredMeta']){const start=src.indexOf('function '+name+'('),end=src.indexOf('\n  }',start)+4;vm.runInContext(src.slice(start,end),ctx);}assert.equal(ctx.isLegendarySummonMeta(meta),true);assert.equal(ctx.isAnchoredMeta({...meta,playMode:'anchored'}),false);});
 function fixture({opaque=false,fail=false,rejectPlay=false}={}){
- const videos=[],canvases=[];let stops=0,starts=0;
+ const videos=[],canvases=[],positions=[],audioOpts=[];let stops=0,starts=0;
  const document={hidden:false,body:{appendChild(){}},createElement(kind){
   if(kind==='video'){
    const v=new EventTarget();Object.assign(v,{videoWidth:1280,videoHeight:720,readyState:2,currentTime:0,ended:false,canPlayType:()=> 'probably',removeAttribute(){},remove(){this.removed=true;},pause(){this.playing=false;},load(){if(!this.removed)queueMicrotask(()=>this.dispatchEvent(new Event(fail?'error':'loadeddata')));},play(){if(rejectPlay)return Promise.reject(Error('blocked'));this.playing=true;return Promise.resolve();}});videos.push(v);return v;
   }
-  const c={style:{},remove(){this.removed=true;},getContext:()=>({drawImage(){},getImageData:()=>({data:new Uint8ClampedArray(16).fill(opaque?255:0)}),clearRect(){},fillRect(){},save(){},restore(){},translate(){},scale(){}})};canvases.push(c);return c;
+  const c={style:{},remove(){this.removed=true;},getContext:()=>({drawImage(){},getImageData:()=>({data:new Uint8ClampedArray(16).fill(opaque?255:0)}),clearRect(){},fillRect(){},save(){},restore(){},translate(x,y){positions.push([x,y]);},scale(){}})};canvases.push(c);return c;
  }};
- const ctx={document,AbortController,setTimeout,clearTimeout,Promise,Map,Set,Math,innerWidth:1920,innerHeight:1080,Sfx:{loadUrl:async()=>({}),playBuf:()=>{starts++;return{stop:()=>stops++}}},requestAnimationFrame:f=>setTimeout(()=>{for(const v of videos)if(v.playing){v.currentTime+=.3;v.ended=v.currentTime>=2;}f();},0),cancelAnimationFrame:clearTimeout};ctx.window=ctx;vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../js/legendary-video.js'),'utf8'),ctx);
- return{fx:ctx.LegendaryVideoFx,videos,canvases,audio:()=>({starts,stops})};
+ const ctx={document,AbortController,setTimeout,clearTimeout,Promise,Map,Set,Math,innerWidth:1920,innerHeight:1080,Sfx:{loadUrl:async()=>({}),playBuf:(buf,opts)=>{audioOpts.push(opts);starts++;return{stop:()=>stops++}}},requestAnimationFrame:f=>setTimeout(()=>{for(const v of videos)if(v.playing){v.currentTime+=.3;v.ended=v.currentTime>=2;}f();},0),cancelAnimationFrame:clearTimeout};ctx.window=ctx;vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../js/legendary-video.js'),'utf8'),ctx);
+ return{fx:ctx.LegendaryVideoFx,videos,canvases,positions,audioOpts,audio:()=>({starts,stops})};
 }
 test('streamed video repeats with fresh decoder and owned audio cleanup',async()=>{const f=fixture();assert.equal(await f.fx.preload('pack/',meta),true);for(let i=0;i<3;i++)assert.equal(await f.fx.play('pack/',meta),true);assert.equal(f.fx.pending(),0);assert.ok(f.videos.every(v=>v.removed));assert.deepEqual(f.audio(),{starts:3,stops:3});});
 test('opaque decoder and missing media fallback before playback',async()=>{for(const options of [{opaque:true},{fail:true}]){const f=fixture(options);assert.equal(await f.fx.preload('pack/',meta),false);assert.equal(await f.fx.play('pack/',meta),false);assert.equal(f.fx.pending(),0);assert.equal(f.audio().starts,0);}});
@@ -40,3 +40,7 @@ test('native reveal easing is bounded monotonic with exact endpoints',()=>{
  for(let i=0;i<=100;i++){const y=f.fx.ease(i/100);assert.ok(y>=last&&y<=1);last=y;}
  assert.ok(f.fx.ease(.5)>.5);
 });
+
+test('selected spell shares one decoder and delayed sound across explicit anchors',async()=>{const f=fixture(),m={...meta,sfx:{...meta.sfx,startMs:785,durationMs:822}};assert.equal(await f.fx.play('pack/',m,{anchors:[{x:10,y:20,scale:.1},{x:30,y:40,scale:.2}]}),true);assert.deepEqual(f.positions.slice(0,2),[[10,6.5],[30,13]]);assert.equal(f.audio().starts,1);assert.equal(f.audioOpts[0].when,.785);assert.equal(f.audioOpts[0].durationMs,822);assert.equal(f.videos.length,1);});
+test('empty explicit spell anchors draw no centered replacement',async()=>{const f=fixture();assert.equal(await f.fx.play('pack/',meta,{anchors:[]}),true);assert.equal(f.positions.length,0);assert.equal(f.audio().starts,1);});
+test('legacy anchor objects do not change the existing top-level display scale',async()=>{const f=fixture();await f.fx.play('pack/',meta,{anchor:{x:10,y:20,scale:.1}});assert.deepEqual(f.positions[0],[10,-115]);});
