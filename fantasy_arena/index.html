@@ -7,11 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/game.css?v=0.4043" />
-<link rel="stylesheet" href="css/lobby.css?v=0.4043" />
-<link rel="stylesheet" href="css/title.css?v=0.4043" />
-<link rel="stylesheet" href="css/audio-match.css?v=0.4043" />
-<link rel="stylesheet" href="css/shop.css?v=0.4043" />
+<link rel="stylesheet" href="css/game.css?v=0.4044" />
+<link rel="stylesheet" href="css/lobby.css?v=0.4044" />
+<link rel="stylesheet" href="css/title.css?v=0.4044" />
+<link rel="stylesheet" href="css/audio-match.css?v=0.4044" />
+<link rel="stylesheet" href="css/shop.css?v=0.4044" />
 </head>
 <body>
 <button class="bgm-btn settings-gear-btn" id="settingsGearBtn" title="설정" aria-label="설정">⚙</button>
@@ -26,7 +26,7 @@
         <button class="menu-btn" id="btnShop"><span class="menu-art plate-normal" aria-hidden="true"><span class="slice-0"></span><span class="slice-1"></span><span class="slice-2"></span></span><span class="menu-art plate-hover" aria-hidden="true"><span class="slice-0"></span><span class="slice-1"></span><span class="slice-2"></span></span><span class="menu-label">상점</span></button>
         <button class="menu-btn" id="btnSettings"><span class="menu-art plate-normal" aria-hidden="true"><span class="slice-0"></span><span class="slice-1"></span><span class="slice-2"></span></span><span class="menu-art plate-hover" aria-hidden="true"><span class="slice-0"></span><span class="slice-1"></span><span class="slice-2"></span></span><span class="menu-label">설정</span></button>
         <button class="menu-btn" id="btnTitleQuit" type="button"><span class="menu-art plate-normal" aria-hidden="true"><span class="slice-0"></span><span class="slice-1"></span><span class="slice-2"></span></span><span class="menu-art plate-hover" aria-hidden="true"><span class="slice-0"></span><span class="slice-1"></span><span class="slice-2"></span></span><span class="menu-label">게임 종료</span></button>
-        <div class="build-ver" id="buildVer">v0.4043</div>
+        <div class="build-ver" id="buildVer">v0.4044</div>
       </div>
     </div>
   </section>
@@ -191,10 +191,10 @@
       <li><b>치명공격</b> — 체력을 1 이상 깎으면 적이 바로 죽습니다.</li>
       <li><b>흡혈공격</b> — 준 체력 피해만큼 체력을 회복합니다.</li>
       <li><b>약화공격</b> — 공격 전에 적 공격·방어를 1씩 낮춥니다.</li>
-      <li><b>석화공격</b> — 공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다.</li>
+      <li><b>석화공격</b> — 공격 전에 적 공격을 0으로 만들고 적 방어를 최대 5까지 +1 합니다. 이미 방어가 5 이상이면 유지합니다.</li>
       <li><b>광역공격</b> — 적 유닛 전체를 공격합니다(영웅 제외). 반격을 받지 않습니다. 반격할 때는 퍼지지 않고 공격한 유닛에게만 반격합니다.</li>
-      <li><b>보호</b> — 피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)</li>
-      <li><b>환생</b> — 죽으면 체력 1로 한 번 다시 살아납니다. 카드 기본 능력은 그대로 다시 가지며 환생만 사라집니다. 다시 나타날 때 소환: 효과는 발동하지 않고, 파괴: 효과는 다시 파괴될 때 또 발동합니다. 환생으로 나타나면 침묵은 풀리고 원래 능력이 돌아옵니다. 환생하는 유닛이 낀 아이템의 파괴: 효과는 발동하고, 유닛은 아이템 없이 다시 나타납니다.</li>
+      <li><b>보호</b> — 공격·스펠 피해를 한 번 막습니다. 직접 능력치 감소와 코인으로 줄어드는 체력은 막지 않습니다.</li>
+      <li><b>환생</b> — 죽으면 체력 1로 한 번 다시 살아납니다. 공격력·방어력·최대 체력·코인·능력은 카드 기본값으로 돌아가고 현재 체력만 1이 됩니다. 장착 아이템·강화·추가 능력은 제거되며 환생은 소모됩니다. 다시 나타날 때 소환: 효과는 발동하지 않고, 파괴: 효과는 다시 파괴될 때 또 발동합니다. 환생으로 나타나면 침묵은 풀리고 원래 능력이 돌아옵니다. 환생하는 유닛이 낀 아이템의 파괴: 효과는 발동하고, 유닛은 아이템 없이 다시 나타납니다.</li>
       <li><b>소환:</b> — 전장에 낼 때 발동합니다.</li>
       <li><b>파괴:</b> — 파괴될 때 발동합니다.</li>
       <li><b>면역</b> — 스펠·효과의 단일 대상으로 지정되지 않습니다. 전체 효과는 받습니다.</li>
@@ -335,27 +335,27 @@
 </div>
 
 
-<script src="js/cards-data.js?v=0.4043"></script>
-<script src="js/vfx.js?v=0.4043"></script>
-<script src="js/bgm.js?v=0.4043"></script>
-<script src="js/sfx.js?v=0.4043"></script>
-<script src="js/settings.js?v=0.4043"></script>
-<script src="js/render.js?v=0.4043"></script>
-<script src="js/combat.js?v=0.4043"></script>
-<script src="js/combat-media.js?v=0.4043"></script>
-<script src="js/combat-fx.js?v=0.4043"></script>
-<script src="js/legendary-video.js?v=0.4043"></script>
-<script src="js/legendary-outcomes.js?v=0.4043"></script>
-<script src="js/match-reference.js?v=0.4043"></script>
-<script src="js/spell-fx.js?v=0.4043"></script>
-<script src="js/coin-duel.js?v=0.4043"></script>
-<script src="js/game.js?v=0.4043"></script>
+<script src="js/cards-data.js?v=0.4044"></script>
+<script src="js/vfx.js?v=0.4044"></script>
+<script src="js/bgm.js?v=0.4044"></script>
+<script src="js/sfx.js?v=0.4044"></script>
+<script src="js/settings.js?v=0.4044"></script>
+<script src="js/render.js?v=0.4044"></script>
+<script src="js/combat.js?v=0.4044"></script>
+<script src="js/combat-media.js?v=0.4044"></script>
+<script src="js/combat-fx.js?v=0.4044"></script>
+<script src="js/legendary-video.js?v=0.4044"></script>
+<script src="js/legendary-outcomes.js?v=0.4044"></script>
+<script src="js/match-reference.js?v=0.4044"></script>
+<script src="js/spell-fx.js?v=0.4044"></script>
+<script src="js/coin-duel.js?v=0.4044"></script>
+<script src="js/game.js?v=0.4044"></script>
 <div id="exitNotice" role="status" aria-live="polite"></div>
-<script src="js/menu-exit.js?v=0.4043"></script>
-<script src="js/title-menu.js?v=0.4043"></script>
-<script src="js/net.js?v=0.4043"></script>
-<script src="js/lobby.js?v=0.4043"></script>
-<script src="js/match-demo.js?v=0.4043"></script>
-<script src="js/shop.js?v=0.4043"></script>
+<script src="js/menu-exit.js?v=0.4044"></script>
+<script src="js/title-menu.js?v=0.4044"></script>
+<script src="js/net.js?v=0.4044"></script>
+<script src="js/lobby.js?v=0.4044"></script>
+<script src="js/match-demo.js?v=0.4044"></script>
+<script src="js/shop.js?v=0.4044"></script>
 </body>
 </html>

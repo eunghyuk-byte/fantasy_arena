@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.4043";
+const GAME_VERSION = "0.4044";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -2464,6 +2464,9 @@ function collectAbilityTips(c) {
     tips.push({ title: t, desc: String(desc || "") });
   };
   if (!c) return tips;
+  if ((c.type === "spell" || c.type === "item") && cardEffectText(c)) {
+    add("카드 효과", cardEffectText(c));
+  }
   if (c.atkSkill != null && typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[c.atkSkill]) {
     const [nm, desc] = ATK_SKILL_HELP[c.atkSkill];
     add(nm, desc);
@@ -3430,7 +3433,7 @@ const ATK_SKILL_HELP = {
   5: ["치명공격", "체력을 1 이상 깎으면 적이 바로 죽습니다."],
   6: ["흡혈공격", "준 체력 피해만큼 체력을 회복합니다."],
   7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],
-  8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다."],
+  8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 적 방어를 최대 5까지 +1 합니다. 이미 방어가 5 이상이면 유지합니다."],
   9: ["광역공격", "코인으로 정해진 공격력으로 적 유닛 전체에 동시에 피해를 줍니다(각 방어·보호 적용, 영웅 제외). 첫 적의 피해·처치 여부와 무관하며 후열 코인은 추가로 굴리지 않습니다. 반격을 받지 않습니다. 반격할 때는 퍼지지 않고 공격한 유닛에게만 반격합니다."]
 };
 /* 옛 키워드(복수·강탈·출전·유언)는 내부 키로만 남기고 화면에는 「소환:」「파괴:」 문장으로 표시 (9/27) */
@@ -3453,8 +3456,13 @@ function fmtCoinLinks(c) {
   one("공", L.atkC); one("방", L.defC); one("체", L.hpC);
   return parts.length ? parts.join(" ") : "";
 }
+function cardEffectText(c) {
+  return String((c && c.text) || "").trim();
+}
 function buildLoreSkillsHtml(c) {
   const rows = [];
+  const effect = cardEffectText(c);
+  if (effect) rows.push(`<div class="lore-skill"><b>카드 효과</b><span>${escHtml(effect).replace(/\n/g, "<br>")}</span></div>`);
   if (c.atkSkill != null && ATK_SKILL_HELP[c.atkSkill]) {
     const [nm, desc] = ATK_SKILL_HELP[c.atkSkill];
     rows.push(`<div class="lore-skill"><b>${nm}</b><span>${desc}</span></div>`);
@@ -3509,7 +3517,7 @@ function cardInfoParts(c) {
   const coin = (c.type === "minion") ? fmtCoinLinks(c) : "";
   const top = [c.cost + "소울", tribeNm, raceNm, stats, coin ? ("코인 " + coin) : ""].filter(Boolean).join(" · ");
   const bot = [rareKo, cap].filter(Boolean).join(" · ");
-  return { name: c.name, metaHtml: top + (bot ? "<br><br>" + bot : ""), skillsHtml: buildLoreSkillsHtml(c), lore: loreOf(id) };
+  return { name: c.name, metaHtml: top + (bot ? "<br><br>" + bot : ""), effectText: cardEffectText(c), skillsHtml: buildLoreSkillsHtml(c), lore: loreOf(id) };
 }
 
 /* ===== v0.342: 덱 편집 — 호버 툴팁 + 클릭 즉시 추가 ===== */
@@ -3521,17 +3529,40 @@ function poolTipEl() {
     el.id = "poolTip";
     el.className = "pool-tip lore-side";
     el.setAttribute("aria-hidden", "true");
+    el.tabIndex = 0;
+    el.addEventListener("mouseenter", () => clearTimeout(_poolTipHideTimer));
+    el.addEventListener("focusin", () => clearTimeout(_poolTipHideTimer));
+    el.addEventListener("mouseleave", () => { if (!el.matches(":focus-within")) hidePoolTip(); });
+    el.addEventListener("focusout", (e) => { if (!el.contains(e.relatedTarget) && !el.matches(":hover")) hidePoolTip(); });
+    el.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      const anchor = _poolTipAnchor;
+      hidePoolTip();
+      if (anchor && anchor.isConnected) {
+        anchor.tabIndex = -1;
+        anchor.focus({ preventScroll: true });
+      }
+    });
     document.body.appendChild(el);
   }
   return el;
 }
 let _poolTipId = null;
+let _poolTipHideTimer = null;
+let _poolTipAnchor = null;
 function hidePoolTip() {
+  clearTimeout(_poolTipHideTimer);
   _poolTipId = null;
   const el = document.getElementById("poolTip");
-  if (el) el.classList.remove("show");
+  if (el) {
+    el.classList.remove("show");
+    el.setAttribute("aria-hidden", "true");
+  }
 }
 function showPoolTip(anchor, id) {
+  clearTimeout(_poolTipHideTimer);
+  _poolTipAnchor = anchor;
   const c = CARD_MAP[id];
   if (!c || !anchor) return;
   const el = poolTipEl();
@@ -3543,6 +3574,7 @@ function showPoolTip(anchor, id) {
     _poolTipId = id;
   }
   el.classList.add("show");
+  el.setAttribute("aria-hidden", "false");
   positionPoolTip(anchor);
 }
 function positionPoolTip(anchor) {
@@ -3597,12 +3629,17 @@ function bindPoolHover(pool) {
     const to = e.relatedTarget;
     if (to && it.contains(to)) return;
     // 다시 그려진(같은 id) 카드로 옮겨간 경우는 mouseover가 다시 띄움
-    hidePoolTip();
+    clearTimeout(_poolTipHideTimer);
+    _poolTipHideTimer = setTimeout(hidePoolTip, 160);
   });
   pool.addEventListener("scroll", hidePoolTip, { passive: true });
   pool.addEventListener("dragstart", hidePoolTip);
-  window.addEventListener("scroll", hidePoolTip, { passive: true, capture: true });
-  window.addEventListener("wheel", hidePoolTip, { passive: true });
+  const outsideTip = (e) => {
+    const tip = document.getElementById("poolTip");
+    if (!tip || !tip.contains(e.target)) hidePoolTip();
+  };
+  window.addEventListener("scroll", outsideTip, { passive: true, capture: true });
+  window.addEventListener("wheel", outsideTip, { passive: true });
   window.addEventListener("resize", hidePoolTip);
 }
 

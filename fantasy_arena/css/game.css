@@ -4864,3 +4864,6 @@ html, body, body * {
   color: #fff3be;
   text-shadow: 0 1px 2px #000;
 }
+
+/* Long card explanations remain fully readable on short screens. */
+#poolTip.pool-tip { max-width:calc(100vw - 16px); max-height:calc(100dvh - 16px); overflow-y:auto; overscroll-behavior:contain; pointer-events:auto !important; }

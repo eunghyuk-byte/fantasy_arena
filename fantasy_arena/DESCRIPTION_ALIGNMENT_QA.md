@@ -1,6 +1,6 @@
-# Card description alignment — local review
+# Card description alignment — v0.4044
 
-Base: v0.4043 `05953bb875196bee77a666548a3d163c92fcad05`. No version bump, remote push or public deployment.
+Base: v0.4043 `05953bb875196bee77a666548a3d163c92fcad05`. User approved final wording and release as v0.4044.
 
 ## Changes
 
@@ -8,18 +8,18 @@ The shared Canvas renderer previously anchored single-line text at the top line 
 
 ## Verification
 
-604 Node tests pass, including three alignment tests observed failing before the fix. Real Chrome composed all 300 non-token cards at desktop and mobile 844x390: 77 empty, 158 one-line, 63 two-line, 2 three-line. Before/after records prove identical wording, font, widths and line counts; only requested Y positions differ. Mobile records equal desktop records because all views share the same 768x1152 composition.
+610 client/server Node tests pass, including three alignment tests observed failing before the fix. Real Chrome composed all 300 non-token cards at desktop and mobile 844x390: 77 empty, 158 one-line, 63 two-line, 2 three-line. Before/after records prove identical wording, font, widths and line counts; only requested Y positions differ. Mobile records equal desktop records because all views share the same 768x1152 composition.
 
 Builder/catalogue, lore, hand and zoom use the same composed image at 1600x900 and 844x390. Representative item/spell/unit cards were visually checked, including 사마의, 블랙드래곤, 여포, 전염병, 해골던지기, 파멸, 사신의낫, 흑마법서 and 적토마. Independent reviewer found no important defect. Native Steam and other OS font fallbacks were not tested.
 
-## Wording decision required — no text changed
+## Approved wording applied
 
 | Card | Current text | Cause | Proposed two lines |
 |---|---|---|---|
 | 동남풍 (ns9) | 적 전체 전장 유닛을 핸드로 이동 / 손패 10장 초과분은 파괴 | First explicit line exceeds 476.16px and wraps, producing 3 lines | 적 전장 유닛 전부 핸드로 / 손패 10장 초과분은 파괴 |
 | 일기토 (fs9) | 내 전장과 적 전장에서 랜덤 유닛 하나씩만 남기고 나머지 처치 | Long single sentence width-wraps into 3 lines | 각 전장 무작위 1기 외 / 나머지 유닛 처치 |
 
-Slash means a proposed explicit newline. At the unchanged 45px font, proposed line widths are 454.86 / 456.34px and 398.61 / 310.23px. Available width is 476.16px. These proposals are not applied; final approval is required before changing card text. Until then the two existing three-line cards remain visible in full, without clipping or shrinking.
+Slash means a proposed explicit newline. At the unchanged 45px font, proposed line widths are 454.86 / 456.34px and 398.61 / 310.23px. Available width is 476.16px. The user approved both proposals, now applied as explicit two-line descriptions. Final real Chrome audit: 300 cards, 77 empty, 158 one-line, 65 two-line, zero three-line. Every other card-data field and the complete pool remain identical to the base. No clipping or font shrinking.
 
 ## Library before/after images
 

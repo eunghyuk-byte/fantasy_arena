@@ -1,3 +1,9 @@
+## v0.4044
+- Synchronize current effect summaries across detail/hover/peek, correct stale flavor lore and ability rules help, and keep long hover explanations scrollable with keyboard focus/Escape support.
+- Center card descriptions within each frame type while preserving approved single-line unit/item and two-line spell positions.
+- Apply approved two-line wording for 동남풍 and 일기토; no effect-rule changes.
+- Pack prices: 1,500 / 5,900 / 9,900 won; bundle discounts approximately 21% / 34%. Commerce remains unconnected.
+
 ## v0.4043
 
 - Adds the approved 24 units using existing abilities and the 24 previously approved illustrations. Each tribe now has 33 units, 10 spells and 7 items: 50 regular cards, excluding tokens.
