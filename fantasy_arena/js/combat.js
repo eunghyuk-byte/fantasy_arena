@@ -227,6 +227,11 @@ function doAttackCore(p, attacker, target, auto, action) {
     window._pendingAtkDef = aDefVal;
   }
 
+  // Each defender lifetime gets one temporary HP application per exchange.
+  // Rebirth clears _turnRoll, so the same object becomes a fresh participant.
+  const defenderCoins = new Map();
+  if (def) defenderCoins.set(def, { roll: def._turnRoll, snap: dHpSnap });
+
   const skLabel = (typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[atkSkillOf(attacker)])
     ? ATK_SKILL_HELP[atkSkillOf(attacker)][0] : "";
   log(`${attacker.name} 공유코인 N=${aShared.n} 앞면${aShared.heads}` + (aShared.reused ? " (이번 턴 결과)" : "") + ` → 공 ${aAtk}` + (atkSkillOf(attacker) > 1 ? ` [${skLabel}]` : ""));
@@ -250,6 +255,33 @@ function doAttackCore(p, attacker, target, auto, action) {
       u._fxAtkD = dA || 0;
       u._fxDefD = dD || 0;
       u._fxHpD = dH || 0;
+    }
+    async function prepareDefenderCoins(unit) {
+      action.guard();
+      const existing = defenderCoins.get(unit);
+      if (existing && existing.roll === unit._turnRoll) return existing;
+      const roll = turnCoinRoll(unit);
+      const snap = beginCombatHpCoin(unit, roll.dHp);
+      const entry = { roll: unit._turnRoll, snap };
+      defenderCoins.set(unit, entry);
+      const atk = clampAtk((Number(unit.atk) || 0) + roll.dAtk);
+      const dp = clampDef((Number(unit.def) || 0) + roll.dDef, unit.def);
+      armFx(unit, atk, dp, roll.dAtk, roll.dDef, roll.dHp);
+      if (snap && snap.coinKilled) holdDeath(unit);
+      if (roll.flips.length && !roll.reused) {
+        const extraRows = [{ label: unit.name, unit, modLabel: "", flips: roll.flips,
+          delta: roll.heads, detail: sharedDetail(unit, roll, atk, dp, unit.hp, snap ? snap.pre : null) }];
+        await new Promise(done => showCoinResult("코인 배틀", extraRows, done, {
+          attacker, attackerOwner: p, defender: unit,
+          aHpPre: attacker.hp, dHpPre: snap ? snap.pre : unit.hp
+        }));
+        action.guard();
+      }
+      if (snap && snap.coinKilled) {
+        log(`${unit.name} 코인으로 체력 0 · 전투 전 파괴`);
+        await death(unit);
+      }
+      return entry;
     }
     armFx(attacker, aAtk, aDefVal, aShared.dAtk, aShared.dDef, aShared.dHp);
     if (target.kind === "minion" && def) {
@@ -343,7 +375,11 @@ function doAttackCore(p, attacker, target, auto, action) {
       log(`${attacker.name} 광역공격 → 적 유닛 ${victims.length}체`);
       for (const vic of victims) {
         if (attacker.hp <= 0 || attacker.dying) break;
-        const blocked = Math.max(0, vic.def || 0);
+        const coinState = await prepareDefenderCoins(vic);
+        action.guard();
+        if (coinState.snap && coinState.snap.coinKilled) continue;
+        const vicRoll = storedTurnCoins(vic);
+        const blocked = clampDef((Number(vic.def) || 0) + (vicRoll ? vicRoll.dDef : 0), vic.def);
         const calc = calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefNow, vic);
         const hpDmg = calc.hpDmg;
         log(`${vic.name} 방어 ${blocked} → 체력피해 ${hpDmg}`);
@@ -416,7 +452,12 @@ function doAttackCore(p, attacker, target, auto, action) {
             break;
           }
         }
-        const blocked = (hit === 1 && def === (target && target.minion)) ? (window._pendingDef || 0) : Math.max(0, def.def || 0);
+        const coinState = await prepareDefenderCoins(def);
+        action.guard();
+        // A retarget that dies to its own HP coin consumes the remaining hit.
+        if (coinState.snap && coinState.snap.coinKilled) break;
+        const hitRoll = storedTurnCoins(def);
+        const blocked = hit === 1 ? (window._pendingDef || 0) : clampDef((Number(def.def) || 0) + (hitRoll ? hitRoll.dDef : 0), def.def);
         const backBlock = window._pendingAtkDef || 0;
         const calc = calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefNow, def);
         let hpDmg = calc.hpDmg;
@@ -441,11 +482,11 @@ function doAttackCore(p, attacker, target, auto, action) {
         action.guard();
         const survived = def && def.hp > 0 && !def.dying;
         // counter uses this hit's defender current atk if retargeted mid-연속
-        const counterAtk = (hit === 1) ? dAtk : clampAtk(Number(def.atk) || 0);
+        const counterAtk = hit === 1 ? dAtk : clampAtk((Number(def.atk) || 0) + (hitRoll ? hitRoll.dAtk : 0));
         if (survived && counterAtk && attacker.hp > 0 && !attacker.dying) {
           // v0.374: 반격도 공격 능력이 공격할 때와 똑같이 발동 (치명 v0.372 → 전체 확장, 9/29 사용자 확정)
           //   광역 → 퍼지지 않고 공격자에게만 일반 반격 · 연속 → 공격자에게 두 번, 처치하면 이어지지 않음
-          const counterDefVal = (hit === 1 && def === (target && target.minion)) ? defVal : Math.max(0, Number(def.def) || 0);
+          const counterDefVal = hit === 1 ? defVal : clampDef((Number(def.def) || 0) + (hitRoll ? hitRoll.dDef : 0), def.def);
           await counterAttack(def, target.owner, counterAtk, counterDefVal);
           // v0.317 「반격:」 아이템 (상대 턴에 반격할 때)
           if (def._itemFx && typeof applyItemCounterFx === "function") applyItemCounterFx(target.owner, def);
@@ -471,7 +512,9 @@ function doAttackCore(p, attacker, target, auto, action) {
     }
     // Fantasy Masters: strip remaining gold HP coin bonus; black/damage already stuck
     settleCombatHpCoin(aHpSnap);
-    settleCombatHpCoin(dHpSnap);
+    for (const [unit, entry] of defenderCoins) {
+      if (entry.roll === unit._turnRoll) settleCombatHpCoin(entry.snap);
+    }
     action.guard();
     const dying = [state.p1,state.p2].flatMap(pl => pl.board.filter(mm => mm.dying));
     await deathGroup(dying);

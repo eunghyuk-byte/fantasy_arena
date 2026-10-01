@@ -1,3 +1,11 @@
+# v0.393
+
+- Prevents an unfinished spell or its delayed summon callback from changing a restarted match or releasing its input lock.
+- Retains same-turn attack/defense coin results for consecutive hits and area attacks. Base-attack-zero units can participate in automatic combat when their attack coins can provide positive attack.
+- Area-attack backline and consecutive-attack retargets roll their coins on first participation; temporary HP coins apply and settle once per defender lifetime. Rebirth rolls fresh coins. A retarget dying to black HP coins consumes the remaining consecutive hit and ends the attack (user-confirmed).
+- Protection blocks combat/spell damage, but not direct stat reduction or coin HP loss (user-confirmed). Falling Rock and Sandhell now preserve protection while reducing HP, matching Lu Bu's direct reduction. Rule text and in-game help agree.
+- This is a gameplay-only bug release. Pending es2 B effects and other media changes are not included. Verification and remaining browser limits are recorded in GAMEPLAY_V393_QA.md.
+
 # v0.392
 
 - Added approved MyTurn A (1050ms), reference-contained full-canvas placement (-6,-30 at 1920x1080), explicit dim off, no duplicate label or fade.

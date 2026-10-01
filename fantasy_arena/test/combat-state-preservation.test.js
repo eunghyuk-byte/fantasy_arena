@@ -14,10 +14,12 @@ async function run(old,skill,enemySkill,coins,shield,opponent){
  if(!old)g.CombatFx={generation:()=>0,onCancel:()=>()=>{},snapshot:()=>null,play:async(k,o)=>{o.onImpact?.();return {}}};
  await g.doAttack(mine,a,{kind:'minion',owner:foe,minion:d});return JSON.parse(JSON.stringify({p1:simplify(p1),p2:simplify(p2),rng:seed}));
 }
-test('360 deterministic exchanges preserve both sides state and RNG against published v0.390',async()=>{
+test('340 unaffected exchanges preserve both sides state and RNG against published v0.390',async()=>{
  let count=0;
  for(const opponent of [false,true])for(let skill=1;skill<=9;skill++)for(const enemy of [1,4,5,6,9])for(const coins of [false,true])for(const shield of [false,true]){
+   // Consecutive + coin cases intentionally fix v0.390 second-hit roll loss; covered by bug-reproduction.test.js.
+   if(skill===4 && coins) continue;
    assert.deepEqual(await run(false,skill,enemy,coins,shield,opponent),await run(true,skill,enemy,coins,shield,opponent),JSON.stringify({skill,enemy,coins,shield,opponent}));count++;
  }
- assert.equal(count,360);
+ assert.equal(count,340);
 });

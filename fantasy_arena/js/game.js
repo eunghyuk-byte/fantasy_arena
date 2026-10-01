@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.392";
+const GAME_VERSION = "0.393";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -419,7 +419,10 @@ async function runAutoCombat(p) {
     if (!p.board.includes(m) || m.hp <= 0) continue;
     // R7: 공격권 없는 유닛만 스킵 (판마: 소환 직후에도 canAttack=true)
     // 공격불가(cannotAttack): 턴 종료 자동전투에서 공격 피해를 주지 않음
-    if (unitCannotAttack(m) || !m.canAttack || m.attacksLeft <= 0 || (Number(m.atk) || 0) <= 0) continue;
+    if (unitCannotAttack(m) || !m.canAttack || m.attacksLeft <= 0) continue;
+    const saved = storedTurnCoins(m);
+    const attackCoin = saved ? saved.dAtk : effectiveCoinLinks(m).atkC;
+    if ((Number(m.atk) || 0) <= 0 && attackCoin <= 0) continue;
     const legal = attackTargets(p, m);
     if (!legal.length) continue;
     const foe = e.board.find(x => x.hp > 0);
@@ -931,7 +934,9 @@ function preloadLegendaryFx(s) {
 }
 
 async function runSpellCast(p, card, target) {
-  state.busy = true;
+  const owner = state;
+  const valid = () => state === owner;
+  owner.busy = true;
   // 맹덕신서(copy_enemy_spell): 시전 시점 상대 전장 장착 유닛 수만큼, 해결 뒤 원본 소울 복사본을 상대 핸드에
   const copiers = unitsWithItemFx(opponent(p), "copy_enemy_spell").length;
   try {
@@ -941,7 +946,7 @@ async function runSpellCast(p, card, target) {
     // v0.371 소환 연출(summon 모드, 팔진도): 연출이 먼저 해결을 부르고 새 토큰 uid를 받아 숨겼다가 드러냄
     let resolved = false;
     plan.resolveNow = () => {
-      if (resolved) return [];
+      if (resolved || !valid()) return [];
       resolved = true;
       const before = new Set(p.board.map(m => m.uid));
       resolveSpell(p, card, target, plan);
@@ -949,11 +954,13 @@ async function runSpellCast(p, card, target) {
       return p.board.filter(m => !before.has(m.uid)).map(m => m.uid);
     };
     await playSpellFx(card, target, p, plan);
+    if (!valid()) return;
     if (!resolved) { resolved = true; resolveSpell(p, card, target, plan); }
     for (let i = 0; i < copiers; i++) addCardToHand(opponent(p), card.id, "맹덕신서 복사");
   } finally {
-    state.busy = false;
+    if (valid()) owner.busy = false;
   }
+  if (!valid()) return;
   checkWin();
   render();
 }
@@ -1423,12 +1430,12 @@ function applyFx(p, fx, target) {
     log(`어스퀘이크 · 적 전체 피해 ${n}`);
     [...e.board].forEach(m => spellDamageMinion(e, m, n, { fromSpell: true }));
   } else if (fx.type === "enemy_def_hp_down") {
-    // v0.350 낙석: 적 전체 방·체 −N (방어를 거치지 않고 직접 감소 · 체력 감소는 보호가 막음)
+    // v0.350 낙석: 적 전체 방·체 −N (방어를 거치지 않고 직접 감소 · 보호는 피해만 막으므로 감소에는 소모되지 않음)
     const n = fx.value || 1;
     [...e.board].forEach(m => {
       if (m.dying) return;
       m.def = Math.max(0, (Number(m.def) || 0) - n);
-      damageMinion(e, m, n, { fromSpell: true });
+      damageMinion(e, m, n, { fromSpell: true, statReduction: true });
     });
   } else if (fx.type === "heal_all_full") {
     // v0.350 치유의빛: 아군 전체 체력 = 최대 체력
@@ -1478,7 +1485,7 @@ function applyFx(p, fx, target) {
       // 공·방·체 직접 감소(방어 미경유)
       m.atk = Math.max(0, (m.atk || 0) - n);
       m.def = Math.max(0, (m.def || 0) - n);
-      damageMinion(e, m, n, { fromSpell: true });
+      damageMinion(e, m, n, { fromSpell: true, statReduction: true });
     });
   } else if (fx.type === "plague") {
     const minC = fx.minCost != null ? fx.minCost : 0;
@@ -1747,9 +1754,9 @@ function damageMinion(owner, m, n, ctx) {
   if (!m || m.dying) return;
   ctx = ctx || {};
   n = Math.max(0, Number(n) || 0);
-  // 보호: only real HP≥1 hits consume; 0-dmg & black-coin HP loss do not
+  // Protection blocks combat/spell HP damage, not direct stat reduction or coin loss.
   const hasShield = hasOwnAbility(m, "보호") || (m.keywords || []).includes("shield");
-  if (n > 0 && hasShield) {
+  if (n > 0 && hasShield && !ctx.statReduction) {
     if (hasOwnAbility(m, "보호")) {
       const rest = ownAbilities(m).filter(x => x !== "보호");
       m.ability = rest.length ? rest.join(",") : null;
@@ -3222,7 +3229,7 @@ const ATK_SKILL_HELP = {
 const ABI_LABEL = { "복수": "파괴: 나를 파괴한 적을 제거", "강탈": "파괴: 나를 파괴한 적을 탈취", "출전": "소환: 드로우 1", "유언": "파괴: 드로우 1" };
 function abiName(ab) { return (typeof ABI_LABEL !== "undefined" && ABI_LABEL[ab]) || ab; }
 const ABI_HELP = {
-  "보호": "피해를 한 번만 막아 줍니다. (코인으로 체력이 깎일 때는 안 막힘)",
+  "보호": "전투·스펠 피해를 한 번 막아 줍니다. 직접 능력치 감소와 코인으로 깎이는 체력은 막지 않습니다.",
   "복수": "파괴될 때 나를 파괴한 적을 제거합니다.",
   "환생": "죽으면 체력 1로 한 번 다시 살아납니다. 카드 기본 능력은 그대로 다시 가지며 환생만 사라집니다. 다시 나타날 때 소환: 효과는 발동하지 않고, 파괴: 효과는 다시 파괴될 때 또 발동합니다. 환생으로 나타나면 침묵은 풀리고 원래 능력이 돌아옵니다. 환생하는 유닛이 낀 아이템의 파괴: 효과는 발동하고, 유닛은 아이템 없이 다시 나타납니다.",
   "강탈": "파괴될 때 나를 파괴한 적을 탈취합니다.",
