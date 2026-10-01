@@ -1,3 +1,11 @@
+# v0.403
+
+- Replaces the title backdrop with the approved elemental portal artwork and retains the existing FantasySoul emblem and wordmark.
+- Keeps online lobby, shop and settings routes, with a fourth accessible Game Exit button. Gold hover/focus, touch press/cancel feedback and reduced-motion support are scoped to the title.
+- Shares safe exit handling between title and settings: uses an available desktop quit bridge, otherwise requests window close and explains when the browser tab must be closed manually. No blank-page navigation or account data deletion.
+- Contains keyboard focus in settings when opened from the title, restores the opener on close, and supports Escape.
+- Verified with 475 client tests and Chrome desktop, keyboard, touch, short landscape and narrow viewport checks. No combat, card-stat, login or payment changes.
+
 # v0.402
 
 - Waits for an uncached opponent spell face before the existing central reveal and effect sequence. Loading is bounded and cancellable; failed media identifies the used card by name. Cancellation and game end cannot apply a pending spell again.

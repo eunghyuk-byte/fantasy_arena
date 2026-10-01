@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.402";
+const GAME_VERSION = "0.403";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -3816,22 +3816,32 @@ function openHelp() {
   }
   const pop = document.getElementById("helpPop");
   if (pop) pop.classList.add("show");
+  if (pop && document.getElementById("title").inert) {
+    document.getElementById("settingsPop").inert = true;
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-modal", "true");
+    pop.setAttribute("aria-label", "도움말");
+    document.getElementById("btnHelpClose").focus();
+  }
 }
 function closeHelp() {
   document.getElementById("helpPop").classList.remove("show");
+  const settings = document.getElementById("settingsPop");
+  if (settings.inert) {
+    settings.inert = false;
+    document.getElementById("helpPop").removeAttribute("aria-modal");
+    document.getElementById("btnSettingsHelp").focus();
+  }
 }
 document.getElementById("btnSettingsHelp").onclick = openHelp; // v0.334: 설정 안 「도움말」
-const _btnQuit = document.getElementById("btnQuit");
-if (_btnQuit) _btnQuit.onclick = () => {
-  try {
-    if (window.fantasyArenaDesktop && fantasyArenaDesktop.quit) { fantasyArenaDesktop.quit(); return; }
-  } catch (e) {}
-  try { window.close(); } catch (e) {}
-  location.href = "about:blank";
-};
 document.getElementById("btnHelpClose").onclick = closeHelp;
 document.getElementById("helpPop").addEventListener("click", e => {
   if (e.target.id === "helpPop") closeHelp();
+});
+document.getElementById("helpPop").addEventListener("keydown", e => {
+  if (!document.getElementById("settingsPop").inert) return;
+  if (e.key === "Escape") { e.preventDefault(); closeHelp(); }
+  else if (e.key === "Tab") { e.preventDefault(); document.getElementById("btnHelpClose").focus(); }
 });
 
 const _gear = document.getElementById("settingsGearBtn");

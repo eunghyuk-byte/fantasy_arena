@@ -194,16 +194,32 @@
     if (head) head.style.display = inCombat ? "" : "none";
     if (btn) btn.style.display = inCombat ? "" : "none";
   }
+  let titleSettingsOrigin = null;
   function openSettings() {
     syncSettingsUI();
     syncCombatSettings();
     const pop = document.getElementById("settingsPop");
     if (pop) pop.classList.add("show");
+    const title = document.getElementById("title");
+    if (pop && title && title.classList.contains("active")) {
+      titleSettingsOrigin = document.activeElement;
+      title.inert = true;
+      pop.setAttribute("role", "dialog");
+      pop.setAttribute("aria-modal", "true");
+      pop.setAttribute("aria-label", "설정");
+      document.getElementById("btnSettingsClose").focus();
+    }
   }
 
   function closeSettings() {
     const pop = document.getElementById("settingsPop");
     if (pop) pop.classList.remove("show");
+    if (titleSettingsOrigin) {
+      document.getElementById("title").inert = false;
+      pop.removeAttribute("aria-modal");
+      titleSettingsOrigin.focus();
+      titleSettingsOrigin = null;
+    }
   }
 
   function bindSettingsUI() {
@@ -225,6 +241,16 @@
     };
     if (pop) pop.addEventListener("click", e => {
       if (e.target.id === "settingsPop") closeSettings();
+    });
+    if (pop) pop.addEventListener("keydown", e => {
+      if (!titleSettingsOrigin) return;
+      if (e.key === "Escape") { e.preventDefault(); closeSettings(); return; }
+      if (e.key !== "Tab") return;
+      const controls = Array.from(pop.querySelectorAll('button, input, select, [tabindex="0"]'))
+        .filter(el => !el.disabled && el.getClientRects().length);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
     if (sel) sel.onchange = async () => {
       saveResId(sel.value);
