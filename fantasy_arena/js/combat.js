@@ -701,6 +701,133 @@ function showBuilder() {
 }
 
 /* ---------- AI ---------- */
+// Small deterministic AI heuristics. Only our hand and public board/HP/resources are read.
+function aiUnitValue(m) { return Math.max(0, m.atk || 0) + Math.max(0, m.hp || 0) * 0.6 + Math.max(0, m.def || 0) + 1; }
+function aiDamageValue(m, raw) {
+  const n = Math.max(0, raw - Math.max(0, m.def || 0));
+  if (!n) return 0;
+  if (hasOwnAbility(m, "보호") || (m.keywords || []).includes("shield")) return 1;
+  return Math.min(n, Math.max(0, m.hp)) * 1.5 + (n >= m.hp ? aiUnitValue(m) : 0);
+}
+function aiReadyDamage(p) {
+  return p.board.reduce((sum, m) => {
+    if (m.hp <= 0 || m.dying || !m.canAttack || m.attacksLeft <= 0 || unitCannotAttack(m)) return sum;
+    const roll = storedTurnCoins(m), links = effectiveCoinLinks(m);
+    if ((Number(m.atk) || 0) <= 0 && (roll ? roll.dAtk : links.atkC) <= 0) return sum;
+    // A lethal shortcut must not assume a favorable unseen coin outcome.
+    const delta = roll ? roll.dAtk : Math.min(0, links.atkC);
+    let attack = clampAtk((m.atk || 0) + delta);
+    const hpDelta = roll ? roll.dHp : Math.min(0, links.hpC);
+    if (m.hp + hpDelta <= 0) return sum;
+    if (atkSkillOf(m) === 3) attack += clampDef((m.def || 0) + (roll ? roll.dDef : Math.min(0, links.defC)), m.def);
+    return sum + attack * (atkSkillOf(m) === 4 ? 2 : 1);
+  }, 0);
+}
+function aiFxValue(p, fx, target, card) {
+  if (!fx) return 0;
+  const e = opponent(p), foes = e.board.filter(m => m.hp > 0 && !m.dying), mine = p.board.filter(m => m.hp > 0 && !m.dying);
+  const t = target && target.minion;
+  const enemy = target && target.owner === e;
+  const lost = m => Math.max(0, (m.maxHp || m.hp) - m.hp);
+  const drawValue = n => Math.min(Math.max(0, n || 0), p.deck.length, Math.max(0, 11 - p.hand.length)) * 2;
+  const damageAll = (units, n) => units.reduce((sum, m) => sum + aiDamageValue(m, n), 0);
+  const buffValue = m => {
+    const attack = Math.max(0, fx.atk || 0) * (m.canAttack && m.attacksLeft > 0 && !unitCannotAttack(m) ? 1.8 : 0.7);
+    return attack + Math.max(0, fx.def || 0) * 1.2 + Math.max(0, fx.hp || 0) + (fx.atkSkill && fx.atkSkill !== atkSkillOf(m) ? 2 : 0) + (fx.addDeathrattle ? 2 : 0);
+  };
+  switch (fx.type) {
+    case "dmg": return enemy && t ? aiDamageValue(t, fx.value || 0) + (fx.skipAttack && !t.skipAttack ? Math.max(0, t.atk || 0) : 0) : 0;
+    case "kill": case "kill_if": return enemy && t ? aiUnitValue(t) + 4 : 0;
+    case "heal_all_full": return mine.reduce((s, m) => s + lost(m), 0) * 1.5;
+    case "heal_hero": return Math.min(lost(p), fx.value || 0) * 2;
+    case "buff": return target && target.owner === p && t ? buffValue(t) : 0;
+    case "buff_all": return mine.reduce((s, m) => s + buffValue(m), 0);
+    case "grant_kw": return mine.filter(m => !hasOwnAbility(m, fx.ability) && !(m.keywords || []).includes(fx.kw)).length * 3;
+    case "grant_extra": return t && target.owner === p && !unitCannotAttack(t) ? Math.max(0, t.atk || 0) * 2 : 0;
+    case "double_def": return t && target.owner === p ? Math.max(0, t.def || 0) * 2 : 0;
+    case "draw": return drawValue(fx.value);
+    case "draw_ex": return drawValue(fx.drawBoard ? mine.length : fx.draw || 0) + Math.min(lost(p), fx.healHero || 0) - (fx.payHp || 0) * (p.hp <= (fx.payHp || 0) + 3 ? 20 : 1) - damageAll(mine, fx.ownAllHp || 0) + (enemy && t ? aiDamageValue(t, fx.enemyDmg || 0) : 0) - (t && target.owner === p && fx.sacOwn ? aiUnitValue(t) : 0);
+    case "aoe_pack": return damageAll(foes, fx.all || fx.enemy || 0) - damageAll(mine, fx.all || fx.own || 0) + mine.length * (fx.ownHp || 0) + drawValue(fx.draw) + (fx.skipAttack ? foes.filter(m => !m.skipAttack).reduce((s, m) => s + Math.max(0, m.atk || 0), 0) : 0);
+    case "aoe_enemy": case "aoe_all_enemy": return damageAll(foes, fx.value || 0);
+    case "earthquake": return damageAll(foes, fx.by === "hand" ? Math.max(0, p.hand.length - 1) : Math.floor(p.maxSoul / 2));
+    case "sandtrap": return damageAll(foes.slice(0, Math.max(0, 5 - mine.length)), 3);
+    case "enemy_def_hp_down": case "sandhell": return foes.reduce((s, m) => s + Math.min(m.hp, fx.value || 1) * 1.5 + Math.min(m.def || 0, fx.value || 1) + (fx.type === "sandhell" ? Math.min(m.atk || 0, fx.value || 1) : 0), 0);
+    case "wipe_all": return foes.reduce((s, m) => s + aiUnitValue(m), 0) - mine.reduce((s, m) => s + aiUnitValue(m), 0) - Math.abs(fx.maxSoul || 0);
+    case "tornado": return foes.filter(m => printedSoul(m) <= fx.maxCost).reduce((s, m) => s + aiUnitValue(m), 0) - mine.filter(m => printedSoul(m) <= fx.maxCost).reduce((s, m) => s + aiUnitValue(m), 0);
+    case "sac_own_aoe": return t && target.owner === p ? damageAll(foes, fx.value || 3) - aiUnitValue(t) : 0;
+    case "summon_n": case "summon_islands": case "summon_token": {
+      const slots = Math.max(0, 5 - mine.length - (card?.type === "minion" ? 1 : 0));
+      const count = fx.type === "summon_islands" ? slots : fx.type === "summon_token" ? 1 : (fx.count || 1);
+      return Math.min(slots, count) * 3;
+    }
+    case "copy_own": return t && target.owner === p && mine.length < 5 ? aiUnitValue(t) : 0;
+    case "set_one": {
+      if (!enemy || !t) return 0;
+      if (fx.coinZero) { const l = effectiveCoinLinks(t); return Math.max(0, l.atkC + l.defC + l.hpC); }
+      return Math.max(0, (t.atk || 0) - (fx.atk == null ? t.atk : fx.atk)) + Math.max(0, (t.hp || 0) - (fx.hp == null ? t.hp : fx.hp));
+    }
+    case "soul": return 0; // Coins need a concrete newly affordable follow-up, handled by chooseAiAction.
+    case "soul_next": return Math.max(0, fx.value || 0);
+    case "hand_cost": return p.hand.filter(c => c !== card && c.type === "minion" && effectiveCardCost(p, c) > 0).length * Math.abs(fx.delta || 0);
+    case "enemy_skip_attack": return foes.filter(m => !m.skipAttack).reduce((s, m) => s + Math.max(0, m.atk || 0), 0);
+    case "silence_enemy_board": return foes.filter(m => m.ability || m.atkSkill > 1 || m.deathrattle || m.deathrattles?.length).reduce((s, m) => s + 2 + Math.max(0, m.atk || 0) * 0.2, 0);
+    default: return 1; // Preserve support for less common effects without expanding the planner.
+  }
+}
+function aiPlayOptions(p, budget = p.soul) {
+  const e = opponent(p), urgent = p.hp <= e.board.reduce((s, m) => s + Math.max(0, m.atk || 0), 0);
+  const options = [];
+  for (const card of p.hand) {
+    const cost = effectiveCardCost(p, card);
+    if (cost > budget || (card.spell && card.spell.type === "soul")) continue;
+    if (card.type === "minion" && (p.noPlayMinion || p.board.length >= 5)) continue;
+    const equip = card.type === "item" && isEquipItem(card);
+    const fx = equip ? { _itemEquip: true } : card.type === "spell" ? card.spell : card.battlecry;
+    const targets = needsTarget(card) ? validTargets(p, fx) : [null];
+    if (!targets.length) continue;
+    let best = null;
+    for (const target of targets) {
+      let score;
+      if (card.type === "minion") score = 2 + aiUnitValue(card) + aiFxValue(p, fx, target, card);
+      else if (equip) score = target ? 2 + Math.max(0, card.atk || 0) * (target.minion.canAttack ? 1.5 : 0.7) + Math.max(0, card.def || 0) + Math.max(0, card.hp || 0) : 0;
+      else score = aiFxValue(p, fx, target, card);
+      if (urgent && score > 0 && card.type === "spell" && /^(kill|dmg|aoe_|earthquake|sandtrap|enemy_def|sandhell|heal_|enemy_skip)/.test(fx?.type || "")) score *= 1.5;
+      if (score > 0 && (!best || score > best.score)) best = { kind: "play", card, target, cost, score };
+    }
+    if (best) options.push(best);
+  }
+  return options.sort((a, b) => b.score - a.score || a.cost - b.cost);
+}
+function aiPlannedRemainder(p, options, budget) {
+  let remaining = budget, slots = Math.max(0, 5 - p.board.length);
+  const removed = new Set();
+  for (const option of options) {
+    if (option.cost > remaining || option.card.type === "minion" && slots <= 0) continue;
+    if (option.target?.minion && removed.has(option.target.minion.uid)) continue;
+    remaining -= option.cost;
+    if (option.card.type === "minion") slots--;
+    const fx = option.card.spell, target = option.target?.minion;
+    if (target && (fx?.type === "kill" || fx?.type === "kill_if" || fx?.type === "dmg" && !hasOwnAbility(target, "보호") && (fx.value || 0) - (target.def || 0) >= target.hp)) removed.add(target.uid);
+  }
+  return remaining;
+}
+function chooseAiAction(p) {
+  if (state.busy || ui.battling) return { kind: "wait" };
+  const e = opponent(p);
+  if (!e.board.some(m => m.hp > 0 && !m.dying) && aiReadyDamage(p) >= e.hp) return { kind: "combat" };
+  let options = aiPlayOptions(p), budget = p.soul, coin = null;
+  const token = p.hand.find(c => c.spell?.type === "soul" && c.spell.value > effectiveCardCost(p, c));
+  if (token) {
+    const boosted = p.soul + token.spell.value - effectiveCardCost(p, token);
+    const more = aiPlayOptions(p, boosted), witness = more.find(o => o.cost > p.soul);
+    if (witness && (!options.length || witness.score > options[0].score)) { options = more; budget = boosted; coin = token; }
+  }
+  const leftover = aiPlannedRemainder(p, options, budget);
+  if (canSoulDraw(p) && p.hand.length < 10 && p.deck.length > 0 && leftover >= soulDrawCost(p)) return { kind: "draw" };
+  if (coin) return { kind: "play", card: coin, target: null };
+  return options[0] || { kind: "combat" };
+}
+
 function aiTurn() {
   if (state.over) return;
   const owner = state;
@@ -717,35 +844,6 @@ function aiTurn() {
     return;
   }
 
-  const tryPlay = () => {
-    const plays = p.hand
-      .filter(c => (typeof effectiveCardCost === "function" ? effectiveCardCost(p, c) : c.cost) <= p.soul)
-      .filter(c => c.type !== "minion" || p.board.length < 5)
-      .sort((a, b) => scorePlay(p, b) - scorePlay(p, a));
-    for (const card of plays) {
-      let target = null;
-      if (needsTarget(card)) {
-        const fx = (card.type === "item" && typeof isEquipItem === "function" && isEquipItem(card))
-          ? { _itemEquip: true }
-          : (card.type === "spell" ? card.spell : card.battlecry);
-        const ts = validTargets(p, fx);
-        if (!ts.length) {
-          if (card.type === "item") continue;
-          if (card.type === "spell") continue; // 대상 필수 스펠: 대상 없으면 사용 불가
-          if (fx && fx.target) continue;
-        }
-        if (fx && fx._itemEquip) target = ts[0] || null;
-        else target = pickAiTarget(p, fx, ts);
-        if (!target && ((fx && fx.target) || (fx && fx._itemEquip))) continue;
-      }
-      if (!playCard(p, card, target)) continue; // 거부된 카드로 무한 재시도 방지
-      render();
-      return true;
-    }
-
-    return false;
-  };
-
   const step = () => {
     if (!valid() || state.over) return;
     // v0.381: 전설 소환 연출 등 오버레이 게이트 중이면 끝난 뒤 다음 행동 (연출끼리·전투와 겹치지 않게)
@@ -754,14 +852,13 @@ function aiTurn() {
       SpellFx.whenOverlayIdle().then(() => { if (state === st) setTimeout(step, 280); });
       return;
     }
-    if (tryPlay()) { setTimeout(step, 420); return; }
-    // v0.319 소울 드로우: 낼 카드가 없고 3소울 이상 남았고 손패가 가득 차지 않았으면 사용 → 뽑은 카드로 다시 시도
-    // (덱이 비었으면 피로 피해만 받으므로 쓰지 않음)
-    if (typeof canSoulDraw === "function" && canSoulDraw(p) && p.hand.length < 10 && p.deck.length > 0) {
-      useSoulDraw(p);
-      render();
-      setTimeout(step, 420);
-      return;
+    if (current() !== p) return;
+    const action = chooseAiAction(p);
+    if (action.kind === "wait") { setTimeout(step, 120); return; }
+    if (action.kind === "draw") {
+      if (useSoulDraw(p)) { render(); setTimeout(step, 420); return; }
+    } else if (action.kind === "play" && playCard(p, action.card, action.target)) {
+      render(); setTimeout(step, 420); return;
     }
     runAutoCombat(p).then(ok => { if (ok && valid()) passTurn(); }).catch(e => console.warn(e));
   };

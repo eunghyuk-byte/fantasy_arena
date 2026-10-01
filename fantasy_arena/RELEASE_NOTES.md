@@ -1,3 +1,11 @@
+# v0.397
+
+- Adds twelve bounded AI decision principles using its own hand and public game state only, without looking at hidden cards or consuming extra random rolls.
+- Projects useful card spending before acting. If at least 3 souls would remain, uses the soul draw first and recalculates from the new hand. Saves the coin when no worthwhile newly affordable follow-up needs it.
+- Prefers certain automatic-combat lethal, responds to urgent visible threats, avoids invalid immune targets and duplicate removal, and values effective area damage, missing-HP healing and friendly buffs.
+- Respects board/hand capacity, waits for pending spell resolution and recalculates after each action. Existing automatic attacks and match cancellation remain in charge.
+- Uses a small deterministic heuristic rather than a search engine. This release does not claim optimal strategy or a measured win-rate improvement. Verified with 443 Node tests, independent review and six actual Chromium AI scenarios. Details: V397_QA.md.
+
 # v0.396
 
 - Queues a visible end-turn request during current actions, including ordinary draws and full-hand burns, and advances once after completion. Repeated input, restart and cancellation cannot duplicate a turn.
