@@ -1,3 +1,11 @@
+# v0.395
+
+- Speeds only the opening-hand deal to 1.5× (480ms per card); ordinary later draws remain 720ms.
+- Aligns the end-turn button with the board's right gold rail and center divider, and both hero icons with their frame centers using artwork-relative coordinates.
+- Makes dragged hand cards leave their visual hand slot while preserving layout and game state until valid play. Cancel, Escape, pointer cancellation, turn transitions and resets restore cleanly.
+- Gives hand and board drag sessions owned pointer listeners, preventing canceled gestures from affecting later drags. Visual proxies are excluded from accessibility and contain no duplicate IDs.
+- Verified with 319 Node tests, independent code review and Chromium geometry, draw timing, mouse/touch cancellation, valid minion/spell drops and board-drag interruption. See UI_V395_QA.md. No card rules or media assets changed.
+
 # v0.394
 
 - Added selected Giant Seal es1 C and Earthquake es2 B, re-keyed directly from1440×1440 generation sources. Both use1440px VP9alpha at30fps; no384/512px upscale or reduced-resolution production assets.
