@@ -1,3 +1,10 @@
+## v0.405
+
+- Approved pack-shop presentation with DOM prices/actions and explicit unavailable payment/inventory notices.
+- Independent saved BGM/SFX levels and switches, retaining master volume and gesture playback.
+- Local-only virtual matching preview; disabled on public hosts.
+- 481 regression tests and desktop/mobile browser QA. See UI_V405_QA.md.
+
 # v0.404
 
 - Matches the approved elemental-gate title composition using unchanged reference pixels for the emblem, FantasySoul wordmark, underline and ornamental button borders.
