@@ -3850,7 +3850,7 @@ if (_gear) _gear.onclick = (e) => {
   try { if (window.StageSettings && StageSettings.open) StageSettings.open(); } catch (err) {}
 };
 document.body.addEventListener("click", () => {
-  if (!Bgm.isOn()) Bgm.start();
+  Bgm.unlock();
   try { Sfx.warmup && Sfx.warmup(); } catch (e) {}
 }, { once: true });
 

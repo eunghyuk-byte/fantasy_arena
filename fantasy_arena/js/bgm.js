@@ -4,6 +4,12 @@ const Bgm = (() => {
   const EXTS = [".ogg", ".mp3", ".m4a", ".wav"];
   let unlocked = false, wanted = true, track = "menu";
   let vol = 0.5, duckMul = 1;
+  let channelVol = 1;
+  try {
+    wanted = localStorage.getItem('fa_bgm_enabled') !== '0';
+    const saved = localStorage.getItem('fa_bgm_channel_vol');
+    if (saved !== null && Number.isFinite(+saved)) channelVol = Math.max(0, Math.min(1, +saved / 100));
+  } catch (e) {}
   try { const sv = localStorage.getItem("fa_bgm_vol"); if (sv !== null && !isNaN(+sv)) vol = Math.max(0, Math.min(1, +sv / 100)); } catch (e) {}
   const beds = { menu: null, battle: null };
   const urls = { menu: "", battle: "" };
@@ -16,7 +22,7 @@ const Bgm = (() => {
 
   // Store the slider position; square it once at the output for a quiet low end.
   // Sfx uses the same curve while retaining its own full-scale mix level.
-  function outputVolume() { return wanted ? vol * vol * duckMul : 0; }
+  function outputVolume() { return wanted ? vol * vol * channelVol * channelVol * duckMul : 0; }
 
   function applyVol() {
     const v = outputVolume();
@@ -113,6 +119,7 @@ const Bgm = (() => {
 
   async function start() {
     wanted = true;
+    try { localStorage.setItem('fa_bgm_enabled', '1'); } catch (e) {}
     unlocked = true;
     await ensure("menu");
     await ensure("battle");
@@ -121,6 +128,7 @@ const Bgm = (() => {
   }
   function stop() {
     wanted = false;
+    try { localStorage.setItem('fa_bgm_enabled', '0'); } catch (e) {}
     clearFades();
     Object.values(beds).forEach(a => {
       if (!a) return;
@@ -146,10 +154,17 @@ const Bgm = (() => {
     applyVol();
   }
   function getVolume() { return vol; }
+  function setChannelVolume(v) {
+    channelVol = Math.max(0, Math.min(1, +v || 0));
+    try { localStorage.setItem('fa_bgm_channel_vol', String(Math.round(channelVol * 100))); } catch (e) {}
+    clearFades(); applyVol();
+  }
+  function getChannelVolume() { return channelVol; }
+  async function unlock() { unlocked = true; if (wanted) await start(); }
   function isOn() { return wanted && unlocked; }
 
   function isWanted() { return !!wanted; }
-  return { start, stop, toggle, to, duck, setVolume, getVolume, isOn, isWanted, track: () => track };
+  return { start, stop, toggle, to, duck, setVolume, getVolume, setChannelVolume, getChannelVolume, unlock, isOn, isWanted, track: () => track };
 })();
 window.Bgm = Bgm;
 const TavernBgm = Bgm;

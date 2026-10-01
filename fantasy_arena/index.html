@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="css/game.css?v=0.404" />
 <link rel="stylesheet" href="css/lobby.css?v=0.404" />
 <link rel="stylesheet" href="css/title.css?v=0.404" />
+<link rel="stylesheet" href="css/audio-match.css?v=audio-demo-1" />
 </head>
 <body>
 <button class="bgm-btn settings-gear-btn" id="settingsGearBtn" title="설정" aria-label="설정">⚙</button>
@@ -67,7 +68,10 @@
       <div class="lobby-panel lobby-right">
         <div class="lobby-user" id="lobbyUser"></div>
         <div class="lobby-sel" id="lobbySel"></div>
-        <button class="menu-btn lobby-match" id="btnMatch">매칭 시작</button>
+      <div id="matchDemo" hidden role="group" aria-live="off" aria-label="가상 인원 디자인 미리보기">
+        <span>현재 약 <b id="matchDemoCount">—</b>명이 매칭을 돌리고 있습니다<span id="matchDemoDots" aria-hidden="true">.</span></span>
+      </div>
+      <button class="menu-btn lobby-match" id="btnMatch">매칭 시작</button>
         <button class="menu-btn ghost" id="btnLobbyAi">AI 연습</button>
         <button class="menu-btn ghost" id="btnLobbyBack">타이틀로</button>
       </div>
@@ -112,10 +116,14 @@
       <input type="checkbox" id="fsToggle" /> 전체 화면
     </label>
     <h3>사운드</h3>
-    <label class="settings-row settings-check" for="bgmToggle">
-      <input type="checkbox" id="bgmToggle" /> 음악 (BGM)
-    </label>
-    <label class="settings-row" for="bgmVol" style="display:flex;align-items:center;gap:8px">음량 <input type="range" id="bgmVol" min="0" max="100" step="1" value="50" style="flex:1" /> <span id="bgmVolVal" style="min-width:2.5em;text-align:right">50</span></label>
+    <div class="sound-controls" role="group" aria-label="사운드">
+      <label class="settings-row sound-volume" for="bgmVol"><span>전체 음량</span><input type="range" id="bgmVol" min="0" max="100" step="1" value="50" /><output id="bgmVolVal" for="bgmVol">50</output></label>
+      <p class="sound-help">전체 음량은 음악과 효과음에 함께 적용됩니다.</p>
+      <label class="sound-switch" for="bgmToggle"><input type="checkbox" id="bgmToggle" /> 음악 (BGM) 켜기</label>
+      <label class="settings-row sound-volume" for="bgmChannelVol"><span>BGM 음량</span><input type="range" id="bgmChannelVol" min="0" max="100" step="1" value="100" /><output id="bgmChannelVolVal" for="bgmChannelVol">100</output></label>
+      <label class="sound-switch" for="sfxToggle"><input type="checkbox" id="sfxToggle" /> 효과음 켜기</label>
+      <label class="settings-row sound-volume" for="sfxChannelVol"><span>효과음 음량</span><input type="range" id="sfxChannelVol" min="0" max="100" step="1" value="100" /><output id="sfxChannelVolVal" for="sfxChannelVol">100</output></label>
+    </div>
     <h3 id="settingsCombatHead" style="display:none">전투</h3>
     <button class="menu-btn" id="btnSurrender" style="width:100%;margin:8px 0 16px;display:none">항복</button>
     <button class="menu-btn" id="btnQuit" style="width:100%;margin:8px 0 16px">게임 종료</button>
@@ -300,9 +308,9 @@
 
 <script src="js/cards-data.js?v=0.404"></script>
 <script src="js/vfx.js?v=0.404"></script>
-<script src="js/bgm.js?v=0.404"></script>
-<script src="js/sfx.js?v=0.404"></script>
-<script src="js/settings.js?v=0.404"></script>
+<script src="js/bgm.js?v=audio-demo-1"></script>
+<script src="js/sfx.js?v=audio-demo-1"></script>
+<script src="js/settings.js?v=audio-demo-1"></script>
 <script src="js/render.js?v=0.404"></script>
 <script src="js/combat.js?v=0.404"></script>
 <script src="js/combat-media.js?v=0.404"></script>
@@ -312,11 +320,12 @@
 <script src="js/match-reference.js?v=0.404"></script>
 <script src="js/spell-fx.js?v=0.404"></script>
 <script src="js/coin-duel.js?v=0.404"></script>
-<script src="js/game.js?v=0.404"></script>
+<script src="js/game.js?v=audio-demo-1"></script>
 <div id="exitNotice" role="status" aria-live="polite"></div>
 <script src="js/menu-exit.js?v=0.404"></script>
 <script src="js/title-menu.js?v=0.404"></script>
 <script src="js/net.js?v=0.404"></script>
 <script src="js/lobby.js?v=0.404"></script>
+<script src="js/match-demo.js?v=audio-demo-1"></script>
 </body>
 </html>

@@ -1,0 +1,25 @@
+/* Scoped UI additions; existing master volume continues to scale both channels. */
+#settingsPop .sound-controls { border-top:1px solid #78602f; padding-top:8px; }
+#settingsPop .sound-volume { display:flex; align-items:center; gap:10px; margin:4px 0 10px; }
+#settingsPop .sound-volume > span:first-child { flex:0 0 6.2em; }
+#settingsPop .sound-volume input { flex:1; min-width:60px; min-height:44px; touch-action:pan-y; accent-color:#e3c15f; }
+#settingsPop .sound-volume output { min-width:3ch; text-align:right; font-variant-numeric:tabular-nums; }
+#settingsPop .sound-switch { display:flex; align-items:center; gap:10px; min-height:44px; cursor:pointer; }
+#settingsPop .sound-switch input { width:22px; height:22px; accent-color:#e3c15f; }
+#settingsPop .sound-help { font-size:13px; line-height:1.5; color:#cabc96; margin:0 0 8px; }
+#settingsPop .sound-controls input:focus-visible { outline:2px solid #ffe9a4; outline-offset:3px; }
+#matchDemo { margin:8px 0 12px; padding:10px 8px; border:1px solid #967847; border-radius:7px; background:#251d12; text-align:center; color:#f0dfb0; font-size:clamp(12px,1.7cqh,18px); line-height:1.45; }
+#matchDemoCount { display:inline-block; min-width:3ch; font-variant-numeric:tabular-nums; }
+#matchDemoDots { display:inline-block; width:3ch; text-align:left; }
+#matchDemo[hidden] { display:none !important; }
+#lobby .lobby-right:has(#matchDemo:not([hidden])) { overflow-y:auto; overscroll-behavior:contain; }
+#lobby .lobby-right:has(#matchDemo:not([hidden])) > * { flex-shrink:0; }
+#lobby .lobby-right:has(#matchDemo:not([hidden])) .lobby-sel { flex:1 0 auto; min-height:min-content; }
+@container stage (max-height:500px) {
+ #lobby .lobby-right:has(#matchDemo:not([hidden])) .menu-btn { min-height:44px; font-size:14px; }
+}
+@media (max-height:500px) {
+ #settingsPop .settings-box { max-height:94dvh; overflow-y:auto; }
+ #settingsPop .sound-volume { gap:6px; }
+ #matchDemo { margin:5px 0; padding:5px; }
+}

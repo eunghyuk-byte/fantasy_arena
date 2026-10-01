@@ -184,6 +184,12 @@
       const p = Math.round(Bgm.getVolume() * 100);
       vs.value = p; if (vv) vv.textContent = p;
     }
+    for (const [id, api] of [['bgmChannelVol', window.Bgm], ['sfxChannelVol', typeof Sfx !== 'undefined' ? Sfx : null]]) {
+      const input = document.getElementById(id), output = document.getElementById(id + 'Val');
+      if (input && api) { const p = Math.round(api.getChannelVolume() * 100); input.value = p; if (output) output.textContent = p; }
+    }
+    const effects = document.getElementById('sfxToggle');
+    if (effects && typeof Sfx !== 'undefined') effects.checked = !Sfx.isMuted();
   }
 
   function syncCombatSettings() {
@@ -269,7 +275,6 @@
         } catch (e) { console.warn("bgm toggle failed", e); }
       };
       bgm.addEventListener("change", applyBgm);
-      bgm.addEventListener("click", applyBgm);
     }
     const vs = document.getElementById("bgmVol"), vv = document.getElementById("bgmVolVal");
     if (vs) vs.addEventListener("input", () => {
@@ -278,6 +283,16 @@
       try { const api = (typeof Bgm !== "undefined") ? Bgm : window.Bgm; if (api) api.setVolume(p / 100); } catch (e) {}
       try { const api = (typeof Sfx !== "undefined") ? Sfx : window.Sfx; if (api) api.setVolume(p / 100); } catch (e) {}
     });
+    for (const [id, api] of [['bgmChannelVol', window.Bgm], ['sfxChannelVol', typeof Sfx !== 'undefined' ? Sfx : null]]) {
+      const input = document.getElementById(id), output = document.getElementById(id + 'Val');
+      if (input && api) input.addEventListener('input', () => {
+        const p = Math.max(0, Math.min(100, +input.value || 0));
+        if (output) output.textContent = p;
+        api.setChannelVolume(p / 100);
+      });
+    }
+    const effects = document.getElementById('sfxToggle');
+    if (effects && typeof Sfx !== 'undefined') effects.addEventListener('change', () => Sfx.setMuted(!effects.checked));
   }
 
   window.StageSettings = {

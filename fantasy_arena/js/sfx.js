@@ -15,9 +15,15 @@ const Sfx = (() => {
   const EXTS = [".ogg", ".mp3", ".wav"];
   const MAX_GAIN = 0.85; // Preserve the existing effects mix at slider 100.
   let ctx = null, sfxGain = null, muted = false, vol = 1;
+  let channelVol = 1;
+  try {
+    muted = localStorage.getItem('fa_sfx_enabled') === '0';
+    const saved = localStorage.getItem('fa_sfx_channel_vol');
+    if (saved !== null && Number.isFinite(+saved)) channelVol = Math.max(0, Math.min(1, +saved / 100));
+  } catch (e) {}
   // Bgm owns the saved slider position and is loaded before Sfx in the game.
   if (typeof Bgm !== "undefined" && Bgm.getVolume) vol = Bgm.getVolume();
-  function outputVolume() { return muted ? 0 : MAX_GAIN * vol * vol; }
+  function outputVolume() { return muted ? 0 : MAX_GAIN * vol * vol * channelVol * channelVol; }
   const cache = new Map();
   function ac() {
     if (!ctx) {
@@ -26,7 +32,7 @@ const Sfx = (() => {
       sfxGain.gain.value = outputVolume();
       sfxGain.connect(ctx.destination);
     }
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") { const resuming = ctx.resume(); if (resuming && resuming.catch) resuming.catch(() => {}); }
     return ctx;
   }
   function duck(ms) {
@@ -175,8 +181,16 @@ const Sfx = (() => {
   }
   function setMuted(m) {
     muted = !!m;
+    try { localStorage.setItem('fa_sfx_enabled', muted ? '0' : '1'); } catch (e) {}
     if (sfxGain) sfxGain.gain.value = outputVolume();
   }
+  function setChannelVolume(v) {
+    channelVol = Math.max(0, Math.min(1, +v || 0));
+    try { localStorage.setItem('fa_sfx_channel_vol', String(Math.round(channelVol * 100))); } catch (e) {}
+    if (sfxGain) sfxGain.gain.value = outputVolume();
+  }
+  function getChannelVolume() { return channelVol; }
+  function isMuted() { return muted; }
   // v0.352: arbitrary-URL one-shots (spell packs). loadUrl caches the decoded buffer so
   // callers can preload, then start sound + animation on the same tick.
   const urlCache = new Map();
@@ -206,6 +220,6 @@ const Sfx = (() => {
   return {
     playDeath, playCardDrop, playDraw, playSummon,
     playHeroHit, playTurn, playWin, playLose, playClick, playCoin,
-    setVolume, setMuted, warmup, loadUrl, playUrl, playBuf, makeBus, FILES
+    setVolume, setMuted, setChannelVolume, getChannelVolume, isMuted, warmup, loadUrl, playUrl, playBuf, makeBus, FILES
   };
 })();

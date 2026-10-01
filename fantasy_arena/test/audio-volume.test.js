@@ -8,9 +8,10 @@ const root = path.join(__dirname, '..');
 const flush = () => new Promise(resolve => setImmediate(resolve));
 const closeTo = (actual, expected, message) => assert.ok(Math.abs(actual - expected) < 1e-12, `${message}: ${actual} != ${expected}`);
 
-function fixture(saved = null, { missingSounds = false, blockedStorage = false } = {}) {
+function fixture(saved = null, { missingSounds = false, blockedStorage = false, savedValues = {} } = {}) {
   const nodes = [], audios = [], intervals = new Map(), values = new Map(), elements = new Map();
   if (saved !== null) values.set('fa_bgm_vol', String(saved));
+  for (const [key,value] of Object.entries(savedValues)) values.set(key,String(value));
   let timerId = 0;
   function node(kind) {
     const n = { kind, connections: [], connect(dest) { this.connections.push(dest); }, disconnect() { this.connections = []; } };
@@ -57,7 +58,7 @@ function fixture(saved = null, { missingSounds = false, blockedStorage = false }
   load('sfx.js');
   vm.runInContext('this.sfx = Sfx;', ctx);
   return {
-    bgm: ctx.Bgm, sfx: ctx.sfx, values, nodes, audios, slider, label, toggle,
+    bgm: ctx.Bgm, sfx: ctx.sfx, values, nodes, audios, slider, label, toggle, element,
     loadSettings() { load('settings.js'); },
     input(value) { slider.value = String(value); slider.listeners.input(); },
     tick() { for (let i = 0; i < 100 && intervals.size; i++) for (const fn of [...intervals.values()]) fn(); },
@@ -71,6 +72,50 @@ function outputGain(node) {
   assert.equal(node.connections.length, 1, 'every source has exactly one route to the output');
   return (node.gain?.value ?? 1) * outputGain(node.connections[0]);
 }
+
+test('channel levels and switches survive reload without changing the legacy master', async () => {
+  const f=fixture(50);
+  await f.bgm.start(); f.sfx.playBuf({});
+  f.bgm.setChannelVolume(.4); f.sfx.setChannelVolume(.2);
+  closeTo(f.bed().volume,.25*.16,'independent BGM');
+  closeTo(f.master().gain.value,.85*.25*.04,'independent SFX');
+  f.bgm.stop(); f.sfx.setMuted(true);
+  const restored=fixture(50,{savedValues:Object.fromEntries(f.values)});
+  assert.equal(restored.bgm.isWanted(),false);
+  assert.equal(restored.sfx.isMuted(),true);
+  assert.equal(restored.bgm.getChannelVolume(),.4);
+  assert.equal(restored.sfx.getChannelVolume(),.2);
+  await restored.bgm.unlock();
+  assert.equal(restored.audios.length,0,'first gesture respects saved BGM off');
+  restored.sfx.playBuf({});
+  restored.sfx.setMuted(false); restored.sfx.playBuf({});
+  closeTo(restored.master().gain.value,.85*.25*.04,'unmute restores SFX setting');
+});
+
+test('live channel changes affect active ordinary and bus effects independently of music', async () => {
+  const f=fixture(100); await f.bgm.start();
+  f.sfx.playBuf({}); const regular=f.nodes.find(n=>n.kind==='buffer');
+  const bus=f.sfx.makeBus(-6,true);f.sfx.playBuf({},{dest:bus});
+  const coin=f.nodes.filter(n=>n.kind==='buffer').at(-1);
+  f.sfx.setChannelVolume(.3);
+  closeTo(outputGain(regular),.85*.09,'active ordinary effect');
+  closeTo(outputGain(coin),Math.pow(10,-6/20)*.85*.09,'active bus effect');
+  closeTo(f.bed().volume,1,'BGM unchanged');
+  f.sfx.setMuted(true);assert.equal(outputGain(regular),0);assert.equal(outputGain(coin),0);
+  f.bgm.setChannelVolume(.2);f.tick();closeTo(f.bed().volume,.04,'BGM live update');
+});
+
+test('settings channel inputs do not change the other channel or master', async () => {
+  const f=fixture(50);
+  const bg=f.element('bgmChannelVol','100'), sf=f.element('sfxChannelVol','100');
+  f.element('bgmChannelVolVal'); f.element('sfxChannelVolVal');const toggle=f.element('sfxToggle');
+  f.loadSettings();await f.bgm.start();f.sfx.playBuf({});
+  sf.value='20';sf.listeners.input();
+  closeTo(f.master().gain.value,.85*.25*.04,'SFX slider');closeTo(f.bed().volume,.25,'music unchanged');
+  bg.value='70';bg.listeners.input();closeTo(f.bed().volume,.25*.49,'BGM slider');
+  assert.equal(f.values.get('fa_bgm_vol'),'50');
+  toggle.checked=false;toggle.listeners.change();assert.equal(f.master().gain.value,0);
+});
 
 test('BGM uses a smooth perceptual curve with exact mute and the existing maximum', async () => {
   const f = fixture();
