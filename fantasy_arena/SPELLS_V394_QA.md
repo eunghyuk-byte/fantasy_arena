@@ -17,6 +17,10 @@ Base: cdafd61700f7e3f87f31d791db83e89064d5ddbf (published v0.393). Game rules ma
 -19/29 small immutable video parts reassemble to the full original byte count and SHA256 before a Blob URL is created. Missing, wrong-size, reordered or wrong-hash parts fail without playing partial data.
 - Cancellation stops pending loads, decoder, audio and frame callbacks; owned Blob URLs are revoked. Metadata loading and video readiness have bounded deadlines. Stale spell callbacks cannot erase a newer card showcase or alter a restarted game.
 - Full Node suite:284/284 passed. Added contracts cover wrong media, cancellation, URL release, legacy scaling, exact selected target, empty enemy sets, one decoder/audio for multiple units and metadata/showcase lifecycle.
-- Final staged browser verification is pending before main publication. Existing11 legendary packs and other spell assets remain unchanged.
+- Real Chromium browser verification passed on staging commit39a61b634c05293bbe537fad12dc13a2f7e5abae: all19/29 parts reassembled to the approved SHA;1440×1440 transparent decoding succeeded.
+- Real playCard results: Seal consumed soul10→7 and removed the selected unit (enemy5→4); Earthquake consumed soul10→4 and drew the shared video on all5 opposing units. Measured display sizes were500.65px and354.75px, matching selected previews.
+- Sfx.playBuf was invoked exactly once per cast with538/785ms delays and800/821.814ms source durations. No direct human listening was performed.
+- Showcase300ms and active1100ms cancellation followed by immediate replay both completed with zero remaining effect canvases. The state object stayed identical during ordinary casts; no JavaScript page errors occurred.
+- Existing11 legendary packs and other spell assets remain unchanged. These browser checks are automated rendering/state/timing checks; actual Safari, exhaustive manual visual review and direct listening remain unverified.
 
 Actual Safari and direct human audio listening were not performed. Track, waveform and timing checks are not a claim of listening.

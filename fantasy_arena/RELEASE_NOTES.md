@@ -1,4 +1,4 @@
-# v0.394 (pending)
+# v0.394
 
 - Added selected Giant Seal es1 C and Earthquake es2 B, re-keyed directly from1440×1440 generation sources. Both use1440px VP9alpha at30fps; no384/512px upscale or reduced-resolution production assets.
 - Preserves selected1.2second motion, card-relative placement and original sounds. Seal centers on the exact chosen UID at max(card width×2.1,card height×1.55); Earthquake plays once per opposing unit at1.65× card width. One shared decoder and one sound per cast.
