@@ -32,22 +32,22 @@ test("아이템: 적 유닛에는 장착 불가 (playCard 대상 소유자 위�
 test("카드 수치: 소울·스탯·능력 (사용자 지정)", () => {
   const c = (n) => card(g, n);
   assert.equal(c("미로생성").cost, 4);
-  assert.deepEqual([c("거대화").cost, c("거대화").spell.atk, c("거대화").spell.hp], [7, 9, 9]);
+  assert.deepEqual([c("거대화").cost, c("거대화").spell.atk, c("거대화").spell.hp], [8, 9, 9]);
   assert.deepEqual([c("골렘의심장").atk, c("골렘의심장").def, c("골렘의심장").hp, c("골렘의심장").itemFx], [0, 0, 1, "eot_hp_plus3"]);
   assert.deepEqual([c("돌도끼").atk, c("돌도끼").def, c("돌도끼").hp, c("돌도끼").atkSkill], [3, 0, 2, undefined]);
-  assert.deepEqual([c("대지의팔찌").cost, c("대지의팔찌").atk, c("대지의팔찌").def, c("대지의팔찌").hp, c("대지의팔찌").ability], [7, 2, 2, 8, undefined]);
+  assert.deepEqual([c("대지의팔찌").cost, c("대지의팔찌").atk, c("대지의팔찌").def, c("대지의팔찌").hp, c("대지의팔찌").ability], [7, 0, 2, 5, undefined]);
   assert.equal(c("화염폭풍").cost, 4);
   assert.equal(c("메테오").cost, 6);
-  assert.deepEqual([c("불꽃검").atk, c("불꽃검").def, c("불꽃검").hp], [1, 0, 0]);
+  assert.deepEqual([c("불꽃검").atk, c("불꽃검").def, c("불꽃검").hp], [2, 0, 0]);
   assert.deepEqual([c("불꽃도끼").atk, c("불꽃도끼").def, c("불꽃도끼").hp, c("불꽃도끼").atkSkill], [4, 0, 1, undefined]);
   assert.deepEqual([c("분노의해머").cost, c("분노의해머").atk, c("분노의해머").def, c("분노의해머").hp], [3, 3, 0, 2]);
   assert.equal(c("토네이도").cost, 3);
   assert.equal(c("폭풍우").cost, 5);
-  assert.deepEqual([c("요정의부츠").cost, c("요정의부츠").atk, c("요정의부츠").def, c("요정의부츠").hp, c("요정의부츠").ability], [2, 0, 0, 1, undefined]);
-  assert.deepEqual([c("하피의손톱").cost, c("하피의손톱").atk, c("하피의손톱").def, c("하피의손톱").hp, c("하피의손톱").atkSkill], [4, 4, 0, 2, undefined]);
-  assert.deepEqual([c("청룡언월도").cost, c("청룡언월도").atk, c("청룡언월도").def, c("청룡언월도").hp], [6, 2, 2, 0]);
-  assert.equal(c("불길한예감").cost, 1);
-  assert.deepEqual([c("다크아머").cost, c("다크아머").atk, c("다크아머").def, c("다크아머").hp, c("다크아머").ability], [7, 0, 3, 5, undefined]);
+  assert.deepEqual([c("요정의부츠").cost, c("요정의부츠").atk, c("요정의부츠").def, c("요정의부츠").hp, c("요정의부츠").ability], [2, 0, 1, 2, undefined]);
+  assert.deepEqual([c("하피의손톱").cost, c("하피의손톱").atk, c("하피의손톱").def, c("하피의손톱").hp, c("하피의손톱").atkSkill], [4, 4, 0, 1, undefined]);
+  assert.deepEqual([c("청룡언월도").cost, c("청룡언월도").atk, c("청룡언월도").def, c("청룡언월도").hp], [6, 4, 2, 1]);
+  assert.equal(c("불길한예감").cost, 0);
+  assert.deepEqual([c("다크아머").cost, c("다크아머").atk, c("다크아머").def, c("다크아머").hp, c("다크아머").ability], [7, 0, 2, 4, undefined]);
   // 문구: 쉼표·마침표 없음 (카드 효과 표기 규칙)
   ["어스퀘이크","미로생성","낙석","거대화","골렘의심장","대지의팔찌","화염폭풍","메테오","일기토","불꽃검","분노의해머","진공베기","폭풍우","요정의부츠","하피의손톱","수정호수","청룡언월도","헬게이트","불길한예감","조작된주화","다크아머","치유의빛"]
     .forEach(n => assert.ok(!/[,.]/.test(c(n).text || ""), n + " 문구"));
@@ -197,28 +197,32 @@ test("불꽃검·분노의해머: 공격 시 공격+2", () => {
 test("불꽃검 + 연속공격 유닛: 공격마다 발동 (+2 두 번) · 영웅 피해 반영", async () => {
   const { p1, p2 } = setup(g);
   const m = plain(p1, "l12", 5); m.atk = 3; m.atkSkill = 4;
-  g.equipItemOnUnit(p1, inst("불꽃검"), m); // 공 4
+  g.equipItemOnUnit(p1, inst("불꽃검"), m); // 공 5
   const hp0 = p2.hp;
   await g.doAttack(p1, m, { kind: "hero", owner: p2 }, false);
-  assert.equal(m.atk, 4 + 4, "공격+2 두 번");
-  assert.equal(hp0 - p2.hp, 6 + 8, "1타 6 · 2타 8");
+  assert.equal(m.atk, 5 + 4, "공격+2 두 번");
+  assert.equal(hp0 - p2.hp, 7 + 9, "1타 7 · 2타 9");
 });
 
-test("요정의부츠: 장착해 있는 동안 상대 유닛 카드 소울 +1 (스펠은 그대로 · 중첩)", () => {
+test("요정의부츠: 턴 종료마다 상대 손패 유닛 소울 +1 (스펠은 그대로 · 누적)", () => {
   const { p1, p2 } = setup(g);
   const u = g.cloneCard("l12"), sp = inst("낙석");
   const base = u.cost;
+  p2.hand.push(u, sp);
   const m = plain(p1, "l12", 3);
   g.equipItemOnUnit(p1, inst("요정의부츠"), m);
+  assert.equal(g.effectiveCardCost(p2, u), base, "장착 즉시 비용 오라 없음");
+  g.applyItemEndTurnFx(p1);
   assert.equal(g.effectiveCardCost(p2, u), base + 1);
   assert.equal(g.effectiveCardCost(p2, sp), sp.cost);
-  assert.equal(g.effectiveCardCost(p1, u), base, "내 유닛은 영향 없음");
+  assert.equal(g.cloneCard(u.id).cost, base, "원본 유닛은 영향 없음");
   const m2 = plain(p1, "l12", 3);
   g.equipItemOnUnit(p1, inst("요정의부츠"), m2);
-  assert.equal(g.effectiveCardCost(p2, u), base + 2);
+  g.applyItemEndTurnFx(p1);
+  assert.equal(g.effectiveCardCost(p2, u), base + 3);
   g.destroyMinion(p1, m, { fromSpell: true });
   g.destroyMinion(p1, m2, { fromSpell: true });
-  assert.equal(g.effectiveCardCost(p2, u), base);
+  assert.equal(g.effectiveCardCost(p2, u), base + 3);
 });
 
 test("하피의손톱: 처치 시 하피 1기 생성", () => {
@@ -231,15 +235,18 @@ test("하피의손톱: 처치 시 하피 1기 생성", () => {
   assert.equal(p1.board.filter(x => x.id === "n10").length, 1);
 });
 
-test("청룡언월도: 파괴 시 이 유닛 방어(아이템 포함)만큼 적 전체 피해 · 공격 시엔 발동 안 함", () => {
+test("청룡언월도: 파괴 시 랜덤 물 유닛 3장 생성 · 공격 시엔 발동 안 함", () => {
   const { p1, p2 } = setup(g);
   const m = plain(p1, "l12", 3); // 방 0 + 아이템 2
   g.equipItemOnUnit(p1, inst("청룡언월도"), m);
   const foe = plain(p2, "l12", 5);
   g.applyItemAttackFx(p1, m);
   assert.equal(foe.hp, 5, "공격: 미발동");
+  assert.equal(p1.hand.length, 0);
   g.destroyMinion(p1, m, { fromSpell: true });
-  assert.equal(foe.hp, 3);
+  assert.equal(foe.hp, 5);
+  assert.equal(p1.hand.length, 3);
+  assert.ok(p1.hand.every(c => c.type === "minion" && c.tribe === "water"));
 });
 
 test("다크아머: 파괴 시 랜덤 적 하나 탈취", () => {

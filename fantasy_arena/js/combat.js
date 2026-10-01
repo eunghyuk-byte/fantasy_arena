@@ -179,13 +179,6 @@ function doAttackCore(p, attacker, target, auto, action) {
 
   const aShared = turnCoinRoll(attacker);
   let aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
-  // v0.350 「공격: 공격+2」(불꽃검·분노의해머): 연속공격은 타격마다 발동 → 두 번째 타격 전에 한 번 더
-  const retriggerAtkPlus = () => {
-    if (attacker._itemFx !== "attack_atk_plus2" || p !== current()) return;
-    applyItemAttackFx(p, attacker);
-    aAtk += 2;
-    if (attacker._fxAtk != null) attacker._fxAtk = aAtk;
-  };
   const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef, attacker.def);
   const aHpSnap = beginCombatHpCoin(attacker, aShared.dHp);
   const rows = [];
@@ -296,6 +289,16 @@ function doAttackCore(p, attacker, target, auto, action) {
     await pause(280);
     const atkEl = Vfx.elOf(attacker.uid);
     let aDefNow = window._pendingAtkDef || 0;
+    // 「공격:」 아이템은 연속공격의 각 타격에 발동한다. 저장된 코인 결과는 재사용한다.
+    const retriggerAttackItem = () => {
+      if (!attacker._itemFx || p !== current() || !p.board.includes(attacker)) return;
+      applyItemAttackFx(p, attacker);
+      aAtk = clampAtk((Number(attacker.atk) || 0) + aShared.dAtk);
+      aDefNow = clampDef((Number(attacker.def) || 0) + aShared.dDef, attacker.def);
+      window._pendingAtkDef = aDefNow;
+      if (attacker._fxAtk != null) attacker._fxAtk = aAtk;
+      if (attacker._fxDef != null) attacker._fxDef = aDefNow;
+    };
     const sk = atkSkillOf(attacker);
     const foe = opponent(p);
 
@@ -439,9 +442,9 @@ function doAttackCore(p, attacker, target, auto, action) {
     } else if (target.kind === "hero") {
       const hits = (sk === 4) ? 2 : 1;
       for (let hit = 1; hit <= hits; hit++) {
-        if (attacker.hp <= 0 || attacker.dying) break;
+        if (attacker.hp <= 0 || attacker.dying || !p.board.includes(attacker)) break;
         if (target.owner.hp <= 0) break;
-        if (hit > 1) retriggerAtkPlus();
+        if (hit > 1) retriggerAttackItem();
         const isMeHero = target.owner === meView().me;
         const defEl = Vfx.heroOf(isMeHero);
         const calc = calcAtkSkillHpDamage(attacker, aAtk, 0, aDefNow, null);
@@ -460,8 +463,8 @@ function doAttackCore(p, attacker, target, auto, action) {
       // single minion: 연속(4)=two hits with counter each (kill→retarget next living)
       const hits = (sk === 4) ? 2 : 1;
       for (let hit = 1; hit <= hits; hit++) {
-        if (attacker.hp <= 0 || attacker.dying) break;
-        if (hit > 1) retriggerAtkPlus();
+        if (attacker.hp <= 0 || attacker.dying || !p.board.includes(attacker)) break;
+        if (hit > 1) retriggerAttackItem();
         // 연속: 1타 처치 후 남은 타는 다음 생존 적(유닛→영웅)으로 재지정. 시체/스킵 금지.
         if (!(def && def.hp > 0 && !def.dying)) {
           if (sk !== 4) break;

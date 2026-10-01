@@ -1,9 +1,18 @@
-## v0.405
+## v0.4042
 
 - Approved pack-shop presentation with DOM prices/actions and explicit unavailable payment/inventory notices.
 - Independent saved BGM/SFX levels and switches, retaining master volume and gesture playback.
 - Local-only virtual matching preview; disabled on public hosts.
-- 481 regression tests and desktop/mobile browser QA. See UI_V405_QA.md.
+- 572 regression tests and desktop/mobile browser QA. See UI_V4042_QA.md.
+
+# v0.4041
+
+- Applies the approved update to 29 existing items, including four rarity changes. Harpy and wave-spearman summons remain 2/0/3 and 2/0/2; their item descriptions now agree with the source cards.
+- Boots and owl equipment now increase one random eligible opponent hand instance's soul cost at turn end. Increases stack and survive equipment loss; global cost auras are removed. Black Grimoire copies a fresh base card without removing the opponent's card.
+- Updates the ring's independent coin probability, kill/attack/death hand generation and Blessed Armor protection. Consecutive attacks trigger attack equipment on each hit. Generated/copied cards use the existing ten-card hand limit.
+- Applies the additionally approved soul costs and two rarity changes to 11 existing spells; Fire Shield now grants +3 attack/defense/health. Zero-soul spells retain legal casting, deck membership and AI availability.
+- Exempts all items from authoring soul bands while preserving unit/spell bands. Unit definitions, other spells/items, shop, multiplayer and audio files are unchanged.
+- Advances the version by 0.0001 as specified in VERSIONING.md. Validation and release evidence: ITEMS_V4041_QA.md.
 
 # v0.404
 

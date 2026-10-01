@@ -236,7 +236,7 @@ test("침묵된 대교 + 환생: 첫 파괴는 침묵 상태라 파괴: 미발�
 
 // ---- v0.349 (9/29): 환생하는 유닛이 낀 아이템의 파괴: 효과 발동, 아이템 없이 환생 ----
 
-test("적토마 장착 + 환생(피닉스): 적토마 토큰 생성, 아이템 없이 부활", () => {
+test("적토마 장착 + 환생(피닉스): 여포 핸드 생성, 아이템 없이 부활", () => {
   const { p1 } = setup(g);
   const m = place(g, p1, "f26");
   assert.ok(g.equipItemOnUnit(p1, g.cloneCard("di7"), m));
@@ -244,11 +244,12 @@ test("적토마 장착 + 환생(피닉스): 적토마 토큰 생성, 아이템 �
   assert.ok(p1.board.includes(m), "환생함");
   assert.equal(m.hp, 1);
   assert.ok(!m.equippedItem && !m._itemFx, "아이템 없이 부활");
-  assert.equal(p1.board.filter(x => x.id === "d40").length, 1, "적토마 토큰 생성");
+  assert.equal(p1.board.filter(x => x.id === "d40").length, 0, "적토마 토큰 생성 없음");
+  assert.equal(p1.hand.filter(x => x.id === "d7").length, 1, "여포 핸드 생성");
   assert.ok(!hasRebirth(m));
-  kill(g, p1, m); // 재파괴: 아이템 없으니 토큰 추가 없음
+  kill(g, p1, m); // 재파괴: 아이템 없으니 여포 추가 없음
   assert.ok(!p1.board.includes(m));
-  assert.equal(p1.board.filter(x => x.id === "d40").length, 1);
+  assert.equal(p1.hand.filter(x => x.id === "d7").length, 1);
 });
 
 test("인어의하프 장착 + 환생(피닉스): 적 전체 공=0, 아이템 없이 부활", () => {

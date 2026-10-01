@@ -5,7 +5,7 @@ function fixture(){const g=loadGame(),{p1,p2}=setup(g);g.CombatFx={generation:()
 test('reported feather + flame shield then repeated Wyvern combat rebirth restores printed 2/2/1',async()=>{
  const {g,p1,p2}=fixture(),m=place(g,p2,'f17'),id=m.uid;p2.soul=20;
  for(const cardId of ['fi4','fs7']){const c=g.cloneCard(cardId);p2.hand.push(c);assert.equal(g.playCard(p2,c,{kind:'minion',owner:p2,minion:m}),true);await flush();}
- assert.deepEqual([m.atk,m.def,m.hp],[6,8,12]);
+ assert.deepEqual([m.atk,m.def,m.hp],[5,7,11]);
  for(let i=0;i<3;i++){p1.board=[];const a=place(g,p1,'n26');await g.doAttack(p1,a,{kind:'minion',owner:p2,minion:m});}
  assert.ok(p2.board.includes(m));assert.equal(m.uid,id);assert.deepEqual([m.atk,m.def,m.hp,m.maxHp],[2,2,1,5]);assert.ok(!m.equippedItem);assert.ok(!g.combatWillRebirth(m));assert.equal(m.atkC,-2);assert.equal(m.defC,-2);assert.equal(m._turnRoll,undefined);
  g.destroyMinion(p2,m,{fromSpell:true});assert.ok(!p2.board.includes(m));
