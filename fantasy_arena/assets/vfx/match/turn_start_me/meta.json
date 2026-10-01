@@ -115,7 +115,7 @@
       1920,
       1080
     ],
-    "scale": 1,
+    "scale": 0.8,
     "placement": "The pixels are unshifted on the full source canvas. Apply top-left (-6,-30) ONCE at 1920x1080 reference scale. For matchStage W,H: s=min(W/1920,H/1080); origin=((W-1920*s)/2,(H-1080*s)/2); top-left=origin+(-6*s,-30*s); size=(1920*s,1080*s). Do not crop, stretch, or apply the derived top-left twice."
   },
   "dim": {

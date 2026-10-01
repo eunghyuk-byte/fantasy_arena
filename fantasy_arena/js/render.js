@@ -1248,7 +1248,7 @@ function renderMinion(m, side) {
 function renderDeckPile(p) {
   const hud = (typeof HUD_UI !== "undefined") ? HUD_UI : {};
   const nDeck = p.deck.length;
-  const layers = Math.min(6, Math.max(1, Math.ceil(nDeck / 5)));
+  const layers = Math.min(6, Math.max(0, Math.ceil(nDeck / 5)));
   let stack = "";
   for (let i = 0; i < layers; i++) {
     stack += `<i class="pile-layer" style="--i:${i};background-image:url('${hud.deck || ""}')"></i>`;

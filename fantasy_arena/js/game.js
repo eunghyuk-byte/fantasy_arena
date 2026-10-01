@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.401";
+const GAME_VERSION = "0.402";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -150,6 +150,7 @@ function other() { return state.turn === 1 ? state.p2 : state.p1; }
 
 function draw(p, n = 1) {
   for (let i = 0; i < n; i++) {
+    if (state && state.over) break;
     if (!p.deck.length) {
       p.fatigue += 1;
       p.hp -= p.fatigue;
@@ -1137,7 +1138,9 @@ function preloadLegendaryFx(s) {
 
 async function runSpellCast(p, card, target) {
   const owner = state;
-  const valid = () => state === owner;
+  const epoch = typeof SpellFx !== "undefined" && SpellFx.legendaryEpoch ? SpellFx.legendaryEpoch() : null;
+  const valid = () => state === owner && !owner.over &&
+    (epoch === null || SpellFx.legendaryEpoch() === epoch);
   owner.busy = true;
   // 맹덕신서(copy_enemy_spell): 시전 시점 상대 전장 장착 유닛 수만큼, 해결 뒤 원본 소울 복사본을 상대 핸드에
   const copiers = unitsWithItemFx(opponent(p), "copy_enemy_spell").length;
@@ -1160,7 +1163,7 @@ async function runSpellCast(p, card, target) {
     if (!resolved) { resolved = true; resolveSpell(p, card, target, plan); }
     for (let i = 0; i < copiers; i++) addCardToHand(opponent(p), card.id, "맹덕신서 복사");
   } finally {
-    if (valid()) owner.busy = false;
+    if (state === owner) owner.busy = false;
   }
   if (!valid()) return;
   checkWin();

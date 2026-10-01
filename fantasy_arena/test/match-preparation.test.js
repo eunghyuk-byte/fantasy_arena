@@ -8,6 +8,12 @@ test('explicit dim off/zero never falls back to MyTurn default',()=>{
  assert.equal(resolveDim('turn_start_me',{}).opacity,.3);
 });
 const anchor={mode:'reference-contain',container:'matchStage',referenceSizePx:[1920,1080],fit:'contain',pivotPx:[960,540],positionAtRef1080p:[954,510],displaySizeAtRef1080p:[1920,1080],canvasTopLeftAtRef1080p:[-6,-30],scale:1};
+test('MY TURN renders at 80 percent with its existing centre preserved',()=>{
+ const meta=JSON.parse(fs.readFileSync(path.join(__dirname,'../assets/vfx/match/turn_start_me/meta.json'),'utf8'));
+ const visual={style:{}};load().applyMatchPresentation(visual,meta,{},1920,1080);
+ assert.equal(parseFloat(visual.style.width),1536);assert.equal(parseFloat(visual.style.height),864);
+ assert.equal(parseFloat(visual.style.left)+768,954);assert.equal(parseFloat(visual.style.top)+432,510);
+});
 test('confirmed synthetic contract fits container once and resets reused legacy visuals',()=>{
  const {applyMatchPresentation}=load(),visual={style:{}};
  const meta={anchor};const opts={};

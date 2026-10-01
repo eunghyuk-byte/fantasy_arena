@@ -1,3 +1,11 @@
+# v0.402
+
+- Waits for an uncached opponent spell face before the existing central reveal and effect sequence. Loading is bounded and cancellable; failed media identifies the used card by name. Cancellation and game end cannot apply a pending spell again.
+- Scales only the MY TURN presentation to 80% around its existing centre, preserving animation and audio.
+- Empty decks no longer display card backs or their shadows; the count remains and replenishing the deck restores the pile.
+- Preserves independent escalating fatigue on empty draw attempts and stops multi-draw after lethal fatigue. Hand overflow burning remains separate.
+- Verification: 471 client tests, 2 server API tests, independent review, and Chrome game scenarios covering both perspectives, single-target/AOE/instant spells, consecutive AI spells, cancellation/restart/end, empty decks and fatigue. Existing 24 artwork assets are unchanged.
+
 # v0.401
 
 - Registers the 24 user-selected planned-unit artworks under assets/img/art/new-units/: four each for earth, fire, wind, water, light and dark. Only the 1000x800 JPEG quality-90 game files are included; high-resolution originals are excluded.

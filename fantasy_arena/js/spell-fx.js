@@ -1664,6 +1664,9 @@ const SpellFx = (() => {
     if (!fxCard) return;
     if (src && typeof src === "string" && src.indexOf("[object") < 0) {
       fxCard.innerHTML = '<img src="' + src + '" alt="">';
+    } else {
+      // A failed image must not leave an empty showcase or the previous card.
+      fxCard.textContent = name || "";
     }
     fxCard.classList.remove("out");
     void fxCard.offsetWidth;
@@ -2003,10 +2006,9 @@ const SpellFx = (() => {
 
         let faceSrc = "";
         try {
-          faceSrc = await Promise.race([
-            resolveFace(card),
-            new Promise(r => setTimeout(() => r(""), 300))
-          ]);
+          // Opponent cards have no warmed hand face. Await the same composed
+          // face before starting the showcase, with bounded, clearable loading.
+          faceSrc = await waitSpellMeta(resolveFace(card));
         } catch (e) { faceSrc = ""; }
         if (opts.fxEpoch !== _legendaryEpoch) return;
         paintCard(faceSrc || "", card.name || "");
