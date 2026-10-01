@@ -1,72 +1,96 @@
-/* Elemental gate: scoped to the title so the fixed battle stage is unchanged. */
+/* Approved 1672 x 941 reference coordinates. Portrait/short stages reflow below. */
 #app:has(#title.active) {
-  /* Mobile layout viewport can initially exceed the visible viewport. */
   max-width: min(100vw, 177.7778dvh);
   max-height: min(100dvh, 56.25vw);
 }
+body:has(#title.active) #settingsGearBtn { visibility: hidden; }
 #title.screen.active {
-  padding: 5cqh 16px 3cqh !important;
-  justify-content: flex-start !important;
+  position: relative;
+  padding: 0 !important;
   overflow: auto !important;
-  background: linear-gradient(180deg, rgba(2,9,20,.16), transparent 55%, rgba(2,9,20,.28)),
-    url('../assets/img/ui/element-portal-background.webp') center / cover no-repeat, #071423 !important;
+  background: url('../assets/img/ui/element-portal-background.webp') center / contain no-repeat, #071423 !important;
 }
 #title .title-brand {
-  align-items: center;
-  width: auto !important;
-  margin: 0 auto 4cqh !important;
-  gap: 1cqh !important;
+  position: absolute; inset: 0 0 auto;
+  display: block; width: 100% !important; height: 47.9cqh;
+  margin: 0 !important; padding: 0; pointer-events: none;
 }
-#title .title-emblem { height: 17cqh !important; max-height: 17cqh !important; }
-#title .title-wordmark { --wm-h: 17cqh; }
-#title .title-body { width: min(38cqw, 440px) !important; min-width: min(280px, 100%); }
+#title .title-emblem {
+  position: absolute; top: 6.695cqh; left: 50%;
+  width: 13.457cqw; height: 22.955cqh !important; max-height: none !important;
+  transform: translateX(-50%); object-fit: fill; margin: 0;
+  filter: drop-shadow(0 2px 5px #0008);
+}
+#title .title-wordmark {
+  position: absolute; top: 26.142cqh; left: calc(50% + .658cqw);
+  width: 41.567cqw !important; height: 24.655cqh !important; max-height: none !important;
+  transform: translateX(-50%); object-fit: fill; margin: 0 !important;
+  clip-path: inset(0 0 48.5% 0);
+  filter: drop-shadow(0 2px 5px #0008);
+}
+#title .title-underline {
+  position: absolute; top: 24.867cqh; left: calc(50% + .09cqw);
+  width: 40.072cqw; height: 23.379cqh;
+  transform: translateX(-50%); object-fit: fill;
+  clip-path: inset(51.5% 0 0 0);
+  filter: drop-shadow(0 2px 5px #0008);
+}
+#title .title-body {
+  position: absolute; top: 47.928cqh; left: 50%; transform: translateX(-50%);
+  width: 29.665cqw !important; min-width: 180px;
+  margin: 0 !important; padding: 0;
+}
 #title .title-menu {
-  width: 100%; min-width: 0;
-  display: flex; flex-direction: column;
-  gap: clamp(6px, 1.5cqh, 16px) !important;
-  padding: 0 !important;
+  display: flex; flex-direction: column; width: 100%; min-width: 0;
+  gap: 1.063cqh !important; padding: 0 !important;
   border: 0; border-radius: 0; background: none; box-shadow: none;
 }
 #title .title-menu::before, #title .title-menu::after { content: none; }
 #title .title-menu .menu-btn {
-  position: relative;
-  min-height: 44px;
-  height: clamp(44px, 8cqh, 82px);
-  padding: 8px 24px !important;
-  border: 1px solid #a98b4f; border-radius: 5px;
-  background: linear-gradient(180deg, rgba(28,46,60,.96), rgba(6,17,29,.96));
-  color: #f5e4bc;
-  font-size: clamp(16px, 2.5cqh, 27px) !important;
-  font-weight: 700;
-  letter-spacing: .13em !important;
-  text-shadow: 0 2px 4px #000;
-  box-shadow: inset 0 0 0 3px #091723, inset 0 0 0 4px #63543a, 0 5px 12px #0008;
+  --plate: url('../assets/img/ui/menu-button-normal.png');
+  position: relative; isolation: isolate;
+  width: 100%; min-height: 44px; height: 10.627cqh;
+  flex: 0 0 auto;
+  padding: 0 24px !important;
+  border: 0; border-radius: 0;
+  background: transparent; box-shadow: none;
+  color: #fff1ad;
+  font-size: clamp(16px, 4.04cqh, 40px) !important;
+  font-weight: 700; letter-spacing: .02em !important;
+  text-shadow: 0 2px 3px #000;
   touch-action: manipulation;
-  transition: border-color .16s, box-shadow .16s, background .16s, transform .1s;
+  transition: transform .1s, filter .15s;
 }
+#title .title-menu .menu-btn::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  /* Sprite has transparent canvas padding; crop in CSS without altering pixels. */
+  background: var(--plate) center 46% / 103.17% 204.5% no-repeat;
+  filter: brightness(.85) saturate(.9);
+}
+#title #btnLobby { font-size: clamp(17px, 4.676cqh, 44px) !important; }
 @media (hover: hover) {
   #title .title-menu .menu-btn:hover {
-    border-color: #ffe5a4;
-    background: linear-gradient(180deg, #354753, #172838);
-    box-shadow: inset 0 0 0 3px #152334, inset 0 0 0 4px #d9b970, 0 0 22px #ebbf5966;
+    --plate: url('../assets/img/ui/menu-button-hover.png');
+    color: #fff5b9;
+    filter: drop-shadow(0 0 8px #ffc44a80);
   }
 }
 #title .title-menu .menu-btn:focus-visible {
-  outline: 2px solid #ffe5a4; outline-offset: 4px;
-  border-color: #ffe5a4;
-  box-shadow: inset 0 0 0 3px #152334, inset 0 0 0 4px #d9b970, 0 0 22px #ebbf5966;
+  --plate: url('../assets/img/ui/menu-button-hover.png');
+  outline: 2px solid #ffe5a4; outline-offset: 3px;
+  border-radius: 20px;
+  filter: drop-shadow(0 0 8px #ffc44a80);
 }
 #title .title-menu .menu-btn:active,
 #title .title-menu .menu-btn.is-pressed {
-  transform: translateY(2px);
-  border-color: #ffe5a4;
-  background: #091522;
-  box-shadow: inset 0 3px 12px #000, 0 0 14px #ebbf5955;
+  --plate: url('../assets/img/ui/menu-button-hover.png');
+  transform: translateY(2px) scale(.985);
+  filter: brightness(.82);
 }
 #title .title-menu .build-ver {
-  position: static !important; margin: 1cqh 0 0 !important;
-  text-align: center; color: #d4d3cf; font-size: clamp(11px, 1.5cqh, 15px) !important;
-  text-shadow: 0 2px 3px #000;
+  position: static !important; align-self: flex-end;
+  margin: 0 !important; color: #ddd3b3;
+  font-size: clamp(10px, 1.3cqh, 13px) !important;
 }
 #exitNotice:not(:empty) {
   position: fixed; z-index: 100000; bottom: 16px; left: 50%; transform: translateX(-50%);
@@ -74,12 +98,20 @@
   border: 1px solid #d9b970; border-radius: 6px; background: #0b1928; color: #fff0cf;
   text-align: center; font-size: 16px; box-shadow: 0 4px 20px #000a;
 }
-@container stage (max-height: 420px) {
-  #title.screen.active { padding-top: 3cqh !important; }
-  #title .title-brand { margin-bottom: 2cqh !important; }
-  #title .title-emblem { height: 14cqh !important; max-height: 14cqh !important; }
-  #title .title-wordmark { --wm-h: 14cqh; }
-  #title .title-menu { gap: 6px !important; }
+/* Keep 44px touch targets and the full logo visible on short landscape screens. */
+@container stage (max-height: 500px) {
+  #title.screen.active { display: flex !important; justify-content: flex-start !important; padding: 2cqh 8px !important; }
+  #title .title-brand {
+    position: relative; inset: auto; height: 22cqh; flex: 0 0 auto;
+  }
+  #title .title-emblem { top: 0; width: 9cqh; height: 9cqh !important; }
+  #title .title-wordmark { top: 8.5cqh; left: 50%; width: 40cqh !important; height: 12cqh !important; clip-path: none; }
+  #title .title-underline { display: none; }
+  #title .title-body { position: relative; top: auto; left: auto; transform: none; width: 36cqw !important; margin: 1cqh auto 0 !important; }
+  #title .title-menu { gap: 4px !important; }
+  #title .title-menu .menu-btn { height: 44px; font-size: 17px !important; }
+  #title #btnLobby { font-size: 17px !important; }
+  #title .title-menu .build-ver { line-height: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #title .title-menu .menu-btn { transition: none; }
