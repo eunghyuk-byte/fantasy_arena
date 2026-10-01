@@ -30,8 +30,8 @@ const COIN_GOLD = "assets/img/coins/gold.png";
 const COIN_BLACK = "assets/img/coins/black.png";
 
 const CARDS = [
-// === UNITS (source of truth: 판타지아레나_유닛목록.xlsx + art {id}.jpg; never add orphan e29+ non-token units here (e41 token OK)) ===
-// 유닛 단일 소스 — 유닛목록.xlsx + art/{id}.jpg 가 정본. e29+ 고아 비토큰 유닛 추가 금지 (e41 토큰 OK).
+// === UNITS: existing roster + approved 24-unit expansion appended below ===
+// 신규 24종 승인 수치: test-support/approved-24-units.json; 승인 아트 연결: assets/img/art/new-units/catalog.json.
   { id:"e1", tribe:"earth", name:"놀", cost:1, type:"minion", atk:1, def:0, hp:3, atkC:-1, defC:0, hpC:1, rarity:"common", text:"" },
   { id:"e2", tribe:"earth", name:"대지술사", cost:4, type:"minion", atk:2, def:0, hp:6, atkC:0, defC:0, hpC:-3, rarity:"common", ability:"환생", text:"환생" },
   { id:"e3", tribe:"earth", name:"그린드래곤", cost:9, type:"minion", atk:6, def:0, hp:12, atkC:-2, defC:0, hpC:2, rarity:"legendary", ability:"면역", text:"면역" },
@@ -318,7 +318,33 @@ const CARDS = [
   { id:"f40", tribe:"fire", name:"화산재", cost:6, type:"minion", token:true, atk:5, def:0, hp:1, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
   { id:"l40", tribe:"light", name:"성흔사", cost:5, type:"minion", token:true, atk:6, def:1, hp:6, atkC:0, defC:0, hpC:0, rarity:"rare", text:"토큰" },
   { id:"d40", tribe:"dark", name:"적토마", cost:6, type:"minion", token:true, atk:4, def:1, hp:4, atkC:0, defC:0, hpC:0, rarity:"legendary", text:"토큰" },
-  { id:"ds9", tribe:"dark", name:"미인계", cost:8, type:"spell", rarity:"legendary", text:"적 유닛 하나 탈취", spell:{ type:"steal_minion", target:"enemy_minion" } }
+  { id:"ds9", tribe:"dark", name:"미인계", cost:8, type:"spell", rarity:"legendary", text:"적 유닛 하나 탈취", spell:{ type:"steal_minion", target:"enemy_minion" } },
+
+// Approved 24-unit expansion. Append to preserve the existing default deck order.
+  {"id":"e30","name":"돌가죽두더지","tribe":"earth","cost":1,"atk":2,"def":0,"hp":2,"atkC":0,"defC":0,"hpC":1,"rarity":"common","type":"minion","text":""},
+  {"id":"e31","name":"고목지기","tribe":"earth","cost":4,"atk":1,"def":0,"hp":5,"atkC":0,"defC":0,"hpC":1,"rarity":"common","ability":"환생","type":"minion","text":"환생"},
+  {"id":"e32","name":"바위등멧돼지","tribe":"earth","cost":4,"atk":4,"def":0,"hp":5,"atkC":-1,"defC":0,"hpC":1,"rarity":"common","type":"minion","text":""},
+  {"id":"e33","name":"산악거북","tribe":"earth","cost":6,"atk":2,"def":2,"hp":4,"atkC":0,"defC":0,"hpC":1,"rarity":"uncommon","atkSkill":8,"type":"minion","text":"석화공격"},
+  {"id":"f30","name":"잿불담비","tribe":"fire","cost":1,"atk":3,"def":0,"hp":2,"atkC":-1,"defC":0,"hpC":0,"rarity":"common","type":"minion","text":""},
+  {"id":"f31","name":"화로일꾼","tribe":"fire","cost":2,"atk":4,"def":0,"hp":3,"atkC":-1,"defC":0,"hpC":-1,"rarity":"common","type":"minion","text":""},
+  {"id":"f32","name":"홍련검투사","tribe":"fire","cost":4,"atk":4,"def":0,"hp":4,"atkC":-2,"defC":0,"hpC":-2,"rarity":"uncommon","atkSkill":4,"type":"minion","text":"연속공격"},
+  {"id":"f33","name":"용암전갈","tribe":"fire","cost":5,"atk":4,"def":0,"hp":5,"atkC":-2,"defC":0,"hpC":-2,"rarity":"uncommon","atkSkill":5,"type":"minion","text":"치명공격"},
+  {"id":"n30","name":"휘파람새","tribe":"wind","cost":1,"atk":2,"def":0,"hp":2,"atkC":0,"defC":0,"hpC":-1,"rarity":"common","atkSkill":2,"type":"minion","text":"관통공격"},
+  {"id":"n31","name":"하늘다람쥐","tribe":"wind","cost":2,"atk":2,"def":1,"hp":2,"atkC":0,"defC":0,"hpC":0,"rarity":"common","type":"minion","text":""},
+  {"id":"n32","name":"절벽유랑객","tribe":"wind","cost":4,"atk":2,"def":1,"hp":2,"atkC":0,"defC":0,"hpC":0,"rarity":"common","ability":"출전","type":"minion","text":"소환: 드로우 1"},
+  {"id":"n33","name":"깃날개뱀","tribe":"wind","cost":5,"atk":3,"def":1,"hp":5,"atkC":0,"defC":0,"hpC":0,"rarity":"uncommon","atkSkill":2,"type":"minion","text":"관통공격"},
+  {"id":"a30","name":"여울수달","tribe":"water","cost":1,"atk":3,"def":0,"hp":1,"atkC":-1,"defC":1,"hpC":0,"rarity":"common","type":"minion","text":""},
+  {"id":"a31","name":"산호소라게","tribe":"water","cost":2,"atk":1,"def":2,"hp":1,"atkC":1,"defC":-1,"hpC":0,"rarity":"common","type":"minion","text":""},
+  {"id":"a32","name":"빙하파수꾼","tribe":"water","cost":5,"atk":1,"def":3,"hp":2,"atkC":-1,"defC":-1,"hpC":1,"rarity":"uncommon","atkSkill":3,"type":"minion","text":"돌진공격"},
+  {"id":"a33","name":"산호등고래","tribe":"water","cost":6,"atk":2,"def":3,"hp":5,"atkC":0,"defC":-2,"hpC":2,"rarity":"uncommon","type":"minion","text":""},
+  {"id":"l30","name":"등불지기","tribe":"light","cost":1,"atk":1,"def":0,"hp":2,"atkC":1,"defC":1,"hpC":0,"rarity":"common","type":"minion","text":""},
+  {"id":"l31","name":"진주깃공작","tribe":"light","cost":4,"atk":1,"def":0,"hp":3,"atkC":2,"defC":2,"hpC":0,"rarity":"common","ability":"보호","type":"minion","text":"보호"},
+  {"id":"l32","name":"여명대사제","tribe":"light","cost":6,"atk":2,"def":0,"hp":5,"atkC":0,"defC":3,"hpC":0,"rarity":"uncommon","ability":"출전","type":"minion","text":"소환: 드로우 1"},
+  {"id":"l33","name":"서광기린","tribe":"light","cost":6,"atk":3,"def":1,"hp":4,"atkC":2,"defC":0,"hpC":2,"rarity":"uncommon","ability":"보호","type":"minion","text":"보호"},
+  {"id":"d30","name":"묘지쥐","tribe":"dark","cost":1,"atk":2,"def":0,"hp":3,"atkC":0,"defC":0,"hpC":-2,"rarity":"common","type":"minion","text":""},
+  {"id":"d31","name":"묘석까마귀","tribe":"dark","cost":2,"atk":4,"def":0,"hp":3,"atkC":0,"defC":0,"hpC":-2,"rarity":"common","type":"minion","text":""},
+  {"id":"d32","name":"검은가면시종","tribe":"dark","cost":2,"atk":2,"def":0,"hp":3,"atkC":-2,"defC":0,"hpC":-2,"rarity":"common","ability":"환생","type":"minion","text":"환생"},
+  {"id":"d33","name":"납골거미","tribe":"dark","cost":3,"atk":2,"def":1,"hp":3,"atkC":-2,"defC":0,"hpC":-2,"rarity":"common","atkSkill":6,"type":"minion","text":"흡혈공격"}
 
 ];
 const SPELL_SCHOOL = { fire:"염술", wind:"풍술", water:"물술", light:"성술", dark:"암술", earth:"지술" };
@@ -658,6 +684,34 @@ function pickFrameUrl(c, tribe) {
   return frameOf(c);
 }
 const CARD_ART = {"a1":"assets/img/art/a1.jpg","a2":"assets/img/art/a2.jpg","a3":"assets/img/art/a3.jpg","a4":"assets/img/art/a4.jpg","a5":"assets/img/art/a5.jpg","a6":"assets/img/art/a6.jpg","a7":"assets/img/art/a7.jpg","a8":"assets/img/art/a8.jpg","a9":"assets/img/art/a9.jpg","a10":"assets/img/art/a10.jpg","a11":"assets/img/art/a11.jpg","a12":"assets/img/art/a12.jpg","a13":"assets/img/art/a13.jpg","a14":"assets/img/art/a14.jpg","a15":"assets/img/art/a15.jpg","a16":"assets/img/art/a16.jpg","a17":"assets/img/art/a17.jpg","a18":"assets/img/art/a18.jpg","a19":"assets/img/art/a19.jpg","a20":"assets/img/art/a20.jpg","a21":"assets/img/art/a21.jpg","a22":"assets/img/art/a22.jpg","a23":"assets/img/art/a23.jpg","a24":"assets/img/art/a24.jpg","a25":"assets/img/art/a25.jpg","a26":"assets/img/art/a26.jpg","a27":"assets/img/art/a27.jpg","a28":"assets/img/art/a28.jpg","a29":"assets/img/art/a29.jpg","as1":"assets/img/art/as1.jpg","as2":"assets/img/art/as2.jpg","as3":"assets/img/art/as3.jpg","as4":"assets/img/art/as4.jpg","as5":"assets/img/art/as5.jpg","as6":"assets/img/art/as6.jpg","as7":"assets/img/art/as7.jpg","as8":"assets/img/art/as8.jpg","d1":"assets/img/art/d1.jpg","d2":"assets/img/art/d2.jpg","d3":"assets/img/art/d3.jpg","d4":"assets/img/art/d4.jpg","d5":"assets/img/art/d5.jpg","d6":"assets/img/art/d6.jpg","d7":"assets/img/art/d7.jpg","d8":"assets/img/art/d8.jpg","d9":"assets/img/art/d9.jpg","d10":"assets/img/art/d10.jpg","d11":"assets/img/art/d11.jpg","d12":"assets/img/art/d12.jpg","d13":"assets/img/art/d13.jpg","d14":"assets/img/art/d14.jpg","d15":"assets/img/art/d15.jpg","d16":"assets/img/art/d16.jpg","d17":"assets/img/art/d17.jpg","d18":"assets/img/art/d18.jpg","d19":"assets/img/art/d19.jpg","d20":"assets/img/art/d20.jpg","d21":"assets/img/art/d21.jpg","d22":"assets/img/art/d22.jpg","d23":"assets/img/art/d23.jpg","d24":"assets/img/art/d24.jpg","d25":"assets/img/art/d25.jpg","d26":"assets/img/art/d26.jpg","d27":"assets/img/art/d27.jpg","d28":"assets/img/art/d28.jpg","d29":"assets/img/art/d29.jpg","ds1":"assets/img/art/ds1.jpg","ds2":"assets/img/art/ds2.jpg","ds3":"assets/img/art/ds3.jpg","ds4":"assets/img/art/ds4.jpg","ds5":"assets/img/art/ds5.jpg","ds6":"assets/img/art/ds6.jpg","ds7":"assets/img/art/ds7.jpg","ds8":"assets/img/art/ds8.jpg","e1":"assets/img/art/e1.jpg","e2":"assets/img/art/e2.jpg","e3":"assets/img/art/e3.jpg","e4":"assets/img/art/e4.jpg","e5":"assets/img/art/e5.jpg","e6":"assets/img/art/e6.jpg","e7":"assets/img/art/e7.jpg","e8":"assets/img/art/e8.jpg","e9":"assets/img/art/e9.jpg","e10":"assets/img/art/e10.jpg","e11":"assets/img/art/e11.jpg","e12":"assets/img/art/e12.jpg","e13":"assets/img/art/e13.jpg","e14":"assets/img/art/e14.jpg","e15":"assets/img/art/e15.jpg","e16":"assets/img/art/e16.jpg","e17":"assets/img/art/e17.jpg","e18":"assets/img/art/e18.jpg","e19":"assets/img/art/e19.jpg","e20":"assets/img/art/e20.jpg","e21":"assets/img/art/e21.jpg","e22":"assets/img/art/e22.jpg","e23":"assets/img/art/e23.jpg","e24":"assets/img/art/e24.jpg","e25":"assets/img/art/e25.jpg","e26":"assets/img/art/e26.jpg","e27":"assets/img/art/e27.jpg","e28":"assets/img/art/e28.jpg","e29":"assets/img/art/e29.jpg","es1":"assets/img/art/es1.jpg","es2":"assets/img/art/es2.jpg","es3":"assets/img/art/es3.jpg","es4":"assets/img/art/es4.jpg","es5":"assets/img/art/es5.jpg","es6":"assets/img/art/es6.jpg","es7":"assets/img/art/es7.jpg","es8":"assets/img/art/es8.jpg","f1":"assets/img/art/f1.jpg","f2":"assets/img/art/f2.jpg","f3":"assets/img/art/f3.jpg","f4":"assets/img/art/f4.jpg","f5":"assets/img/art/f5.jpg","f6":"assets/img/art/f6.jpg","f7":"assets/img/art/f7.jpg","f8":"assets/img/art/f8.jpg","f9":"assets/img/art/f9.jpg","f10":"assets/img/art/f10.jpg","f11":"assets/img/art/f11.jpg","f12":"assets/img/art/f12.jpg","f13":"assets/img/art/f13.jpg","f14":"assets/img/art/f14.jpg","f15":"assets/img/art/f15.jpg","f16":"assets/img/art/f16.jpg","f17":"assets/img/art/f17.jpg","f18":"assets/img/art/f18.jpg","f19":"assets/img/art/f19.jpg","f20":"assets/img/art/f20.jpg","f21":"assets/img/art/f21.jpg","f22":"assets/img/art/f22.jpg","f23":"assets/img/art/f23.jpg","f24":"assets/img/art/f24.jpg","f25":"assets/img/art/f25.jpg","f26":"assets/img/art/f26.jpg","f27":"assets/img/art/f27.jpg","f28":"assets/img/art/f28.jpg","f29":"assets/img/art/f29.jpg","fs1":"assets/img/art/fs1.jpg","fs2":"assets/img/art/fs2.jpg","fs3":"assets/img/art/fs3.jpg","fs4":"assets/img/art/fs4.jpg","fs5":"assets/img/art/fs5.jpg","fs6":"assets/img/art/fs6.jpg","fs7":"assets/img/art/fs7.jpg","fs8":"assets/img/art/fs8.jpg","l1":"assets/img/art/l1.jpg","l2":"assets/img/art/l2.jpg","l3":"assets/img/art/l3.jpg","l4":"assets/img/art/l4.jpg","l5":"assets/img/art/l5.jpg","l6":"assets/img/art/l6.jpg","l7":"assets/img/art/l7.jpg","l8":"assets/img/art/l8.jpg","l9":"assets/img/art/l9.jpg","l10":"assets/img/art/l10.jpg","l11":"assets/img/art/l11.jpg","l12":"assets/img/art/l12.jpg","l13":"assets/img/art/l13.jpg","l14":"assets/img/art/l14.jpg","l15":"assets/img/art/l15.jpg","l16":"assets/img/art/l16.jpg","l17":"assets/img/art/l17.jpg","l18":"assets/img/art/l18.jpg","l19":"assets/img/art/l19.jpg","l20":"assets/img/art/l20.jpg","l21":"assets/img/art/l21.jpg","l22":"assets/img/art/l22.jpg","l23":"assets/img/art/l23.jpg","l24":"assets/img/art/l24.jpg","l25":"assets/img/art/l25.jpg","l26":"assets/img/art/l26.jpg","l27":"assets/img/art/l27.jpg","l28":"assets/img/art/l28.jpg","l29":"assets/img/art/l29.jpg","ls1":"assets/img/art/ls1.jpg","ls2":"assets/img/art/ls2.jpg","ls3":"assets/img/art/ls3.jpg","ls4":"assets/img/art/ls4.jpg","ls5":"assets/img/art/ls5.jpg","ls6":"assets/img/art/ls6.jpg","ls7":"assets/img/art/ls7.jpg","ls8":"assets/img/art/ls8.jpg","n1":"assets/img/art/n1.jpg","n2":"assets/img/art/n2.jpg","n3":"assets/img/art/n3.jpg","n4":"assets/img/art/n4.jpg","n5":"assets/img/art/n5.jpg","n6":"assets/img/art/n6.jpg","n7":"assets/img/art/n7.jpg","n8":"assets/img/art/n8.jpg","n9":"assets/img/art/n9.jpg","n10":"assets/img/art/n10.jpg","n11":"assets/img/art/n11.jpg","n12":"assets/img/art/n12.jpg","n13":"assets/img/art/n13.jpg","n14":"assets/img/art/n14.jpg","n15":"assets/img/art/n15.jpg","n16":"assets/img/art/n16.jpg","n17":"assets/img/art/n17.jpg","n18":"assets/img/art/n18.jpg","n19":"assets/img/art/n19.jpg","n20":"assets/img/art/n20.jpg","n21":"assets/img/art/n21.jpg","n22":"assets/img/art/n22.jpg","n23":"assets/img/art/n23.jpg","n24":"assets/img/art/n24.jpg","n25":"assets/img/art/n25.jpg","n26":"assets/img/art/n26.jpg","n27":"assets/img/art/n27.jpg","n28":"assets/img/art/n28.jpg","n29":"assets/img/art/n29.jpg","ns1":"assets/img/art/ns1.jpg","ns2":"assets/img/art/ns2.jpg","ns3":"assets/img/art/ns3.jpg","ns4":"assets/img/art/ns4.jpg","ns5":"assets/img/art/ns5.jpg","ns6":"assets/img/art/ns6.jpg","ns7":"assets/img/art/ns7.jpg","ns8":"assets/img/art/ns8.jpg","coin":"assets/img/art/coin.jpg","n40":"assets/img/art/n40.jpg","e41":"assets/img/art/e41.jpg","e42":"assets/img/art/e42.jpg","a40":"assets/img/art/a40.jpg","di7":"assets/img/art/di7.jpg","li7":"assets/img/art/li7.jpg","ei7":"assets/img/art/ei7.jpg","ni7":"assets/img/art/ni7.jpg","ai7":"assets/img/art/ai7.jpg","fi7":"assets/img/art/fi7.jpg","ns9":"assets/img/art/ns9.jpg","fs9":"assets/img/art/fs9.jpg","as9":"assets/img/art/as9.jpg","es9":"assets/img/art/es9.jpg","ls9":"assets/img/art/ls9.jpg","ds9":"assets/img/art/ds9.jpg","es10":"assets/img/art/es10.jpg","fs10":"assets/img/art/fs10.jpg","ns10":"assets/img/art/ns10.jpg","as10":"assets/img/art/as10.jpg","ls10":"assets/img/art/ls10.jpg","ds10":"assets/img/art/ds10.jpg","e43":"assets/img/art/e43.jpg","f40":"assets/img/art/f40.jpg","l40":"assets/img/art/l40.jpg","d40":"assets/img/art/di7.jpg"};
+
+// Existing approved JPEGs; no image duplication or fallback art.
+Object.assign(CARD_ART, {
+  "e30": "assets/img/art/new-units/earth/stoneskin-mole.jpg",
+  "e31": "assets/img/art/new-units/earth/oldwood-keeper.jpg",
+  "e32": "assets/img/art/new-units/earth/rockback-boar.jpg",
+  "e33": "assets/img/art/new-units/earth/mountain-turtle.jpg",
+  "f30": "assets/img/art/new-units/fire/ember-marten.jpg",
+  "f31": "assets/img/art/new-units/fire/furnace-worker.jpg",
+  "f32": "assets/img/art/new-units/fire/crimson-gladiator.jpg",
+  "f33": "assets/img/art/new-units/fire/lava-scorpion.jpg",
+  "n30": "assets/img/art/new-units/wind/whistlebird.jpg",
+  "n31": "assets/img/art/new-units/wind/sky-squirrel.jpg",
+  "n32": "assets/img/art/new-units/wind/cliff-wanderer.jpg",
+  "n33": "assets/img/art/new-units/wind/featherwing-serpent.jpg",
+  "a30": "assets/img/art/new-units/water/rapid-otter.jpg",
+  "a31": "assets/img/art/new-units/water/coral-hermit-crab.jpg",
+  "a32": "assets/img/art/new-units/water/glacier-sentinel.jpg",
+  "a33": "assets/img/art/new-units/water/coralback-whale.jpg",
+  "l30": "assets/img/art/new-units/light/lantern-keeper.jpg",
+  "l31": "assets/img/art/new-units/light/pearl-plume-peacock.jpg",
+  "l32": "assets/img/art/new-units/light/dawn-high-priest.jpg",
+  "l33": "assets/img/art/new-units/light/dawn-qilin.jpg",
+  "d30": "assets/img/art/new-units/dark/graveyard-rat.jpg",
+  "d31": "assets/img/art/new-units/dark/gravestone-raven.jpg",
+  "d32": "assets/img/art/new-units/dark/black-mask-attendant.jpg",
+  "d33": "assets/img/art/new-units/dark/ossuary-spider.jpg"
+});
 
 (function bootstrapCardArt() {
   if (typeof CARD_ART === "undefined" || typeof CARDS === "undefined") return;

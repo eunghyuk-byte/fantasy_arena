@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "approved-art-awaiting-card-definitions",
+  "status": "implemented-card-definitions",
   "dimensions": [
     1000,
     800
@@ -14,7 +14,8 @@
       "variant": "C",
       "path": "fantasy_arena/assets/img/art/new-units/earth/stoneskin-mole.jpg",
       "bytes": 254638,
-      "sha256": "8a4c8d7cca84ad824da1851e44b52cb78a1cb681e8ed1c7fd713b0e91d071671"
+      "sha256": "8a4c8d7cca84ad824da1851e44b52cb78a1cb681e8ed1c7fd713b0e91d071671",
+      "cardId": "e30"
     },
     {
       "name": "고목지기",
@@ -23,7 +24,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/earth/oldwood-keeper.jpg",
       "bytes": 455049,
-      "sha256": "a77436e3d42f45cdfadf74a01eb9b2d7c49ba4e7309eff7c150f8515b6a18ddb"
+      "sha256": "a77436e3d42f45cdfadf74a01eb9b2d7c49ba4e7309eff7c150f8515b6a18ddb",
+      "cardId": "e31"
     },
     {
       "name": "바위등멧돼지",
@@ -32,7 +34,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/earth/rockback-boar.jpg",
       "bytes": 413992,
-      "sha256": "9b226e45b1c6bf0bd9194eefdc2c2fb9b87abfb55b17c5ef25890b2cd7b4dff9"
+      "sha256": "9b226e45b1c6bf0bd9194eefdc2c2fb9b87abfb55b17c5ef25890b2cd7b4dff9",
+      "cardId": "e32"
     },
     {
       "name": "산악거북",
@@ -41,7 +44,8 @@
       "variant": "B",
       "path": "fantasy_arena/assets/img/art/new-units/earth/mountain-turtle.jpg",
       "bytes": 398969,
-      "sha256": "c3b59bd8937ab5056850560e9e05e9d99c837be1204bea919c4d2f1760d76d4e"
+      "sha256": "c3b59bd8937ab5056850560e9e05e9d99c837be1204bea919c4d2f1760d76d4e",
+      "cardId": "e33"
     },
     {
       "name": "잿불담비",
@@ -50,7 +54,8 @@
       "variant": "C",
       "path": "fantasy_arena/assets/img/art/new-units/fire/ember-marten.jpg",
       "bytes": 278475,
-      "sha256": "a5446dba0360c0264b838e9bc3c2f1c95f76d86f3278233dd3030c97d57c2599"
+      "sha256": "a5446dba0360c0264b838e9bc3c2f1c95f76d86f3278233dd3030c97d57c2599",
+      "cardId": "f30"
     },
     {
       "name": "화로일꾼",
@@ -59,7 +64,8 @@
       "variant": "C",
       "path": "fantasy_arena/assets/img/art/new-units/fire/furnace-worker.jpg",
       "bytes": 304320,
-      "sha256": "1b81d791317bd1ca131cce16caf9139cf32bbc0f3aed5b37906142058003b0e5"
+      "sha256": "1b81d791317bd1ca131cce16caf9139cf32bbc0f3aed5b37906142058003b0e5",
+      "cardId": "f31"
     },
     {
       "name": "홍련검투사",
@@ -68,7 +74,8 @@
       "variant": "C",
       "path": "fantasy_arena/assets/img/art/new-units/fire/crimson-gladiator.jpg",
       "bytes": 348393,
-      "sha256": "c43a133031912e88ee56ab521e7428b3072de02afbcdfdcf9266e64aebca0485"
+      "sha256": "c43a133031912e88ee56ab521e7428b3072de02afbcdfdcf9266e64aebca0485",
+      "cardId": "f32"
     },
     {
       "name": "용암전갈",
@@ -77,7 +84,8 @@
       "variant": "C",
       "path": "fantasy_arena/assets/img/art/new-units/fire/lava-scorpion.jpg",
       "bytes": 460704,
-      "sha256": "b6a1726fc763f361d965aaf43f41844381b847845aa8bd8cfe87fc4b84e55e06"
+      "sha256": "b6a1726fc763f361d965aaf43f41844381b847845aa8bd8cfe87fc4b84e55e06",
+      "cardId": "f33"
     },
     {
       "name": "휘파람새",
@@ -86,7 +94,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/wind/whistlebird.jpg",
       "bytes": 322239,
-      "sha256": "0d436e5ee3e696f18c6d5eef74b96bb6315bfd08e3ce1fb4f6271ed5fc5d84d1"
+      "sha256": "0d436e5ee3e696f18c6d5eef74b96bb6315bfd08e3ce1fb4f6271ed5fc5d84d1",
+      "cardId": "n30"
     },
     {
       "name": "하늘다람쥐",
@@ -95,7 +104,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/wind/sky-squirrel.jpg",
       "bytes": 326486,
-      "sha256": "b57c3c6b60d4309fdb7b81873886a2a0e63d7f457a2e93c9a0716271acbab7a9"
+      "sha256": "b57c3c6b60d4309fdb7b81873886a2a0e63d7f457a2e93c9a0716271acbab7a9",
+      "cardId": "n31"
     },
     {
       "name": "절벽유랑객",
@@ -104,7 +114,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/wind/cliff-wanderer.jpg",
       "bytes": 367247,
-      "sha256": "d4e5c07544759b669980b8cfc6bcb070c572cc0c74446993948a5a9193a5e845"
+      "sha256": "d4e5c07544759b669980b8cfc6bcb070c572cc0c74446993948a5a9193a5e845",
+      "cardId": "n32"
     },
     {
       "name": "깃날개뱀",
@@ -113,7 +124,8 @@
       "variant": "B",
       "path": "fantasy_arena/assets/img/art/new-units/wind/featherwing-serpent.jpg",
       "bytes": 346590,
-      "sha256": "eb7e7d6ccdee491d690023e0462ccaf09b4ba0ed536719574c62603e1f4ca77a"
+      "sha256": "eb7e7d6ccdee491d690023e0462ccaf09b4ba0ed536719574c62603e1f4ca77a",
+      "cardId": "n33"
     },
     {
       "name": "여울수달",
@@ -122,7 +134,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/water/rapid-otter.jpg",
       "bytes": 301414,
-      "sha256": "b05a930ad3fe28d36d16a8c8db0bb6a27aceb18a2febc0a9de3d3208ee1991a2"
+      "sha256": "b05a930ad3fe28d36d16a8c8db0bb6a27aceb18a2febc0a9de3d3208ee1991a2",
+      "cardId": "a30"
     },
     {
       "name": "산호소라게",
@@ -131,7 +144,8 @@
       "variant": "B",
       "path": "fantasy_arena/assets/img/art/new-units/water/coral-hermit-crab.jpg",
       "bytes": 309648,
-      "sha256": "63cc1eb17904190729e7e243ddb4c57763380ee54807ee8fa33b814776bc865c"
+      "sha256": "63cc1eb17904190729e7e243ddb4c57763380ee54807ee8fa33b814776bc865c",
+      "cardId": "a31"
     },
     {
       "name": "빙하파수꾼",
@@ -140,7 +154,8 @@
       "variant": "C",
       "path": "fantasy_arena/assets/img/art/new-units/water/glacier-sentinel.jpg",
       "bytes": 351162,
-      "sha256": "a72d0b87bf87f8373346e00e2bb9d248b918d4876c5953463a5de1bf69840f75"
+      "sha256": "a72d0b87bf87f8373346e00e2bb9d248b918d4876c5953463a5de1bf69840f75",
+      "cardId": "a32"
     },
     {
       "name": "산호등고래",
@@ -149,7 +164,8 @@
       "variant": "C",
       "path": "fantasy_arena/assets/img/art/new-units/water/coralback-whale.jpg",
       "bytes": 382394,
-      "sha256": "cae0a14098fb679bf0a34b16ade4ff72a91267afdf7e954281898d945fac9a54"
+      "sha256": "cae0a14098fb679bf0a34b16ade4ff72a91267afdf7e954281898d945fac9a54",
+      "cardId": "a33"
     },
     {
       "name": "등불지기",
@@ -158,7 +174,8 @@
       "variant": "B",
       "path": "fantasy_arena/assets/img/art/new-units/light/lantern-keeper.jpg",
       "bytes": 268301,
-      "sha256": "2843e10ddf02c54145a62e7831f89536fb23d4786cf7696afca554deeb34155b"
+      "sha256": "2843e10ddf02c54145a62e7831f89536fb23d4786cf7696afca554deeb34155b",
+      "cardId": "l30"
     },
     {
       "name": "진주깃공작",
@@ -167,7 +184,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/light/pearl-plume-peacock.jpg",
       "bytes": 342917,
-      "sha256": "4e6c91c25506517a44dcf55057eea1fb89cf099dca15061ec0156e4a77c73b11"
+      "sha256": "4e6c91c25506517a44dcf55057eea1fb89cf099dca15061ec0156e4a77c73b11",
+      "cardId": "l31"
     },
     {
       "name": "여명대사제",
@@ -176,7 +194,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/light/dawn-high-priest.jpg",
       "bytes": 343772,
-      "sha256": "284b80bfe4a4096aaf568fb9e6f0340589559133c04897bc43074b92d421cdaf"
+      "sha256": "284b80bfe4a4096aaf568fb9e6f0340589559133c04897bc43074b92d421cdaf",
+      "cardId": "l32"
     },
     {
       "name": "서광기린",
@@ -185,7 +204,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/light/dawn-qilin.jpg",
       "bytes": 352507,
-      "sha256": "062e54f56fe3b3be6079cea2c2521cf2b2965915820626f79731640259dcf35c"
+      "sha256": "062e54f56fe3b3be6079cea2c2521cf2b2965915820626f79731640259dcf35c",
+      "cardId": "l33"
     },
     {
       "name": "묘지쥐",
@@ -194,7 +214,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/dark/graveyard-rat.jpg",
       "bytes": 238159,
-      "sha256": "c85995905ddd6f512ab5236c5805e5a570791cd53c37ca99ec215c269043e6a8"
+      "sha256": "c85995905ddd6f512ab5236c5805e5a570791cd53c37ca99ec215c269043e6a8",
+      "cardId": "d30"
     },
     {
       "name": "묘석까마귀",
@@ -203,7 +224,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/dark/gravestone-raven.jpg",
       "bytes": 240055,
-      "sha256": "47031ed1791f1ed6c45514a6e3a5dc789f5a1f18f620d5b27f44071054117196"
+      "sha256": "47031ed1791f1ed6c45514a6e3a5dc789f5a1f18f620d5b27f44071054117196",
+      "cardId": "d31"
     },
     {
       "name": "검은가면시종",
@@ -212,7 +234,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/dark/black-mask-attendant.jpg",
       "bytes": 269552,
-      "sha256": "01f7339feb66d34d2e2febc0502e4965d460207f8af43615c379116538cd63af"
+      "sha256": "01f7339feb66d34d2e2febc0502e4965d460207f8af43615c379116538cd63af",
+      "cardId": "d32"
     },
     {
       "name": "납골거미",
@@ -221,7 +244,8 @@
       "variant": "A",
       "path": "fantasy_arena/assets/img/art/new-units/dark/ossuary-spider.jpg",
       "bytes": 318793,
-      "sha256": "7716e4bd0b97382bac784627b25ea561f5782428298cf06c711d5eef76fc0320"
+      "sha256": "7716e4bd0b97382bac784627b25ea561f5782428298cf06c711d5eef76fc0320",
+      "cardId": "d33"
     }
   ]
 }
