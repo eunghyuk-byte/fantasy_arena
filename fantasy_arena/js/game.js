@@ -2949,13 +2949,22 @@ function bindBoardMinion(el, minion) {
     document.body.classList.add("dragging-card");
     const slot = el.closest(".slot");
     if (slot) slot.classList.add("board-drag-source");
-    _drag = {
+    const ownerState = state;
+    const owner = meView().me;
+    const session = _drag = {
       kind: "board", minion, el, ghost, pid: ev.pointerId,
       x0: ev.clientX, y0: ev.clientY, lastX: ev.clientX, lastY: ev.clientY,
       pointerType: ev.pointerType || "mouse"
     };
+    const ownsEvent = (e) => _drag === session &&
+      (session.pid == null ? e.pointerId == null : e.pointerId === session.pid);
+    const cancel = (e) => {
+      if (!ownsEvent(e)) return;
+      clearDrag();
+    };
     const move = (e) => {
-      if (!_drag || _drag.kind !== "board") return;
+      if (!ownsEvent(e)) return;
+      if (state !== ownerState || meView().me !== owner || !owner.board.includes(minion) || !canReorderBoard()) { clearDrag(); return; }
       if (e.cancelable) try { e.preventDefault(); } catch (err) {}
       trackDragXY(e);
       const { x, y } = dragPointerXY(e);
@@ -2974,13 +2983,8 @@ function bindBoardMinion(el, minion) {
       }
     };
     const up = (e) => {
-      window.removeEventListener("pointermove", move, true);
-      window.removeEventListener("pointerup", up, true);
-      window.removeEventListener("pointercancel", up, true);
-      window.removeEventListener("mousemove", move, true);
-      window.removeEventListener("mouseup", up, true);
-      try { if (ev.pointerId != null && el.releasePointerCapture) el.releasePointerCapture(ev.pointerId); } catch (err) {}
-      if (!_drag || _drag.kind !== "board") return;
+      if (!ownsEvent(e)) return;
+      if (state !== ownerState || meView().me !== owner || !owner.board.includes(minion) || !canReorderBoard()) { clearDrag(); return; }
       trackDragXY(e);
       const { x, y } = dragPointerXY(e);
       const ok = overBoard(x, y);
@@ -2997,11 +3001,24 @@ function bindBoardMinion(el, minion) {
         render();
       }
     };
-    window.addEventListener("pointermove", move, true);
-    window.addEventListener("pointerup", up, true);
-    window.addEventListener("pointercancel", up, true);
-    window.addEventListener("mousemove", move, true);
-    window.addEventListener("mouseup", up, true);
+    session.cleanup = () => {
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", cancel, true);
+      window.removeEventListener("mousemove", move, true);
+      window.removeEventListener("mouseup", up, true);
+      el.removeEventListener("lostpointercapture", cancel);
+      try { if (session.pid != null && el.releasePointerCapture) el.releasePointerCapture(session.pid); } catch (err) {}
+    };
+    if (session.pid != null) {
+      window.addEventListener("pointermove", move, true);
+      window.addEventListener("pointerup", up, true);
+      window.addEventListener("pointercancel", cancel, true);
+      el.addEventListener("lostpointercapture", cancel);
+    } else {
+      window.addEventListener("mousemove", move, true);
+      window.addEventListener("mouseup", up, true);
+    }
   };
   const touch = bindTouchPeekHold(el, minion, {
     capture: false, // do not steal click targeting / attack selection
