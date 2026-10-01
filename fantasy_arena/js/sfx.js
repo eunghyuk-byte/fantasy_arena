@@ -1,8 +1,6 @@
 const Sfx = (() => {
   const BASE = "assets/audio/sfx/";
   const FILES = {
-    slash: "sfx_slash",
-    parry: "sfx_parry",
     death: "sfx_death",
     cardDrop: "sfx_card_play",
     draw: "sfx_card_draw",
@@ -120,20 +118,6 @@ const Sfx = (() => {
     const g = envGain(c, t, 0.008, dur, peak);
     n.connect(f); f.connect(g); g.connect(sfxGain); n.start(t);
   }
-  function playSlash() {
-    playKey("slash", { duckMs: 220 }).then(ok => {
-      if (ok) return;
-      synthNoise(0.12, 0.08, 1200);
-      synthTone([520], 0.07, 0.16);
-    });
-  }
-  function playParry() {
-    playKey("parry", { duckMs: 200 }).then(ok => {
-      if (ok) return;
-      synthTone([980, 640], 0.08, 0.12);
-      synthNoise(0.08, 0.05, 1800);
-    });
-  }
   function playDeath() {
     playKey("death", { duckMs: 420 }).then(ok => {
       if (ok) return;
@@ -216,7 +200,7 @@ const Sfx = (() => {
   }
   function warmup() { Object.values(FILES).forEach(stem => load(stem)); }
   return {
-    playSlash, playParry, playDeath, playCardDrop, playDraw, playSummon,
+    playDeath, playCardDrop, playDraw, playSummon,
     playHeroHit, playTurn, playWin, playLose, playClick, playCoin,
     setVolume, setMuted, warmup, loadUrl, playUrl, playBuf, makeBus, FILES
   };

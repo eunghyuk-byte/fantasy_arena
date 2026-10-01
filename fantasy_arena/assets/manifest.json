@@ -1,5 +1,5 @@
 {
-  "count": 830,
+  "count": 828,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -18,7 +18,7 @@
     },
     {
       "path": "assets/audio/sfx/SOUNDS.md",
-      "bytes": 1373,
+      "bytes": 1066,
       "name": "SOUNDS"
     },
     {
@@ -50,16 +50,6 @@
       "path": "assets/audio/sfx/sfx_lose.ogg",
       "bytes": 21792,
       "name": "sfx_lose"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_parry.ogg",
-      "bytes": 13839,
-      "name": "sfx_parry"
-    },
-    {
-      "path": "assets/audio/sfx/sfx_slash.ogg",
-      "bytes": 15473,
-      "name": "sfx_slash"
     },
     {
       "path": "assets/audio/sfx/sfx_summon.ogg",

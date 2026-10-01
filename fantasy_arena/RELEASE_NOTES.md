@@ -1,3 +1,10 @@
+# v0.398
+
+- Removes two unused legacy sword/parry sound files and their unreachable presentation helpers, warmup entries and manifest entries (29,312 bytes).
+- Retains the legacy death sound used by the overflow-burn fallback, current combat/match/spell/coin audio, codec fallbacks, all thirteen legendary alternate encodes and the MY TURN lossless reference.
+- Updates the general sound inventory with measured file durations. No replacement audio or newly generated sound is introduced.
+- Verification: 445 Node tests and unchanged SHA256 for all 83 retained audio files. See AUDIO_V398_QA.md.
+
 # v0.397
 
 - Adds twelve bounded AI decision principles using its own hand and public game state only, without looking at hidden cards or consuming extra random rolls.

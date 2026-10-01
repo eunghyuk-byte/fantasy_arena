@@ -79,27 +79,6 @@ const Vfx = (() => {
     const p = spawn("dmg-pop", x, y);
     p.textContent = "-"+n;
   }
-  async function attackSeq(atkEl, defEl, dmg, crit) {
-    lunge(atkEl);
-    await waitMs(180);
-    slash(atkEl, defEl, crit);
-    try { Sfx.playSlash(); } catch(e) {}
-    shake(crit ? 340 : 220);
-    recoil(defEl);
-    dmgPop(defEl, dmg);
-    await hitstop(crit ? 110 : 70);
-    await waitMs(crit ? 280 : 180);
-  }
-  async function parrySeq(defEl, atkEl, dmg, crit) {
-    spawn("shield-burst", ...(() => { const c = center(defEl); return [c.x, c.y]; })());
-    try { Sfx.playParry(); } catch(e) {}
-    slash(defEl, atkEl, !!crit);
-    recoil(atkEl);
-    dmgPop(atkEl, dmg);
-    shake(crit ? 300 : 180); // v0.372: 치명 반격은 공격 치명처럼 강하게
-    if (crit) await hitstop(90);
-    await waitMs(crit ? 300 : 260);
-  }
   function death(el) {
     if (!el) return;
     const c = center(el);
@@ -113,5 +92,5 @@ const Vfx = (() => {
     el.classList.add("fx-dissolve");
     try { Sfx.playDeath(); } catch(e) {}
   }
-  return { layer, elOf, heroOf, attackSeq, parrySeq, death, shake, slash, spawn, center };
+  return { layer, elOf, heroOf, death, shake, slash, spawn, center };
 })();
