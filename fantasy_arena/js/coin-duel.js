@@ -185,12 +185,11 @@ const CoinDuel = (() => {
     const u = side && side.unit;
     if (!u) return Promise.resolve("");
     try {
-      const img = document.querySelector('.minion[data-uid="' + u.uid + '"] img.card-face');
-      if (img && img.src && img.classList.contains("face-ready")) return Promise.resolve(img.src);
-    } catch (e) {}
-    try {
       if (typeof faceSrc === "function") {
-        const opts = { atk: u.atk, def: u.def, hp: side.hpPre != null ? side.hpPre : u.hp };
+        // A battlefield image can still contain a previous exchange. Compose from
+        // the combat snapshot, preserving live status badges without mutating u.
+        const badges = typeof minionFaceOpts === "function" ? minionFaceOpts(u) : {};
+        const opts = { ...badges, ...(side.faceOpts || { atk: u.atk, def: u.def, hp: side.hpPre != null ? side.hpPre : u.hp }) };
         return Promise.race([faceSrc(u, opts).then(s => s || ""), sleep(400).then(() => "")]);
       }
     } catch (e) {}

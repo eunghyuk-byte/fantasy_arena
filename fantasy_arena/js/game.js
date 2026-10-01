@@ -161,11 +161,128 @@ function draw(p, n = 1) {
     if (p.hand.length >= 10) {
       const nm = (CARD_MAP[id] && CARD_MAP[id].name) || id;
       log(`${p.name}의 손패가 가득 차 ${nm}이(가) 불탔다`);
+      queueDrawBurn(p, id);
     } else {
       p.hand.push(cloneCard(id));
       if (!p.isAI) p._drewCount = (p._drewCount || 0) + 1;
     }
   }
+}
+
+/** Overflow is a deck draw, but never a hand entry or a unit death. */
+function queueDrawBurn(player, id) {
+  if (!state || ![state.p1, state.p2].includes(player)) return;
+  const sequence = state._drawBurnSequence = (state._drawBurnSequence || 0) + 1;
+  // Public event contract: reveal ONLY the burned card, never the owner's hand/deck.
+  (state._drawBurnQueue || (state._drawBurnQueue = [])).push({
+    seat: player === state.p1 ? 1 : 2, id, name: CARD_MAP[id]?.name || id, sequence, source: 'deck'
+  });
+}
+function drawBurnPending() {
+  return !!(state && (state._drawBurnPlaying || state._drawBurnQueue?.length));
+}
+async function playDrawBurnSequence() {
+  const owner = state;
+  if (!owner || owner._drawBurnPlaying || !owner._drawBurnQueue?.length) return;
+  owner._drawBurnPlaying = true;
+  const generation = typeof CombatFx !== 'undefined' && CombatFx.generation ? CombatFx.generation() : null;
+  const session = { cancelled: false, cleanup: null };
+  session.valid = () => !session.cancelled && state === owner && !owner.over &&
+    (generation === null || CombatFx.generation() === generation);
+  const cancel = () => { session.cancelled = true; owner._drawBurnQueue = []; session.cleanup?.(); };
+  const unsubscribe = typeof CombatFx !== 'undefined' && CombatFx.onCancel ? CombatFx.onCancel(cancel) : null;
+  try {
+    while (session.valid() && owner._drawBurnQueue.length) {
+      // Existing ordinary/opening draws keep their speeds and finish first.
+      while (session.valid() && (([owner.p1, owner.p2].some(p => p && p._drawingAnim) || meView().me?._drewCount > 0) ||
+        (typeof SpellFx !== 'undefined' && SpellFx.overlayBusy && SpellFx.overlayBusy()))) {
+        await new Promise(resolve => setTimeout(resolve, 16));
+      }
+      if (!session.valid()) break;
+      const event = owner._drawBurnQueue.shift();
+      await playDrawBurnCard(event, session);
+    }
+  } catch (e) { console.warn('draw burn presentation', e); }
+  finally {
+    session.cleanup?.();
+    if (unsubscribe) unsubscribe();
+    owner._drawBurnPlaying = false;
+    if (!session.valid()) owner._drawBurnQueue = [];
+  }
+}
+/** Deck back -> visible front -> the same visual-only torn-card media as combat. */
+async function playDrawBurnCard(event, session) {
+  if (!session.valid()) return;
+  const mine = (event.seat === 1 ? state.p1 : state.p2) === meView().me;
+  const pile = document.querySelector(mine ? '#myDeck .pile-stack' : '#oppDeck .pile-stack') ||
+    document.getElementById(mine ? 'myDeck' : 'oppDeck');
+  const hand = document.getElementById(mine ? 'myHand' : 'oppHand');
+  if (!pile || !hand || document.hidden) return;
+  const a = pile.getBoundingClientRect(), b = hand.getBoundingClientRect();
+  const width = Math.max(80, Math.min(180, window.innerWidth * .13)), height = width * 1.5;
+  const x = Math.max(0, Math.min(window.innerWidth - width, b.left + b.width / 2 - width / 2));
+  const y = Math.max(8, Math.min(window.innerHeight - height - 8, mine ? b.top - height - 12 : b.bottom + 12));
+  const ghost = document.createElement('div'), img = document.createElement('img');
+  ghost.className = 'draw-burn-ghost';
+  ghost.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${width}px;height:${height}px;z-index:121;pointer-events:none;`;
+  img.style.cssText = 'display:block;width:100%;height:100%;object-fit:fill;';
+  img.alt = '';
+  img.src = typeof HUD_UI !== 'undefined' && HUD_UI.deck ? HUD_UI.deck : 'assets/img/hud/back.png';
+  ghost.appendChild(img); document.body.appendChild(ghost);
+  let animation = null, monitor = null, settle = null, stopped = false;
+  const cleanup = () => {
+    if (stopped) return; stopped = true;
+    if (monitor !== null) clearTimeout(monitor);
+    try { animation?.cancel(); } catch (e) {}
+    ghost.remove();
+    if (settle) settle();
+  };
+  session.cleanup = cleanup;
+  const monitorValidity = () => {
+    if (!session.valid() || document.hidden) cleanup();
+    else monitor = setTimeout(monitorValidity, 32);
+  };
+  monitorValidity();
+  const wait = ms => new Promise(resolve => { settle = resolve; setTimeout(resolve, ms); });
+  // Compose without mutating gameplay IDs, hand, board or death-trigger state.
+  const front = typeof faceSrc === 'function' ? faceSrc(CARD_MAP[event.id], {}, null).catch(() => '') : Promise.resolve('');
+  try {
+    try { Sfx.playDraw?.(); } catch (e) {}
+    try { if (typeof SpellFx !== 'undefined') SpellFx.playUi?.('deck_draw'); } catch (e) {}
+    const dx = a.left + a.width / 2 - x - width / 2, dy = a.top + a.height / 2 - y - height / 2;
+    if (ghost.animate) {
+      animation = ghost.animate([
+        { transform: `translate(${dx}px,${dy}px) scale(.65)`, opacity: 1 },
+        { transform: 'translate(0,0) scale(1)', opacity: 1 }
+      ], { duration: DRAW_FLY_MS, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'forwards' });
+      await Promise.race([animation.finished?.catch(() => {}), wait(DRAW_FLY_MS + 80)].filter(Boolean));
+    } else await wait(DRAW_FLY_MS);
+    if (stopped || !session.valid()) return;
+    const src = await Promise.race([front, wait(1800).then(() => '')]);
+    if (stopped || !session.valid()) return;
+    if (src) {
+      await new Promise(resolve => {
+        settle = resolve;
+        img.onload = img.onerror = resolve;
+        img.src = src;
+        if (img.complete && img.naturalWidth) resolve();
+        setTimeout(resolve, 1200);
+      });
+    }
+    if (stopped || !session.valid()) return;
+    img.alt = CARD_MAP[event.id]?.name || event.id;
+    await wait(260);
+    if (stopped || !session.valid()) return;
+    if (typeof CombatFx !== 'undefined' && CombatFx.play) {
+      const snapshot = CombatFx.snapshot(null, ghost);
+      await CombatFx.play('death', { snapshot, valid: () => !stopped && session.valid(),
+        onImpact: () => { ghost.style.visibility = 'hidden'; } });
+    } else {
+      // Legacy fallback remains presentation-only too.
+      if (typeof Vfx !== 'undefined') Vfx.death(ghost);
+      await wait(900);
+    }
+  } finally { cleanup(); if (session.cleanup === cleanup) session.cleanup = null; }
 }
 
 const DRAW_FLY_MS = 720;
@@ -333,7 +450,7 @@ function canSoulDraw(p) {
   if (p !== current()) return false;
   if (p._soulDrawUsed) return false;
   if ((p.soul | 0) < soulDrawCost(p)) return false;
-  if (state.busy) return false;
+  if (state.busy || state.endTurnRequest) return false;
   if (typeof ui !== "undefined" && ui && ui.battling) return false;
   return true;
 }
@@ -392,10 +509,46 @@ function beginTurn(p, opts) {
   if (!(opts && opts.noTurnFx)) playTurnStartFx(p);
 }
 
+// UI-only lifetime, separate from combat state and cleanup. Rerenders preserve
+// elapsed time; CSS ends the number without a timer or a whole-board rerender.
+const damageNumberViews = new WeakMap();
+function damageNumberHtml(unit) {
+  const hit = unit && unit._hurt;
+  let view = unit && damageNumberViews.get(unit);
+  if (view && view.owner !== state) { damageNumberViews.delete(unit); view = null; }
+  if (hit && hit.dmg && (!view || view.hit !== hit)) {
+    view = { hit, shownAt: Date.now(), owner: state };
+    damageNumberViews.set(unit, view);
+  }
+  if (!view) return "";
+  const elapsed = Math.max(0, Date.now() - view.shownAt);
+  if (elapsed >= 1800) return "";
+  return `<div class="hp-tick" style="animation-delay:-${elapsed}ms">-${view.hit.dmg}</div>`;
+}
+
+// Keep coin-change chips through the exchange and briefly after FX fields clear.
+// Like HP numbers this is presentation state only; no extra combat wait or timer.
+const combatStatDeltaViews = new WeakMap();
+function combatStatDeltaHtml(unit) {
+  const active = unit && (unit._fxAtk != null || unit._fxDef != null || unit._fxHp != null);
+  let view = unit && combatStatDeltaViews.get(unit);
+  if (view && view.owner !== state) { combatStatDeltaViews.delete(unit); view = null; }
+  if (active) {
+    view = { values: [unit._fxAtkD || 0, unit._fxDefD || 0, unit._fxHpD || 0], at: Date.now(), owner: state };
+    combatStatDeltaViews.set(unit, view);
+  }
+  if (!view) return "";
+  const elapsed = Math.max(0, Date.now() - view.at);
+  if (!active && elapsed >= 1800) return "";
+  const kinds = ["d-atk", "d-def", "d-hp"];
+  const tail = active ? "" : ` style="animation:statDeltaOut 1.8s linear both;animation-delay:-${elapsed}ms"`;
+  return view.values.map((d, i) => d ? `<div class="stat-delta ${d > 0 ? "up" : "down"} ${kinds[i]}"${tail}>${d > 0 ? "+" : ""}${d}</div>` : "").join("");
+}
+
 function renderHeroSlot(p, isMe) {
   const icon = (typeof TRIBE_ICONS !== "undefined" && TRIBE_ICONS[p.hero.id]) || "";
   const hurt = p._hurt && p._hurt.dmg ? " hurt" : "";
-  const tick = p._hurt && p._hurt.dmg ? `<div class="hp-tick">-${p._hurt.dmg}</div>` : "";
+  const tick = damageNumberHtml(p);
   let canTarget = false;
   try {
     if (ui.targeting) canTarget = ui.targeting.targets.some(t => t.kind === "hero" && t.owner === p);
@@ -442,16 +595,57 @@ async function runAutoCombat(p) {
   return valid();
   } finally { if (state === owner && ui === ownerUi) ownerUi.battling = false; }
 }
+// A turn-end intent belongs to one match and one turn. It never overrides an action lock.
+function endTurnActivityPending() {
+  return !!(state.busy || ui.battling ||
+    (typeof drawBurnPending === "function" && drawBurnPending()) ||
+    [state.p1, state.p2].some(p => p && p._drawingAnim) || meView().me._drewCount > 0 ||
+    (typeof SpellFx !== "undefined" && SpellFx.overlayBusy && SpellFx.overlayBusy()) ||
+    (typeof CombatFx !== "undefined" && CombatFx.pending && CombatFx.pending()));
+}
 function endTurn() {
-  try { hidePeek(); } catch (e) {}
-  if (state.over || ui.battling || state.busy) return;
-  try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
+  if (!state || state.over || state.endTurnRequest) return false;
   const p = current();
-  if (p.isAI) return;
+  if (p.isAI || p !== meView().me) return false;
+  try { hidePeek(); } catch (e) {}
   if (_drag) clearDrag();
   ui.targeting = null; ui.attacker = null;
-  const owner = state;
-  runAutoCombat(p).then(ok => { if(ok && state === owner) passTurn(); }).catch(e => console.warn(e));
+  const owner = state, ownerUi = ui, serial = state.turnSerial;
+  const generation = typeof CombatFx !== "undefined" ? CombatFx.generation() : 0;
+  const request = { phase: "waiting", started: Date.now() };
+  owner.endTurnRequest = request;
+  owner.endTurnError = false;
+  const valid = () => state === owner && ui === ownerUi && !owner.over &&
+    current() === p && owner.turnSerial === serial && owner.endTurnRequest === request &&
+    (typeof CombatFx === "undefined" || CombatFx.generation() === generation);
+  const paint = () => { if (state === owner && typeof updateEndBtn === "function") updateEndBtn(current() === meView().me && !current().isAI && !state.over); };
+  const release = error => {
+    if (owner.endTurnRequest === request) delete owner.endTurnRequest;
+    if (state === owner && error) { owner.endTurnError = true; log("턴 종료 대기 지연: 현재 동작이 끝난 뒤 다시 눌러 주세요."); }
+    paint();
+  };
+  const drain = () => {
+    if (!valid()) { release(false); return; }
+    // render consumes newly queued draws; the previous draw may have finished without a render.
+    if ((p._drewCount > 0 && !p._drawingAnim) ||
+        (typeof drawBurnPending === "function" && drawBurnPending() && !owner._drawBurnPlaying)) render();
+    if (endTurnActivityPending()) {
+      // A stalled action must not force a rules transition or clear engine ownership.
+      if (Date.now() - request.started >= 30000) { release(true); return; }
+      setTimeout(drain, 50);
+      return;
+    }
+    request.phase = "running";
+    paint();
+    runAutoCombat(p).then(ok => {
+      if (ok && valid()) { release(false); passTurn(); }
+      else release(false);
+    }).catch(e => { console.warn(e); release(true); });
+  };
+  paint();
+  // Give the pressed/pending state a paint before beginning the next action.
+  setTimeout(drain, 0);
+  return true;
 }
 
 function passTurn() {
@@ -763,7 +957,9 @@ function playCard(p, card, target) {
   if (card.type === "spell" && needsTarget(card)) {
     // 스펠 개편 규칙: 대상 필수 스펠은 유효한 대상이 없으면 사용 불가 (소울 미차감)
     const ts = validTargets(p, card.spell);
-    const ok = target && target.kind === "minion" && ts.some(t => t.minion && t.minion.uid === target.minion.uid);
+    const ok = target && target.kind === "minion" && target.minion &&
+      target.minion.hp > 0 && !target.minion.dying &&
+      ts.some(t => t.owner === target.owner && t.minion === target.minion);
     if (!ts.length || !ok) { log("마땅한 대상이 없습니다"); return false; }
   }
   if (card.type === "item" && isEquipItem(card)) {
@@ -1899,6 +2095,11 @@ function resolveDeath(owner, m) {
     // v0.347 (9/29): 카드 기본(인쇄) 능력은 그대로 다시 가진다 — 보호 소모·스펠로 덮인 능력도 복원. 환생만 사라진다.
     restorePrintedAbilitiesOnRebirth(m);
     m.hp = 1;
+    m._hurt = null;
+    damageNumberViews.delete(m);
+    combatStatDeltaViews.delete(m);
+    m._fxAtk = m._fxDef = m._fxHp = null;
+    m._fxAtkD = m._fxDefD = m._fxHpD = null;
     m.dying = false;
     m.damaged = true;
     m._deathCtx = null;
@@ -2173,12 +2374,12 @@ function showCoinResult(title, rows, done, duel) {
       try { me = meView().me; } catch (e) { me = state && state.p1; }
       const atkMine = duel.attackerOwner === me;
       const rowOf = u => rows.find(r => r.unit === u) || null;
-      const side = (u, hpPre) => {
+      const side = (u, hpPre, stats) => {
         if (!u) return null;
         const r = rowOf(u);
-        return { unit: u, hpPre, flips: r ? r.flips.slice() : [], detail: r ? (r.detail || "") : "" };
+        return { unit: u, hpPre, faceOpts: stats ? { ...stats } : null, flips: r ? r.flips.slice() : [], detail: r ? (r.detail || "") : "" };
       };
-      const A = side(duel.attacker, duel.aHpPre), D = side(duel.defender, duel.dHpPre);
+      const A = side(duel.attacker, duel.aHpPre, duel.aStats), D = side(duel.defender, duel.dHpPre, duel.dStats);
       CoinDuel.play({ top: atkMine ? D : A, bottom: atkMine ? A : D })
         .then(ok => { if (ok) finish(); else fallback(); }, fallback);
     } catch (e) { fallback(); }
@@ -2456,21 +2657,11 @@ function spellTargetFromPoint(x, y, allowed) {
     const r = el.getBoundingClientRect();
     if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
       const uid = el.getAttribute("data-uid");
-      if (allowMinion.has(uid)) return allowMinion.get(uid);
+      // An explicit drop on an ineligible card is a rejection, never a retarget.
+      return allowMinion.get(uid) || null;
     }
   }
-  let best = null, bestD = 1e9;
-  els.forEach(el => {
-    const uid = el.getAttribute("data-uid");
-    if (!allowMinion.has(uid)) return;
-    const r = el.getBoundingClientRect();
-    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    const d = Math.hypot(x - cx, y - cy);
-    if (d < bestD && d < Math.max(r.width, r.height) * 0.85) {
-      bestD = d; best = allowMinion.get(uid);
-    }
-  });
-  if (best) return best;
+  // Targeted spells require an actual card/hero hit; empty space is not a cast.
   for (const t of allowHero) {
     const side = (t.owner === meView().me) ? "me" : "opp";
     const el = document.querySelector('.hero-slot[data-hero="' + (side === "me" ? "me" : "opp") + '"], .hero-portrait.' + (side === "me" ? "mine" : "opp"));
@@ -2549,7 +2740,7 @@ function spellDragTargets(card) {
 
 function canDropCard(card) {
   if (!state || !card) return false;
-  if (state.busy) return false;
+  if (state.busy || state.endTurnRequest) return false;
   const me = meView().me;
   if (state.over || current() !== me || me.isAI) return false;
   if (me.soul < effectiveCardCost(me, card)) return false;
@@ -2886,7 +3077,7 @@ function bindHandCard(el, card) {
 }
 
 function canReorderBoard() {
-  if (!state || state.busy || state.over) return false;
+  if (!state || state.busy || state.endTurnRequest || state.over) return false;
   const me = meView().me;
   if (!me || me.isAI) return false;
   if (current() !== me) return false;
@@ -3040,6 +3231,7 @@ function bindBoardMinion(el, minion) {
 }
 
 function onHandClick(card) {
+  if (!state || state.busy || state.endTurnRequest) return;
   const me = meView().me;
   if (state.over || current() !== me || current().isAI) return;
   if (ui.targeting || ui.attacker) { ui.targeting = null; ui.attacker = null; render(); }
@@ -3064,6 +3256,7 @@ function onHandClick(card) {
 }
 
 function onMinionClick(owner, minion, side) {
+  if (!state || state.busy || state.endTurnRequest) return;
   const me = meView().me;
   if (!minion) return;
   if (ui.targeting) {
@@ -3265,7 +3458,7 @@ const ATK_SKILL_HELP = {
   6: ["흡혈공격", "준 체력 피해만큼 체력을 회복합니다."],
   7: ["약화공격", "공격 전에 적 공격·방어를 1씩 낮춥니다."],
   8: ["석화공격", "공격 전에 적 공격을 0으로 만들고 방어를 +1 합니다."],
-  9: ["광역공격", "적 유닛 전체를 공격합니다(영웅 제외). 반격을 받지 않습니다. 반격할 때는 퍼지지 않고 공격한 유닛에게만 반격합니다."]
+  9: ["광역공격", "코인으로 정해진 공격력으로 적 유닛 전체에 동시에 피해를 줍니다(각 방어·보호 적용, 영웅 제외). 첫 적의 피해·처치 여부와 무관하며 후열 코인은 추가로 굴리지 않습니다. 반격을 받지 않습니다. 반격할 때는 퍼지지 않고 공격한 유닛에게만 반격합니다."]
 };
 /* 옛 키워드(복수·강탈·출전·유언)는 내부 키로만 남기고 화면에는 「소환:」「파괴:」 문장으로 표시 (9/27) */
 const ABI_LABEL = { "복수": "파괴: 나를 파괴한 적을 제거", "강탈": "파괴: 나를 파괴한 적을 탈취", "출전": "소환: 드로우 1", "유언": "파괴: 드로우 1" };

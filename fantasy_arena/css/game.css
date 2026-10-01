@@ -466,18 +466,18 @@
       -1px 1px 0 #000,
       0 2px 4px #000,
       0 0 8px #c00;
-    animation: hpPop .55s ease-out forwards;
+    animation: hpPop 1.8s ease-out forwards;
   }
   /* Minion hurt tick: sit ABOVE the heart gem digit (not covering it) */
   .minion .hp-tick {
     left: auto; right: 6%; top: auto; bottom: 20%;
     transform: translate(0, 0);
-    font-size: 22px;
-    animation: hpPopGem .55s ease-out forwards;
+    font-size: calc(var(--slot-h, 320px) * 0.0703); /* 92% of baked 88/1152 stat font */
+    animation: hpPopGem 1.8s ease-out forwards;
   }
   @keyframes hpPopGem {
     0% { opacity: 0; transform: translate(0, 6px) scale(.6); }
-    30% { opacity: 1; transform: translate(0, 0) scale(1.15); }
+    12%, 78% { opacity: 1; transform: translate(0, 0) scale(1); }
     100% { opacity: 0; transform: translate(0, -14px) scale(.9); }
   }
   .hero-slot.hurt::before {
@@ -507,10 +507,10 @@
     z-index: 8;
     pointer-events: none;
     font-weight: 900;
-    font-size: 14px;
+    font-size: calc(var(--slot-h, 320px) * 0.0703); /* just below face digits */
     line-height: 1;
     /* black rim matching .gem span / HUD numbers */
-    -webkit-text-stroke: 1.25px #000;
+    -webkit-text-stroke: 1.6px #000;
     paint-order: stroke fill;
     text-shadow:
       0 0 2px #000,
@@ -526,11 +526,16 @@
       0 2px 4px #000;
     animation: statDeltaIn .28s ease-out both;
   }
-  .stat-delta.up { color: #5eb8ff; }
-  .stat-delta.down { color: #ff5a5a; }
+  .stat-delta.up { color: #8bd4ff; }
+  .stat-delta.down { color: #ff8585; }
   .stat-delta.d-atk { left: 8%; }
   .stat-delta.d-def { left: 50%; transform: translateX(-50%); }
   .stat-delta.d-hp { right: 8%; left: auto; }
+  @keyframes statDeltaOut {
+    0%, 78% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .hp-tick ~ .stat-delta.d-hp { bottom: 44%; } /* clear name + stored-coin badge */
   @keyframes statDeltaIn {
     0% { opacity: 0; transform: translateY(6px) scale(.85); }
     100% { opacity: 1; }
@@ -4004,7 +4009,7 @@ html.is-desktop #game.active .my-hand .card.playable,
 .minion .turn-coin {
   position: absolute;
   top: 65%;        /* 카드 효과 칸 오른쪽 위 모서리 (공/방/체 숫자·코인 점과 겹치지 않음) */
-  right: 7%;
+  right: 11%;
   z-index: 7;
   pointer-events: none;
   display: inline-flex;
@@ -4015,7 +4020,7 @@ html.is-desktop #game.active .my-hand .card.playable,
   background: rgba(18, 8, 0, .78);
   border: 1px solid rgba(201, 161, 91, .8);
   color: #f3e3b3;
-  font: 900 11px/1 "Noto Sans KR", Arial, sans-serif;
+  font: 900 12px/1 "Noto Sans KR", Arial, sans-serif;
   white-space: nowrap;
 }
 .minion .turn-coin span { opacity: .7; font-weight: 700; }
@@ -4098,7 +4103,7 @@ html.is-desktop #game.active .my-hand .card.playable,
 /* =====================================================================
    HAND LAYOUT LOCK v0.234 — DO NOT OVERRIDE BELOW THIS LINE
    See LAYOUT_HAND_LOCK.md. Negative margin-bottom on .my-hand is FORBIDDEN.
-   v0.234 user explicit: ally hand ~+20px down (padding-bottom 12→0 + translateY(8px)).
+   v0.396 user explicit: lower the resting hand by 4cqh; bottom clipping is allowed.
    ===================================================================== */
 #game.active .col-main > .my-hand#myHand,
 #game.active .col-main > .my-hand {
@@ -4106,7 +4111,7 @@ html.is-desktop #game.active .my-hand .card.playable,
   margin-top: 0 !important;
   padding-top: 6px !important;
   padding-bottom: 0 !important;
-  transform: translateY(8px);
+  transform: translateY(calc(8px + 4cqh));
   overflow: hidden !important;
   z-index: 8 !important;
   align-items: flex-end !important;
@@ -4847,4 +4852,15 @@ html, body, body * {
   opacity: 0 !important;
   pointer-events: none !important;
   transition: none !important;
+}
+
+/* Accepted turn-end intent remains visibly pressed until all action owners settle. */
+#game.active .col-main > #endBtn.end-btn.end-pending {
+  opacity: 1;
+  filter: none;
+  cursor: wait;
+}
+#game.active .col-main > #endBtn.end-btn.end-pending .end-btn-label {
+  color: #fff3be;
+  text-shadow: 0 1px 2px #000;
 }

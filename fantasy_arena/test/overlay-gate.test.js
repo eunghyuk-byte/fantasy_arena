@@ -106,3 +106,15 @@ test("드로우 대기·모션 중 새 카드 숨김은 inline important (playab
 });
 
 test('clearing a stalled match metadata load releases its input hold immediately',async()=>{const {S,ctx,els}=loadSpellFx();ctx.fetch=()=>new Promise(()=>{});const p=S.playMatch('turn_start_me');await tick();assert.equal(S.overlayBusy(),true);S.clear();assert.equal(await p,false);await tick();assert.equal(S.overlayBusy(),false);assert.equal(els.fxInputBlock.style.display,'none');});
+
+test('overlay forwards only an eligible turn button press while all other input stays blocked', () => {
+  const { S, ctx } = loadSpellFx();
+  let forwarded=[];const btn={disabled:false,classList:{contains:x=>x==='my-turn'},getBoundingClientRect:()=>({left:100,right:200,top:50,bottom:100}),dispatchEvent:e=>forwarded.push(e)};
+  const original=ctx.document.getElementById;ctx.document.getElementById=id=>id==='endBtn'?btn:original(id);
+  ctx.PointerEvent=function(type,init){Object.assign(this,{type},init)};
+  const listeners={};ctx.document.createElement=()=>({style:{},setAttribute(){},addEventListener:(type,fn)=>listeners[type]=fn});
+  const release=S.overlayHold();const event=(x,y)=>({type:'pointerdown',clientX:x,clientY:y,pointerId:7,button:0,preventDefault(){},stopPropagation(){}});
+  listeners.pointerdown(event(150,75));assert.equal(forwarded.length,1);assert.equal(forwarded[0].pointerId,7);
+  listeners.pointerdown(event(20,75));assert.equal(forwarded.length,1);
+  btn.disabled=true;listeners.pointerdown(event(150,75));assert.equal(forwarded.length,1);release();
+});

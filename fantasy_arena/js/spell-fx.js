@@ -2481,8 +2481,21 @@ const SpellFx = (() => {
       el.id = "fxInputBlock";
       el.setAttribute("aria-hidden", "true");
       el.style.cssText = "position:fixed;inset:0;z-index:2147483000;background:transparent;pointer-events:auto;cursor:default;touch-action:none;";
-      const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
-      ["pointerdown", "pointerup", "click", "dblclick", "contextmenu", "touchstart", "wheel"].forEach(t => el.addEventListener(t, stop, { passive: false }));
+      const stop = (e) => {
+        // The overlay blocks actions, but a turn-end intent may be queued. Reuse the
+        // button's press/release/cancel contract rather than ending a turn here.
+        const btn = document.getElementById("endBtn");
+        if (btn && !btn.disabled && btn.classList.contains("my-turn") &&
+            (e.type === "pointerdown" || e.type === "pointercancel")) {
+          const r = btn.getBoundingClientRect();
+          if (e.type === "pointercancel" || (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom)) {
+            try { btn.dispatchEvent(new PointerEvent(e.type, { pointerId: e.pointerId, pointerType: e.pointerType,
+              button: e.button, clientX: e.clientX, clientY: e.clientY, bubbles: false })); } catch (err) {}
+          }
+        }
+        e.preventDefault(); e.stopPropagation();
+      };
+      ["pointerdown", "pointerup", "pointercancel", "click", "dblclick", "contextmenu", "touchstart", "wheel"].forEach(t => el.addEventListener(t, stop, { passive: false }));
       document.body.appendChild(el);
     }
     if (el) el.style.display = _ovCount > 0 ? "block" : "none";

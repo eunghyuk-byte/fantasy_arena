@@ -1,4 +1,4 @@
-# 핸드·전장 레이아웃 락 (2026-09-23 / v0.234)
+# 핸드·전장 레이아웃 락 (2026-10-01 / v0.396)
 
 사용자 요청으로 **반복 회귀 금지**. 핸드가 전장 유닛과 겹치거나, 핸드가 우표만해지거나, 음수 margin으로 전장 위로 올라가는 수정을 **절대 다시 넣지 말 것**.
 
@@ -9,7 +9,7 @@
 | `#game.active .my-hand` margin-bottom | **0** | `-18px` / `-72px` / `-96px` 등 **음수 금지** |
 | hand padding-top | **≤ 12px** (현재 6px) | `48px`/`60px` 큰 top padding 금지 (카드를 위로 밀어 전장과 겹침) |
 | hand padding-bottom | **0** | v0.234: 12→0 (얼라이 핸드 하향) |
-| hand translateY | **+8px** | v0.234: padding-bottom과 합쳐 ~+20px 하향. 음수 margin 대체 금지 |
+| hand translateY | **calc(8px + 4cqh)** | v0.396 사용자 명시: 전장 수치 가림을 줄이도록 기본 손패 하향, 하단 일부 잘림 허용. hover/터치 상세·카드 크기 유지 |
 | hand card height | `min(92~94%, 22cqh)`, max ~200~210px, min-height 140~150px | 전장과 안 겹치는 선에서 가독 유지 |
 | myBoard z-index | 4, hand z-index 8 | 핸드가 아래 행에만 그림 |
 | overflow my-hand | **hidden** | visible + 음수 margin 조합이 회귀 원인 |

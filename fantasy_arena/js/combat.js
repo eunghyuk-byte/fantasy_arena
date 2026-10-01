@@ -184,6 +184,7 @@ function doAttackCore(p, attacker, target, auto, action) {
     if (attacker._itemFx !== "attack_atk_plus2" || p !== current()) return;
     applyItemAttackFx(p, attacker);
     aAtk += 2;
+    if (attacker._fxAtk != null) attacker._fxAtk = aAtk;
   };
   const aDefVal = clampDef((Number(attacker.def) || 0) + aShared.dDef, attacker.def);
   const aHpSnap = beginCombatHpCoin(attacker, aShared.dHp);
@@ -240,7 +241,9 @@ function doAttackCore(p, attacker, target, auto, action) {
   if (def && dShared && dShared.flips.length && !dShared.reused) rows[rows.length - 1].unit = def;
   const duel = {
     attacker, attackerOwner: p, defender: target.kind === "minion" ? def : null,
-    aHpPre: aHpSnap ? aHpSnap.pre : attacker.hp, dHpPre: dHpSnap ? dHpSnap.pre : (def ? def.hp : null)
+    aHpPre: aHpSnap ? aHpSnap.pre : attacker.hp, dHpPre: dHpSnap ? dHpSnap.pre : (def ? def.hp : null),
+    aStats: { atk: aAtk, def: aDefVal, hp: attacker.hp },
+    dStats: def ? { atk: dAtk, def: defVal, hp: def.hp } : null
   };
   for (const snap of [aHpSnap, dHpSnap]) if (snap && snap.coinKilled) holdDeath(snap.unit);
   showCoinResult("코인 배틀", rows, async () => {
@@ -273,7 +276,9 @@ function doAttackCore(p, attacker, target, auto, action) {
           delta: roll.heads, detail: sharedDetail(unit, roll, atk, dp, unit.hp, snap ? snap.pre : null) }];
         await new Promise(done => showCoinResult("코인 배틀", extraRows, done, {
           attacker, attackerOwner: p, defender: unit,
-          aHpPre: attacker.hp, dHpPre: snap ? snap.pre : unit.hp
+          aHpPre: attacker.hp, dHpPre: snap ? snap.pre : unit.hp,
+          aStats: { atk: aAtk, def: window._pendingAtkDef ?? aDefVal, hp: attacker.hp },
+          dStats: { atk, def: dp, hp: unit.hp }
         }));
         action.guard();
       }
@@ -312,10 +317,11 @@ function doAttackCore(p, attacker, target, auto, action) {
         const syncAttackerStats = () => {
           const dA = (Number(attacker.atk) || 0) - oa;
           const dD = (Number(attacker.def) || 0) - od;
-          if (dA) aAtk = Math.max(0, aAtk + dA);
+          if (dA) { aAtk = Math.max(0, aAtk + dA); attacker._fxAtk = aAtk; }
           if (dD) {
             window._pendingAtkDef = Math.max(0, (window._pendingAtkDef || 0) + dD);
             aDefNow = window._pendingAtkDef;
+            attacker._fxDef = aDefNow;
           }
         };
         if (csk === 7 || csk === 8) { applyAtkSkillOnStart(cu, attacker); syncAttackerStats(); }
@@ -326,11 +332,13 @@ function doAttackCore(p, attacker, target, auto, action) {
           const dD = (Number(attacker.def) || 0) - odPierce;
           window._pendingAtkDef = Math.max(0, (window._pendingAtkDef || 0) + dD);
           aDefNow = window._pendingAtkDef;
+          attacker._fxDef = aDefNow;
         }
         const dmg = calc.hpDmg;
         if (hits > 1) log(`${cu.name} 연속 반격 ${h}/${hits}`);
         if (dmg <= 0) {
           await strike('counter', attacker, Vfx.elOf(attacker.uid), 0, () => {});
+          render();
           log(`${cu.name} 반격` + (skName ? ` [${skName}]` : "") + (csk === 2 ? ` (관통 흡수 ${calc.absorbed})` : "") + ` → 체력피해 0`);
           continue;
         }
@@ -370,29 +378,59 @@ function doAttackCore(p, attacker, target, auto, action) {
     if (coinDead.length && !aoeAfterCoin) {
       // exchange skipped; cleanup below resolves the coin deaths
     } else if (sk === 9 && foe.board.some(m => m.hp > 0 && !m.dying)) {
-      // —— 9 광역공격: shared roll → all enemy board minions; no counter ——
+      // One attacker/front roll; backline never opens a duel or consumes new RNG.
       const victims = foe.board.filter(m => m.hp > 0 && !m.dying).slice();
-      log(`${attacker.name} 광역공격 → 적 유닛 ${victims.length}체`);
+      const coinDeaths = [];
       for (const vic of victims) {
-        if (attacker.hp <= 0 || attacker.dying) break;
-        const coinState = await prepareDefenderCoins(vic);
-        action.guard();
-        if (coinState.snap && coinState.snap.coinKilled) continue;
-        const vicRoll = storedTurnCoins(vic);
-        const blocked = clampDef((Number(vic.def) || 0) + (vicRoll ? vicRoll.dDef : 0), vic.def);
-        const calc = calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefNow, vic);
-        const hpDmg = calc.hpDmg;
-        log(`${vic.name} 방어 ${blocked} → 체력피해 ${hpDmg}`);
-        const defEl = Vfx.elOf(vic.uid);
-        await strike("attack", vic, defEl, hpDmg, () => {
-        damageMinion(foe, vic, hpDmg, combatKillCtx(attacker, p));
-        });
-        if (!(vic.hp > 0 && !vic.dying)) {
-          await death(vic);
+        if (defenderCoins.has(vic)) continue;
+        const saved = storedTurnCoins(vic);
+        if (!saved) continue;
+        const snap = beginCombatHpCoin(vic, saved.dHp);
+        defenderCoins.set(vic, { roll: vic._turnRoll, snap });
+        armFx(vic, clampAtk((Number(vic.atk) || 0) + saved.dAtk),
+          clampDef((Number(vic.def) || 0) + saved.dDef, vic.def), saved.dAtk, saved.dDef, saved.dHp);
+        if (snap && snap.coinKilled) coinDeaths.push(vic);
+      }
+      if (coinDeaths.length) await deathGroup(coinDeaths);
+      action.guard();
+      const hits = victims.filter(vic => vic.hp > 0 && !vic.dying).map(vic => {
+        const roll = storedTurnCoins(vic);
+        const blocked = clampDef((Number(vic.def) || 0) + (roll ? roll.dDef : 0), vic.def);
+        const amount = calcAtkSkillHpDamage(attacker, aAtk, blocked, aDefNow, vic).hpDmg;
+        const el = Vfx.elOf(vic.uid);
+        const snapshot = typeof CombatFx !== 'undefined' ? CombatFx.snapshot(vic.uid, el) : null;
+        shots.set(vic, snapshot);
+        return { vic, el, snapshot, amount, dealt: 0 };
+      });
+      log(`${attacker.name} 광역공격 공 ${aAtk} → 적 유닛 ${hits.length}체 동시 피해 · 추가 코인 없음`);
+      let applied = false;
+      const impactAll = () => {
+        if (applied) return;
+        action.guard(); applied = true;
+        for (const hit of hits) {
+          const before = Math.max(0, Number(hit.vic.hp) || 0);
+          damageMinion(foe, hit.vic, hit.amount, combatKillCtx(attacker, p));
+          hit.dealt = Math.max(0, before - Math.max(0, Number(hit.vic.hp) || 0));
+          if (hit.vic.hp <= 0 || hit.vic.dying) holdDeath(hit.vic);
         }
         render();
+      };
+      if (typeof CombatFx !== 'undefined') {
+        // All jobs start together. Their shared, idempotent impact commits all HP changes once.
+        const results = await Promise.all(hits.map(hit => {
+          const shield = hasOwnAbility(hit.vic, "보호") || (hit.vic.keywords || []).includes("shield");
+          const blocked = hit.amount <= 0 || shield;
+          return CombatFx.play(blocked ? 'defend' : 'attack', {
+            snapshot: hit.snapshot, el: hit.el, sourceEl: Vfx.elOf(attacker.uid),
+            attempted: true, damage: blocked ? 0 : hit.amount, valid: action.valid,
+            onImpact: () => { impactAll(); return hit.dealt; }
+          });
+        }));
         action.guard();
-      }
+        const failed = results.find(result => result && result.error);
+        if (failed) throw failed.error;
+      } else impactAll();
+      await deathGroup(hits.filter(hit => hit.vic.hp <= 0 || hit.vic.dying).map(hit => hit.vic));
       log(`${attacker.name} 광역공격 · 반격 없음`);
       render();
       action.guard();

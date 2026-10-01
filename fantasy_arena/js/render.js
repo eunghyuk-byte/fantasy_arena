@@ -319,9 +319,11 @@ function render() {
           else if (typeof flyDrawCard === "function") await flyDrawCard(undefined, drawPlaybackRate);
         } catch (e) {}
         me._drawingAnim = false;
+        if (me._drewCount > 0 && typeof render === "function") render();
       })();
     });
   }
+  if (typeof playDrawBurnSequence === "function") playDrawBurnSequence();
   // v0.372: 드로우 대기 중 다시 그려도(render) 아직 날아오지 않은 새 카드는 숨긴 채 (투명도만 · 레이아웃 변화 없음)
   //   playable 카드의 `opacity:1 !important` CSS 를 이기도록 inline important
   if ((me._drawHideN || 0) > 0 && !dragging) {
@@ -1173,7 +1175,7 @@ function minionFaceOpts(m) {
   return {
     atk: m._fxAtk != null ? m._fxAtk : m.atk,
     def: m._fxDef != null ? m._fxDef : m.def,
-    hp:  m._fxHp  != null ? m._fxHp  : m.hp,
+    hp: m.hp, // HP coins already live on m; always include later damage/healing.
     // v0.316: 전장 유닛 현재 보호막 상태로만 오버레이 (인쇄 텍스트 X)
     fieldShield: unitHasActiveShield(m),
     // v0.323: 전장 유닛 현재 면역 상태 (침묵 등으로 잃으면 사라짐)
@@ -1197,6 +1199,7 @@ function refreshMinionFace(m) {
 }
 
 function renderMinion(m, side) {
+  const liveUnit = m;
   // v0.381 전설 소환 연출: 히트 전까지 이전 표시(문구·능력)로 — 로직 상태는 그대로
   if (typeof fxDisplayUnit === "function") m = fxDisplayUnit(m);
   const me = meView().me;
@@ -1227,16 +1230,8 @@ function renderMinion(m, side) {
   }, 0);
   const hurt = m._hurt && m._hurt.dmg ? ` hurt` : "";
   const rip = m.dying ? " " + (typeof combatDeathClass === 'function' ? combatDeathClass(m) : 'rip') : "";
-  const tick = m._hurt && m._hurt.dmg ? `<div class="hp-tick">-${m._hurt.dmg}</div>` : "";
-  function deltaChip(d, kind) {
-    if (!d) return "";
-    const cls = d > 0 ? "stat-delta up" : "stat-delta down";
-    const txt = d > 0 ? ("+" + d) : String(d);
-    return `<div class="${cls} ${kind}">${txt}</div>`;
-  }
-  const deltas = (m._fxAtk != null || m._fxDef != null || m._fxHp != null)
-    ? (deltaChip(m._fxAtkD, "d-atk") + deltaChip(m._fxDefD, "d-def") + deltaChip(m._fxHpD, "d-hp"))
-    : "";
+  const tick = damageNumberHtml(liveUnit);
+  const deltas = combatStatDeltaHtml(liveUnit);
   const pending = cached ? "" : " face-pending";
   const srcAttr = cached ? ` src="${cached}"` : "";
   // v0.318: 이번 턴에 굴린 코인 결과 (앞면 H/N) — 카드 위쪽 가장자리 작은 배지, 클릭 통과
@@ -1746,7 +1741,8 @@ function updateEndBtn(myTurn) {
   const { me } = meView();
   const label = btn.querySelector(".end-btn-label");
   const { off: offSrc, glow: glowSrc, pressed: pressedSrc } = endBtnHudSrcs();
-  btn.classList.remove("opp-turn", "my-turn", "glow", "go");
+  btn.classList.remove("opp-turn", "my-turn", "glow", "go", "end-pending");
+  btn.setAttribute("aria-busy", "false");
   btn.classList.toggle("holding", !!(myTurn && btn._endBtnHolding));
   if (!myTurn) {
     btn.classList.add("opp-turn");
@@ -1754,6 +1750,16 @@ function updateEndBtn(myTurn) {
     btn._endBtnHolding = false;
     if (label) label.textContent = "상대 턴";
     // opp turn → off plate (disabled)
+    btn._endBtnDesiredSrc = offSrc;
+    setEndBtnBg(btn, offSrc);
+    return;
+  }
+  if (state.endTurnRequest) {
+    btn.classList.add("my-turn", "end-pending", "holding");
+    btn.disabled = true;
+    btn._endBtnHolding = false;
+    btn.setAttribute("aria-busy", "true");
+    if (label) label.textContent = state.endTurnRequest.phase === "waiting" ? "종료 대기" : "종료 중";
     btn._endBtnDesiredSrc = offSrc;
     setEndBtnBg(btn, offSrc);
     return;
@@ -1766,7 +1772,7 @@ function updateEndBtn(myTurn) {
   } else {
     btn.classList.add("glow");
   }
-  if (label) label.textContent = "턴 종료";
+  if (label) label.textContent = state.endTurnError ? "종료 재시도" : "턴 종료";
   // my turn + playable → pressed; my turn + none → glow
   const src = hasPlayable ? pressedSrc : glowSrc;
   btn._endBtnDesiredSrc = src;
@@ -1808,18 +1814,17 @@ function updateEndBtn(myTurn) {
     const onUp = (e) => {
       if (btn._endBtnPtr != null && e.pointerId != null && e.pointerId !== btn._endBtnPtr) return;
       const armed = !!btn._endBtnArmed;
+      if (!armed) return; // window capture may already have accepted this same release
       const over = stillOverBtn(e);
       btn._endBtnArmed = false;
       btn._endBtnPtr = null;
       clearHold();
       try { if (e.pointerId != null) btn.releasePointerCapture(e.pointerId); } catch (err) {}
       try { btn.blur(); } catch (err) {}
-      if (!armed) return;
       if (btn.disabled || !btn.classList.contains("my-turn")) return;
       // Cancel if release point is outside #endBtn bounds
       if (!over) return;
-      try { if (typeof Sfx !== "undefined" && Sfx.playTurn) Sfx.playTurn(); } catch (err) {}
-      try { if (typeof endTurn === "function") endTurn(); } catch (err) {}
+      try { if (typeof endTurn === "function" && endTurn() && typeof Sfx !== "undefined" && Sfx.playTurn) Sfx.playTurn(); } catch (err) {}
     };
     btn.addEventListener("pointerup", onUp);
     btn.addEventListener("pointercancel", (e) => {
