@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.404";
+const GAME_VERSION = "0.4041";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -433,7 +433,7 @@ function startGame(vsAI) {
 
 /**
  * v0.319 소울 드로우: 모든 영웅 공통. 3소울 · 카드 1장 드로우 · 한 턴에 한 번 · 내 턴에만.
- * 스펠이 아니다 (올빼미의눈·맹덕신서와 무관). 드로우는 일반 draw() 경로 (손패 10장 소각·빈 덱 피로 동일).
+ * 스펠이 아니다 (핸드 카드 비용 증가와 무관). 드로우는 일반 draw() 경로 (손패 10장 소각·빈 덱 피로 동일).
  */
 const SOUL_DRAW_COST = 3;
 /**
@@ -751,10 +751,10 @@ function equipItemOnUnit(p, card, unit) {
     grantedCharge, grantedKw
   };
   // v0.317: 코인 아이템(노름바위·불꽃도박반지·도둑바람·저주의인형·조작된주화)은 장착 시 코인을 바꾸지 않고
-  // 매 코인 판정(rollSharedCoins)에서 적용. 성스러운주화는 유닛별 앞면 확률 +0.2.
+  // 매 코인 판정(rollSharedCoins)에서 적용. 주화·반지는 유닛별 앞면 확률 ±0.2.
   if (card.itemFx) unit._itemFx = card.itemFx;
-  if (card.itemFx === "coin_luck20") {
-    unit.coinLuckBonus = 0.2;
+  if (card.itemFx === "coin_luck20" || card.itemFx === "coin_badluck20") {
+    unit.coinLuckBonus = card.itemFx === "coin_luck20" ? 0.2 : -0.2;
     bonuses.grantedCoinLuck = true;
   }
   if (card.itemFx === "kill_draw") {
@@ -793,21 +793,9 @@ function unitsWithItemFx(p, fx) {
   if (!p || !p.board) return [];
   return p.board.filter(m => m && m._itemFx === fx && m.hp > 0 && !m.dying);
 }
-/** 올빼미의눈(enemy_spell_cost_plus1): 상대 전장의 장착 유닛 수만큼 내 스펠 소울 +1 (중첩) */
-function enemySpellTax(p) {
-  if (!p || !state || !state.p1 || !state.p2) return 0;
-  return unitsWithItemFx(opponent(p), "enemy_spell_cost_plus1").length;
-}
-/** v0.350 요정의부츠(enemy_minion_cost_plus1): 상대 전장의 장착 유닛 수만큼 내 유닛 카드 소울 +1 (중첩 · 올빼미의눈과 같은 방식) */
-function enemyMinionTax(p) {
-  if (!p || !state || !state.p1 || !state.p2) return 0;
-  return unitsWithItemFx(opponent(p), "enemy_minion_cost_plus1").length;
-}
+/** 핸드 카드 인스턴스의 현재 소울. 턴 종료 비용 증가는 그 카드에 누적된다. */
 function effectiveCardCost(p, card) {
-  let c = card && card.cost != null ? Number(card.cost) : 0;
-  if (card && card.type === "spell") c = Math.max(0, c + enemySpellTax(p));
-  if (card && card.type === "minion") c = Math.max(0, c + enemyMinionTax(p));
-  return c;
+  return Math.max(0, card && card.cost != null ? Number(card.cost) : 0);
 }
 /** 카드 1장을 핸드에 생성. 손패 10장이면 드로우와 같이 소각. */
 function addCardToHand(p, id, why) {
@@ -883,8 +871,15 @@ function applyItemKillFx(killerOwner, killer, victimOwner) {
       n++;
     });
     log(`${killer.name} ${nm} · 처치: 적 전체 방·체 −1 (${n}기)`);
-  } else if (fx === "kill_random_dark_hand") {
-    addCardToHand(killerOwner, randomTribeCardId("dark"), `${nm} 처치`);
+  } else if (fx === "kill_copy_enemy_hand") {
+    const hand = opponent(killerOwner).hand;
+    if (hand.length) {
+      const source = hand[Math.floor(Math.random() * hand.length)];
+      // 기존 복사 규칙: 상대 인스턴스를 이동하지 않고 원본 데이터로 새 카드를 만든다.
+      addCardToHand(killerOwner, source.id, `${nm} 복사`);
+    }
+  } else if (fx === "kill_random_earth_spell") {
+    addCardToHand(killerOwner, randomTribeSpellId("earth"), `${nm} 처치`);
   } else if (fx === "kill_summon_harpy") {
     // v0.350 하피의손톱: 처치: 하피(n10) 1기 생성 (전장 가득이면 미생성)
     log(`${killer.name} ${nm} · 처치: 하피 생성`);
@@ -894,7 +889,7 @@ function applyItemKillFx(killerOwner, killer, victimOwner) {
 /** 공격: 장착 유닛이 내 턴에 공격을 선언할 때 (코인 판정 전) */
 function applyItemAttackFx(p, attacker) {
   const fx = attacker && attacker._itemFx;
-  if (!fx || !state || p !== current()) return;
+  if (!fx || !state || p !== current() || !p.board.includes(attacker)) return;
   const nm = (attacker.equippedItem && attacker.equippedItem.name) || "";
   if (fx === "attack_def_plus1") {
     clampDefBuff(attacker, 1);
@@ -903,6 +898,8 @@ function applyItemAttackFx(p, attacker) {
     // v0.350 불꽃검·분노의해머: 공격할 때마다 공격+2 (영구). 연속공격은 두 번째 타격 전에 한 번 더 (combat.js)
     attacker.atk = (Number(attacker.atk) || 0) + 2;
     log(`${attacker.name} ${nm} · 공격: 공격+2`);
+  } else if (fx === "attack_fireball_hand") {
+    addCardToHand(p, "fs3", `${nm} 공격`);
   } else if (fx === "attack_summon_a10") {
     if (p.board.length < 5) {
       const tok = cloneCard("a10");
@@ -942,6 +939,16 @@ function applyItemEndTurnFx(p) {
     const nm = (m.equippedItem && m.equippedItem.name) || "";
     addCardToHand(p, randomTribeCardId("light"), `${nm} 턴 종료`);
   });
+  for (const [fx, type] of [["eot_enemy_minion_cost_plus1", "minion"], ["eot_enemy_spell_cost_plus1", "spell"]]) {
+    unitsWithItemFx(p, fx).forEach(m => {
+      const pool = opponent(p).hand.filter(c => c.type === type);
+      if (!pool.length) return;
+      const chosen = pool[Math.floor(Math.random() * pool.length)];
+      chosen.cost = effectiveCardCost(opponent(p), chosen) + 1;
+      // 상대 손패의 카드 이름은 공개하지 않는다.
+      log(`${m.equippedItem.name} · 내 턴 종료: 상대 핸드의 랜덤 ${type === "minion" ? "유닛" : "스펠"} 소울+1`);
+    });
+  }
 }
 
 function playCard(p, card, target) {
@@ -1142,8 +1149,6 @@ async function runSpellCast(p, card, target) {
   const valid = () => state === owner && !owner.over &&
     (epoch === null || SpellFx.legendaryEpoch() === epoch);
   owner.busy = true;
-  // 맹덕신서(copy_enemy_spell): 시전 시점 상대 전장 장착 유닛 수만큼, 해결 뒤 원본 소울 복사본을 상대 핸드에
-  const copiers = unitsWithItemFx(opponent(p), "copy_enemy_spell").length;
   try {
     // v0.371 일기토(duel_random_keep): 생존 유닛을 연출 전에 뽑아 연출·해결에 같이 넘김 (연출 = 실제 결과)
     const plan = {};
@@ -1161,7 +1166,6 @@ async function runSpellCast(p, card, target) {
     await playSpellFx(card, target, p, plan);
     if (!valid()) return;
     if (!resolved) { resolved = true; resolveSpell(p, card, target, plan); }
-    for (let i = 0; i < copiers; i++) addCardToHand(opponent(p), card.id, "맹덕신서 복사");
   } finally {
     if (state === owner) owner.busy = false;
   }
@@ -2113,16 +2117,14 @@ function resolveDeath(owner, m) {
 
 /** 파괴: 장착 아이템 효과 (적토마·인어의하프). v0.349 (9/29): 환생하는 유닛도 발동, 유닛은 아이템 없이 다시 나타난다. */
 function resolveItemDeathFx(owner, fx, deadDef) {
-  if (fx === "destroy_summon_chitu") {
-    // 적토마 토큰(d40)은 아이템이 없어 재생성 루프 없음
-    applyFx(owner, { type: "summon_token", summonId: "d40" }, null);
+  if (fx === "destroy_lubu_hand") {
+    addCardToHand(owner, "d7", "적토마 파괴");
   } else if (fx === "destroy_enemy_atk_zero") {
     const foe = opponent(owner);
     foe.board.forEach(x => { x.atk = 0; });
     log(`인어의하프 · 파괴: 적 전체 공=0 (${foe.board.length}기)`);
-  } else if (fx === "destroy_def_aoe_damage") {
-    // v0.350 청룡언월도: 파괴: 이 유닛의 방어만큼 적 전체 피해
-    applyFx(owner, { type: "aoe_by_def", value: deadDef || 0, label: "청룡언월도 파괴" }, null);
+  } else if (fx === "destroy_random_water_minions_hand") {
+    for (let i = 0; i < 3; i++) addCardToHand(owner, randomTribeMinionId("water"), "청룡언월도 파괴");
   } else if (fx === "destroy_steal_random") {
     // v0.350 다크아머: 파괴: 랜덤 적 하나 탈취 (면역 제외 · 초선과 같은 이동 규칙)
     const foe = opponent(owner);
@@ -2259,20 +2261,14 @@ function effectiveCoinLinks(m) {
 function rollSharedCoins(m) {
   // v0.317 코인 아이템: 매 코인 판정마다 적용 (장착 시 코인 링크는 그대로). 코인 없는 유닛은 스탯만.
   // v0.322: 링크 계산은 effectiveCoinLinks (표시와 동일)
-  const fx = m && m._itemFx;
   const eff = effectiveCoinLinks(m);
   const la = eff.atkC, ld = eff.defC, lh = eff.hpC;
   const n = eff.n;
   let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
-  if (m && m.coinLuckBonus) luck = Math.min(1, luck + m.coinLuckBonus);
+  if (m && m.coinLuckBonus) luck = Math.max(0, Math.min(1, luck + m.coinLuckBonus));
   if (m && m.coinGold) luck = 1;
   if (m && m.coinBlack) luck = 0;
-  let flips = Array.from({ length: n }, () => Math.random() < luck);
-  if (fx === "coin_all_same" && n > 0) {
-    // 불꽃도박반지: 50% 전부 앞면 · 50% 전부 뒷면
-    const allHeads = Math.random() < 0.5;
-    flips = Array.from({ length: n }, () => allHeads);
-  }
+  const flips = Array.from({ length: n }, () => Math.random() < luck);
   const heads = flips.filter(Boolean).length;
   return {
     flips,
@@ -2330,7 +2326,7 @@ function settleCombatHpCoin(snap) {
 function rollCoins(mod, unit) {
   const n = Math.abs(mod || 0);
   let luck = (state.acting && state.acting.coinP != null) ? state.acting.coinP : 0.5;
-  if (unit && unit.coinLuckBonus) luck = Math.min(1, luck + unit.coinLuckBonus);
+  if (unit && unit.coinLuckBonus) luck = Math.max(0, Math.min(1, luck + unit.coinLuckBonus));
   if (unit && unit.coinGold) luck = 1;
   if (unit && unit.coinBlack) luck = 0;
   const flips = Array.from({ length: n }, () => Math.random() < luck);

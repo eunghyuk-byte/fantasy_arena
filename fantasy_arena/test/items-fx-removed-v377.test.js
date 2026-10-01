@@ -38,7 +38,7 @@ test("v0.377 장착 규칙 유지 — 장착·스탯 보너스·유닛당 1개",
   const r = g.playCard(p1, it, { kind: "minion", owner: p1, minion: m });
   assert.notStrictEqual(r, false);
   assert.ok(m.equippedItem, "장착 안 됨");
-  assert.ok(m.def >= def0 + 2 && m.hp >= hp0 + 4, "스탯 보너스 없음");
+  assert.ok(m.def >= def0 + 2 && m.hp >= hp0 + 2, "스탯 보너스 없음");
   const soul = p1.soul;
   const it2 = g.cloneCard("ai4");
   p1.hand.push(it2);

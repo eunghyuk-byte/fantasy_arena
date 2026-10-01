@@ -1,3 +1,12 @@
+# v0.4041
+
+- Applies the approved update to 29 existing items, including four rarity changes. Harpy and wave-spearman summons remain 2/0/3 and 2/0/2; their item descriptions now agree with the source cards.
+- Boots and owl equipment now increase one random eligible opponent hand instance's soul cost at turn end. Increases stack and survive equipment loss; global cost auras are removed. Black Grimoire copies a fresh base card without removing the opponent's card.
+- Updates the ring's independent coin probability, kill/attack/death hand generation and Blessed Armor protection. Consecutive attacks trigger attack equipment on each hit. Generated/copied cards use the existing ten-card hand limit.
+- Applies the additionally approved soul costs and two rarity changes to 11 existing spells; Fire Shield now grants +3 attack/defense/health. Zero-soul spells retain legal casting, deck membership and AI availability.
+- Exempts all items from authoring soul bands while preserving unit/spell bands. Unit definitions, other spells/items, shop, multiplayer and audio files are unchanged.
+- Advances the version by 0.0001 as specified in VERSIONING.md. Validation and release evidence: ITEMS_V4041_QA.md.
+
 # v0.404
 
 - Matches the approved elemental-gate title composition using unchanged reference pixels for the emblem, FantasySoul wordmark, underline and ornamental button borders.
