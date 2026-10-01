@@ -4103,7 +4103,7 @@ html.is-desktop #game.active .my-hand .card.playable,
 /* =====================================================================
    HAND LAYOUT LOCK v0.234 — DO NOT OVERRIDE BELOW THIS LINE
    See LAYOUT_HAND_LOCK.md. Negative margin-bottom on .my-hand is FORBIDDEN.
-   v0.396 user explicit: lower the resting hand by 4cqh; bottom clipping is allowed.
+   v0.396 user explicit: lower the resting hand by 5cqh; bottom clipping is allowed.
    ===================================================================== */
 #game.active .col-main > .my-hand#myHand,
 #game.active .col-main > .my-hand {
@@ -4111,7 +4111,7 @@ html.is-desktop #game.active .my-hand .card.playable,
   margin-top: 0 !important;
   padding-top: 6px !important;
   padding-bottom: 0 !important;
-  transform: translateY(calc(8px + 4cqh));
+  transform: translateY(calc(8px + 5cqh));
   overflow: hidden !important;
   z-index: 8 !important;
   align-items: flex-end !important;
