@@ -1,3 +1,11 @@
+# v0.404
+
+- Matches the approved elemental-gate title composition using unchanged reference pixels for the emblem, FantasySoul wordmark, underline and ornamental button borders.
+- Reuses text-free source strips behind four real DOM buttons: online lobby, shop, settings and game exit. Preserves existing routes, keyboard focus, touch feedback, reduced motion and safe browser exit guidance.
+- Retains 44px targets on short landscape screens. The fourth button is an authorized addition; DOM typography, stretched plate interiors and a faint small-screen logo backing remain minor differences from the mockup. This is not a claim of pixel-identical rendering.
+- Refreshes release/cache versions. No unit, card-stat, item-rarity, multiplayer, login or payment changes.
+- Verification: 475 client tests, Chrome menu/keyboard/touch/responsive checks, source-pixel regression and independent visual review. See TITLE_V404_QA.md.
+
 # v0.403
 
 - Replaces the title backdrop with the approved elemental portal artwork and retains the existing FantasySoul emblem and wordmark.

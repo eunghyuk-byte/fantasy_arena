@@ -17,7 +17,7 @@ body:has(#title.active) #settingsGearBtn { visibility: hidden; }
 #title .title-logo {
  position:absolute; display:block; left:33.492823cqw; top:6.376196cqh;
  width:34.090909cqw; height:40.914984cqh;
- background:url('../assets/img/ui/approved-title-source.png') 50.8166969% 10.7913669% / 293.333333% 244.415584% no-repeat;
+ background:url('../assets/img/ui/approved-title-source.png?v=0.404') 50.8166969% 10.7913669% / 293.333333% 244.415584% no-repeat;
  mask-image:linear-gradient(to right,transparent,#000 1.5%,#000 98.5%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 98%,transparent); mask-composite:intersect;
 }
 #title .title-body {
@@ -44,7 +44,7 @@ body:has(#title.active) #settingsGearBtn { visibility: hidden; }
 }
 #title .plate-normal { inset:0 1.574803%; }
 #title .plate-hover { opacity:0; }
-#title .menu-art > span { background-image:url('../assets/img/ui/approved-title-source.png'); background-repeat:no-repeat; min-width:0; min-height:0; }
+#title .menu-art > span { background-image:url('../assets/img/ui/approved-title-source.png?v=0.404'); background-repeat:no-repeat; min-width:0; min-height:0; }
 
 
 /* Full-height left, blank center, and right strips avoid source text and row seams. */
@@ -58,7 +58,7 @@ body:has(#title.active) #settingsGearBtn { visibility: hidden; }
 #title .plate-hover .slice-2 { background-size:3096.296296296296% 855.4545454545455%; background-position:64.15327564894932% 53.42960288808665%; }
 
 /* Preserve the original un-stretched central rim highlights above the blank fill. */
-#title .menu-art::before,#title .menu-art::after { content:""; position:absolute; left:10.97561%; right:10.97561%; background-image:url('../assets/img/ui/approved-title-source.png'); background-repeat:no-repeat; pointer-events:none; }
+#title .menu-art::before,#title .menu-art::after { content:""; position:absolute; left:10.97561%; right:10.97561%; background-image:url('../assets/img/ui/approved-title-source.png?v=0.404'); background-repeat:no-repeat; pointer-events:none; }
 #title .plate-hover::before,#title .plate-hover::after { left:10.629921%; right:10.629921%; }
 #title .plate-normal::before { top:0; height:13.043478260869565%; background-size:435.4166666666667% 7841.666666666667%; background-position:50% 61.35629709364908%; mask-image:linear-gradient(to bottom,#000 70%,transparent); }
 #title .plate-normal::after { bottom:0; height:13.043478260869565%; background-size:435.4166666666667% 7841.666666666667%; background-position:50% 69.96770721205597%; mask-image:linear-gradient(to top,#000 70%,transparent); }
