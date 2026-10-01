@@ -1,3 +1,10 @@
+# v0.400
+
+- Fixes rebirth retaining spell buffs and negative depleted equipment defense. Reborn units restore printed attack, defense, maximum HP, coins and abilities at 1 current HP; granted effects and equipment are cleared, and rebirth is consumed.
+- Preserves death-trigger ordering, printed abilities, object identity and spent attack rights. Summon effects do not fire again.
+- Makes the volume slider control effects as well as music. A square output curve gives a quiet low end, exact mute at 0 and the existing maximum at 100, with saved positions and live updates preserved.
+- Replaces the UI click sound with selected procedural candidate 1, 부드러운 탭 (0.22 seconds); the selected summon sound and all other media remain unchanged. Existing click gain and rate limiting remain. Automated regression verification: 460 tests passed.
+
 # v0.399
 
 - Replaces the default summon sound with the selected procedural candidate 4, "마법 응축", encoded as 48kHz stereo OGG from its one-second PCM source.

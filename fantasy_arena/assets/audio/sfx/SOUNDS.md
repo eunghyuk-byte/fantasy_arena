@@ -10,7 +10,7 @@
 | sfx_turn.ogg | 0.697s | three rising chimes, tavern bell |
 | sfx_win.ogg | 1.405s | short triumphant brass sting |
 | sfx_lose.ogg | 1.200s | descending low brass, not comic |
-| sfx_ui_click.ogg | 0.048s | soft wood/ui tick |
+| sfx_ui_click.ogg | 0.220s | 직접 합성 후보 1 · 부드러운 탭 · 48kHz stereo |
 | sfx_coin.ogg | 0.846s | gold coin spin land |
 
 볼륨: Sfx.setVolume(0~1) / BGM은 TavernBgm.duck

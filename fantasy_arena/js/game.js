@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.399";
+const GAME_VERSION = "0.400";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -2001,48 +2001,22 @@ function stripRebirthText(t) {
     .split(/\s*·\s*/).map(x => x.trim()).filter(x => x && x !== "환생").join(" · ")
   ).filter(Boolean).join("\n");
 }
-/**
- * v0.347 (9/29) 규칙: 환생으로 다시 나타날 때 카드 기본(카드 데이터에 인쇄된) 능력은 그대로 다시 가지며 환생만 사라진다.
- * - 인쇄 능력(보호·면역·공격불가 등, 환생 제외)·공격 능력(atkSkill)·인쇄 키워드·인쇄 파괴: 효과를 다시 부여 (보호 소모했어도 다시 생김)
- * - 버프·코인·받은 피해·스펠로 받은 키워드 등 전투 중 변화는 기존 환생 규칙대로 (여기서 건드리지 않음)
- * - v0.348 (9/29, 하스스톤 방식): 침묵된 유닛도 환생으로 나타나면 침묵이 풀리고 원래(인쇄) 능력이 돌아온다
+/** Rebirth restores printed state at 1 HP; no acquired effects survive.
+ * Keep object/UID and already-spent attack rights so combat references remain valid
+ * and rebirth cannot grant an additional attack. Printed rebirth is consumed too.
  */
 function restorePrintedAbilitiesOnRebirth(m) {
   if (!m) return;
   const b = (typeof CARD_MAP !== "undefined" && CARD_MAP[m.id]) || null;
   if (!b || b.type !== "minion") return;
-  if (m.silenced) {
-    m.silenced = false;
-    if (b.battlecry && !m.battlecry) m.battlecry = b.battlecry; // 인쇄 정보 복원만 (환생 시 소환: 은 발동 안 함)
-  }
-  const printedAb = stripRebirthAbility(b.ability);
-  const curAb = stripRebirthAbility(m.ability);
-  if (printedAb) {
-    m.ability = printedAb;
-    // 스펠로 받은 다른 능력은 키워드로 남긴다 (인쇄 능력과 함께 유지)
-    const kwMap = { "보호": "shield", "강탈": "steal", "출전": "battlecry", "복수": "revenge", "유언": "deathrattle", "면역": "immune" };
-    if (curAb && curAb !== printedAb && kwMap[curAb]) {
-      m.keywords = Array.from(new Set([...(m.keywords || []), kwMap[curAb]]));
-    }
-  } else {
-    m.ability = curAb;
-  }
-  if (b.atkSkill != null) m.atkSkill = b.atkSkill;
-  const kws = new Set((m.keywords || []).filter(k => k !== "rebirth"));
-  (b.keywords || []).forEach(k => { if (k !== "rebirth") kws.add(k); });
-  if (b.atkSkill === 2 || String(b.text || "").includes("관통")) kws.add("pierce");
-  m.keywords = Array.from(kws);
-  if (b.deathrattle && !m.deathrattle) m.deathrattle = b.deathrattle;
-  if (b.cannotAttack) m.cannotAttack = true;
-  // 문구: 인쇄 문구(환생 제외) + 전투 중 덧붙은 줄(성흔 등)
-  if (b.text != null) {
-    const baseLines = String(b.text).split("\n").length;
-    const extra = String(m.text || "").split("\n").slice(baseLines).filter(Boolean);
-    const t = [stripRebirthText(b.text)].concat(extra).filter(Boolean).join("\n");
-    m.text = t;
-  } else if (m.text) {
-    m.text = stripRebirthText(m.text);
-  }
+  const identity = { uid: m.uid, canAttack: m.canAttack, attacksLeft: m.attacksLeft };
+  for (const key of ["_atkTurn", "_sickTurn"]) if (m[key] != null) identity[key] = m[key];
+  const keywords = (b.keywords || []).filter(k => k !== "rebirth");
+  if ((b.atkSkill === 2 || String(b.text || "").includes("관통")) && !keywords.includes("pierce")) keywords.push("pierce");
+  for (const key of Object.keys(m)) delete m[key];
+  Object.assign(m, b, identity, { keywords, ability: stripRebirthAbility(b.ability),
+    text: stripRebirthText(b.text), hp: 1, maxHp: b.hp || 1, damaged: true });
+  if (b.cannotAttack) { m.canAttack = false; m.attacksLeft = 0; }
 }
 
 /**
@@ -3466,7 +3440,7 @@ function abiName(ab) { return (typeof ABI_LABEL !== "undefined" && ABI_LABEL[ab]
 const ABI_HELP = {
   "보호": "전투·스펠 피해를 한 번 막아 줍니다. 직접 능력치 감소와 코인으로 깎이는 체력은 막지 않습니다.",
   "복수": "파괴될 때 나를 파괴한 적을 제거합니다.",
-  "환생": "죽으면 체력 1로 한 번 다시 살아납니다. 카드 기본 능력은 그대로 다시 가지며 환생만 사라집니다. 다시 나타날 때 소환: 효과는 발동하지 않고, 파괴: 효과는 다시 파괴될 때 또 발동합니다. 환생으로 나타나면 침묵은 풀리고 원래 능력이 돌아옵니다. 환생하는 유닛이 낀 아이템의 파괴: 효과는 발동하고, 유닛은 아이템 없이 다시 나타납니다.",
+  "환생": "죽으면 체력 1로 한 번 다시 살아납니다. 공격력·방어력·최대 체력·코인·능력은 카드 기본값으로 돌아가고 현재 체력은 1이 됩니다. 받은 버프·약화·추가 능력은 지워지며 환생은 소모됩니다. 다시 나타날 때 소환: 효과는 발동하지 않고, 파괴: 효과는 다시 파괴될 때 또 발동합니다. 환생으로 나타나면 침묵은 풀리고 원래 능력이 돌아옵니다. 환생하는 유닛이 낀 아이템의 파괴: 효과는 발동하고, 유닛은 아이템 없이 다시 나타납니다.",
   "강탈": "파괴될 때 나를 파괴한 적을 탈취합니다.",
   "출전": "낼 때 카드 1장을 뽑습니다.",
   "유언": "파괴될 때 카드 1장을 뽑습니다.",

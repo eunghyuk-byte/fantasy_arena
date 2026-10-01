@@ -13,13 +13,17 @@ const Sfx = (() => {
     coin: "sfx_coin"
   };
   const EXTS = [".ogg", ".mp3", ".wav"];
-  let ctx = null, sfxGain = null, muted = false, vol = 0.85;
+  const MAX_GAIN = 0.85; // Preserve the existing effects mix at slider 100.
+  let ctx = null, sfxGain = null, muted = false, vol = 1;
+  // Bgm owns the saved slider position and is loaded before Sfx in the game.
+  if (typeof Bgm !== "undefined" && Bgm.getVolume) vol = Bgm.getVolume();
+  function outputVolume() { return muted ? 0 : MAX_GAIN * vol * vol; }
   const cache = new Map();
   function ac() {
     if (!ctx) {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       sfxGain = ctx.createGain();
-      sfxGain.gain.value = vol;
+      sfxGain.gain.value = outputVolume();
       sfxGain.connect(ctx.destination);
     }
     if (ctx.state === "suspended") ctx.resume();
@@ -167,11 +171,11 @@ const Sfx = (() => {
   }
   function setVolume(v) {
     vol = Math.max(0, Math.min(1, +v || 0));
-    if (sfxGain) sfxGain.gain.value = muted ? 0 : vol;
+    if (sfxGain) sfxGain.gain.value = outputVolume();
   }
   function setMuted(m) {
     muted = !!m;
-    if (sfxGain) sfxGain.gain.value = muted ? 0 : vol;
+    if (sfxGain) sfxGain.gain.value = outputVolume();
   }
   // v0.352: arbitrary-URL one-shots (spell packs). loadUrl caches the decoded buffer so
   // callers can preload, then start sound + animation on the same tick.

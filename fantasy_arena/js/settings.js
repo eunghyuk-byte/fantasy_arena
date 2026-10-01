@@ -250,6 +250,7 @@
       const p = Math.max(0, Math.min(100, +vs.value || 0));
       if (vv) vv.textContent = p;
       try { const api = (typeof Bgm !== "undefined") ? Bgm : window.Bgm; if (api) api.setVolume(p / 100); } catch (e) {}
+      try { const api = (typeof Sfx !== "undefined") ? Sfx : window.Sfx; if (api) api.setVolume(p / 100); } catch (e) {}
     });
   }
 

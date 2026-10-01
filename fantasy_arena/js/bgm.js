@@ -14,8 +14,12 @@ const Bgm = (() => {
     fadeTimers = [];
   }
 
+  // Store the slider position; square it once at the output for a quiet low end.
+  // Sfx uses the same curve while retaining its own full-scale mix level.
+  function outputVolume() { return wanted ? vol * vol * duckMul : 0; }
+
   function applyVol() {
-    const v = wanted ? vol * duckMul : 0;
+    const v = outputVolume();
     Object.keys(beds).forEach(k => {
       const a = beds[k];
       if (a) a.volume = (k === track ? v : 0);
@@ -101,7 +105,7 @@ const Bgm = (() => {
         applyVol();
         return;
       }
-      fade(next, vol * duckMul, fadeMs);
+      fade(next, outputVolume(), fadeMs);
     }
     if (other && other !== next) fade(other, 0, fadeMs);
     applyVol();
@@ -133,7 +137,7 @@ const Bgm = (() => {
     duckMul = on ? 0.34 : 1;
     const a = beds[track];
     if (!a) return;
-    fade(a, wanted ? vol * duckMul : 0, ms || 80);
+    fade(a, outputVolume(), ms || 80);
   }
   function setVolume(v) {
     vol = Math.max(0, Math.min(1, +v || 0));

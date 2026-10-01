@@ -101,7 +101,7 @@ test("인쇄 환생 유닛(피닉스): 부활 후 환생 없음, 문구에서도
   assert.ok(!p1.board.includes(m));
 });
 
-test("공격 능력(atkSkill) 인쇄 유닛 + 환생: 스펠로 바뀐 공격 능력 → 인쇄 공격 능력 복원, 버프는 기존 규칙대로 유지", () => {
+test("공격 능력(atkSkill) 인쇄 유닛 + 환생: 스펠로 바뀐 공격 능력 → 인쇄 공격 능력 복원, 버프는 제거", () => {
   const { p1 } = setup(g);
   const m = place(g, p1, "n6"); // 매사냥꾼 관통공격(2) (v0.358: 나무궁수는 관통 제거)
   g.equipItemOnUnit(p1, g.cloneCard("li1"), m);
@@ -112,7 +112,7 @@ test("공격 능력(atkSkill) 인쇄 유닛 + 환생: 스펠로 바뀐 공격 �
   assert.ok(p1.board.includes(m));
   assert.equal(m.atkSkill, 2);
   assert.ok(m.keywords.includes("pierce"));
-  assert.equal(m.atk, atkBefore, "버프(공격력)는 기존 환생 규칙대로 유지");
+  assert.equal(m.atk, g.cloneCard("n6").atk, "버프 제거 후 인쇄 공격력 복원");
   assert.ok(!hasRebirth(m));
 });
 
