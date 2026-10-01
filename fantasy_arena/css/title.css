@@ -19,21 +19,21 @@ body:has(#title.active) #settingsGearBtn { visibility: hidden; }
   position: absolute; top: 6.695cqh; left: 50%;
   width: 13.457cqw; height: 22.955cqh !important; max-height: none !important;
   transform: translateX(-50%); object-fit: fill; margin: 0;
-  filter: drop-shadow(0 2px 5px #0008);
+  filter: brightness(1.23) contrast(1.06) saturate(.92) drop-shadow(0 2px 5px #0008);
 }
 #title .title-wordmark {
   position: absolute; top: 26.142cqh; left: calc(50% + .658cqw);
   width: 41.567cqw !important; height: 24.655cqh !important; max-height: none !important;
   transform: translateX(-50%); object-fit: fill; margin: 0 !important;
   clip-path: inset(0 0 48.5% 0);
-  filter: drop-shadow(0 2px 5px #0008);
+  filter: brightness(1.15) saturate(.82) drop-shadow(0 2px 5px #0008);
 }
 #title .title-underline {
-  position: absolute; top: 24.867cqh; left: calc(50% + .09cqw);
+  position: absolute; top: 25.717cqh; left: calc(50% + .09cqw);
   width: 40.072cqw; height: 23.379cqh;
   transform: translateX(-50%); object-fit: fill;
   clip-path: inset(51.5% 0 0 0);
-  filter: drop-shadow(0 2px 5px #0008);
+  filter: brightness(1.15) saturate(.82) drop-shadow(0 2px 5px #0008);
 }
 #title .title-body {
   position: absolute; top: 47.928cqh; left: 50%; transform: translateX(-50%);
@@ -64,17 +64,20 @@ body:has(#title.active) #settingsGearBtn { visibility: hidden; }
 #title .title-menu .menu-btn::before {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   /* Sprite has transparent canvas padding; crop in CSS without altering pixels. */
-  background: var(--plate) center 46% / 103.17% 204.5% no-repeat;
+  background: var(--plate) center 46% / 103.17% 184% no-repeat;
   filter: brightness(.85) saturate(.9);
 }
 #title #btnLobby { font-size: clamp(17px, 4.676cqh, 44px) !important; }
+#title #btnLobby::before { background-size: 103.17% 204.5%; }
 @media (hover: hover) {
   #title .title-menu .menu-btn:hover {
     --plate: url('../assets/img/ui/menu-button-hover.png');
     color: #fff5b9;
     filter: drop-shadow(0 0 8px #ffc44a80);
   }
+  #title .title-menu .menu-btn:hover::before { filter: brightness(1) saturate(1); }
 }
+#title .title-menu .menu-btn:focus-visible::before { filter: brightness(1) saturate(1); }
 #title .title-menu .menu-btn:focus-visible {
   --plate: url('../assets/img/ui/menu-button-hover.png');
   outline: 2px solid #ffe5a4; outline-offset: 3px;
