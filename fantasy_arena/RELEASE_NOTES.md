@@ -1,3 +1,13 @@
+# v0.396
+
+- Queues a visible end-turn request during current actions, including ordinary draws and full-hand burns, and advances once after completion. Repeated input, restart and cancellation cannot duplicate a turn.
+- Shows overflow deck draws from either player's seat: deck flight, public card reveal and the existing torn-card effect, without hand entry or gameplay death triggers.
+- Uses calculated combat values in repeated coin overlays, preserves current damaged HP and improves floating-value size, contrast and 1.8s readability. Moves the stored-coin badge slightly left and enlarges it.
+- Rejects targeted spell drops on immune or otherwise invalid cards instead of redirecting to neighbors. Exact valid targets and existing all-enemy effects are preserved.
+- Area attacks use one attacker/front roll, no fresh backline rolls, one simultaneous damage commit and grouped deaths. All target media prepare before a shared animation clock; the batch owns one outcome sound.
+- Lowers the resting hand another 5cqh so desktop battlefield numbers remain clear. Card size, hover/touch-hold detail and drag behavior remain; bottom clipping is intentional.
+- Verified with 420 Node tests and exact-candidate Chromium interaction, timing, stat and target checks. See V396_QA.md, including existing narrow portrait-layout limitations. AI changes and media replacements are not included.
+
 # v0.395
 
 - Speeds only the opening-hand deal to 1.5× (480ms per card); ordinary later draws remain 720ms.
