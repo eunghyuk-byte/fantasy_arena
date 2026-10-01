@@ -1,3 +1,10 @@
+## v0.4043
+
+- Adds the approved 24 units using existing abilities and the 24 previously approved illustrations. Each tribe now has 33 units, 10 spells and 7 items: 50 regular cards, excluding tokens.
+- Preserves all 285 previous card records and art mappings, the six default decks, and the v0.4041 item/spell and v0.4042 shop/audio updates. No new combat mechanics or pack probabilities.
+- Adds approval-contract, summon, AI, shared-coin, ability, art-checksum and server deck-validation coverage. Verification: 601 client tests, 2 server API tests, 24 rendered cards and six deck builders; 198 unit band checks and 4,644 duplicate comparisons. See APPROVED_24_UNITS_QA.md.
+- Refreshes the version and asset cache keys to v0.4043.
+
 ## v0.4042
 
 - Approved pack-shop presentation with DOM prices/actions and explicit unavailable payment/inventory notices.
