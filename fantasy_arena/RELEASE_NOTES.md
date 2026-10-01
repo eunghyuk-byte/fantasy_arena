@@ -1,3 +1,10 @@
+# v0.401
+
+- Registers the 24 user-selected planned-unit artworks under assets/img/art/new-units/: four each for earth, fire, wind, water, light and dark. Only the 1000x800 JPEG quality-90 game files are included; high-resolution originals are excluded.
+- Adds a separate art catalog with approved names, elements, soul labels, selected variants, relative paths, measured byte sizes and SHA-256 hashes. All 24 files match the catalog and approved-art commit; existing artwork is preserved.
+- This release prepares artwork only. These units are not playable cards: game IDs, stats, abilities, rarities and runtime card connections remain pending and are not inferred from the catalog.
+- Verification: all 460 existing client tests passed with original repository bytes; all 24 JPEG dimensions, decoding, Q90 quantization tables and hashes passed, with an independent scope review.
+
 # v0.400
 
 - Fixes rebirth retaining spell buffs and negative depleted equipment defense. Reborn units restore printed attack, defense, maximum HP, coins and abilities at 1 current HP; granted effects and equipment are cleared, and rebirth is consumed.
