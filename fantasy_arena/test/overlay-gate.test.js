@@ -60,7 +60,7 @@ test("시작: MATCH START → MY TURN 이 잡힐 때까지 게이트 유지, 드
   assert.match(game, /releaseIntro = SpellFx\.overlayHold\(\);[\s\S]*showGame\(\);\s*render\(\);/);
   assert.match(game, /playTurnStartFx\(first\);\s*releaseIntro\(\);/);
   const render = read("js/render.js");
-  assert.match(render, /me\._drawHideN = n;[\s\S]*await SpellFx\.whenOverlayIdle\(\);[\s\S]*me\._drawHideN = 0;[\s\S]*await playDrawSequence\(n\);/);
+  assert.match(render, /me\._drawHideN = n;[\s\S]*await SpellFx\.whenOverlayIdle\(\);[\s\S]*me\._drawHideN = 0;[\s\S]*await playDrawSequence\(n, drawPlaybackRate\);/);
   assert.match(render, /if \(\(me\._drawHideN \|\| 0\) > 0 && !dragging\)/);
 });
 

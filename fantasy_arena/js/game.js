@@ -171,7 +171,8 @@ function draw(p, n = 1) {
 const DRAW_FLY_MS = 720;
 
 /** Fly a ghost from deck pile to a specific hand card element. Returns Promise. */
-function flyDrawCard(cardEl) {
+function flyDrawCard(cardEl, playbackRate = 1) {
+  const durationMs = DRAW_FLY_MS / playbackRate;
   return new Promise((resolve) => {
     try { Sfx.playDraw && Sfx.playDraw(); } catch (e) {}
     try { if (typeof SpellFx !== "undefined" && SpellFx.playUi) SpellFx.playUi("deck_draw"); } catch (e) {}
@@ -211,18 +212,18 @@ function flyDrawCard(cardEl) {
         { transform: "translate(0,0) rotate(-18deg) scale(.72)", offset: 0 },
         { transform: "translate(" + (dx * 0.45) + "px," + (dy * 0.35 - 90) + "px) rotate(12deg) scale(.92)", offset: 0.45 },
         { transform: "translate(" + dx + "px," + dy + "px) rotate(0deg) scale(1)", offset: 1 }
-      ], { duration: DRAW_FLY_MS, easing: "cubic-bezier(.2,.72,.12,1)", fill: "forwards" });
+      ], { duration: durationMs, easing: "cubic-bezier(.2,.72,.12,1)", fill: "forwards" });
       anim.onfinish = done;
     } catch (e) {
       done();
       return;
     }
-    setTimeout(done, DRAW_FLY_MS + 80);
+    setTimeout(done, durationMs + 80);
   });
 }
 
 /** Sequential deck→hand flies for the last N cards in #myHand. */
-async function playDrawSequence(n) {
+async function playDrawSequence(n, playbackRate = 1) {
   const hand = document.getElementById("myHand");
   if (!hand || n < 1) return;
   const cards = [...hand.querySelectorAll(".card")];
@@ -235,7 +236,7 @@ async function playDrawSequence(n) {
   for (let i = 0; i < n; i++) {
     const el = cards[startIdx + i];
     if (!el) continue;
-    try { await flyDrawCard(el); } catch (e) {}
+    try { await flyDrawCard(el, playbackRate); } catch (e) {}
     try { el.style.removeProperty("opacity"); } catch (e) {} // 모션이 생략돼도 카드가 숨은 채 남지 않게
   }
 }
@@ -265,6 +266,9 @@ function startGame(vsAI) {
   const second = p1First ? state.p2 : state.p1;
   draw(first, 3);
   draw(second, 4);
+  // Only the opening hand flies faster; consume this flag on its first render.
+  first._openingDrawPending = true;
+  second._openingDrawPending = true;
   second.hand.push(cloneCoinFor(second));
   state.turn = p1First ? 1 : 2;
   // v0.357: 첫 턴 연출은 match_start가 끝난 뒤 (예전엔 beginTurn이 먼저 불러 둘이 겹침)
@@ -369,6 +373,7 @@ function playTurnStartFx(p) {
 }
 function beginTurn(p, opts) {
   try { hidePeek(); } catch (e) {}
+  if (_drag) clearDrag();
   try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   state.acting = p;
   p.maxSoul = Math.min(10, p.maxSoul + 1);
@@ -443,6 +448,7 @@ function endTurn() {
   try { if (typeof SpellFx !== "undefined" && SpellFx.clear) SpellFx.clear(); } catch (e) {}
   const p = current();
   if (p.isAI) return;
+  if (_drag) clearDrag();
   ui.targeting = null; ui.attacker = null;
   const owner = state;
   runAutoCombat(p).then(ok => { if(ok && state === owner) passTurn(); }).catch(e => console.warn(e));
@@ -2741,13 +2747,22 @@ function bindHandCard(el, card) {
     const ghost = makeDragGhost(el, ev.clientX, ev.clientY);
     el.classList.add("dragging");
     document.body.classList.add("dragging-card");
-    _drag = {
+    const ownerState = state;
+    const owner = meView().me;
+    const session = _drag = {
       kind: "hand", card, el, ghost, pid: ev.pointerId,
       x0: ev.clientX, y0: ev.clientY, lastX: ev.clientX, lastY: ev.clientY,
       pointerType: ev.pointerType || "mouse"
     };
+    const ownsEvent = (e) => _drag === session &&
+      (session.pid == null ? e.pointerId == null : e.pointerId === session.pid);
+    const cancel = (e) => {
+      if (!ownsEvent(e)) return;
+      clearDrag();
+    };
     const move = (e) => {
-      if (!_drag) return;
+      if (!ownsEvent(e)) return;
+      if (state !== ownerState || meView().me !== owner || !owner.hand.includes(card) || !canDropCard(card)) { clearDrag(); return; }
       if (e.cancelable) try { e.preventDefault(); } catch (err) {}
       trackDragXY(e);
       const { x, y } = dragPointerXY(e);
@@ -2779,13 +2794,8 @@ function bindHandCard(el, card) {
       }
     };
     const up = (e) => {
-      window.removeEventListener("pointermove", move, true);
-      window.removeEventListener("pointerup", up, true);
-      window.removeEventListener("pointercancel", up, true);
-      window.removeEventListener("mousemove", move, true);
-      window.removeEventListener("mouseup", up, true);
-      try { if (ev.pointerId != null && el.releasePointerCapture) el.releasePointerCapture(ev.pointerId); } catch (err) {}
-      if (!_drag) return;
+      if (!ownsEvent(e)) return;
+      if (state !== ownerState || meView().me !== owner || !owner.hand.includes(card) || !canDropCard(card)) { clearDrag(); return; }
       trackDragXY(e);
       const { x, y } = dragPointerXY(e);
       const cardRef = _drag.card;
@@ -2829,23 +2839,33 @@ function bindHandCard(el, card) {
         return;
       }
       ok = overBoard(x, y) && canDropCard(cardRef);
-      if (ok && cardRef && cardRef.type === "minion") {
-        window._dropSlot = insertIndexFromPoint(x, y, null);
-      } else {
-        window._dropSlot = null;
-      }
-      clearInsertPreview();
+      const dropSlot = ok && cardRef && cardRef.type === "minion" ? insertIndexFromPoint(x, y, null) : null;
       clearDrag();
       if (ok) {
+        window._dropSlot = dropSlot;
         try { Sfx.playCardDrop && Sfx.playCardDrop(); } catch (err) {}
         onHandClick(cardRef);
       }
     };
-    window.addEventListener("pointermove", move, true);
-    window.addEventListener("pointerup", up, true);
-    window.addEventListener("pointercancel", up, true);
-    window.addEventListener("mousemove", move, true);
-    window.addEventListener("mouseup", up, true);
+    // The session owns its listeners, so Escape/turn changes cannot leave an old drop handler alive.
+    session.cleanup = () => {
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", cancel, true);
+      window.removeEventListener("mousemove", move, true);
+      window.removeEventListener("mouseup", up, true);
+      el.removeEventListener("lostpointercapture", cancel);
+      try { if (session.pid != null && el.releasePointerCapture) el.releasePointerCapture(session.pid); } catch (err) {}
+    };
+    if (session.pid != null) {
+      window.addEventListener("pointermove", move, true);
+      window.addEventListener("pointerup", up, true);
+      window.addEventListener("pointercancel", cancel, true);
+      el.addEventListener("lostpointercapture", cancel);
+    } else {
+      window.addEventListener("mousemove", move, true);
+      window.addEventListener("mouseup", up, true);
+    }
   };
 
   const touch = bindTouchPeekHold(el, card, {
@@ -2878,6 +2898,11 @@ function makeDragGhost(srcEl, clientX, clientY) {
   const r = srcEl.getBoundingClientRect();
   const ghost = srcEl.cloneNode(true);
   ghost.className = "drag-ghost"; // minion/card 클래스 제거 → slot 크기 CSS 미적용
+  // A visual proxy is never a second accessible card or duplicate document ID.
+  ghost.setAttribute("aria-hidden", "true");
+  ghost.setAttribute("inert", "");
+  ghost.removeAttribute("id");
+  ghost.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
   ghost.style.cssText = "";
   ghost.style.setProperty("position", "fixed", "important");
   ghost.style.setProperty("left", clientX + "px", "important");
@@ -3065,12 +3090,12 @@ document.getElementById("game").addEventListener("click", (e) => {
 });
 
 // Stuck peek safety: clear on tab hide / window blur / any pointer cancel at doc level
-document.addEventListener("visibilitychange", () => { if (document.hidden) hidePeek(); });
-window.addEventListener("blur", () => { try { hidePeek(); } catch (e) {} });
+document.addEventListener("visibilitychange", () => { if (document.hidden) clearDrag(); });
+window.addEventListener("blur", () => { clearDrag(); });
 document.addEventListener("pointercancel", () => { try { if (!_drag) hidePeek(); } catch (e) {} }, true);
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { ui.targeting = null; ui.attacker = null; render(); }
+  if (e.key === "Escape") { clearDrag(); ui.targeting = null; ui.attacker = null; render(); }
 });
 // v0.332: 전투 화면 버튼(소울 드로우·턴 종료·설정 톱니 등)에 포커스가 남은 채 Space/Enter를 눌러
 // 버튼이 키보드로 발동하는 오발동 차단. 전투 조작은 마우스(포인터)만. (의도된 단축키는 Esc=대상 지정 취소뿐)

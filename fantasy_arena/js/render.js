@@ -302,6 +302,8 @@ function render() {
   layoutOppFan();
   if ((me._drewCount || 0) > 0 && !me._drawingAnim) {
     const n = me._drewCount;
+    const drawPlaybackRate = me._openingDrawPending ? 1.5 : 1;
+    me._openingDrawPending = false;
     me._drewCount = 0;
     me._drawingAnim = true;
     // v0.372: 매치 연출(MATCH START·MY TURN·승패) 중에는 드로우 모션·사운드를 미루고, 새 카드는 그동안 숨김
@@ -313,8 +315,8 @@ function render() {
         } catch (e) {}
         me._drawHideN = 0;
         try {
-          if (typeof playDrawSequence === "function") await playDrawSequence(n);
-          else if (typeof flyDrawCard === "function") await flyDrawCard();
+          if (typeof playDrawSequence === "function") await playDrawSequence(n, drawPlaybackRate);
+          else if (typeof flyDrawCard === "function") await flyDrawCard(undefined, drawPlaybackRate);
         } catch (e) {}
         me._drawingAnim = false;
       })();
@@ -1365,14 +1367,10 @@ function layoutHudGems() {
     const HERO_H = HERO_W * 1.28;
     const oppHero = document.querySelector("#oppStrip .hud-hero");
     const myHero = document.querySelector("#myStrip .hud-hero");
-    placeIn(oppHero, hr, 0.928, 0.275, HERO_W, HERO_H);
-    placeIn(myHero, hr, 0.928, 0.635, HERO_W, HERO_H);
-    // v0.236: hero icons +15px right
-    [oppHero, myHero].forEach(el => {
-      if (!el || !el.style.left) return;
-      const L = parseFloat(el.style.left);
-      if (!Number.isNaN(L)) el.style.setProperty("left", (L + 15 * Z) + "px", "important");
-    });
+    // Arch centers in board_169.jpg; art coordinates scale with every viewport.
+    const HERO_CX = (3186 - 480) / 2880;
+    placeIn(oppHero, hr, HERO_CX, 0.275, HERO_W, HERO_H);
+    placeIn(myHero, hr, HERO_CX, 0.635, HERO_W, HERO_H);
     // v0.351: 소울 드로우(내 버튼) — 내 영웅 초상 바로 아래 가운데
     const sdb = document.getElementById("mySoulDraw");
     if (sdb && myHero && sdb.style.width) {
@@ -1694,10 +1692,10 @@ function layoutEndBtn() {
   if (!(contentW > 8 && contentH > 8)) return;
   const contentLeft = core.left;
   const contentTop = core.top;
-  // v0.225: button center = board mid horizontal ∩ right gold-frame vertical edge
-  // content-box: CY 0.5 = battlefield center divider; CX ≈ right edge of gold board frame
-  const CX = 0.968;
-  const CY = 0.500;
+  // Measured right gold rail / central table divider in board_169.jpg.
+  // Anchor the button center to the artwork, with no viewport-pixel offsets.
+  const CX = (3030 - 480) / 2880;
+  const CY = 1012 / 2160;
   // Final end-turn art is 700×700 transparent PNG — fill the board well as a square
   const WIDTH_FRAC = 0.088;
   const bw = contentW * WIDTH_FRAC;
@@ -1707,10 +1705,8 @@ function layoutEndBtn() {
   if (!Number.isFinite(left) || !Number.isFinite(top) || !Number.isFinite(bw)) return;
   // Reject pathological seats (e.g. top-right over opp hero) from bad parent metrics
   if (top < mr.height * 0.25 || top > mr.height * 0.75) return;
-  // v0.236… v0.259: end-turn LEFT cumulative −99
-  const Z = boardZoom(bg); // v0.328
-  btn.style.left = (left - 99 * Z) + "px";
-  btn.style.top = (top - 24 * Z) + "px";
+  btn.style.left = left + "px";
+  btn.style.top = top + "px";
   btn.style.width = bw + "px";
   btn.style.height = bh + "px";
   btn.style.right = "auto";

@@ -4840,3 +4840,11 @@ html, body, body * {
   object-fit: contain !important;
   display: block !important;
 }
+
+/* Keep the hand slot while its one visible card follows the pointer.
+   Opacity on the parent also hides playable glow descendants; no hand reflow. */
+#game.active .my-hand .card.dragging {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: none !important;
+}

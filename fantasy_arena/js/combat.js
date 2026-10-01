@@ -551,6 +551,7 @@ function checkWin() {
 }
 
 function finish(winner) {
+  if (typeof _drag !== "undefined" && _drag) clearDrag();
   state.over = true;
   state.winner = winner;
   const endState = state;
@@ -607,9 +608,12 @@ function clearDrag() {
   const peek = document.getElementById("cardPeek");
   if (peek) peek.remove();
   if (typeof _drag !== "undefined" && _drag) {
-    if (_drag.el) _drag.el.classList.remove("dragging");
-    _drag = null;
+    const session = _drag;
+    _drag = null; // Invalidate first: releasing capture can synchronously dispatch lostpointercapture.
+    if (session.cleanup) session.cleanup();
+    if (session.el) session.el.classList.remove("dragging");
   }
+  window._dropSlot = null;
   try { document.body.classList.remove("dragging-card"); } catch (err) {}
   if (typeof placeDropGlow === "function") placeDropGlow(false);
   if (typeof clearEquipHover === "function") clearEquipHover();
