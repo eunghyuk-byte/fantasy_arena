@@ -568,6 +568,15 @@ function frameOpaqueBBox(src, urlKey) {
   }
 }
 
+// Preserve approved single-line seats for stat frames, and the two-line spell seat.
+// The shield tip narrows the usable unit/item panel above the full rectangle center.
+function descriptionTextStartY(type, height, fontSize, lineCount) {
+  const twoLineHeight = fontSize * 1.28 + 1;
+  const center = height * 0.778 - (type === "spell" ? 0 : twoLineHeight / 2);
+  const lineHeight = fontSize * 1.28 + (lineCount >= 2 ? 1 : 0);
+  return center - ((lineCount - 1) * lineHeight) / 2;
+}
+
 async function composeCardFace(c, opts={}) {
   const W = 768, H = 1152;
   const canvas = document.createElement("canvas");
@@ -797,11 +806,7 @@ async function composeCardFace(c, opts={}) {
     }
     if (!lines.length && txt) lines.push(txt);
     const lh = tSize * 1.28 + (lines.length >= 2 ? 1 : 0); // v0.251: 2+ lines gap +1px
-    // v0.254: first line Y = 2-line top (no center / no -5 for single line)
-    const lh2 = tSize * 1.28 + 1;
-    const startY = lines.length <= 1
-      ? H*0.778 - lh2 / 2
-      : H*0.778 - ((lines.length - 1) * lh) / 2;
+    const startY = descriptionTextStartY(c.type, H, tSize, lines.length);
     lines.forEach((ln, i) => ctx.fillText(ln, W*0.50, startY + i * lh));
     ctx.restore();
   }
