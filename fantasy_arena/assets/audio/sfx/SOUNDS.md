@@ -5,7 +5,7 @@
 | sfx_death.ogg | 0.477s | card paper tear + cloth fall, not gory |
 | sfx_card_play.ogg | 0.277s | thick card slap onto wood table |
 | sfx_card_draw.ogg | 0.430s | single card slide from deck |
-| sfx_summon.ogg | 0.953s | fantasy summon whoosh + soft impact |
+| sfx_summon.ogg | 1.000s | 직접 합성 후보 4 · 마법 응축 · 48kHz stereo |
 | sfx_hero_hit.ogg | 0.649s | body thud + light grunt, not scream |
 | sfx_turn.ogg | 0.697s | three rising chimes, tavern bell |
 | sfx_win.ogg | 1.405s | short triumphant brass sting |

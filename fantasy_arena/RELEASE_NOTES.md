@@ -1,3 +1,9 @@
+# v0.399
+
+- Replaces the default summon sound with the selected procedural candidate 4, "마법 응축", encoded as 48kHz stereo OGG from its one-second PCM source.
+- Keeps the existing summon trigger, volume/mute settings and fallback behavior. No other sound or gameplay rules change.
+- Refreshes asset cache version and measured sound inventory. Verification details: SUMMON_V399_QA.md.
+
 # v0.398
 
 - Removes two unused legacy sword/parry sound files and their unreachable presentation helpers, warmup entries and manifest entries (29,312 bytes).
