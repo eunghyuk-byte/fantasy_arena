@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/lobby.css?v=0.404" />
 <link rel="stylesheet" href="css/title.css?v=0.404" />
 <link rel="stylesheet" href="css/audio-match.css?v=audio-demo-1" />
+<link rel="stylesheet" href="css/shop.css?v=shop-ui-1" />
 </head>
 <body>
 <button class="bgm-btn settings-gear-btn" id="settingsGearBtn" title="설정" aria-label="설정">⚙</button>
@@ -41,12 +42,40 @@
   </section>
 
   <!-- v0.334 상점 (준비 중) -->
-  <section id="shop" class="screen">
-    <div class="shop-box">
-      <h2 class="tsel-title">상점</h2>
-      <p class="shop-soon">준비 중입니다.</p>
-      <button class="menu-btn ghost tsel-back" id="btnShopBack">뒤로</button>
+  <section id="shop" class="screen" aria-labelledby="shopTitle">
+    <header class="shop-header">
+      <button class="menu-btn shop-back" id="btnShopBack" type="button"><span class="shop-button-art" aria-hidden="true"><span></span><span></span><span></span></span><span>‹ 뒤로</span></button>
+      <div class="shop-heading"><span class="shop-brand" role="img" aria-label="FantasySoul"></span><h1 id="shopTitle">카드팩 상점</h1></div>
+      <aside class="shop-owned" aria-label="보유 카드팩"><span class="owned-pack-art" aria-hidden="true"></span><div><h2>보유 카드팩</h2><p id="ownedPackCount">미연동</p><button class="menu-btn" id="btnPackOpen" type="button" aria-describedby="shopAvailability"><span class="shop-button-art" aria-hidden="true"><span></span><span></span><span></span></span><span>팩 열기</span></button></div></aside>
+    </header>
+    <p id="shopAvailability">결제·보유 팩 미연동 — 현재 구매와 팩 열기를 이용할 수 없습니다.</p>
+    <div class="shop-products">
+      <article class="shop-product" data-packs="1">
+        <span class="shop-corner top-left" aria-hidden="true"></span><span class="shop-corner top-right" aria-hidden="true"></span><span class="shop-corner bottom-left" aria-hidden="true"></span><span class="shop-corner bottom-right" aria-hidden="true"></span>
+        <div class="shop-pack-art pack-1" role="img" aria-label="1팩 묶음"></div>
+        <h2>1팩</h2><p class="shop-card-count">카드 5장</p>
+        <div class="shop-offer" aria-hidden="true"></div>
+        <p class="shop-price">1,500원</p>
+        <button class="menu-btn shop-buy" type="button" aria-describedby="shopAvailability"><span class="shop-button-art" aria-hidden="true"><span></span><span></span><span></span></span><span>구매 안내</span></button>
+      </article>
+      <article class="shop-product" data-packs="5">
+        <span class="shop-corner top-left" aria-hidden="true"></span><span class="shop-corner top-right" aria-hidden="true"></span><span class="shop-corner bottom-left" aria-hidden="true"></span><span class="shop-corner bottom-right" aria-hidden="true"></span>
+        <div class="shop-pack-art pack-5" role="img" aria-label="5팩 묶음"></div>
+        <h2>5팩</h2><p class="shop-card-count">카드 25장</p>
+        <div class="shop-offer"><span>단품 합계 <s>7,500원</s></span><span class="shop-discount">약 27% 할인</span></div>
+        <p class="shop-price">5,500원</p>
+        <button class="menu-btn shop-buy" type="button" aria-describedby="shopAvailability"><span class="shop-button-art" aria-hidden="true"><span></span><span></span><span></span></span><span>구매 안내</span></button>
+      </article>
+      <article class="shop-product" data-packs="10">
+        <span class="shop-corner top-left" aria-hidden="true"></span><span class="shop-corner top-right" aria-hidden="true"></span><span class="shop-corner bottom-left" aria-hidden="true"></span><span class="shop-corner bottom-right" aria-hidden="true"></span>
+        <div class="shop-pack-art pack-10" role="img" aria-label="10팩 묶음"></div>
+        <h2>10팩</h2><p class="shop-card-count">카드 50장</p>
+        <div class="shop-offer"><span>단품 합계 <s>15,000원</s></span><span class="shop-discount">약 33% 할인</span></div>
+        <p class="shop-price">10,000원</p>
+        <button class="menu-btn shop-buy" type="button" aria-describedby="shopAvailability"><span class="shop-button-art" aria-hidden="true"><span></span><span></span><span></span></span><span>구매 안내</span></button>
+      </article>
     </div>
+    <dialog id="shopInfo" aria-labelledby="shopInfoTitle" aria-describedby="shopInfoText"><h2 id="shopInfoTitle">상점 안내</h2><p id="shopInfoText"></p><form method="dialog"><button class="menu-btn" id="btnShopInfoClose">확인</button></form></dialog>
   </section>
 
   <!-- v0.331 로비 (덱 목록 + 매칭) -->
@@ -327,5 +356,6 @@
 <script src="js/net.js?v=0.404"></script>
 <script src="js/lobby.js?v=0.404"></script>
 <script src="js/match-demo.js?v=audio-demo-1"></script>
+<script src="js/shop.js?v=shop-ui-1"></script>
 </body>
 </html>

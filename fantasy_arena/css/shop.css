@@ -1,0 +1,76 @@
+/* Source pixels provide pack art and corner ornaments; all prices/actions are DOM. */
+#shop.screen.active { display:block; padding:3cqh 8.7cqw 7cqh; overflow:auto !important; background:url('../assets/img/ui/element-portal-background.webp') center/cover no-repeat,#07121c; }
+#shop .shop-header { display:grid; grid-template-columns:1fr 2fr 1fr; align-items:start; gap:2cqw; min-height:19cqh; }
+#shop .shop-back { justify-self:start; min-width:100px; min-height:44px; margin:0; padding:8px 18px; font-size:20px; white-space:nowrap; }
+#shop .shop-heading { text-align:center; min-width:0; }
+#shop .shop-brand { display:block; width:min(100%,34cqh); height:10cqh; margin:0 auto; background-image:url('../assets/img/ui/approved-shop-source.png'); background-repeat:no-repeat; background-size:532.484076433121% 941%;background-position:49.92636229749632% 4.756242568370987%; mask-image:linear-gradient(to right,transparent,#000 4%,#000 96%,transparent); }
+#shop h1 { margin:2cqh 0 0; font-size:clamp(26px,5cqh,52px); color:#ffe6a4; letter-spacing:.09em; text-shadow:0 3px 4px #000; }
+#shop .shop-owned { display:flex; align-items:center; justify-content:center; gap:12px; border:1px solid #cca857; outline:1px solid #5c4523; outline-offset:3px; border-radius:5px; padding:10px; background:#08111ced; color:#ffe9ad; }
+#shop .shop-owned h2 { font-size:clamp(13px,1.9cqh,20px); margin:0; white-space:nowrap; }
+#shop .shop-owned p { margin:3px 0 5px; font-size:13px; color:#d8c9a3; }
+#shop .shop-owned .menu-btn { margin:0; min-width:0; min-height:44px; width:100%; padding:6px 12px; font-size:clamp(14px,2.2cqh,22px); white-space:nowrap; }
+#shop .owned-pack-art { flex:0 0 6cqh; height:9cqh; background-image:url('../assets/img/ui/approved-shop-source.png'); background-repeat:no-repeat; background-size:1038.5093167701862% 416.3716814159292%;background-position:19.060225016545335% 45.17482517482517%; }
+#shopAvailability { margin:0 0 1.6cqh; text-align:center; padding:6px 12px; border:1px solid #7c663b; background:#101924e8; border-radius:4px; color:#ffe4a0; font-size:clamp(12px,1.5cqh,16px); line-height:1.4; }
+#shop .shop-products { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.25cqw; }
+#shop .shop-product { position:relative; min-width:0; text-align:center; padding:1cqh 1.4cqw 2cqh; background:linear-gradient(#08111bf7,#050a11fa); border:2px solid #e0b85f; outline:1px solid #5b401f; outline-offset:3px; border-radius:5px; color:#ffedb5; box-shadow:0 6px 14px #0009,inset 0 0 0 4px #182128; }
+#shop .shop-pack-art { width:100%; height:32cqh; background-image:url('../assets/img/ui/approved-shop-source.png'); background-repeat:no-repeat; }
+#shop .pack-1 { background-size:400% 317.9054054054054%;background-position:12.838915470494419% 40.93023255813954%; }
+#shop .pack-5 { background-size:390.6542056074767% 317.9054054054054%;background-position:49.91961414790997% 40.93023255813954%; }
+#shop .pack-10 { background-size:390.6542056074767% 317.9054054054054%;background-position:87.45980707395499% 40.93023255813954%; }
+#shop .shop-product h2 { margin:1cqh 0 .4cqh; font-size:clamp(25px,4.5cqh,48px); line-height:1.1; text-shadow:0 2px 3px #000; }
+#shop .shop-card-count { margin:0; font-size:clamp(14px,2.6cqh,26px); color:#f4ead6; }
+#shop .shop-offer { display:flex; min-height:4cqh; gap:8px; align-items:center; justify-content:center; margin:1.5cqh 0 0; font-size:clamp(11px,1.6cqh,18px); color:#cdbf9e; flex-wrap:wrap; }
+#shop .shop-discount { padding:3px 8px; border:1px solid #78808b; background:#0c1722; color:#ffe5a5; border-radius:3px; }
+#shop .shop-price { margin:.5cqh 0 1.3cqh; font-size:clamp(24px,4.1cqh,43px); font-weight:700; line-height:1.2; color:#fff0bc; }
+#shop .shop-buy { width:100%; min-width:0; min-height:44px; margin:0; padding:1.2cqh 8px; background:linear-gradient(#1e3346,#08111e); border:2px solid #e3bc62; border-radius:10px; font-size:clamp(17px,3cqh,30px); box-shadow:inset 0 0 0 2px #203649; }
+#shop .menu-btn:focus-visible { outline:3px solid #fff0b2; outline-offset:4px; }
+#shop .menu-btn:active { transform:translateY(2px); filter:brightness(.85); }
+#shop .menu-btn { touch-action:manipulation; }
+#shop .shop-corner { position:absolute; width:30px; height:30px; pointer-events:none; background-image:url('../assets/img/ui/approved-shop-source.png'); background-repeat:no-repeat; }
+#shop .top-left { top:-3px;left:-3px;background-size:5225% 2940.625%;background-position:8.780487804878048% 26.62266226622662%; }
+#shop .top-right { top:-3px;right:-3px;background-size:5225% 2940.625%;background-position:34.268292682926834% 26.62266226622662%; }
+#shop .bottom-left { bottom:-3px;left:-3px;background-size:5225% 2940.625%;background-position:8.780487804878048% 91.0891089108911%; }
+#shop .bottom-right { bottom:-3px;right:-3px;background-size:5225% 2940.625%;background-position:34.268292682926834% 91.0891089108911%; }
+#shopInfo { max-width:min(520px,calc(100vw - 32px)); max-height:88dvh; overflow:auto; border:2px solid #d6b564; border-radius:12px; padding:24px; background:#111923; color:#fff0c7; box-shadow:0 12px 50px #000b; }
+#shopInfo::backdrop { background:#000b; }
+#shopInfo h2 { margin:0 0 16px; font-size:24px; }
+#shopInfoText { line-height:1.75; font-size:16px; white-space:normal; }
+#shopInfo form { text-align:right; }
+#btnShopInfoClose { min-height:44px; min-width:110px; margin:10px 0 0; }
+@container stage (max-height:500px) {
+ #shop.screen.active { padding:12px 18px 24px; }
+ #shop .shop-header { grid-template-columns:80px minmax(0,1fr) 150px; gap:12px; min-height:118px; }
+ #shop .shop-back { min-width:0; padding:8px 12px; font-size:16px; }
+ #shop .shop-brand { width:145px; max-width:100%; height:46px; }
+ #shop h1 { font-size:24px; margin:8px 0; }
+ #shop .shop-owned { gap:6px; padding:6px; }
+ #shop .owned-pack-art { display:none; }
+ #shop .shop-pack-art { height:150px; }
+ #shop .shop-product { padding:8px 8px 14px; }
+ #shop .shop-offer { min-height:40px; margin:10px 0 0; gap:4px; }
+ #shop .shop-card-count { font-size:15px; }
+ #shop .shop-price { margin:8px 0 12px; font-size:24px; }
+ #shop .shop-products { gap:14px; }
+}
+@container stage (max-width:480px) {
+ #shop .shop-header { grid-template-columns:1fr 1fr; min-height:0; }
+ #shop .shop-heading { grid-column:1 / -1; grid-row:2; }
+ #shop .shop-owned { grid-column:2;grid-row:1; }
+ #shop .shop-products { grid-template-columns:1fr; gap:20px; }
+ #shop .shop-pack-art { height:220px; }
+}
+@media (prefers-reduced-motion:reduce) { #shop .menu-btn { transition:none; } }
+
+/* Text-free source button strips retain the approved frame without baked labels. */
+#shop .shop-buy,#shop .shop-back,#shop .shop-owned .menu-btn { position:relative; isolation:isolate; background:transparent; border:0; box-shadow:none; }
+#shop .shop-button-art { position:absolute; inset:0; z-index:-1; pointer-events:none; display:grid; grid-template-columns:45fr 290fr 45fr; clip-path:polygon(5% 0,95% 0,98% 25%,98% 38%,100% 50%,98% 62%,98% 75%,95% 100%,5% 100%,2% 75%,2% 62%,0 50%,2% 38%,2% 25%); }
+#shop .shop-button-art > span { background-image:url('../assets/img/ui/approved-shop-source.png'); background-repeat:no-repeat; }
+#shop .shop-button-art > span:nth-child(1) { background-size:3715.5555555555557% 1147.5609756097563%;background-position:11.001843884449908% 87.77648428405122%; }
+#shop .shop-button-art > span:nth-child(2) { background-size:4777.142857142857% 1147.5609756097563%;background-position:14.660965180207697% 87.77648428405122%; }
+#shop .shop-button-art > span:nth-child(3) { background-size:3715.5555555555557% 1147.5609756097563%;background-position:31.591886908420406% 87.77648428405122%; }
+#shop .shop-brand { mask-image:linear-gradient(to right,transparent,#000 5%,#000 95%,transparent),linear-gradient(to bottom,transparent,#000 7%,#000 85%,transparent);mask-composite:intersect; }
+#shop .shop-pack-art { mask-image:linear-gradient(to bottom,#000 88%,transparent); }
+@media (hover:hover) { #shop .menu-btn:hover .shop-button-art { filter:brightness(1.2) drop-shadow(0 0 4px #d6b16470); } }
+#shop .shop-pack-art { height:auto; aspect-ratio:418 / 296; }
+#shop .pack-5,#shop .pack-10 { aspect-ratio:428 / 296; }
+#shop .shop-brand { height:auto; aspect-ratio:314 / 100; }

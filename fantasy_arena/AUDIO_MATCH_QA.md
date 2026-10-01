@@ -13,6 +13,6 @@ Validation:
 - Selected-deck fixture and reachable 44px matching/AI/Return controls at 568x320, 844x390 and 360x640. Private preview panel scrolls on small screens. The fixture exists only in the isolated test browser, not user data.
 - Existing title/menu browser regression suite passed. Independent reviewer confirmed audio routing and caught a small-screen overflow, which was corrected and rechecked.
 
-Limits: native Steam audio/output hardware and subjective listening were not tested. The 9.4-second GIF is a silent screen demonstration, not an audio recording. Real purchases, matching counts and multiplayer changes are outside this patch.
+Limits: native Steam audio/output hardware and subjective listening were not tested. The 8.4-second GIF is a silent screen demonstration, not an audio recording. Real purchases, matching counts and multiplayer changes are outside this patch.
 
 Likely integration conflicts: index.html, js/settings.js, js/bgm.js, js/sfx.js and one first-gesture line in js/game.js. cards-data.js and item/combat rules remain unchanged.
