@@ -417,15 +417,17 @@ function doAttackCore(p, attacker, target, auto, action) {
       };
       if (typeof CombatFx !== 'undefined') {
         // All jobs start together. Their shared, idempotent impact commits all HP changes once.
-        const results = await Promise.all(hits.map(hit => {
+        const entries = hits.map(hit => {
           const shield = hasOwnAbility(hit.vic, "보호") || (hit.vic.keywords || []).includes("shield");
           const blocked = hit.amount <= 0 || shield;
-          return CombatFx.play(blocked ? 'defend' : 'attack', {
+          return { kind: blocked ? 'defend' : 'attack', opts: {
             snapshot: hit.snapshot, el: hit.el, sourceEl: Vfx.elOf(attacker.uid),
             attempted: true, damage: blocked ? 0 : hit.amount, valid: action.valid,
             onImpact: () => { impactAll(); return hit.dealt; }
-          });
-        }));
+          }};
+        });
+        const results = CombatFx.playBatch ? await CombatFx.playBatch(entries)
+          : await Promise.all(entries.map(entry => CombatFx.play(entry.kind, entry.opts)));
         action.guard();
         const failed = results.find(result => result && result.error);
         if (failed) throw failed.error;

@@ -49,6 +49,56 @@ var CombatFx = (() => {
     }finally{prepared?.dispose();active.delete(job);}})();
     return Promise.race([work,cancelled]).finally(()=>active.delete(job));
   }
+  // Prepare every target before releasing a shared clock. One batch owns one sound.
+  function playBatch(entries = []) {
+    const token = generation, controller = new AbortController(), prepared = [];
+    let settled = false, playing = false, resolveStop;
+    const stopped = new Promise(resolve => { resolveStop = resolve; });
+    const valid = entry => token === generation && (!entry.opts?.valid || entry.opts.valid());
+    const dispose = pack => { try { pack?.dispose(); } catch (e) {} };
+    const finishEarly = cancelled => {
+      if (settled) return;
+      settled = true;
+      const results = entries.map(entry => {
+        let error = null;
+        if (!cancelled && !playing && entry.opts?.attempted !== false && valid(entry)) {
+          try { entry.opts?.onImpact?.(); } catch (e) { error = e; }
+        }
+        return { cancelled, error };
+      });
+      controller.abort(); prepared.forEach(dispose); prepared.length = 0;
+      resolveStop(results);
+    };
+    const job = { cancel: () => finishEarly(true), complete: () => finishEarly(false) };
+    active.add(job);
+    const work = (async () => {
+      const packs = await Promise.all(entries.map(async entry => {
+        if (entry.opts?.attempted === false || typeof CombatMedia === 'undefined') return null;
+        let pack;
+        try { pack = await CombatMedia.prepare(entry.kind, controller.signal); }
+        catch (e) { pack = { providers: {} }; }
+        if (settled || controller.signal.aborted) { dispose(pack); return null; }
+        prepared.push(pack); return pack;
+      }));
+      if (settled || entries.some(entry => !valid(entry))) return entries.map(() => ({cancelled:true}));
+      playing = true;
+      const startedAt = performance.now();
+      const canSound = (entry, index) => {
+        const providers = packs[index]?.providers || media;
+        const kind = entry.opts?.damage > 0 ? 'attack' : 'defend';
+        return entry.opts?.attempted !== false && entry.opts?.sound !== false && typeof providers[kind] === 'function';
+      };
+      const audible = entries.findIndex((entry, index) => canSound(entry, index) && entry.opts?.damage > 0);
+      const soundIndex = audible >= 0 ? audible : entries.findIndex(canSound);
+      return await Promise.all(entries.map((entry, index) => playPrepared(entry.kind, {
+        ...entry.opts, providers: packs[index]?.providers || media, startedAt, batch: true,
+        sound: index === soundIndex && entry.opts?.sound !== false
+      })));
+    })();
+    return Promise.race([work, stopped]).finally(() => {
+      active.delete(job); prepared.forEach(dispose); prepared.length = 0;
+    });
+  }
   function playPrepared(requestedKind, opts = {}) {
     const token = generation, providers = opts.providers || media;
     const isDeath = requestedKind === 'death';
@@ -89,7 +139,7 @@ var CombatFx = (() => {
     const shot = opts.snapshot || opts.snapshots?.[0] || snapshot(opts.uid, opts.el);
     let reduced = false;
     try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-    if (document.hidden || (!isDeath && !providers.attack && !providers.defend)) {
+    if (document.hidden || (!opts.batch && !isDeath && !providers.attack && !providers.defend)) {
       impact(); finish(false, null, !isDeath); return result;
     }
     try {
@@ -111,7 +161,7 @@ var CombatFx = (() => {
         visualFailed = true; ctx = null;
         if (canvas) canvas.remove(); if (mask) mask.remove();
       }
-      const started = performance.now(), r = shot && shot.rect;
+      const started = opts.startedAt ?? performance.now(), r = shot && shot.rect;
       let selectedKind = null;
       if (!isDeath && ctx) opts.sourceEl?.classList.add('fx-lunge');
       function draw(now) {
@@ -162,7 +212,7 @@ var CombatFx = (() => {
   if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => {
     if (document.hidden) for (const job of [...active]) job.complete();
   });
-  return { play, clear, snapshot, setMedia, mediaReady, contract, pending: () => active.size,
+  return { play, playBatch, clear, snapshot, setMedia, mediaReady, contract, pending: () => active.size,
     generation: () => generation, DURATION,
     onCancel(fn) { cancellations.add(fn); return () => cancellations.delete(fn); } };
 })();
