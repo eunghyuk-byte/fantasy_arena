@@ -20,7 +20,7 @@
       const current = this.sample(now);
       this.angle = current.angle; this.velocity = reduced ? 0 : current.velocity;
       this.target = phase === 'searching' && !reduced ? 42 : 0;
-      this.duration = reduced ? 0 : phase === 'searching' ? 1600 : phase === 'matched' ? 480 : 360;
+      this.duration = reduced ? 0 : phase === 'searching' ? 1600 : phase === 'preview-stop' ? 1800 : phase === 'matched' ? 480 : 360;
       this.since = now; this.phase = phase;
     }
     freeze(now) {

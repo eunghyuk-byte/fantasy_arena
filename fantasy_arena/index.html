@@ -98,12 +98,14 @@
         </div>
       </div>
       <div class="lobby-panel lobby-right">
-        <div class="sanctuary-seal" aria-hidden="true"><div id="lobbySealRotor" class="seal-rotor"><div id="lobbyElements" class="seal-elements"></div></div><div class="seal-halo"></div></div>
+        <div class="sanctuary-seal" aria-hidden="true"><canvas id="lobbySealCanvas" class="seal-canvas"></canvas><div id="lobbySealRotor" class="seal-rotor"><div id="lobbyElements" class="seal-elements"></div></div><div class="seal-halo"></div></div>
         <div class="lobby-sel" id="lobbySel"></div>
       <div id="matchDemo" hidden role="group" aria-live="off" aria-label="가상 인원 디자인 미리보기">
         <span>현재 약 <b id="matchDemoCount">—</b>명이 매칭을 돌리고 있습니다<span id="matchDemoDots" aria-hidden="true">.</span></span>
       </div>
-      <button class="menu-btn lobby-match" id="btnMatch">매칭 시작</button>
+      <div class="slab-contact" aria-hidden="true"></div>
+        <button class="menu-btn lobby-match" id="btnMatch">매칭 시작</button>
+      <div class="seal-preview-controls"><span id="sealPreviewStatus" role="status" hidden></span></div>
         <div class="sanctuary-actions">
         <button class="menu-btn ghost" id="btnLobbyAi">AI 연습</button>
         <button class="menu-btn ghost" id="btnLobbyEdit">덱 편집</button>
@@ -360,6 +362,7 @@
 <script src="js/title-menu.js?v=0.4048"></script>
 <script src="js/net.js?v=0.4048"></script>
 <script src="js/lobby-motion.js?v=0.4048"></script>
+<script src="js/lobby-seal-webgl.js?v=seal-preview-1"></script>
 <script src="js/lobby.js?v=0.4048"></script>
 <script src="js/match-demo.js?v=0.4048"></script>
 <script src="js/shop.js?v=0.4048"></script>

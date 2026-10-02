@@ -40,7 +40,7 @@
   }
   function profileHtml(statusHtml) {
     const account = window.FSNet && FSNet.account();
-    return `<div class="profile-identity"><div class="profile-name">${esc(account && account.displayName || 'PLAYER')}</div>${rankTrigger()}</div><div class="profile-status">${statusHtml}</div>`;
+    return `<div class="profile-identity"><div class="profile-name">${esc(account && account.displayName || 'PLAYER')}</div>${rankTrigger()}</div><button type="button" class="profile-settings" aria-label="설정" onclick="document.getElementById('settingsGearBtn').click()">⚙</button><div class="profile-status">${statusHtml}</div>`;
   }
   function rankTrigger() {
     const p = LobbyMotion.rankProfile(window.FSNet && FSNet.account());
@@ -172,8 +172,9 @@
       <div class="lobby-deck-plinth"><div class="lobby-sel-name">${esc(d.name)}</div>
       <div class="lobby-sel-meta">${esc(tribeOf(d.tribe).name)} · ${d.cards.length}장${d.local ? " · 이 기기" : ""}</div></div>`
       : `<div class="lobby-sel-empty">덱을 고르거나<br>「새 덱」으로 만드세요.</div>`;
-    $("btnMatch").disabled = !(d && L.online && roomSession) || L.connectionLost || matchBusy();
-    $("btnMatch").title = !roomSession ? '온라인 방 연결 기능이 아직 연결되지 않았습니다.' : L.online ? "" : "매칭은 서버 로그인 후 가능합니다.";
+    if(previewActive&&previewKey!==`${L.online}:${acc?.id||''}:${d?.id||''}`)stopPreview(true);
+    $("btnMatch").disabled = !d || matchBusy();
+    $("btnMatch").title = !roomSession || !L.online || L.connectionLost || navigator.onLine===false ? '서버 미연결: 원판 연출만 실행합니다. 다시 누르면 정지합니다.' : '';
     $("btnLobbyAi").disabled = !d || matchBusy();
     $("btnLobbyEdit").disabled = !d || matchBusy();
     $("btnLobbyRename").disabled = !d || matchBusy();
@@ -198,6 +199,7 @@
     open();
   }
   function open() {
+    stopPreview(true);
     if (!roomSession || ['matched','error'].includes(L.matchState)) setMatchState('idle');
     hideScreens();
     $("lobby").classList.add("active");
@@ -271,6 +273,7 @@
   }
   function startMatch() {
     const d = selected();
+    if(d&&!L.roomPending&&(!roomSession||!L.online||L.connectionLost||navigator.onLine===false)){togglePreview();return;}
     if (!d || !L.online || !roomSession || L.connectionLost || navigator.onLine === false || matchBusy()) return;
     $("lobbyWaitDeck").textContent = `${d.name} · ${tribeOf(d.tribe).name}`;
     // Only account room callbacks advance state. There is no simulated queue.
@@ -297,7 +300,7 @@
   }
   function bindRoomSession(session) {
     if (!session || typeof session.create !== 'function' || typeof session.cancel !== 'function') throw new TypeError('Expected an account createRoomSession instance');
-    roomSession = session; render();
+    stopPreview(true);roomSession = session; render();
   }
   function createRoomCallbacks(callbacks = {}) {
     return LobbyMotion.roomCallbacks(setMatchState, {
@@ -396,11 +399,47 @@
    * can call Lobby.setMatchState('matched'|'error'|'disconnected'). */
   const seal = new LobbyMotion.SealMotion();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let sealRenderer=null;
+  try { sealRenderer=LobbySeal3D.create($('lobbySealCanvas'),'assets/img/lobby/seal.png'); }
+  catch(e) { $('lobbySealCanvas').dataset.renderer='fallback'; }
+  let referenceLabelReady=false;
+  const syncReferenceLabel=()=>{$('btnMatch').toggleAttribute('data-reference-label',referenceLabelReady&&$('btnMatch').textContent.trim()==='매칭 시작');};
+  const matchLabelObserver=new MutationObserver(syncReferenceLabel);
+  matchLabelObserver.observe($('btnMatch'),{childList:true,characterData:true,subtree:true});
+  const referenceLabelImage=new Image();referenceLabelImage.onload=()=>{referenceLabelReady=true;syncReferenceLabel();};referenceLabelImage.src='assets/img/lobby/label-match-reference.svg';
+  const referenceTitleImage=new Image();referenceTitleImage.onload=()=>{$('lobby').setAttribute('data-reference-title','');};referenceTitleImage.src='assets/img/lobby/label-lobby-reference.svg';
+  const slabSource=new Image();
+  slabSource.onload=()=>{
+    const texture=document.createElement('canvas');texture.width=512;texture.height=128;
+    const ctx=texture.getContext('2d');
+    for(let i=0;i<8;i++){ctx.save();ctx.translate(i*64+(i%2?64:0),0);ctx.scale(i%2?-1:1,1);ctx.drawImage(slabSource,1195,679,45,72,0,0,64,128);ctx.restore();}
+    $('lobby').style.setProperty('--slab-stone',`url("${texture.toDataURL()}")`);
+  };
+  slabSource.src='assets/img/lobby/approved-lobby-source.png';
+  let previewActive=false,previewStopping=false,previewKey='';
+  function previewLabel(text){$('sealPreviewStatus').textContent=text;$('sealPreviewStatus').hidden=!text;}
+  function stopPreview(immediate=false){
+    if(!previewActive)return;
+    previewStopping=true;$('btnMatch').textContent='매칭 시작';
+    seal.transition('preview-stop',performance.now(),reducedMotion.matches);
+    previewLabel('감속 중 · 매칭 아님');
+    if(immediate){previewActive=previewStopping=false;seal.freeze(performance.now());previewLabel('');}
+  }
+  function togglePreview(){
+    if(matchBusy())return;
+    if(previewActive&&!previewStopping){stopPreview();return;}
+    if(reducedMotion.matches){previewLabel('동작 줄이기 설정 · 정지 조명 미리보기');sealRenderer?.render(seal.sample(performance.now()).angle,.65);return;}
+    previewActive=true;previewStopping=false;previewKey=`${L.online}:${window.FSNet?.account()?.id||''}:${selected()?.id||''}`;seal.transition('searching',performance.now());
+    $('btnMatch').textContent='회전 정지';previewLabel('서버 미연결 · 원판 연출만 실행 (매칭 아님)');
+    if(sealFrame!==null)cancelAnimationFrame(sealFrame);drawSeal(performance.now());
+  }
   let sealFrame = null;
   function drawSeal(now) {
     sealFrame = null;
     const s = seal.sample(now);
     $('lobbySealRotor').style.transform = `rotate(${s.angle}deg)`;
+    sealRenderer?.render(s.angle,Math.min(1,s.velocity/42));
+    if(previewStopping&&s.velocity===0){previewActive=previewStopping=false;previewLabel('');}
     if (!document.hidden && $('lobby').classList.contains('active') && !reducedMotion.matches && (s.velocity !== 0 || seal.target !== 0)) sealFrame = requestAnimationFrame(drawSeal);
   }
   function setMatchState(state) {
@@ -412,6 +451,7 @@
     if (['searching','cancelling'].includes(state)) L.roomPending = true;
     if (['idle','matched','error'].includes(state)) L.cancelPending = L.roomPending = false;
     if (state === L.matchState) return;
+    if(previewActive)stopPreview(true);
     L.matchState = state;
     $('lobby').dataset.matchState = state;
     seal.transition(state, performance.now(), reducedMotion.matches);
@@ -431,6 +471,7 @@
     }
   }
   function suspendSeal() {
+    stopPreview(true);
     if (sealFrame !== null) cancelAnimationFrame(sealFrame);
     sealFrame = null;
     seal.freeze(performance.now());
@@ -527,6 +568,6 @@
   // v0.334: 덱 구성은 로비에서만 들어옴 → 「뒤로」는 로비
   if (back) back.onclick = () => open();
 
-  window.Lobby = { enter, open, refresh, saveDraftToServer, saveDraftLocal, prompt, setMatchState, bindRoomSession, createRoomCallbacks, _state: L };
+  window.Lobby = { enter, open, refresh, saveDraftToServer, saveDraftLocal, prompt, setMatchState, bindRoomSession, createRoomCallbacks, _state: L, sealRendererStats:()=>sealRenderer?.stats || null };
   if (window.FSNet) FSNet.probe();
 })();

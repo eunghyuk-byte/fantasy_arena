@@ -32,6 +32,12 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
     backgroundLoads.push({viewport:label,...result,payloadBytes:fs.statSync(path.join(root,'assets/img/lobby',expected)).size});
   }
   async function verifyOrbit(label) {
+    const renderer=await page.evaluate(()=>Lobby.sealRendererStats());
+    if(renderer?.textureReady) {
+      assert.equal(renderer.medallions,6,label+' six integrated relief medallions');
+      assert.equal(await page.locator('.lobby-sel').evaluate(e=>getComputedStyle(e).zIndex),'1','fixed information overlays rotating relief');
+      clearances.push({viewport:label,integratedMedallions:6,occlusion:'Lower relief may pass behind fixed plinth without snapping angle'});return;
+    }
     const clearance=await page.evaluate(()=>{
       const rotor=document.getElementById('lobbySealRotor'),saved=rotor.style.transform;
       const panel=document.querySelector('.lobby-deck-plinth').getBoundingClientRect();let min=Infinity;
@@ -41,7 +47,10 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
       }
       rotor.style.transform=saved;return min;
     });
-    assert.ok(clearance>0,label+' complete 360-degree badge envelope clears deck panel: '+clearance);
+    if (label==='1920x1080'||label==='3840x2160') {
+      assert.ok(clearance>-80,label+' only lower medallion edge passes behind fixed plinth: '+clearance);
+      assert.equal(await page.locator('.lobby-sel').evaluate(e=>getComputedStyle(e).zIndex),'1','fixed information is painted in front of rotating medallions');
+    } else assert.ok(clearance>0,label+' touch layout complete orbit clears deck panel: '+clearance);
     clearances.push({viewport:label,angles:360,minClearancePx:clearance});
   }
   page.on('pageerror', e=>errors.push(e.message));
@@ -56,15 +65,29 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
     const account = {id:17,displayName:'PLAYER',rank:{tier:'diamond',div:2,progress:35,next:{tier:'diamond',div:1}}};
     window.__qaAccount=account;
     FSNet.state.probed=true; FSNet.isLoggedIn=()=>true; FSNet.isOnline=()=>true; FSNet.account=()=>account; FSNet.listDecks=async()=>({ok:true,decks});
-    FSNet.createRoom=async()=>{window.__qaRoom={code:'QA000001',status:'waiting',matchId:null};return {ok:true,room:window.__qaRoom};};
+    FSNet.createRoom=async()=>{window.__qaCreateCount=(window.__qaCreateCount||0)+1;window.__qaRoom={code:'QA000001',status:'waiting',matchId:null};return {ok:true,room:window.__qaRoom};};
     FSNet.getRoom=async()=>window.__qaRoomError || {ok:true,room:window.__qaRoom};
     FSNet.cancelRoom=async()=>{if(window.__qaCancelError)return window.__qaCancelError;if(window.__qaHoldCancel)await new Promise(resolve=>{window.__qaCancelRelease=resolve;});window.__qaRoom.status='cancelled';return {ok:true,room:window.__qaRoom};};
     Lobby.open();await Lobby.refresh();window.__qaUnboundDisabled=document.getElementById('btnMatch').disabled;
+    document.getElementById('btnMatch').click();await new Promise(r=>setTimeout(r,300));
+    window.__qaPreviewBeforeBinding={state:Lobby._state.matchState,room:window.__qaRoom,angle:document.getElementById('lobbySealRotor').style.transform};
+    account.id=18;await Lobby.refresh();window.__qaAccountChangeStopsPreview=document.getElementById('sealPreviewStatus').hidden;account.id=17;await Lobby.refresh();
+    document.getElementById('btnMatch').click();document.getElementById('btnMatch').click();document.getElementById('btnMatch').click();
+    Lobby.setMatchState('error');window.__qaErrorStopsPreview=document.getElementById('sealPreviewStatus').hidden;Lobby.setMatchState('idle');
+    document.getElementById('btnMatch').click();
     Lobby.bindRoomSession(FSRules.createRoomSession({net:FSNet,...Lobby.createRoomCallbacks({onMatch:id=>{window.__qaStarted=id;}})}));
+    window.__qaBindingStopsPreview=document.getElementById('sealPreviewStatus').hidden;
     Lobby.open(); await Lobby.refresh();
   });
   await page.waitForTimeout(700);
-  assert.equal(await page.evaluate(()=>window.__qaUnboundDisabled),true,'main without a room implementation cannot start a fake match');
+  assert.equal(await page.evaluate(()=>window.__qaUnboundDisabled),false,'unbound primary button allows local visual preview');
+  assert.equal(await page.evaluate(()=>window.__qaPreviewBeforeBinding.state),'idle');
+  assert.equal(await page.evaluate(()=>window.__qaPreviewBeforeBinding.room),undefined,'preview makes no room request');
+  assert.equal(await page.evaluate(()=>window.__qaBindingStopsPreview),true,'real session binding stops visual preview');
+  assert.equal(await page.evaluate(()=>window.__qaAccountChangeStopsPreview),true,'account/login identity change stops visual preview');
+  assert.equal(await page.evaluate(()=>window.__qaErrorStopsPreview),true,'error stops repeated local preview clicks');
+  const gridRect=await page.locator('#lobbyDecks').boundingBox(),sixthRect=await page.locator('.lobby-deck[data-id]').nth(5).boundingBox();
+  assert.ok(sixthRect.y+sixthRect.height<=gridRect.y+gridRect.height,'six-deck reference third row is fully visible, including bottom frame');
   await page.screenshot({path:path.join(out,'lobby-desktop.png')});
   const comparisonBg=path.resolve(root,'../../references/parent-background.png');
   const comparisonSeal=path.resolve(root,'../../references/parent-seal.png');
@@ -137,12 +160,18 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   assert.equal(await page.locator('#lobbyWait').isVisible(),false);
   await page.evaluate(()=>window.dispatchEvent(new Event('offline')));
   assert.equal(await page.locator('#lobbyWait').isVisible(),false);
-  assert.equal(await page.locator('#btnMatch').isDisabled(),true,'disconnect blocks another match until verified reconnect');
-  await page.evaluate(()=>document.getElementById('btnMatch').click());
+  assert.equal(await page.locator('#btnMatch').isDisabled(),false,'disconnected without pending room allows only visual preview');
+  const requestsBeforePreview=await page.evaluate(()=>window.__qaCreateCount);
+  await page.click('#btnMatch');await page.waitForTimeout(300);
+  assert.equal(await page.locator('#sealPreviewStatus').isVisible(),true);
+  assert.equal(await page.evaluate(()=>window.__qaCreateCount),requestsBeforePreview,'offline preview never creates a room');
+  assert.equal(await page.evaluate(()=>Lobby._state.roomPending),false);
   assert.equal(await page.locator('#lobbyWait').isVisible(),false);
+  await page.click('#btnMatch');await page.waitForTimeout(2000);
+  assert.equal(await page.locator('#sealPreviewStatus').isVisible(),false,'primary button stops preview with inertia');
   await page.evaluate(()=>Lobby.refresh());
   await page.evaluate(()=>window.dispatchEvent(new Event('offline')));
-  assert.equal(await page.locator('#btnMatch').isDisabled(),true,'a second disconnect also refreshes the disabled UI');
+  assert.equal(await page.locator('#btnMatch').isDisabled(),false,'second disconnect still permits visual preview when no room is pending');
   await page.evaluate(()=>Lobby.refresh());
   await page.evaluate(()=>Lobby.setMatchState('idle'));
   await page.emulateMedia({reducedMotion:'reduce'});
@@ -154,11 +183,14 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   await page.setViewportSize({width:3840,height:2160});
   // Test actual 4K layout independently of the game's existing max resolution preset.
   await page.evaluate(()=>{const a=document.getElementById('app');a.style.width='3840px';a.style.height='2160px';});
-  await page.waitForTimeout(300);await verifyOrbit('3840x2160');await verifyBackground(page,'3840x2160','sanctuary-4k.webp',3840,2160); await page.screenshot({path:path.join(out,'lobby-4k.png')});
+  await page.waitForTimeout(300);await verifyOrbit('3840x2160');await verifyBackground(page,'3840x2160','sanctuary-reference-scene.png',1672,941); await page.screenshot({path:path.join(out,'lobby-4k.png')});
   await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(300);
   await verifyOrbit('390x844');
-  await verifyBackground(page,'390x844','sanctuary-mobile.webp',1920,1080);
+  await verifyBackground(page,'390x844','sanctuary-reference-scene.png',1672,941);
   const mobileCTA=await page.locator('#btnMatch').boundingBox();assert.ok(mobileCTA.y>=0&&mobileCTA.y+mobileCTA.height<=844,'portrait CTA visible without scrolling');
+  const mobileLabel=await page.locator('#btnMatch').evaluate(el=>{const s=getComputedStyle(el,'::after');return{content:s.content,position:s.position,width:parseFloat(s.width),height:parseFloat(s.height),image:s.backgroundImage};});
+  assert.equal(mobileLabel.content,'""','mobile source label generates a visible pseudo element');
+  assert.equal(mobileLabel.position,'absolute');assert.ok(mobileLabel.width>100&&mobileLabel.height>20);assert.match(mobileLabel.image,/label-match-reference/);
   await page.screenshot({path:path.join(out,'lobby-mobile.png'),fullPage:true});
   await page.locator('#lobbyUser .rank-trigger').tap();
   assert.equal(await page.locator('#lobbyRankPopover').isVisible(),true);
@@ -192,7 +224,7 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
     Lobby.open();await Lobby.refresh();
   });
   assert.equal(await page.locator('.lobby-deck[data-id]').count(),9);
-  assert.equal(await page.locator('#btnMatch').isDisabled(),true,'offline matching disabled');
+  assert.equal(await page.locator('#btnMatch').isDisabled(),false,'offline selected deck can preview seal without real match');
   assert.equal(await page.locator('#lobbyUser .rank-trigger').count(),0,'no fabricated rank for offline profile');
   const ninth=page.locator('.lobby-deck[data-id="local:local-qa-8"]');
   await ninth.scrollIntoViewIfNeeded();
@@ -222,10 +254,29 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   const coldMobile=await context.newPage(),coldRequests=[];
   await coldMobile.setViewportSize({width:390,height:844});coldMobile.on('request',r=>coldRequests.push(r.url()));
   await coldMobile.goto('https://sanctuary.test');await coldMobile.waitForFunction(()=>!!window.Lobby);
-  await coldMobile.evaluate(()=>Lobby.open());await verifyBackground(coldMobile,'390 cold navigation','sanctuary-mobile.webp',1920,1080);
+  await coldMobile.evaluate(()=>Lobby.open());await verifyBackground(coldMobile,'390 cold navigation','sanctuary-reference-scene.png',1672,941);
   assert.ok(!coldRequests.some(u=>u.endsWith('sanctuary-4k.webp')),'mobile cold navigation avoids desktop4K payload');
   assert.ok(!coldRequests.some(u=>u.endsWith('sanctuary-4k-original.png')),'archive source never downloaded by runtime');
   await coldMobile.close();
+  const fallback=await context.newPage();
+  await fallback.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(kind,...args){return /webgl/.test(kind)?null:original.call(this,kind,...args);};});
+  await fallback.route(/label-(?:match|lobby)-reference\.svg/,r=>r.abort());
+  await fallback.goto('https://sanctuary.test');await fallback.waitForFunction(()=>!!window.Lobby);
+  await fallback.evaluate(async()=>{FSNet.isOnline=()=>false;FSNet.isLoggedIn=()=>false;Lobby.open();await Lobby.refresh();});
+  assert.equal(await fallback.evaluate(()=>Lobby.sealRendererStats()),null,'WebGL-free path exercised');
+  assert.equal(await fallback.locator('#btnMatch').getAttribute('data-reference-label'),null,'missing optional vector label leaves real text visible');
+  assert.notEqual(await fallback.locator('#btnMatch').evaluate(e=>getComputedStyle(e).color),'rgba(0, 0, 0, 0)');
+  assert.ok(await fallback.locator('#lobbySealRotor').evaluate(e=>getComputedStyle(e).backgroundImage.includes('reference-seal-fallback.png')),'fallback uses same engraved relief render');
+  const fallbackBefore=await fallback.locator('#lobbySealRotor').evaluate(e=>e.style.transform);
+  await fallback.click('#btnMatch');await fallback.waitForTimeout(400);
+  assert.notEqual(await fallback.locator('#lobbySealRotor').evaluate(e=>e.style.transform),fallbackBefore);
+  await fallback.click('#btnMatch');await fallback.waitForTimeout(2000);
+  const fallbackStopped=await fallback.locator('#lobbySealRotor').evaluate(e=>e.style.transform);await fallback.waitForTimeout(200);
+  assert.equal(await fallback.locator('#lobbySealRotor').evaluate(e=>e.style.transform),fallbackStopped);
+  await fallback.screenshot({path:path.join(out,'lobby-no-webgl.png')});await fallback.close();
+  const scenePixels=await page.evaluate(async()=>{const urls=['assets/img/lobby/approved-lobby-source.png','assets/img/lobby/sanctuary-reference-scene.png'],results=[];for(const url of urls){const img=new Image();img.src=url;await img.decode();const c=document.createElement('canvas');c.width=1672;c.height=941;const x=c.getContext('2d');x.drawImage(img,0,0);results.push([[610,390],[1540,500],[140,910],[1460,735],[730,794]].map(([a,b])=>Array.from(x.getImageData(a,b,1,1).data)));}return results;});
+  assert.deepEqual(scenePixels[0],scenePixels[1],'visible columns and altar/floor landmarks retain original pixels');
+
   fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({errors,transforms,center,button,pop,clearances,backgroundLoads,coldMobileAvoids4K:true,checks:'PASS'},null,2));
   await context.close(); await browser.close();
   console.log('PASS: sanctuary browser, motion, rank, 4K and mobile checks. Evidence: '+out);
