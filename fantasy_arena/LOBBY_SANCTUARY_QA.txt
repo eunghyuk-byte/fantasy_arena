@@ -1,3 +1,14 @@
+v0.4049 RELEASE CANDIDATE
+Approved implementation:2c64137e185739d2cc25d885b2c4637923ad8ffd.
+Integrated from current public main1cf5a09, preserving v0.4047 card changes.
+Source scene1672x940, independently rendered source-derived scene/frames/text,
+WebGL relief, fixed portrait and controls. Hidden surfaces are reconstructed.
+Final review confirmed source detail and portrait alignment. Actual room/rank
+backend remains separate; unbound match action is an explicitly labelled local
+rotation preview. No account-branch files are included.
+Release verification records are kept with the task's deployment evidence.
+The older notes below are historical and do not describe current visual assets.
+
 FantasySoul elemental sanctuary lobby — implementation and handoff
 Date: 2026-10-02
 Initial base: 5f335c06aee93dd1fee63bb0a885a0237681998e (main v0.4046)

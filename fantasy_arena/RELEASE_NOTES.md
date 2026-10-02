@@ -1,3 +1,10 @@
+## v0.4049
+- Publish the reviewed reference-faithful sanctuary lobby: original scene layers, engraved 3D seal, translucent deck panel, refined deck frames and source-aligned controls.
+- Preserve visible source stone detail with precise texture coordinates and full display-resolution rendering. Keep the central portrait, labels and architectural brackets fixed during inertial seal rotation.
+- Preserve existing deck CRUD, scrolling, rank display and real room-session callbacks. With no bound matchmaking service, the main button explicitly previews local seal rotation and can decelerate to a stable stop; it never fabricates match success.
+- Keep logout in settings, show local-device labels only for local decks, and provide reduced-motion and same-art WebGL fallback behavior. Existing card rules/data and unfinished account-branch features are unchanged.
+- The approved source is1672x940; restored hidden surfaces and 4K display rendering are not a claim of a native4K source image.
+
 ## v0.4048
 - Launch the approved elemental sanctuary lobby with an optimized3840x2160 background and smaller mobile delivery, original six element icons, independent rotating seal, fixed selected-deck panel and touch-accessible actions.
 - Preserve saved-deck CRUD and scrolling, public population simulation, and all v0.4047 card changes. Respect reduced motion and server-confirmed room lifecycle callbacks; no simulated match success.
