@@ -1,3 +1,9 @@
+## v0.4045 public visibility update
+
+The user approved showing the existing simulated count on public pages. The hostname/query gate is removed; no authentication or other feature gate changes. The 10–100 random count remains a visual simulation, not a real player population measurement. Count/dot timing, reduced motion and lifecycle cleanup are unchanged. The private-preview restrictions below describe the earlier release only.
+
+Validation: 610/610 client/server regression tests passed. Real Chrome checks passed for default visibility, count changes, all three dot phases, stable button position, lobby-exit cleanup, reduced motion, 1600x900 / 844x390 / 568x320 / 360x640 layouts, keyboard, touch and unchanged independent audio controls.
+
 # Independent sound channels and private matching preview
 
 Base: main v0.404 `ee86c0017345e800ee70ff3ed25661b9a9da9cd4`.

@@ -1,9 +1,7 @@
 (() => {
-  // Local visual demo only: never a server population or queue measurement.
+  // Visual simulated count: never a server population or queue measurement.
   const panel=document.getElementById('matchDemo');
-  const local=['localhost','127.0.0.1','[::1]'].includes(window.location.hostname);
-  const enabled=local && new URLSearchParams(window.location.search).get('match-preview')==='1';
-  if (!panel || !enabled) return;
+  if (!panel) return;
   panel.hidden=false;
   const lobby=document.getElementById('lobby');
   const count=document.getElementById('matchDemoCount'), dots=document.getElementById('matchDemoDots');

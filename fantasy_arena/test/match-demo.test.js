@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
-function fixture({hostname='127.0.0.1',search='?match-preview=1'}={}){
+function fixture({hostname='127.0.0.1',search=''}={}){
   let active=false, observer, id=0;
   const timers=new Map(), events={}, media={matches:false,addEventListener(t,fn){this.change=fn;}};
   const nodes={lobby:{classList:{contains:()=>active}},matchDemo:{hidden:true},matchDemoCount:{textContent:''},matchDemoDots:{textContent:''}};
@@ -16,9 +16,9 @@ function fixture({hostname='127.0.0.1',search='?match-preview=1'}={}){
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../js/match-demo.js'),'utf8'),ctx);
   return {nodes,timers,doc,events,media,math,activate(value){active=value;if(observer)observer();},tick(ms){for(const t of [...timers.values()])if(t.ms===ms)t.fn();}};
 }
-test('random population is off by default and cannot be enabled on a public hostname',()=>{
-  for(const options of [{search:''},{hostname:'eunghyuk-byte.github.io'},{hostname:'evil-localhost.example'}]){
-    const f=fixture(options);f.activate(true);assert.equal(f.nodes.matchDemo.hidden,true);assert.equal(f.timers.size,0);assert.equal(f.nodes.matchDemoCount.textContent,'');
+test('visual count is enabled on public and local hosts without a preview query',()=>{
+  for(const options of [{search:''},{hostname:'eunghyuk-byte.github.io',search:''},{hostname:'eunghyuk-byte.github.io',search:'?match-preview=1'}]){
+    const f=fixture(options);f.activate(true);assert.equal(f.nodes.matchDemo.hidden,false);assert.equal(f.timers.size,2);assert.equal(f.nodes.matchDemoCount.textContent,'10');
   }
 });
 test('demo is bounded to 10..100 and only updates while lobby is visible',()=>{

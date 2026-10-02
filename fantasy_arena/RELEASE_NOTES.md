@@ -1,3 +1,7 @@
+## v0.4045
+- Show the existing simulated matching count on public and local lobby pages without a preview query. Keep the 10–100 range, 4-second count update, 700ms dot animation, reduced-motion behavior and timer cleanup. This is not real server population.
+- No card mechanics, authentication or multiplayer service changes.
+
 ## v0.4044
 - Synchronize current effect summaries across detail/hover/peek, correct stale flavor lore and ability rules help, and keep long hover explanations scrollable with keyboard focus/Escape support.
 - Center card descriptions within each frame type while preserving approved single-line unit/item and two-line spell positions.
