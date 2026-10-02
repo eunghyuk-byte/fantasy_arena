@@ -410,3 +410,10 @@ body:has(#lobby.active) > #settingsGearBtn { visibility:hidden; }
 
 #lobby .sanctuary-foreground { display:none; }
 @media (min-width:1001px) { #lobby .sanctuary-foreground { display:block;position:absolute;inset:0;z-index:1;pointer-events:none;background:url('../assets/img/lobby/fixed-pillar-brackets.png') center/100% 100% no-repeat; } }
+
+/* Measured source portrait center: (1065,273) at 1672x941. The official
+   selected-deck bitmap remains independent; enlarge its visible content only. */
+@media (min-width:1001px) {
+ #lobby .lobby-sel-icon { top:6cqh; }
+ #lobby .lobby-sel-icon img { width:104%;height:104%;max-width:none;flex:none; }
+}

@@ -405,7 +405,7 @@
   const seal = new LobbyMotion.SealMotion();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let sealRenderer=null;
-  try { sealRenderer=LobbySeal3D.create($('lobbySealCanvas'),'assets/img/lobby/seal.png'); }
+  try { sealRenderer=LobbySeal3D.create($('lobbySealCanvas')); }
   catch(e) { $('lobbySealCanvas').dataset.renderer='fallback'; }
   let referenceLabelReady=false;
   const syncReferenceLabel=()=>{$('btnMatch').toggleAttribute('data-reference-label',referenceLabelReady&&$('btnMatch').textContent.trim()==='매칭 시작');};

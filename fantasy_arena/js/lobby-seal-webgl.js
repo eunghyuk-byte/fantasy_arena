@@ -40,7 +40,7 @@
     }
     return {vertices:new Float32Array(data),triangles:data.length/21,zMin:-.19,zMax:.124};
   }
-  function create(canvas,textureURL){
+  function create(canvas){
     const gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false,powerPreference:'low-power'});
     if(!gl)return null;
     const vertex=`attribute vec3 position;attribute vec3 normal;attribute float metal;
@@ -49,16 +49,43 @@
       float t=.105;mat3 tilt=mat3(1.,0.,0.,0.,cos(t),sin(t),0.,-sin(t),cos(t));
       vec3 p=tilt*spin*position;P=p;N=tilt*spin*normal;UV=position.xy*.5+.5;M=metal;
       gl_Position=vec4(p.x*.96,(p.y-.006)*.96,-p.z*.5,1.);}`;
-    const fragment=`precision mediump float;varying vec3 P;varying vec3 N;varying vec2 UV;varying float M;
-      uniform sampler2D surface;uniform sampler2D reference;uniform float energy;
-      float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+    const fragmentPrecision=gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER,gl.HIGH_FLOAT).precision>0?'highp':'mediump';
+    const fragment=`precision ${fragmentPrecision} float;varying vec3 P;varying vec3 N;varying vec2 UV;varying float M;
+      uniform sampler2D reference;uniform vec2 sourceSize;uniform float energy;uniform float detailFilter;
+      // Catmull-Rom reconstruction retains native engraving edges under fractional
+      // UV rotation/scale. Nine bilinear taps; low-resolution displays use one.
+      vec3 sourceSample(vec2 pixel){
+        if(detailFilter<.5)return texture2D(reference,pixel/sourceSize).rgb;
+        vec2 base=floor(pixel-.5)+.5,t=pixel-base;
+        vec2 w0=t*(-.5+t*(1.-.5*t));
+        vec2 w1=1.+t*t*(-2.5+1.5*t);
+        vec2 w2=t*(.5+t*(2.-1.5*t));
+        vec2 w3=t*t*(-.5+.5*t),w12=w1+w2;
+        vec2 p0=(base-1.)/sourceSize,p12=(base+w2/w12)/sourceSize,p3=(base+2.)/sourceSize;
+        vec3 c=texture2D(reference,p0).rgb*w0.x*w0.y;
+        c+=texture2D(reference,vec2(p12.x,p0.y)).rgb*w12.x*w0.y;
+        c+=texture2D(reference,vec2(p3.x,p0.y)).rgb*w3.x*w0.y;
+        c+=texture2D(reference,vec2(p0.x,p12.y)).rgb*w0.x*w12.y;
+        c+=texture2D(reference,p12).rgb*w12.x*w12.y;
+        c+=texture2D(reference,vec2(p3.x,p12.y)).rgb*w3.x*w12.y;
+        c+=texture2D(reference,vec2(p0.x,p3.y)).rgb*w0.x*w3.y;
+        c+=texture2D(reference,vec2(p12.x,p3.y)).rgb*w12.x*w3.y;
+        c+=texture2D(reference,p3).rgb*w3.x*w3.y;
+        return clamp(c,0.,1.);
+      }
       void main(){vec3 n=normalize(N);vec3 key=normalize(vec3(-.48,.7,1.05));
       vec3 fill=normalize(vec3(.75,-.45,.55));vec3 view=vec3(0.,0.,1.);
       vec2 local=UV*2.-1.;float radius=length(local);
       vec2 xy=vec2(1065.,330.)+vec2(local.x,-local.y)*350.;
-      vec3 tex=texture2D(reference,xy/vec2(1672.,941.)).rgb;
-      float erase=1.-smoothstep(.57,.61,radius);
-      erase=max(erase,smoothstep(490.,510.,xy.y));
+      vec3 tex=sourceSample(xy);
+      // Erase only fixed UI footprints. The former whole-center mask discarded
+      // valid source stone and replaced it with an enlarged 46x74px repair tile.
+      float portrait=1.-smoothstep(108.,113.,length(xy-vec2(1065.,273.)));
+      float playerBox=(1.-smoothstep(79.,84.,abs(xy.x-1065.)))*smoothstep(376.,382.,xy.y)*(1.-smoothstep(409.,416.,xy.y));
+      float rankBox=(1.-smoothstep(107.,113.,abs(xy.x-1065.)))*smoothstep(410.,416.,xy.y)*(1.-smoothstep(503.,510.,xy.y));
+      float plinthHalf=153.+clamp((xy.y-510.)/90.,0.,1.)*86.;
+      float plinthBox=(1.-smoothstep(plinthHalf,plinthHalf+5.,abs(xy.x-1065.)))*smoothstep(505.,511.,xy.y);
+      float erase=max(max(portrait,playerBox),max(rankBox,plinthBox));
       erase=max(erase,smoothstep(1218.,1235.,xy.x)*(1.-smoothstep(85.,100.,xy.y)));
       // Architectural brackets belong to fixed foreground pillars, never the rotor.
       float bracketY=smoothstep(285.,303.,xy.y)*(1.-smoothstep(426.,443.,xy.y));
@@ -68,9 +95,9 @@
       // sector of THIS reference, keeping band radii and original stone grain.
       float sector=-2.08+asin(sin(atan(-local.y,local.x)*3.))*.14;
       vec2 repair=vec2(1065.,330.)+vec2(cos(sector),sin(sector))*radius*350.;
-      vec3 rebuilt=texture2D(reference,repair/vec2(1672.,941.)).rgb;
+      vec3 rebuilt=texture2D(reference,repair/sourceSize).rgb;
       vec2 stoneXY=vec2(1177.,283.)+abs(fract((local+1.)*1.5)*2.-1.)*vec2(46.,74.);
-      vec3 inner=texture2D(reference,stoneXY/vec2(1672.,941.)).rgb;
+      vec3 inner=texture2D(reference,stoneXY/sourceSize).rgb;
       rebuilt=mix(inner,rebuilt,smoothstep(.5,.56,radius));
       tex=mix(tex,rebuilt,erase);
       float material=clamp(M,0.,1.);
@@ -85,14 +112,14 @@
         vec2 center=vec2(source.x-1065.,330.-source.y)/350.;
         vec2 rel=vec2(local.x-center.x,center.y-local.y)*350.;
         if(id<.5)source=vec2(1065.,95.);
-        tex=texture2D(reference,(source+rel)/vec2(1672.,941.)).rgb;
+        tex=sourceSample(source+rel);
         // Earth is absent from the approved five-glyph drawing. Its sixth
         // engraving is an explicit reconstructed mountain motif, not deck art.
         if(id<.5){
           float r=length(rel),x=rel.x,y=rel.y;
           float mountain=min(abs(y-(abs(x)*1.35-15.)),min(abs(y-(abs(x+9.)*1.25-5.)),abs(y-(abs(x-9.)*1.25-5.))));
           float mark=(1.-smoothstep(.5,1.5,mountain))*(1.-smoothstep(18.,22.,r));
-          vec3 field=texture2D(reference,(vec2(1200.,320.)+rel*.35)/vec2(1672.,941.)).rgb*.72;
+          vec3 field=texture2D(reference,(vec2(1200.,320.)+rel*.35)/sourceSize).rgb*.72;
           field=mix(field,vec3(.41,.32,.17),mark*.9);
           tex=mix(field,tex,smoothstep(23.,27.,r));
         }
@@ -112,19 +139,26 @@
     for(const [name,size,offset] of [['position',3,0],['normal',3,12],['metal',1,24]]){const a=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,size,gl.FLOAT,false,28,offset);}
     function texture(unit,name){const tex=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([50,48,39,255]));
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.uniform1i(gl.getUniformLocation(program,name),unit);return tex;}
-    const tex=texture(0,'surface'),ref=texture(1,'reference');
+    const ref=texture(0,'reference');
+    const detailFilter=gl.getUniformLocation(program,'detailFilter');
+    const sourceSize=gl.getUniformLocation(program,'sourceSize');gl.uniform2f(sourceSize,1672,940);
     gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,0);
     const angle=gl.getUniformLocation(program,'angle'),energy=gl.getUniformLocation(program,'energy');let lastAngle=0,lastEnergy=0,lost=false;
-    const stats={triangles:geometry.triangles,zMin:geometry.zMin,zMax:geometry.zMax,frames:0,maxSubmitMs:0,textureReady:false,medallions:6,referenceReconstruction:true};
+    const renderLimit=Math.min(4096,gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),...gl.getParameter(gl.MAX_VIEWPORT_DIMS));
+    const stats={fragmentPrecision,sourceWidth:0,sourceHeight:0,bufferWidth:0,triangles:geometry.triangles,zMin:geometry.zMin,zMax:geometry.zMax,frames:0,maxSubmitMs:0,textureReady:false,medallions:6,referenceReconstruction:true};
     function render(degrees,power=0){
       lastAngle=degrees;lastEnergy=power;if(lost)return;
-      const start=performance.now(),rect=canvas.getBoundingClientRect(),size=Math.max(1,Math.min(1600,Math.round(rect.width*Math.min(2,devicePixelRatio||1))));
+      const start=performance.now(),rect=canvas.getBoundingClientRect(),size=Math.max(1,Math.min(renderLimit,Math.ceil(rect.width*Math.min(2,devicePixelRatio||1))));
       if(canvas.width!==size||canvas.height!==size){canvas.width=canvas.height=size;gl.viewport(0,0,size,size);}
-      gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform1f(angle,-degrees*Math.PI/180);gl.uniform1f(energy,power);gl.drawArrays(gl.TRIANGLES,0,geometry.vertices.length/7);
-      stats.frames++;stats.maxSubmitMs=Math.max(stats.maxSubmitMs,performance.now()-start);canvas.dataset.renderer='webgl';
+      gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform1f(detailFilter,size>=700?1:0);gl.uniform1f(angle,-degrees*Math.PI/180);gl.uniform1f(energy,power);gl.drawArrays(gl.TRIANGLES,0,geometry.vertices.length/7);
+      stats.bufferWidth=size;stats.frames++;stats.maxSubmitMs=Math.max(stats.maxSubmitMs,performance.now()-start);canvas.dataset.renderer='webgl';
     }
-    let loaded=0;function load(url,tex,unit){const img=new Image();img.onload=()=>{gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);stats.textureReady=++loaded===2;render(lastAngle,lastEnergy);};img.src=url;}
-    load(textureURL,tex,0);load('assets/img/lobby/approved-lobby-source.png',ref,1);
+    const img=new Image();img.onload=()=>{
+      gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,ref);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+      stats.sourceWidth=img.naturalWidth;stats.sourceHeight=img.naturalHeight;
+      gl.uniform2f(sourceSize,img.naturalWidth,img.naturalHeight);stats.textureReady=true;render(lastAngle,lastEnergy);
+    };img.src='assets/img/lobby/approved-lobby-source.png';
     canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();lost=true;canvas.dataset.renderer='fallback';canvas.parentElement.classList.remove('seal-webgl-ready');});
     canvas.addEventListener('webglcontextrestored',()=>{canvas.dataset.renderer='fallback';});
     new ResizeObserver(()=>render(lastAngle,lastEnergy)).observe(canvas);

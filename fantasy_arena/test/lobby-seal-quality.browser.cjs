@@ -1,0 +1,38 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const fs=require('fs'),path=require('path'),assert=require('assert/strict');
+const root=path.resolve(__dirname,'..'),out=path.resolve(process.env.LOBBY_QUALITY_QA_DIR||'../../seal-quality-qa');fs.mkdirSync(out,{recursive:true});
+const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.mp3':'audio/mpeg','.json':'application/json'};
+(async()=>{
+ const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true,args:['--enable-unsafe-swiftshader']});
+ const context=await browser.newContext({viewport:{width:1672,height:941},deviceScaleFactor:1});
+ await context.route('**/*',r=>{const u=new URL(r.request().url());if(u.hostname!=='sanctuary.test')return r.abort();const p=path.join(root,u.pathname==='/'?'index.html':u.pathname);if(!p.startsWith(root)||!fs.existsSync(p))return r.fulfill({status:404,body:''});return r.fulfill({contentType:mime[path.extname(p)]||'application/octet-stream',body:fs.readFileSync(p)});});
+ const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('https://sanctuary.test');await page.waitForFunction(()=>!!window.Lobby);
+ await page.evaluate(async()=>{const decks=TRIBES.map((t,i)=>({id:i+1,name:t.name.replace('땅','대지')+' 덱',tribe:t.id,cards:buildDeck(t.id).map(c=>typeof c==='string'?c:c.id)}));FSNet.isOnline=()=>true;FSNet.isLoggedIn=()=>true;FSNet.account=()=>({id:99,displayName:'PLAYER',rank:{tier:'diamond',div:2,progress:35}});FSNet.listDecks=async()=>({ok:true,decks});Lobby.open();await Lobby.refresh();});
+ await page.waitForFunction(()=>Lobby.sealRendererStats()?.textureReady,{timeout:15000});
+ assert.equal(await page.locator('#lobbySealCanvas').getAttribute('data-renderer'),'webgl');
+
+ const native=await page.locator('.lobby-sel-icon').boundingBox();
+ await page.screenshot({path:path.join(out,'native.png')});
+ await page.setViewportSize({width:3840,height:2160});await page.waitForTimeout(300);
+ await page.evaluate(()=>{const app=document.getElementById('app');app.style.width='3840px';app.style.height='2160px';});
+ await page.waitForTimeout(250);
+ assert.equal(await page.locator('#app').evaluate(e=>Math.round(e.getBoundingClientRect().width)),3840,'4K comparison stage really fills 3840 physical pixels');
+ const buffer=await page.locator('#lobbySealCanvas').evaluate(c=>({width:c.width,display:c.getBoundingClientRect().width,dpr:devicePixelRatio}));
+ assert.ok(buffer.width>=Math.floor(buffer.display*buffer.dpr),'4K seal renders at physical display resolution, without the former 1600px cap');
+ assert.ok(Math.abs(native.y+native.height/2-273)<1.5,'portrait center matches source y273 rather than previous y282');
+ const stats=await page.evaluate(()=>Lobby.sealRendererStats());
+ assert.equal(stats.sourceWidth,1672);assert.equal(stats.sourceHeight,940);
+ assert.equal(stats.fragmentPrecision,'highp','capable GPU uses precise source-pixel UV coordinates');
+ await page.screenshot({path:path.join(out,'4k.png')});
+ const fixedBefore=await page.locator('.lobby-sel-icon').boundingBox();
+ await page.evaluate(()=>{window.__qualityFrames=[];let last=performance.now();function frame(t){window.__qualityFrames.push(t-last);last=t;if(window.__qualityFrames.length<400)requestAnimationFrame(frame)}requestAnimationFrame(frame);});
+ await page.click('#btnMatch');await page.waitForTimeout(2500);
+ assert.deepEqual(await page.locator('.lobby-sel-icon').boundingBox(),fixedBefore,'full-resolution rotation keeps portrait fixed');
+ await page.click('#btnMatch');await page.waitForTimeout(2200);
+ const stopped=await page.locator('#lobbySealRotor').evaluate(e=>e.style.transform);await page.waitForTimeout(350);
+ assert.equal(await page.locator('#lobbySealRotor').evaluate(e=>e.style.transform),stopped,'full-resolution render stops without an angle jump');
+ const motion=await page.evaluate(()=>{const a=window.__qualityFrames.filter(v=>v>0).sort((a,b)=>a-b);return{frames:a.length,p95FrameMs:a[Math.floor(a.length*.95)]};});
+ fs.writeFileSync(path.join(out,'quality.json'),JSON.stringify({native,buffer,stats,motion,errors},null,2));
+ assert.deepEqual(errors,[]);await context.close();await browser.close();console.log('PASS: source-sized texture, precise UV, physical-pixel render buffer, measured portrait alignment');
+})().catch(e=>{console.error(e);process.exit(1)});
