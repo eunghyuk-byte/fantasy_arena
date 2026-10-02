@@ -1,4 +1,22 @@
 Sanctuary medallion and central-surface correction (review candidate)
+Visual-quality follow-up to 383e686 (not publicly deployed)
+- Removed the broad dark central fill. Preserve visible source stone; repair the
+  fixed UI footprints and baked circular rim using clean source-pixel patches.
+  Independent pixel review identified [1180,290,1220,354), [911,285,950,351)
+  and [926,356,975,404). Varied positions/orientations avoid mirrored repetition.
+- Official emblem silhouettes receive contour cleanup, detached-component removal
+  and a distance-based bevel. Edge-aware earth height filtering suppresses
+  photographic grit while preserving rock planes and cracks. Fixed lighting
+  and short contact shadows define the metal relief. Its original coin rim is
+  excluded from the extracted silhouette.
+- Uniform circle/orbit geometry, fixed portrait/controls and motion code unchanged.
+- Targeted follow-up: 12 geometry/relief/motion tests, every-degree browser sweep
+  at four sizes, normal plus six image-processing failure paths and live full-turn
+  cancel/restart recording. Earlier full regression results are recorded below.
+- Independent visual review confirmed the detached earth line is gone and rock
+  planes/cracks are restored, with no new issue found in the reviewed detail.
+  This is a parent visual-review candidate, not final public design approval.
+
 Base: e7599f8b5aa70d9e3bb5cc9ca86d9297181bceb8, public v0.4049.
 Branch: codex/sanctuary-medallion-center-fix. No release version bump or public push.
 
@@ -23,7 +41,7 @@ Correction
 - Updated the independent alpha fallback from the same renderer.
 - Image read/upload failures select that fallback without uncaught callbacks.
 
-Verification
+Earlier full regression on 383e686 (not rerun for this material-only follow-up)
 - Client regression: 717 passed, 0 failed. Server: 2 passed, 0 failed.
 - Existing lobby-sanctuary.browser.cjs: pass (deck/rank fixtures, controls,
   real room-session callback implementation, cancel/error/disconnect/reduced motion,
@@ -32,7 +50,7 @@ Verification
 - lobby-medallion.browser.cjs: every integer angle 0..360 drawn at 1672x941,
   390x844, 844x390 and actual 3840x2160. Fixed portrait, live acceleration,
   cancel deceleration, stable stop, rapid repeat/back/reenter and reduced motion pass.
-- lobby-seal-fallback.browser.cjs: normal and four injected failure paths pass.
+- lobby-seal-fallback.browser.cjs: normal and four injected failure paths passed.
 - Independent reviewer found one unhandled image callback failure; fixed and
   independently rechecked all five loading paths with zero uncaught page errors.
 - Evidence includes original local reproduction, angle images, native/4K/mobile

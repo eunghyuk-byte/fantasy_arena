@@ -46,3 +46,13 @@ test('official emblem colors become monochrome height while the original coin ri
   for(let k=0;k<converted.length;k+=4){assert.equal(converted[k],converted[k+1]);assert.equal(converted[k],converted[k+2]);}
  }
 });
+
+test('relief contour discards a detached spark and bevels the retained solid shape',()=>{
+ const width=64,pixels=new Uint8ClampedArray(width*width*4);
+ for(let y=20;y<45;y++)for(let x=20;x<45;x++)pixels.set([230,90,10,255],(y*width+x)*4);
+ pixels.set([255,100,10,255],(16*width+16)*4);
+ const h=glyphHeight(pixels,width,width,'fire'),at=(x,y)=>h[(y*width+x)*4];
+ assert.equal(at(16,16),0,'isolated spark is not a raised gold fleck');
+ assert.ok(at(32,32)>at(20,32),'outer contour has a slope into a solid cap');
+ assert.ok(at(32,32)>180,'retained flame body remains legible');
+});

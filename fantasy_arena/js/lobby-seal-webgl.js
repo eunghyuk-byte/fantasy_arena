@@ -10,21 +10,90 @@
   // Use the official bitmap ONLY as relief height. No source RGB reaches the
   // gold material. Reject its surrounding coin rim and dark background stone.
   function glyphHeight(pixels,width,height,id){
-    const out=new Uint8ClampedArray(pixels.length);
+    const out=new Uint8ClampedArray(pixels.length),signal=new Float32Array(width*height);
     for(let y=0;y<height;y++)for(let x=0;x<width;x++){
       const k=(y*width+x)*4,r=pixels[k]/255,g=pixels[k+1]/255,b=pixels[k+2]/255;
       const radius=Math.hypot((x+.5)/width-.5,(y+.5)/height-.5)*2;
-      let signal=0;
-      if(id==='earth'||id==='light')signal=Math.max(0,r-b*1.2-.025);
-      else if(id==='fire')signal=Math.max(0,r-Math.max(g,b)*.58-.065);
-      else if(id==='wind')signal=Math.max(0,Math.max(g,b)-r*1.15-.04);
-      else if(id==='water')signal=Math.max(0,b-r*1.15-.045);
-      else signal=Math.max(0,Math.min(r,b)-g*1.12-.025);
-      const edge=Math.max(0,Math.min(1,(.90-radius)/.035));
-      const value=Math.round(Math.pow(Math.min(1,signal*1.8),.8)*255*edge*pixels[k+3]/255);
-      out[k]=out[k+1]=out[k+2]=value;out[k+3]=255;
+      let value=0;
+      if(id==='earth'||id==='light')value=Math.max(0,r-b*1.2-.025);
+      else if(id==='fire')value=Math.max(0,r-Math.max(g,b)*.58-.065);
+      else if(id==='wind')value=Math.max(0,Math.max(g,b)-r*1.15-.04);
+      else if(id==='water')value=Math.max(0,b-r*1.15-.045);
+      else value=Math.max(0,Math.min(r,b)-g*1.12-.025);
+      const edge=Math.max(0,Math.min(1,((id==='earth'?.85:.90)-radius)/.035));
+      signal[y*width+x]=value*edge*pixels[k+3]/255;
+    }
+    // Separate the official silhouette from glow/grit, then form a bevel from
+    // its distance to the contour. Brightness alone is never stamped as gold.
+    const smooth=new Float32Array(signal.length),mask=new Uint8Array(signal.length);
+    for(let y=1;y<height-1;y++)for(let x=1;x<width-1;x++){
+      const p=y*width+x;let sum=0;
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)sum+=signal[p+dy*width+dx]*(dx===0?2:1)*(dy===0?2:1);
+      smooth[p]=sum/16;mask[p]=smooth[p]>(id==='earth'?.050:id==='fire'?.14:id==='dark'?.028:id==='wind'?.045:.075)?1:0;
+    }
+    // Close hairline gaps in rock and flame without retaining detached glow.
+    if(id==='earth'||id==='fire'){
+      const expanded=new Uint8Array(mask.length);
+      for(let y=1;y<height-1;y++)for(let x=1;x<width-1;x++){const p=y*width+x;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)expanded[p]=Math.max(expanded[p],mask[p+dy*width+dx]);}
+      for(let y=1;y<height-1;y++)for(let x=1;x<width-1;x++){const p=y*width+x;let v=1;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)v=Math.min(v,expanded[p+dy*width+dx]);mask[p]=v;}
+    }
+    // A small majority filter regularizes ragged glow edges into a clean cut
+    // contour. It works on the silhouette, not on the finished material.
+    const contour=new Uint8Array(mask);
+    for(let y=2;y<height-2;y++)for(let x=2;x<width-2;x++){const p=y*width+x;let sum=0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)sum+=mask[p+dy*width+dx];contour[p]=sum>=12?1:0;}
+    mask.set(contour);
+    // Drop detached sparks and one-pixel scratches without inventing a symbol.
+    const visited=new Uint8Array(mask.length),minimum=Math.max(3,Math.round(width*height*.0007));
+    for(let p=0;p<mask.length;p++)if(mask[p]&&!visited[p]){
+      const component=[p];visited[p]=1;
+      for(let q=0;q<component.length;q++){const at=component[q],x=at%width,y=Math.floor(at/width);
+        for(const n of [x>0?at-1:-1,x<width-1?at+1:-1,y>0?at-width:-1,y<height-1?at+width:-1])if(n>=0&&mask[n]&&!visited[n]){visited[n]=1;component.push(n);}}
+      let stray=false;
+      if(id==='earth'&&component.length<width*height*.004){
+        const xs=component.map(at=>at%width),ys=component.map(at=>Math.floor(at/width)),w=Math.max(...xs)-Math.min(...xs)+1,h=Math.max(...ys)-Math.min(...ys)+1;
+        stray=Math.max(w/h,h/w)>5;
+      }
+      if(component.length<minimum||stray)for(const at of component)mask[at]=0;
+    }
+    const distance=new Float32Array(mask.length);for(let i=0;i<mask.length;i++)distance[i]=mask[i]?1000:0;
+    for(let y=1;y<height;y++)for(let x=1;x<width-1;x++){const p=y*width+x;distance[p]=Math.min(distance[p],distance[p-1]+1,distance[p-width]+1,distance[p-width-1]+1.414,distance[p-width+1]+1.414);}
+    for(let y=height-2;y>=0;y--)for(let x=width-2;x>0;x--){const p=y*width+x;distance[p]=Math.min(distance[p],distance[p+1]+1,distance[p+width]+1,distance[p+width+1]+1.414,distance[p+width-1]+1.414);}
+    // Broad rock planes use a wider height filter; photographic grit must not
+    // become hundreds of little specular bumps in the gold relief.
+    const planes=new Float32Array(smooth);
+    if(id==='earth')for(let y=4;y<height-4;y++)for(let x=4;x<width-4;x++){
+      const p=y*width+x;let sum=0,weight=0;
+      for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const sample=smooth[(y+dy)*width+x+dx],difference=(sample-smooth[p])/.05,w=Math.exp(-difference*difference-(dx*dx+dy*dy)/16);sum+=sample*w;weight+=w;}
+      planes[p]=sum/weight;
+    }
+    for(let p=0;p<mask.length;p++){
+      const bevel=Math.min(1,distance[p]/2.5),facets=(id==='earth'?.72:.84)+Math.min(1,planes[p]*1.7)*(id==='earth'?.28:.16);
+      const value=Math.round(bevel*facets*255);out[p*4]=out[p*4+1]=out[p*4+2]=value;out[p*4+3]=255;
     }
     return out;
+  }
+  // Quilted from clean, unoccluded stone pixels in the approved source. Unlike
+  // a mirrored micro-tile, each overlapping patch has its own source position;
+  // original grain/contrast survive without a repeated wallpaper pattern.
+  function stoneRepair(image){
+    const source=document.createElement('canvas');source.width=image.naturalWidth;source.height=image.naturalHeight;
+    const context=source.getContext('2d',{willReadFrequently:true});context.drawImage(image,0,0);
+    const pixels=context.getImageData(0,0,source.width,source.height).data;
+    const result=document.createElement('canvas');result.width=result.height=512;const dst=result.getContext('2d'),frame=dst.createImageData(512,512);
+    const patches=[[1180,290,40,64],[911,285,39,66],[926,356,49,48]];
+    function origin(x,y){let n=((x+37)*73856093^(y+71)*19349663)>>>0;const p=patches[n%patches.length];n=(Math.imul(n,1664525)+1013904223)>>>0;return[p[0]+n%(p[2]-32),p[1]+(n>>>10)%(p[3]-32),(n>>>23)&3];}
+    const nodes=Array.from({length:33},(_,y)=>Array.from({length:33},(_,x)=>origin(x,y)));
+    for(let y=0;y<512;y++)for(let x=0;x<512;x++){
+      const gx=Math.floor(x/16),gy=Math.floor(y/16),u=x%16,v=y%16,tx=u/16,ty=v/16,wx=tx*tx*(3-2*tx),wy=ty*ty*(3-2*ty),at=(y*512+x)*4;
+      for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){
+        const [sx,sy,turn]=nodes[gy+dy][gx+dx];let a=u+(1-dx)*16,b=v+(1-dy)*16;
+        if(turn===1)[a,b]=[b,31-a];else if(turn===2)[a,b]=[31-a,31-b];else if(turn===3)[a,b]=[31-b,a];
+        const src=((sy+b)*source.width+sx+a)*4,w=(dx?wx:1-wx)*(dy?wy:1-wy);
+        for(let c=0;c<3;c++)frame.data[at+c]+=pixels[src+c]*w;
+      }
+      frame.data[at+3]=255;
+    }
+    dst.putImageData(frame,0,0);return result;
   }
   function mesh(){
     const data=[];
@@ -80,11 +149,9 @@
       gl_Position=vec4(p.x*.96,(p.y-.006)*.96,-p.z*.5,1.);}`;
     const fragmentPrecision=gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER,gl.HIGH_FLOAT).precision>0?'highp':'mediump';
     const fragment=`precision ${fragmentPrecision} float;varying vec3 P;varying vec3 N;varying vec2 UV;varying float M;
-      uniform sampler2D reference;uniform sampler2D glyphs;uniform vec2 sourceSize;uniform float angle;uniform float energy;uniform float detailFilter;
+      uniform sampler2D reference;uniform sampler2D glyphs;uniform sampler2D stone;uniform vec2 sourceSize;uniform float angle;uniform float energy;uniform float detailFilter;
       ${centersGLSL}
       float glyphAt(vec2 uv,float id){return texture2D(glyphs,vec2((id+clamp(uv.x,0.,1.))/6.,clamp(uv.y,0.,1.))).r;}
-      float grainHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-      float grain(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(grainHash(i),grainHash(i+vec2(1.,0.)),f.x),mix(grainHash(i+vec2(0.,1.)),grainHash(i+1.),f.x),f.y);}
       // Catmull-Rom reconstruction retains native engraving edges under fractional
       // UV rotation/scale. Nine bilinear taps; low-resolution displays use one.
       vec3 sourceSample(vec2 pixel){
@@ -113,7 +180,7 @@
       vec3 tex=sourceSample(xy);
       // Erase only fixed UI footprints. The former whole-center mask discarded
       // valid source stone and replaced it with an enlarged 46x74px repair tile.
-      float portrait=1.-smoothstep(108.,113.,length(xy-vec2(1065.,273.)));
+      float portrait=1.-smoothstep(121.,133.,length(xy-vec2(1065.,273.)));
       float playerBox=(1.-smoothstep(79.,84.,abs(xy.x-1065.)))*smoothstep(376.,382.,xy.y)*(1.-smoothstep(409.,416.,xy.y));
       float rankBox=(1.-smoothstep(107.,113.,abs(xy.x-1065.)))*smoothstep(410.,416.,xy.y)*(1.-smoothstep(503.,510.,xy.y));
       float plinthHalf=153.+clamp((xy.y-510.)/90.,0.,1.)*86.;
@@ -132,14 +199,14 @@
       vec2 stoneXY=vec2(1177.,283.)+abs(fract((local+1.)*1.5)*2.-1.)*vec2(46.,74.);
       vec3 inner=texture2D(reference,stoneXY/sourceSize).rgb;
       rebuilt=mix(inner,rebuilt,smoothstep(.5,.56,radius));
+      // Repair only hidden UI and the baked curved rim; retain real source stone
+      // between them. Grain is sampled at source-pixel scale, never blurred into
+      // a dark disc or multiplied down to eighteen percent of its contrast.
+      vec3 centerStone=texture2D(stone,(xy-vec2(809.,74.))/512.).rgb;
+      rebuilt=mix(centerStone,rebuilt,smoothstep(.62,.65,radius));
       tex=mix(tex,rebuilt,erase);
-      // The source contains a portrait-shaped repair centered 57px ABOVE the
-      // rotation axis. Do not rotate that footprint or its baked hollow. Replace
-      // the whole inner face with continuous stone, at source-pixel scale.
-      vec2 stoneA=vec2(1178.,286.)+abs(fract((xy-vec2(1065.,330.))/vec2(88.,132.))*2.-1.)*vec2(44.,66.);
-      vec2 stoneB=vec2(1178.,286.)+abs(fract((xy.yx-vec2(330.,1065.))/vec2(132.,88.)+.37)*2.-1.)*vec2(44.,66.);
-      float stoneGrain=grain(xy*.041)*.55+grain(xy*.19)*.3+grain(xy*.83)*.15;
-      vec3 centerStone=vec3(.070,.068,.055)*( .69+stoneGrain*.65 )+mix(sourceSample(stoneA),sourceSample(stoneB),.46)*.18;
+      float bowlRim=smoothstep(.47,.505,radius)*(1.-smoothstep(.615,.642,radius));
+      tex=mix(tex,centerStone,bowlRim);
       // Erase the five uneven painted coins before placing the exact circles.
       // Only their old footprints change; surrounding runes and outer rim stay.
       float oldBadge=0.;
@@ -149,23 +216,24 @@
       oldBadge=max(oldBadge,1.-smoothstep(51.,57.,length(xy-vec2(850.,421.))));
       oldBadge=max(oldBadge,1.-smoothstep(51.,57.,length(xy-vec2(1280.,421.))));
       tex=mix(tex,centerStone*vec3(.77,.94,1.04),oldBadge);
-      tex=mix(centerStone,tex,smoothstep(.615,.642,radius));
       float material=clamp(M,0.,1.);
       if(M>1.5){
         float id=floor(M+.1)-2.;
         vec2 rel=local-medallionCenter(id);float r=length(rel);
         vec2 uv=vec2(rel.x,-rel.y)/.196+.5;
         float h=glyphAt(uv,id)*(1.-smoothstep(.092,.098,r));
-        float mark=smoothstep(.025,.15,h);
-        vec3 face=sourceSample(vec2(1198.,320.)+rel*190.)*.70;
+        float mark=smoothstep(.025,.20,h);
+        vec3 face=texture2D(stone,(rel*350.+vec2(128.+id*43.,160.+id*21.))/512.).rgb*.70;
         float annulus=smoothstep(.097,.100,r);
         tex=mix(face,vec3(.36,.28,.16),annulus);
-        tex=mix(tex,vec3(.35,.272,.15)+h*vec3(.19,.145,.080),mark);
+        float contact=glyphAt(uv+vec2(-.008,-.010),id)*(1.-mark);
+        tex*=1.-contact*.48;
+        tex=mix(tex,vec3(.40,.31,.17)+h*vec3(.085,.065,.035),mark);
         // Emboss the official contour and internal facets in the same fixed
         // warm/cool lights as the rim. Neither bitmap color nor its coin survives.
         if(r<.098){
           float d=1./256.;
-          vec2 slope=vec2(glyphAt(uv-vec2(d,0.),id)-glyphAt(uv+vec2(d,0.),id),glyphAt(uv+vec2(0.,d),id)-glyphAt(uv-vec2(0.,d),id))*1.8;
+          vec2 slope=vec2(glyphAt(uv-vec2(d,0.),id)-glyphAt(uv+vec2(d,0.),id),glyphAt(uv+vec2(0.,d),id)-glyphAt(uv-vec2(0.,d),id))*9.;
           float c=cos(angle),s=sin(angle);vec2 rotated=mat2(c,s,-s,c)*slope;
           n=normalize(vec3(rotated,1.));
         }
@@ -176,6 +244,7 @@
       float occlusion=smoothstep(-.17,.07,P.z)*.3+.7;
       vec3 color=tex*(vec3(.70)+diffuse*vec3(.32,.28,.22)+cool*vec3(.025,.055,.055))*occlusion;
       color+=spec*mix(vec3(.008),vec3(.075,.058,.027),material);
+      if(M>1.5){color=tex*(vec3(.36)+diffuse*vec3(.72,.66,.53)+cool*vec3(.045,.09,.10));color+=spec*material*vec3(.24,.18,.095);}
       float rim=smoothstep(.95,1.,radius);color+=rim*energy*vec3(.009,.07,.06);
       gl_FragColor=vec4(color,1.);}`;
     function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
@@ -185,7 +254,7 @@
     for(const [name,size,offset] of [['position',3,0],['normal',3,12],['metal',1,24]]){const a=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,size,gl.FLOAT,false,28,offset);}
     function texture(unit,name){const tex=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([50,48,39,255]));
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.uniform1i(gl.getUniformLocation(program,name),unit);return tex;}
-    const ref=texture(0,'reference'),glyphTexture=texture(1,'glyphs');
+    const ref=texture(0,'reference'),glyphTexture=texture(1,'glyphs'),stoneTexture=texture(2,'stone');
     gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,glyphTexture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
     const detailFilter=gl.getUniformLocation(program,'detailFilter');
     const sourceSize=gl.getUniformLocation(program,'sourceSize');gl.uniform2f(sourceSize,1672,940);
@@ -204,6 +273,7 @@
     const img=new Image();img.onerror=fallback;img.onload=()=>{try{
       gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,ref);
       gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+      const repair=stoneRepair(img);gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,stoneTexture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,repair);
       stats.sourceWidth=img.naturalWidth;stats.sourceHeight=img.naturalHeight;
       gl.uniform2f(sourceSize,img.naturalWidth,img.naturalHeight);stats.textureReady=stats.glyphsReady;render(lastAngle,lastEnergy);
     }catch(e){fallback();}};img.src='assets/img/lobby/approved-lobby-source.png';
