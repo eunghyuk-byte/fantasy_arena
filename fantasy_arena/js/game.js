@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.4045";
+const GAME_VERSION = "0.4046";
 window.GAME_VERSION = GAME_VERSION;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -39,6 +39,36 @@ function cloneCard(id) {
     attacksLeft: 0,
     damaged: false,
   };
+}
+// Card models contain plain data. Clone nested effects without sharing CARD_MAP/source objects.
+function copyCardEffectData(value) {
+  if (Array.isArray(value)) return value.map(copyCardEffectData);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, copyCardEffectData(item)]));
+  }
+  return value;
+}
+function copyMirrorEffects(source, copy) {
+  for (const key of ["cost", "equippedItem", "itemWorn", "_itemBonuses", "_itemFx", "coinLuckBonus", "_onKillDraw", "coinGold", "coinBlack"]) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) copy[key] = copyCardEffectData(source[key]);
+  }
+  if (copy.equippedItem) copy.equippedItem.uid = uid();
+  // Keep the old reset of effects erased by silence, but retain effects acquired afterwards.
+  // Attack rights and temporary turn markers remain governed by copy_own below.
+  for (const key of ["atkSkill", "battlecry", "deathrattle", "deathrattles"]) {
+    if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
+    const value = source[key];
+    if (source.silenced && (value == null || (Array.isArray(value) && !value.length))) continue;
+    copy[key] = copyCardEffectData(value);
+  }
+  const printedText = copy.text || "";
+  for (const key of ["text", "_baseText"]) {
+    if (source[key] == null) continue;
+    // Silence is not inherited; replace only its standalone status label, keeping later effect text.
+    copy[key] = source.silenced
+      ? String(source[key]).split(/(\s*·\s*|\n)/).map(part => part.trim() === "침묵" ? printedText : part).join("")
+      : source[key];
+  }
 }
 function cloneCoinFor(p) {
   const c = cloneCard("coin");
@@ -1492,7 +1522,8 @@ function applyFx(p, fx, target) {
   } else if (fx.type === "copy_own") {
     if (target && target.kind === "minion" && p.board.length < 5) {
       const o = target.minion;
-      const c = cloneCard(o.id);
+      const c = copyCardEffectData(cloneCard(o.id));
+      copyMirrorEffects(o, c);
       c.atk = o.atk;
       c.def = o.def || 0;
       c.hp = o.hp;
@@ -2467,6 +2498,7 @@ function collectAbilityTips(c) {
   if ((c.type === "spell" || c.type === "item") && cardEffectText(c)) {
     add("카드 효과", cardEffectText(c));
   }
+  if (c.effectDetails) add("상세 효과", c.effectDetails);
   if (c.atkSkill != null && typeof ATK_SKILL_HELP !== "undefined" && ATK_SKILL_HELP[c.atkSkill]) {
     const [nm, desc] = ATK_SKILL_HELP[c.atkSkill];
     add(nm, desc);
@@ -3463,6 +3495,7 @@ function buildLoreSkillsHtml(c) {
   const rows = [];
   const effect = cardEffectText(c);
   if (effect) rows.push(`<div class="lore-skill"><b>카드 효과</b><span>${escHtml(effect).replace(/\n/g, "<br>")}</span></div>`);
+  if (c.effectDetails) rows.push(`<div class="lore-skill"><b>상세 효과</b><span>${escHtml(c.effectDetails)}</span></div>`);
   if (c.atkSkill != null && ATK_SKILL_HELP[c.atkSkill]) {
     const [nm, desc] = ATK_SKILL_HELP[c.atkSkill];
     rows.push(`<div class="lore-skill"><b>${nm}</b><span>${desc}</span></div>`);

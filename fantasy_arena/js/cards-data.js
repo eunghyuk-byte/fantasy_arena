@@ -218,7 +218,7 @@ const CARDS = [
   { id:"ns2", tribe:"wind", name:"진공베기", cost:3, type:"spell", rarity:"common", text:"코인 2개 이상인 적 하나 파괴", spell:{ type:"kill_if", minCoins:2 } },
   { id:"ns3", tribe:"wind", name:"상승기류", cost:5, type:"spell", rarity:"rare", text:"드로우3", spell:{ type:"draw", value:3 } },
   { id:"as1", tribe:"water", name:"냉기화살", cost:1, type:"spell", rarity:"common", text:"유닛 하나 피해 2\n다음 턴 공격 불가", spell:{ type:"dmg", value:2, target:"any_minion", skipAttack:true } },
-  { id:"as2", tribe:"water", name:"물거울", cost:4, type:"spell", rarity:"rare", text:"아군 하나 복사", spell:{ type:"copy_own" } },
+  { id:"as2", tribe:"water", name:"물거울", cost:4, type:"spell", rarity:"rare", text:"아군 하나를 그대로 복사", effectDetails:"착용 아이템과 아이템 효과, 현재 버프·능력을 포함해 아군 하나를 독립적으로 복사합니다. 복사본도 아이템 1개 장착 제한을 받습니다. 현재 체력과 최대 체력을 유지하며 공격 기회는 1회로 시작합니다. 기존 규칙대로 침묵 상태와 사용한 공격 기회·일시적인 행동 제한은 복사하지 않습니다. 침묵으로 지워진 기본 공격 능력·소환/파괴 효과는 원래 카드 기준으로 복원되며, 지워진 키워드와 기본 능력은 복원되지 않습니다. 침묵 이후 새로 얻은 아이템 효과와 버프·능력은 복사합니다.", spell:{ type:"copy_own" } },
   { id:"as3", tribe:"water", name:"익사", cost:3, type:"spell", rarity:"common", text:"공격력 5 이하 적 하나 파괴", spell:{ type:"kill_if", maxAtk:5 } },
   { id:"es1", tribe:"earth", name:"거인의봉인", cost:3, type:"spell", rarity:"uncommon", text:"공7 이상 적 하나 파괴", spell:{ type:"kill_if", minAtk:7 } },
   { id:"ns4", tribe:"wind", name:"떠오르는섬", cost:3, type:"spell", rarity:"uncommon", text:"내 전장 빈칸 수만큼 섬의 파편 (1/0/2) 생성", spell:{ type:"summon_islands", summonId:"n40" } },

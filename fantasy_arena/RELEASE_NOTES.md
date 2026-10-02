@@ -1,3 +1,8 @@
+## v0.4046
+- Water Mirror independently copies equipped items, item effects, current stat/cost buffs, acquired attack abilities and stacked death effects. Copied equipment occupies its slot and nested effect data is no longer shared with the source or printed card.
+- Preserve current/max HP and the prior action/silence reset policy; effects acquired after silence are retained.
+- Keep the face summary brief and place complete rules in shared detail/tooltip descriptions.
+
 ## v0.4045
 - Show the existing simulated matching count on public and local lobby pages without a preview query. Keep the 10–100 range, 4-second count update, 700ms dot animation, reduced-motion behavior and timer cleanup. This is not real server population.
 - No card mechanics, authentication or multiplayer service changes.
