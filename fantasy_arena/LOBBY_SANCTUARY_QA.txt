@@ -1,6 +1,11 @@
 FantasySoul elemental sanctuary lobby — implementation and handoff
 Date: 2026-10-02
-Base: 5f335c06aee93dd1fee63bb0a885a0237681998e (main v0.4046)
+Initial base: 5f335c06aee93dd1fee63bb0a885a0237681998e (main v0.4046)
+Integrated public main: 9ebd9518be5fd68e2adba0791b0597edee432ae7 (v0.4047).
+Index cache-version conflicts resolved preserving v0.4047 plus sanctuary scripts/styles.
+cards-data.js, game.js, render.js and approved-description-wrap.json are unchanged from
+that public main: Paljin Stone4/0/9 and two summons,43 description line edits preserved.
+Post-integration client712/712. No public push/deploy; user deployment approval pending.
 Branch: codex/element-sanctum-lobby
 Workspace: C:\Users\KEH\Documents\Codex\2026-10-02\task-4\fantasy_arena
 No main push, version bump, Pages deployment, or account-branch modification.
@@ -104,7 +109,7 @@ Accepted tier names match the existing six TIER_TABLE entries. No guessed next d
 promotion threshold, rating, or percent. Missing authoritative next is shown as unavailable.
 
 VALIDATION
-- node --test --test-reporter=tap fantasy_arena/test/*.test.js: 667/667 at handoff.
+- node --test --test-reporter=tap fantasy_arena/test/*.test.js: 712/712 after main v0.4047 integration.
 - Existing server/test/*.test.js: 2/2 with official portable Node 22.23.3.
   Node 24.19.0 lacks a prebuilt better-sqlite3 11.10.0 Windows binary; no project dependency
   was upgraded. Portable Node ZIP verified against official nodejs.org release SHA256.

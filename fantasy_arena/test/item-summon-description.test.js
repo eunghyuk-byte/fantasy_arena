@@ -13,7 +13,7 @@ for (const [itemId, summonId, trigger] of [
     const item = cards[itemId];
     const summon = cards[summonId];
     const stats = [summon.atk, summon.def, summon.hp];
-    assert.equal(item.text, `${trigger}: ${summon.name} (${stats.join("/")}) 1기 생성`);
+    assert.equal(item.text.replace(/\s+/g, " "), `${trigger}: ${summon.name} (${stats.join("/")}) 1기 생성`);
 
     const wearer = place(g, p1, "l12");
     assert.equal(g.equipItemOnUnit(p1, g.cloneCard(itemId), wearer), true);

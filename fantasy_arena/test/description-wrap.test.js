@@ -1,0 +1,6 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const {loadGame,setup,vm}=require('../test-support/harness');
+const expected=require('../test-support/approved-description-wrap.json');
+for(const [id,text] of Object.entries(expected))test(`${id}: approved semantic two-line description`,()=>{const g=loadGame();assert.equal(g.cloneCard(id).text,text);});
+test('Eight Trigrams summons two independent 4/0/9 stones and describes the same stats',async()=>{const g=loadGame(),{p1}=setup(g),spell=g.cloneCard('es9');await g.runSpellCast(p1,spell,null);assert.equal(p1.board.length,2);for(const m of p1.board){assert.equal(m.id,'e43');assert.deepEqual([m.atk,m.def,m.hp,m.maxHp],[4,0,9,9]);assert.equal(m.cannotAttack,true);}assert.notEqual(p1.board[0].uid,p1.board[1].uid);assert.equal(spell.text,'내 전장에 팔진석 (4/0/9)\n2기 생성');assert.ok(g.buildLoreSkillsHtml(spell).includes('(4/0/9)<br>2기 생성'));assert.ok(g.collectAbilityTips(spell).some(t=>t.desc===spell.text));});
+test('compact rewritten summaries retain detailed targeting and trigger rules',()=>{const g=loadGame();for(const id of ['di3','li7','ls10']){const c=g.cloneCard(id);assert.ok(c.effectDetails,id);assert.ok(g.buildLoreSkillsHtml(c).includes(c.effectDetails));assert.ok(g.collectAbilityTips(c).some(t=>t.desc===c.effectDetails));}});

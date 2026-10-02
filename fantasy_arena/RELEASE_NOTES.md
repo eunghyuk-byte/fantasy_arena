@@ -1,3 +1,7 @@
+## v0.4047
+- Eight Trigrams creates two 4/0/9 stones (previously 4/0/10). Keep both the stat tuple and closing parenthesis on the first description line.
+- Review all 65 two-line card faces and improve 43 descriptions with semantic line breaks. Keep existing font size, at most two lines and unchanged mechanics for all other cards; brief summaries retain full rules in shared details/tooltips.
+
 ## v0.4046
 - Water Mirror independently copies equipped items, item effects, current stat/cost buffs, acquired attack abilities and stacked death effects. Copied equipment occupies its slot and nested effect data is no longer shared with the source or printed card.
 - Preserve current/max HP and the prior action/silence reset policy; effects acquired after silence are retained.
