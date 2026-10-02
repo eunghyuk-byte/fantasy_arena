@@ -1,0 +1,137 @@
+FantasySoul elemental sanctuary lobby — implementation and handoff
+Date: 2026-10-02
+Base: 5f335c06aee93dd1fee63bb0a885a0237681998e (main v0.4046)
+Branch: codex/element-sanctum-lobby
+Workspace: C:\Users\KEH\Documents\Codex\2026-10-02\task-4\fantasy_arena
+No main push, version bump, Pages deployment, or account-branch modification.
+
+IMPLEMENTED
+- Independent sanctuary scenery, rotating stone/metal disc, six original TRIBE_ICONS
+  at equal 60-degree intervals, fixed selected-deck icon/name/profile, vector CTA frame.
+- Real saved decks, two-column scrolling list, selected scroll position, keyboard buttons;
+  existing local/server deck CRUD and AI/builder entry retained. No six-deck product fixture.
+- Analytically integrated smooth acceleration to 42 degrees/second over 1.6 seconds;
+  480ms matched deceleration, 360ms other stop, no angle reset, no delay to battle callback.
+- Repeated click blocking, cancel acknowledgement state, disconnect/reconnect cleanup,
+  reduced motion, hidden-screen/page lifecycle cleanup.
+- Hover/focus rank popover with pointer travel tolerance, tap/pin, outside tap/Escape close,
+  bounded viewport placement. Missing rank data is explicitly unavailable, never diamond/35%.
+- Mobile portrait reflow and landscape targets; 1672, 1920, 3840, 390 portrait, 844 landscape QA.
+
+AUTHORITATIVE INTERFACE / MERGE BOUNDARY
+Account-branch reference: b365d81d546f9498d0fe72a0e10629cbdac26017.
+Handoff read from:
+C:\Users\KEH\Documents\Codex\2026-10-01\task-2\account-design-draft\execution\lobby-interface-handoff.json
+Actual room-session code read for browser validation from:
+C:\Users\KEH\Documents\Codex\2026-10-01\task-2\rules-stage-a\fantasy_arena\js\room-session.js
+
+Neither public main nor that account branch has an automatic matching queue or authoritative
+rank calculation. Main's former elapsed-time-only mock wait is no longer a matching backend.
+Until a real account room session is bound, the match button remains disabled with an
+explanatory title. A host room is not an automatic player queue.
+
+Integration after account/lobby source merge (run after window.Lobby is exported):
+  const rooms = FSRules.createRoomSession({
+    net: FSNet,
+    ...Lobby.createRoomCallbacks({
+      onMatch: id => { void MatchRuntime.startOnline(id); },
+      onStatus: status => { /* retain account auth/recovery handling here */ }
+    })
+  });
+  Lobby.bindRoomSession(rooms);
+
+Keep account-branch create/join/restore/cancel, request IDs, polling, authorization,
+controlVersion, room-code join button and battle-resume behavior owned by that branch.
+Bind its existing session once; do not create a second parallel session. Replace its old
+callback block with the composed callbacks above. Bind before calling rooms.restore().
+The adapter's onWaiting renders the existing room code/wait clock. Additional onWaiting
+behavior may be composed when required by account restoration. Do not copy branch net.js
+or matchmaking backend into public main solely to make a visual demonstration run.
+
+Mapping: connecting/onWaiting -> searching; cancelling -> pending cancellation;
+closed -> idle; onMatch(matchId) -> matched then original callback synchronously;
+disconnected/authRequired -> disconnected; other server errors -> error.
+Room pending and cancellation pending survive disconnection and independent deck refresh.
+Only authoritative closed/matched/terminal error unlock the deck; closed also restores
+connection status. authRequired preserves pending and delegates reauthentication/restore
+to the account callback. Do not treat a deck fetch as a room cancellation acknowledgement.
+Timers only display elapsed time or animate pixels. None generate a match result.
+Existing match-demo.js population/dots remain an inherited visual simulation, NOT live
+server population; this change does not turn that number into authoritative telemetry.
+
+Future rank view contract: account.rank={tier,div,progress,next?:{tier,div}}.
+This is a presentation contract, not an assertion that /api/me currently returns rank.
+Accepted tier names match the existing six TIER_TABLE entries. No guessed next division,
+promotion threshold, rating, or percent. Missing authoritative next is shown as unavailable.
+
+VALIDATION
+- node --test --test-reporter=tap fantasy_arena/test/*.test.js: 667/667 at handoff.
+- Existing server/test/*.test.js: 2/2 with official portable Node 22.23.3.
+  Node 24.19.0 lacks a prebuilt better-sqlite3 11.10.0 Windows binary; no project dependency
+  was upgraded. Portable Node ZIP verified against official nodejs.org release SHA256.
+- Playwright real Chrome: separate server fixtures plus the actual account room-session
+  module; real onMatch callback after getRoom response, cancel held until server ack,
+  unknown error, repeated offline/reconnect, pending search/cancel disconnect recovery
+  with and without a manual deck refresh, motion bounds and fixed center/button,
+  reduced-motion, mouse/focus/touch popover, viewport containment, deck CRUD/scroll.
+- Browser API responses and profile/6-deck data are explicitly QA fixtures; screenshots
+  of a diamond rank are not a claim that current production has a rank system.
+- LocalStorage test starts with nine decks, selects ninth without scroll reset, renames,
+  edits, deletes, creates/saves water deck, and confirms eight unrelated originals remain.
+- Original repository asset JSON/license bytes were restored after Windows autocrlf
+  changed physical sizes; no gameplay or existing asset content was altered.
+- Independent review found reconnect UI issues; reproduced failing tests then corrected
+  connectionLost gating and disconnected -> idle after verified deck-fetch reconnect.
+
+Browser invocation environment:
+PLAYWRIGHT_MODULE=C:\Users\KEH\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright
+PLAYWRIGHT_BROWSERS_PATH=C:\Users\KEH\Documents\Codex\2026-10-02\task-4\browser-runtime
+ROOM_SESSION_SOURCE=<verified account-branch room-session.js path above>
+node fantasy_arena/test/lobby-sanctuary.browser.cjs
+The suite serves only project files via Playwright authenticated test routing; no public site.
+Evidence directory: C:\Users\KEH\Documents\Codex\2026-10-02\task-4\lobby-qa
+
+ASSETS AND RESOLUTION LIMIT
+assets/img/lobby/sanctuary.png: NEW built-in imagegen rendering, 1672x941 RGB.
+assets/img/lobby/seal.png: NEW built-in imagegen rendering, 1254x1254 RGBA.
+assets/img/lobby/match-frame.svg: resolution-independent authored metallic frame.
+No bitmap was enlarged and presented as native 4K. The built-in tool did not return the
+requested 3840x2160/2048 sizes. True 4K background detail remains an explicit limitation.
+Text, borders, controls, and decorative button frame are independent DOM/vector; all six
+element icons reuse the original game assets, including the water ice crystal.
+Parents' alternate background/disc were pixel-inspected and compared in the same layout.
+Current background retains the approved cyan dais better; current blank-center disc avoids
+the alternate's off-center concentric rings behind the fixed selected icon. Keep current
+assets; parent-assets-comparison.png records the alternative without silently replacing art.
+
+Generation prompts (built-in imagegen, no Higgsfield credit use):
+Background: production sanctuary scenery matching the approved reference; requested
+3840x2160, tall black carved stone pillars with aged bronze/gold bevels, cyan atmospheric
+mist and gothic spires, subtle candles, elliptical ritual dais at x64%/y81%, cyan rim,
+quiet left third, dark right center. Remove all panels, text, logos, buttons, deck icons,
+profile badges, elemental emblems and vertical wheel; reconstruct scenery. Full bleed.
+Disc: requested 2048x2048/highest native resolution; perfectly circular front-facing ancient
+black slate seal, muted gold/bronze concentric engraved rings and diamond inlays, blank
+central 60%, even radial illumination, no letters, recognizable elemental symbols, icons,
+perspective, pedestal or architecture; fully transparent outside disc.
+
+SUCCESSFUL CONSUMER-PC DRIVE TRANSFER (do not ask user to repeat manually)
+1. Read Google Drive metadata for the explicit authorized IDs, confirming PNG MIME/bytes.
+2. google_drive_fetch(url=<returned Drive URL>,download_raw_file=true,include_base64=false).
+3. Use ONLY that authenticated result's top-level file_uri.download_url. On this Windows
+   consumer, exec_command with Invoke-WebRequest -Uri <exact returned URL> -OutFile
+   <absolute/current workspace path> succeeded with network escalation. Never construct
+   a download URL, widen Drive sharing, expose signed URLs, or assume a cloud path is local.
+4. Check file existence and exact byte count locally, then view_image on that local path.
+
+Reference Drive ID 1paCaXN9O8Mmo45EUnvGsI__JFNS4WOOW -> references/lobby.png,
+2367843 bytes, 1672x941; rank 1G4U1c7WmLofyD2ITPZE_gwfjmBi_k_om -> references/rank.png,
+180951 bytes. Both viewed as actual pixels before implementing.
+Alternate background 15HnoLmfAQ7YhZ4UvQCiYs5qzN9UhKoqO -> references/parent-background.png,
+2297081 bytes; alternate disc 1_OwO4i2c0bKV4V8rZYjroXp7G6eHsvqv -> references/parent-seal.png,
+2983616 bytes. Both viewed and compared. All paths are relative to task-4, not the repo.
+
+The Library helper failed on Windows os.setxattr; it was NOT patched. The generic attachment
+download tool also failed to create its attachment directory. The authenticated Drive raw
+fetch route above resolved transfer. Temporary exec-server disconnections recovered using
+exec_command(login:false); no evidence establishes a connection to another running game.

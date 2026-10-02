@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="150" viewBox="0 0 720 150" fill="none">
+ <defs>
+  <linearGradient id="metal" x1="0" y1="0" x2="0" y2="150" gradientUnits="userSpaceOnUse"><stop stop-color="#fff0b4"/><stop offset=".06" stop-color="#b39250"/><stop offset=".17" stop-color="#edcf88"/><stop offset=".38" stop-color="#5f431f"/><stop offset=".58" stop-color="#b4985f"/><stop offset=".8" stop-color="#3b2812"/><stop offset=".94" stop-color="#dab974"/><stop offset="1" stop-color="#fff1bb"/></linearGradient>
+  <linearGradient id="edge" x1="0" y1="0" x2="720" y2="130" gradientUnits="userSpaceOnUse"><stop stop-color="#6a4824"/><stop offset=".23" stop-color="#dec68a"/><stop offset=".5" stop-color="#71522a"/><stop offset=".78" stop-color="#e9c782"/><stop offset="1" stop-color="#48321a"/></linearGradient>
+  <linearGradient id="soul" x1="0" y1="0" x2="720" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#46a39b" stop-opacity="0"/><stop offset=".2" stop-color="#7bdad0"/><stop offset=".5" stop-color="#d7fff0"/><stop offset=".8" stop-color="#7bdad0"/><stop offset="1" stop-color="#46a39b" stop-opacity="0"/></linearGradient>
+ </defs>
+ <path d="M46 3H674L716 75 674 147H46L4 75Z" stroke="#281d0f" stroke-width="7"/>
+ <path d="M46 3H674L716 75 674 147H46L4 75Z" stroke="url(#metal)" stroke-width="5"/>
+ <path d="M52 10H668L705 75 668 140H52L15 75Z" stroke="url(#edge)" stroke-width="7"/>
+ <path d="M61 16H659L693 75 659 134H61L27 75Z" stroke="#251a0e" stroke-width="4"/>
+ <path d="M65 19H655L687 75 655 131H65L33 75Z" stroke="url(#metal)" stroke-width="2"/>
+ <path d="M72 24H648L677 75 648 126H72L43 75Z" stroke="#c3a571" stroke-opacity=".7"/>
+ <path d="M56 7 18 75 56 143M66 17 34 75 66 133M664 7 702 75 664 143M654 17 686 75 654 133" stroke="url(#metal)" stroke-width="3"/>
+ <path d="M24 58 15 75 24 92 30 75ZM696 58 705 75 696 92 690 75Z" fill="url(#metal)" stroke="#22190d"/>
+ <path d="M360 3 366 10 360 17 354 10Z" fill="#171710" stroke="#e7cb87"/>
+ <path d="M360 6 363 10 360 14 357 10Z" fill="#d6b16a"/>
+ <path d="M90 131H630" stroke="url(#soul)" stroke-width="3"/>
+ <path d="M120 135H600" stroke="url(#soul)" stroke-opacity=".4" stroke-width="3"/>
+ <path d="M54 6H348M372 6H666" stroke="#fff1bc" stroke-opacity=".85"/>
+</svg>

@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/title.css?v=0.4046" />
 <link rel="stylesheet" href="css/audio-match.css?v=0.4046" />
 <link rel="stylesheet" href="css/shop.css?v=0.4046" />
+<link rel="stylesheet" href="css/lobby-sanctuary.css?v=sanctuary-1" />
 </head>
 <body>
 <button class="bgm-btn settings-gear-btn" id="settingsGearBtn" title="설정" aria-label="설정">⚙</button>
@@ -80,35 +81,39 @@
 
   <!-- v0.331 로비 (덱 목록 + 매칭) -->
   <section id="lobby" class="screen">
+    <header class="sanctuary-heading"><span class="sanctuary-brand">FANTASY<span>ϟ</span>SOUL</span><h1>온라인 로비</h1></header>
+    <div class="lobby-user" id="lobbyUser"></div>
     <div class="lobby">
       <div class="lobby-panel lobby-left">
         <div class="lobby-head">
           <h2>내 덱</h2>
+          <span class="lobby-instruction">원하는 덱을 선택하여 매칭을 시작하세요.</span>
           <span class="lobby-count" id="lobbyDeckCount">0 / 10</span>
         </div>
         <div class="lobby-notice" id="lobbyNotice"></div>
         <div class="lobby-decks" id="lobbyDecks"></div>
         <div class="lobby-left-actions">
-          <button class="menu-btn ghost" id="btnLobbyEdit">덱 편집</button>
           <button class="menu-btn ghost" id="btnLobbyRename">이름 변경</button>
           <button class="menu-btn ghost" id="btnLobbyDelete">삭제</button>
         </div>
       </div>
       <div class="lobby-panel lobby-right">
-        <div class="lobby-user" id="lobbyUser"></div>
+        <div class="sanctuary-seal" aria-hidden="true"><div id="lobbySealRotor" class="seal-rotor"><div id="lobbyElements" class="seal-elements"></div></div><div class="seal-halo"></div></div>
         <div class="lobby-sel" id="lobbySel"></div>
       <div id="matchDemo" hidden role="group" aria-live="off" aria-label="가상 인원 디자인 미리보기">
         <span>현재 약 <b id="matchDemoCount">—</b>명이 매칭을 돌리고 있습니다<span id="matchDemoDots" aria-hidden="true">.</span></span>
       </div>
       <button class="menu-btn lobby-match" id="btnMatch">매칭 시작</button>
+        <div class="sanctuary-actions">
         <button class="menu-btn ghost" id="btnLobbyAi">AI 연습</button>
-        <button class="menu-btn ghost" id="btnLobbyBack">타이틀로</button>
+        <button class="menu-btn ghost" id="btnLobbyEdit">덱 편집</button>
+        <button class="menu-btn ghost" id="btnLobbyBack">돌아가기</button>
+        </div>
       </div>
     </div>
     <div class="lobby-wait" id="lobbyWait">
       <div class="lobby-wait-box">
-        <div class="lobby-spinner"></div>
-        <h2>매칭 상대를 찾는 중…</h2>
+        <h2 id="lobbyWaitLabel">매칭 상대를 찾는 중…</h2>
         <div class="lobby-wait-deck" id="lobbyWaitDeck"></div>
         <div class="lobby-wait-time" id="lobbyWaitTime">00:00</div>
         <button class="menu-btn" id="btnMatchCancel">취소</button>
@@ -354,7 +359,8 @@
 <script src="js/menu-exit.js?v=0.4046"></script>
 <script src="js/title-menu.js?v=0.4046"></script>
 <script src="js/net.js?v=0.4046"></script>
-<script src="js/lobby.js?v=0.4046"></script>
+<script src="js/lobby-motion.js?v=sanctuary-1"></script>
+<script src="js/lobby.js?v=sanctuary-1"></script>
 <script src="js/match-demo.js?v=0.4046"></script>
 <script src="js/shop.js?v=0.4046"></script>
 </body>

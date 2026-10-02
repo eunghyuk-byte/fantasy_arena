@@ -1,5 +1,5 @@
 {
-  "count": 828,
+  "count": 831,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -4082,6 +4082,21 @@
     {
       "path": "assets/vfx/spells/es2/sfx-572706231b14.wav",
       "bytes": 145046
+    },
+    {
+      "path": "assets/img/lobby/sanctuary.png",
+      "bytes": 2317845,
+      "name": "sanctuary"
+    },
+    {
+      "path": "assets/img/lobby/seal.png",
+      "bytes": 3117509,
+      "name": "seal"
+    },
+    {
+      "path": "assets/img/lobby/match-frame.svg",
+      "bytes": 2261,
+      "name": "match-frame"
     }
   ]
 }
