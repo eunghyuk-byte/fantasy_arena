@@ -1,0 +1,49 @@
+Sanctuary medallion and central-surface correction (review candidate)
+Base: e7599f8b5aa70d9e3bb5cc9ca86d9297181bceb8, public v0.4049.
+Branch: codex/sanctuary-medallion-center-fix. No release version bump or public push.
+
+Reproduction and cause
+- New annotated attachments could not be materialized on Windows. They were not
+  viewed locally. Parent authorized independent reproduction using existing assets.
+- Ran the actual v0.4049 lobby, captured six angles and the real preview animation.
+- Uniform mesh circles carried unequal, elliptical painted source medallions.
+  Their centers were also at inconsistent orbit radii.
+- The rotating source retained a portrait repair/hollow offset 57 source pixels
+  above its rotation origin: portrait (1065,273), rotor (1065,330).
+
+Correction
+- Six shared circular profiles on the same radius, spaced 60 degrees apart.
+  Medal faces are orthographic while the stone retains its shallow tilt and depth.
+- Official earth/fire/wind/water/dark/light icon pixels provide monochrome height
+  only. No official source RGB is used as medal color. Water is the ice crystal.
+  All medals share restrained gold, bevels, fixed warm/cool light and relief shading.
+- Removed the old painted medallion footprints and the inner bowl geometry.
+  Reconstructed a continuous central stone surface; fixed portrait size/position
+  and all lobby information, buttons and motion/network code remain unchanged.
+- Updated the independent alpha fallback from the same renderer.
+- Image read/upload failures select that fallback without uncaught callbacks.
+
+Verification
+- Client regression: 717 passed, 0 failed. Server: 2 passed, 0 failed.
+- Existing lobby-sanctuary.browser.cjs: pass (deck/rank fixtures, controls,
+  real room-session callback implementation, cancel/error/disconnect/reduced motion,
+  scroll, small touch layouts, 4K and no-WebGL behavior).
+  Room-session source is injected read-only for testing; account branch not merged.
+- lobby-medallion.browser.cjs: every integer angle 0..360 drawn at 1672x941,
+  390x844, 844x390 and actual 3840x2160. Fixed portrait, live acceleration,
+  cancel deceleration, stable stop, rapid repeat/back/reenter and reduced motion pass.
+- lobby-seal-fallback.browser.cjs: normal and four injected failure paths pass.
+- Independent reviewer found one unhandled image callback failure; fixed and
+  independently rechecked all five loading paths with zero uncaught page errors.
+- Evidence includes original local reproduction, angle images, native/4K/mobile
+  renders, live full-turn/cancel/restart recording and machine-readable results.
+
+Preservation and limits
+- cards-data.js, game.js, render.js, lobby.js, lobby-motion.js, net.js, UI CSS/HTML,
+  original source scene, original six icons and server/account code are unchanged.
+- Public matchmaking integration remains separate. Recorded motion uses real local
+  preview, not a simulated network success. Network callback tests use test fixtures.
+- Scene source remains 1672x940. Geometry/relief/DOM render at display resolution;
+  this change does not claim that the source background became native 4K.
+- Existing 97 metadata checkouts were restored to their manifest-recorded EOL form
+  for client fixture compatibility; none are included in this commit.
