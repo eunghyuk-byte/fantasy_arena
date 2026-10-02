@@ -1,3 +1,8 @@
+## v0.4048
+- Launch the approved elemental sanctuary lobby with an optimized3840x2160 background and smaller mobile delivery, original six element icons, independent rotating seal, fixed selected-deck panel and touch-accessible actions.
+- Preserve saved-deck CRUD and scrolling, public population simulation, and all v0.4047 card changes. Respect reduced motion and server-confirmed room lifecycle callbacks; no simulated match success.
+- Actual matchmaking queue and rank backend remain separate work. Matching stays disabled until a real room session is bound; no account-branch implementation is included.
+
 ## v0.4047
 - Eight Trigrams creates two 4/0/9 stones (previously 4/0/10). Keep both the stat tuple and closing parenthesis on the first description line.
 - Review all 65 two-line card faces and improve 43 descriptions with semantic line breaks. Keep existing font size, at most two lines and unchanged mechanics for all other cards; brief summaries retain full rules in shared details/tooltips.

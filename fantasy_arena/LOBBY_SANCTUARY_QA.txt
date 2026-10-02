@@ -5,10 +5,12 @@ Integrated public main: 9ebd9518be5fd68e2adba0791b0597edee432ae7 (v0.4047).
 Index cache-version conflicts resolved preserving v0.4047 plus sanctuary scripts/styles.
 cards-data.js, game.js, render.js and approved-description-wrap.json are unchanged from
 that public main: Paljin Stone4/0/9 and two summons,43 description line edits preserved.
-Post-integration client712/712. No public push/deploy; user deployment approval pending.
+Post-integration client712/712. User explicitly approved public deployment after review.
+Release prepared as v0.4048; existing v0.4047 mechanics/description changes retained.
 Branch: codex/element-sanctum-lobby
 Workspace: C:\Users\KEH\Documents\Codex\2026-10-02\task-4\fantasy_arena
-No main push, version bump, Pages deployment, or account-branch modification.
+No account-branch implementation included. Public release verification is recorded in
+the separately returned deployment evidence; this document alone does not prove deployment.
 
 APPROVED 4K BACKGROUND REPLACEMENT (after 59e2a97)
 Authenticated Drive source: 1dNed5y_IyjbhDEPnTTmzae6kLciXpn5z, supplied and approved by
