@@ -1,5 +1,5 @@
 /* Elemental sanctuary: scenery, rotating seal, fixed controls remain separate.
- * All UI edges and labels are rendered at the actual display resolution. */
+ * Labels and CSS borders render at display resolution; raster texture resolution is documented. */
 #lobby.screen.active { display:block; padding:0; isolation:isolate; background:#080e0e url('../assets/img/lobby/sanctuary.png') center/cover no-repeat; }
 #lobby::before { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,#05050344,transparent 50%),linear-gradient(0deg,#02060422,transparent 40%); pointer-events:none; }
 #lobby .sanctuary-heading { position:absolute; top:2.8%; left:4.8%; display:flex; align-items:center; gap:2cqw; height:6cqh; color:#f5dfa6; }
@@ -101,6 +101,23 @@
 #lobby .lobby-right .lobby-match::before { inset:0;border:0;border-radius:0;background:url('../assets/img/lobby/match-frame.svg') center/100% 100% no-repeat; }
 #lobby .lobby-right .lobby-match:hover:not(:disabled) { background:linear-gradient(#2e3b2cc7,#0c211dde),url('../assets/img/lobby/seal.png') center/cover;box-shadow:none; }
 @media (prefers-reduced-motion:reduce) { #lobby *,#lobby *::before { animation:none!important;transition:none!important; } }
+/* Approved title wordmark, sampled from the same original source as the title screen. */
+#lobby .sanctuary-brand { display:block;width:18cqw;height:2.945cqw;background:url('../assets/img/ui/approved-title-source.png') 50.802139% 30.787309% / 304% 1045.55556% no-repeat;mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent); }
+/* Keep the complete rotating badge envelope above the separate information plinth. */
+#lobby .sanctuary-seal { width:59cqh;height:59cqh;top:-10cqh; }
+#lobby .seal-element { left:calc(50% + var(--ex)*.855);top:calc(50% + var(--ey)*.855);width:7.1cqh;height:7.1cqh; }
+#lobby .lobby-sel-icon { top:3.5cqh;width:21cqh;height:21cqh; }
+#lobby .sanctuary-player { top:26cqh; }
+#lobby .sanctuary-rank { top:30.5cqh; }
+#lobby .lobby-deck-plinth { position:absolute;top:48cqh;left:17%;width:66%;height:9cqh;box-sizing:border-box;padding:1cqh 2cqw;background:linear-gradient(110deg,#090e0e,#231e13 48%,#0a0e0d);border-block:1px solid #a58548;clip-path:polygon(8% 0,92% 0,100% 100%,0 100%);box-shadow:inset 0 2px 0 #e8c77844,inset 0 -4px 15px #000; }
+#lobby .lobby-sel-name { position:static;width:100%;padding:0;font-size:2.8cqh;line-height:1.3; }
+#lobby .lobby-sel-meta { position:static;width:100%;font-size:1.8cqh;line-height:1.6; }
+#lobby #matchDemo { top:57.4cqh; }
+#lobby .lobby-right .lobby-match { top:61cqh;height:13cqh;left:17%;width:66%;isolation:isolate;background:linear-gradient(#10161244,#07110f66),url('../assets/img/lobby/seal.png') center/200% auto;filter:drop-shadow(0 5px 3px #000); }
+#lobby .lobby-right .lobby-match::before { z-index:-1;background:url('../assets/img/lobby/approved-lobby-source.png') 71.48289% 80.72591% / 269.67742% 662.67606% no-repeat;mask-image:linear-gradient(0deg,#000 0 20%,transparent 20% 80%,#000 80%),linear-gradient(90deg,#000 0 13%,transparent 13% 87%,#000 87%); }
+#lobby .lobby-right .lobby-match:disabled { opacity:.76; }
+#lobby .lobby-deck { border-width:3px;border-color:#b39256 #4e361c #372615 #8d6c3e;outline-offset:-7px;box-shadow:inset 0 0 0 2px #080a07,inset 0 0 0 4px #7e5c303d,inset 0 0 22px #000,0 4px 5px #000b; }
+#lobby .sanctuary-actions .menu-btn { border-width:3px;border-color:#a48855 #4a341e #362616 #82653b;background:linear-gradient(115deg,#352b1c,#101410 45%,#242015);box-shadow:inset 0 0 0 1px #090c09,inset 0 0 0 3px #957a3b55,0 4px 5px #000b; }
 /* The rest of the game remains 16:9. Lobby alone reflows for touch access. */
 @media (max-width:700px) and (orientation:portrait) {
   #app:has(#lobby.active) { width:100vw!important;height:100dvh!important; }
@@ -130,4 +147,53 @@
   #lobby .sanctuary-actions { top:503px;left:0;width:100%;gap:12px; } #lobby .sanctuary-actions .menu-btn { font-size:13px;min-height:44px;padding:8px 4px; }
   #lobby .rank-unavailable { font-size:14px; } #lobby .lobby-sel-empty { top:190px;font-size:18px; }
   #lobby .lobby-wait { position:fixed;left:18px;right:18px;bottom:12px; } #lobby .lobby-wait-box { padding:10px; } #lobby .lobby-wait-box h2,#lobby .lobby-wait-time { font-size:12px; } #lobby .lobby-wait-box .menu-btn { font-size:14px;min-height:40px;padding:8px 12px; }
+}
+
+@media (max-width:700px) and (orientation:portrait) {
+  #lobby .sanctuary-brand { width:122px;height:20px;flex:none; }
+  #lobby.screen.active { padding-bottom:190px; }
+  #lobby .lobby { margin-top:12px;gap:18px; }
+  #lobby .lobby-right { order:-1;height:414px; }
+  #lobby .sanctuary-seal { top:0;width:330px;height:330px; }
+  #lobby .seal-element { left:calc(50% + var(--mx)*.94);top:calc(50% + var(--my)*.94);width:40px;height:40px; }
+  #lobby .lobby-sel-icon { width:116px;height:116px;top:60px; }
+  #lobby .sanctuary-player { top:187px;font-size:22px; }
+  #lobby .sanctuary-rank { top:216px; }
+  #lobby .lobby-deck-plinth { top:342px;height:66px;left:6%;width:88%;padding:6px 18px; }
+  #lobby .lobby-sel-name { font-size:23px; } #lobby .lobby-sel-meta { font-size:14px; }
+  #lobby #matchDemo { position:fixed;top:auto;bottom:143px;left:0;width:100%;height:27px;background:#09110ff5;z-index:9;font-size:12px; }
+  #lobby .lobby-right .lobby-match { position:fixed;top:auto;bottom:65px;left:4%;width:92%;height:76px;font-size:32px;z-index:10; }
+  #lobby .sanctuary-actions { position:fixed;top:auto;bottom:10px;left:4%;width:92%;gap:10px;z-index:10; }
+  #lobby .lobby-wait { bottom:176px;z-index:11; } #lobby .lobby-wait-deck { font-size:11px; }
+}
+@media (max-width:1000px) and (orientation:landscape) {
+  #app:has(#lobby.active) { width:100vw!important;height:100dvh!important; }
+  #lobby .sanctuary-heading { top:10px;left:20px;height:32px;gap:12px; }
+  #lobby .sanctuary-brand { width:140px;height:23px; }
+  #lobby .sanctuary-heading h1 { font-size:23px;padding-left:12px; }
+  #lobby > .lobby-user { top:6px;right:64px;width:32%;height:46px; }
+  #lobby .profile-status .lp-link { font-size:12px;min-height:24px;min-width:60px;padding:1px 6px; }
+  #lobby .profile-name,#lobby .profile-identity .rank-trigger { font-size:14px; }
+  #lobby .profile-status,#lobby .profile-status .lobby-user-name { font-size:11px; }
+  #lobby .profile-identity .rank-trigger .tier-em { --s:48px; }
+  #lobby .lobby { inset:50px 16px 8px;grid-template-columns:38% 1fr;gap:3%; }
+  #lobby .lobby-left { padding:12px; } #lobby .lobby-head { margin-bottom:8px;gap:8px; }
+  #lobby .lobby-head h2 { font-size:21px; } #lobby .lobby-instruction,#lobby .lobby-count,#lobby .lobby-notice { font-size:11px; }
+  #lobby .lobby-decks { grid-auto-rows:110px;gap:8px; } #lobby .lobby-deck { padding:8px 4px; }
+  #lobby .lobby-deck-icon { width:65px;height:65px; } #lobby .lobby-deck-name { font-size:14px;margin-top:7px; }
+  #lobby .lobby-left-actions .menu-btn { font-size:12px;min-height:36px; }
+  #lobby .lobby-right { transform:none; }
+  #lobby .sanctuary-seal { top:-18px;width:180px;height:180px; }
+  #lobby .seal-element { left:calc(50% + var(--mx)*.51);top:calc(50% + var(--my)*.51);width:25px;height:25px; }
+  #lobby .lobby-sel-icon { top:13px;width:68px;height:68px; }
+  #lobby .sanctuary-player { top:90px;font-size:18px; }
+  #lobby .sanctuary-rank { top:113px; } #lobby .sanctuary-rank .rank-trigger { font-size:14px; } #lobby .sanctuary-rank .rank-trigger .tier-em { --s:35px; }
+  #lobby .lobby-deck-plinth { top:166px;left:12%;width:76%;height:47px;padding:2px 12px; }
+  #lobby .lobby-sel-name { font-size:19px; } #lobby .lobby-sel-meta { font-size:12px; }
+  #lobby #matchDemo { top:215px;font-size:12px;padding:2px 0;left:0;width:100%; }
+  #lobby .lobby-right .lobby-match { top:238px;left:5%;width:90%;height:56px;font-size:28px!important; }
+  #lobby .sanctuary-actions { top:296px;left:0;width:100%;gap:8px; } #lobby .sanctuary-actions .menu-btn { font-size:13px;min-height:44px; }
+  #lobby.screen.active { overflow-y:auto; } #lobby .lobby-right { min-height:340px; }
+  #lobby .lobby { bottom:auto;min-height:340px; } #lobby .lobby-left { max-height:332px; }
+  #lobby .lobby-wait { position:fixed;left:44%;right:3%;bottom:8px; } #lobby .lobby-wait-box h2,#lobby .lobby-wait-time,#lobby .lobby-wait-deck { font-size:12px; }
 }

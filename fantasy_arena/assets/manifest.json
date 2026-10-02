@@ -1,5 +1,5 @@
 {
-  "count": 831,
+  "count": 832,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -4097,6 +4097,11 @@
       "path": "assets/img/lobby/match-frame.svg",
       "bytes": 2261,
       "name": "match-frame"
+    },
+    {
+      "path": "assets/img/lobby/approved-lobby-source.png",
+      "bytes": 2367843,
+      "name": "approved-lobby-source"
     }
   ]
 }

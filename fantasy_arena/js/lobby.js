@@ -169,8 +169,8 @@
       <div class="lobby-sel-icon"><img src="${iconOf(d.tribe)}" alt="" draggable="false"></div>
       <div class="sanctuary-player">${esc(acc && acc.displayName || 'PLAYER')}</div>
       <div class="sanctuary-rank">${rankTrigger()}</div>
-      <div class="lobby-sel-name">${esc(d.name)}</div>
-      <div class="lobby-sel-meta">${esc(tribeOf(d.tribe).name)} · ${d.cards.length}장${d.local ? " · 이 기기" : ""}</div>`
+      <div class="lobby-deck-plinth"><div class="lobby-sel-name">${esc(d.name)}</div>
+      <div class="lobby-sel-meta">${esc(tribeOf(d.tribe).name)} · ${d.cards.length}장${d.local ? " · 이 기기" : ""}</div></div>`
       : `<div class="lobby-sel-empty">덱을 고르거나<br>「새 덱」으로 만드세요.</div>`;
     $("btnMatch").disabled = !(d && L.online && roomSession) || L.connectionLost || matchBusy();
     $("btnMatch").title = !roomSession ? '온라인 방 연결 기능이 아직 연결되지 않았습니다.' : L.online ? "" : "매칭은 서버 로그인 후 가능합니다.";

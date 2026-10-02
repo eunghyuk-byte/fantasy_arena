@@ -19,6 +19,20 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
     return route.fulfill({contentType:mime[path.extname(file)]||'application/octet-stream',body:fs.readFileSync(file)});
   });
   const page = await context.newPage(), errors=[];
+  const clearances=[];
+  async function verifyOrbit(label) {
+    const clearance=await page.evaluate(()=>{
+      const rotor=document.getElementById('lobbySealRotor'),saved=rotor.style.transform;
+      const panel=document.querySelector('.lobby-deck-plinth').getBoundingClientRect();let min=Infinity;
+      for(let angle=0;angle<360;angle++) {
+        rotor.style.transform=`rotate(${angle}deg)`;
+        for(const badge of document.querySelectorAll('.seal-element')) min=Math.min(min,panel.top-badge.getBoundingClientRect().bottom);
+      }
+      rotor.style.transform=saved;return min;
+    });
+    assert.ok(clearance>0,label+' complete 360-degree badge envelope clears deck panel: '+clearance);
+    clearances.push({viewport:label,angles:360,minClearancePx:clearance});
+  }
   page.on('pageerror', e=>errors.push(e.message));
   await page.goto('https://sanctuary.test');
   await page.waitForFunction(()=>!!window.Lobby);
@@ -125,20 +139,35 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   await page.waitForTimeout(250);assert.equal(await page.locator('#lobbySealRotor').evaluate(e=>e.style.transform),reduced);
   await page.click('#btnMatchCancel'); await page.emulateMedia({reducedMotion:'no-preference'});
   await page.setViewportSize({width:1920,height:1080});await page.waitForTimeout(250);
-  await page.screenshot({path:path.join(out,'lobby-1920.png')});
+  await verifyOrbit('1920x1080');await page.screenshot({path:path.join(out,'lobby-1920.png')});
   await page.setViewportSize({width:3840,height:2160});
   // Test actual 4K layout independently of the game's existing max resolution preset.
   await page.evaluate(()=>{const a=document.getElementById('app');a.style.width='3840px';a.style.height='2160px';});
-  await page.waitForTimeout(300); await page.screenshot({path:path.join(out,'lobby-4k.png')});
+  await page.waitForTimeout(300);await verifyOrbit('3840x2160'); await page.screenshot({path:path.join(out,'lobby-4k.png')});
   await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(300);
+  await verifyOrbit('390x844');
+  const mobileCTA=await page.locator('#btnMatch').boundingBox();assert.ok(mobileCTA.y>=0&&mobileCTA.y+mobileCTA.height<=844,'portrait CTA visible without scrolling');
   await page.screenshot({path:path.join(out,'lobby-mobile.png'),fullPage:true});
   await page.locator('#lobbyUser .rank-trigger').tap();
   assert.equal(await page.locator('#lobbyRankPopover').isVisible(),true);
   const pop=await page.locator('#lobbyRankPopover').boundingBox(); assert.ok(pop.x>=0 && pop.x+pop.width<=390,'mobile popup stays in viewport');
   await page.locator('.lobby-head h2').tap(); assert.equal(await page.locator('#lobbyRankPopover').isVisible(),false);
+  await page.locator('#lobby').evaluate(e=>e.scrollTop=e.scrollHeight);
+  assert.ok(await page.locator('#lobby').evaluate(e=>e.scrollTop)>100,'portrait actually scrolled beyond first screen');
+  await page.locator('#lobbyDecks').evaluate(e=>e.scrollTop=e.scrollHeight);
+  const lastDeck=page.locator('.lobby-deck[data-id]').last();await lastDeck.tap();
+  assert.equal(await lastDeck.getAttribute('aria-pressed'),'true','last deck remains touch accessible above fixed actions');
+  const stickyCTA=await page.locator('#btnMatch').boundingBox();assert.ok(stickyCTA.y>=0&&stickyCTA.y+stickyCTA.height<=844,'portrait CTA remains accessible after deck scroll');
   await page.locator('#btnMatch').scrollIntoViewIfNeeded();
   await page.screenshot({path:path.join(out,'lobby-mobile-actions.png')});
   await page.setViewportSize({width:844,height:390});await page.waitForTimeout(250);
+  await page.locator('#lobby').evaluate(e=>e.scrollTop=0);await verifyOrbit('844x390');
+  assert.ok(await page.locator('.lobby-deck-name').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize))>=14,'landscape deck labels readable');
+  assert.ok(await page.locator('#btnMatch').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))>=28,'landscape primary action readable over inherited compact rules');
+  assert.ok(await page.locator('#btnLobbyLogout').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))>=12,'landscape logout readable');
+  const profileBounds=await page.locator('#lobbyUser').boundingBox(),gearBounds=await page.locator('#settingsGearBtn').boundingBox();
+  assert.ok(profileBounds.x+profileBounds.width<=gearBounds.x,'landscape profile clears settings');
+  const landscapeCTA=await page.locator('#btnMatch').boundingBox();assert.ok(landscapeCTA.y>=0&&landscapeCTA.y+landscapeCTA.height<=390,'landscape CTA visible without scrolling');
   await page.screenshot({path:path.join(out,'lobby-mobile-landscape.png')});
   assert.ok((await page.locator('#btnLobbyBack').boundingBox()).height>=44,'small landscape touch target');
   await page.click('#btnLobbyBack');
@@ -178,7 +207,7 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   assert.equal(await page.evaluate(()=>loadLocalDecks().filter(d=>d.id.startsWith('local-qa-')).length),8,'unrelated user decks retained');
   await page.screenshot({path:path.join(out,'local-decks-crud.png')});
   assert.deepEqual(errors,[]);
-  fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({errors,transforms,center,button,pop,checks:'PASS'},null,2));
+  fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({errors,transforms,center,button,pop,clearances,checks:'PASS'},null,2));
   await context.close(); await browser.close();
   console.log('PASS: sanctuary browser, motion, rank, 4K and mobile checks. Evidence: '+out);
 })().catch(e=>{console.error(e);process.exit(1);});

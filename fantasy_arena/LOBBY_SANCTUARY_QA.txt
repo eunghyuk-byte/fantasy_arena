@@ -5,9 +5,29 @@ Branch: codex/element-sanctum-lobby
 Workspace: C:\Users\KEH\Documents\Codex\2026-10-02\task-4\fantasy_arena
 No main push, version bump, Pages deployment, or account-branch modification.
 
+PARENT PIXEL REVIEW FOLLOW-UP
+- Replaced improvised wordmark with the exact FantasySoul source used by the title screen
+  (approved-title-source.png, original wordmark region; no fabricated lightning).
+- Moved selected deck name/meta to an opaque dark trapezoid plinth below the complete
+  rotating badge envelope. Browser checks every integer angle 0..359 at four viewports.
+  Minimum bounding-rectangle clearance: 1920=5.78px, 3840=11.57px, portrait390=20.73px,
+  landscape844=6.93px. Wheel, central icon and text remain independent layers.
+- CTA samples ONLY the approved lobby image metal rim using CSS edge masks; central
+  baked lettering is excluded. Live label remains independent DOM. Added layered card
+  and auxiliary-button bevels. approved-lobby-source.png is the untouched 1672x941
+  authorized reference. This is not a full-screen screenshot or native 4K artwork.
+- Portrait CTA, population and footer are fixed and visible on entry and after real
+  maximum scroll. Test taps the last saved deck above the fixed action area. Landscape
+  has separate sizing: deck labels14px, CTA28px, logout12px, profile clears settings.
+- Current background/disc retained after parent asset comparison: cyan dais and blank
+  centered concentric disc fit fixed center better. Alternative comparison screenshot
+  retained. Raster resolution limitation remains unchanged; DOM/SVG clarity is separate.
+- Public population simulation and animated dots preserved. No live telemetry claim.
+
 IMPLEMENTED
 - Independent sanctuary scenery, rotating stone/metal disc, six original TRIBE_ICONS
-  at equal 60-degree intervals, fixed selected-deck icon/name/profile, vector CTA frame.
+  at equal 60-degree intervals, fixed selected-deck icon/name/profile, textured CTA rim
+  with independent live DOM label.
 - Real saved decks, two-column scrolling list, selected scroll position, keyboard buttons;
   existing local/server deck CRUD and AI/builder entry retained. No six-deck product fixture.
 - Analytically integrated smooth acceleration to 42 degrees/second over 1.6 seconds;
