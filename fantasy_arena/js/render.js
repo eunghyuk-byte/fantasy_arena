@@ -753,10 +753,10 @@ async function composeCardFace(c, opts={}) {
     const setStatRe = /^(.*?)\s+((?:공|방|체|코인)=\d+(?:\s*,?\s*(?:공|방|체|코인)=\d+)*)\s*$/;
     const setStatM = txt.match(setStatRe);
     let clauses = [];
-    if (soulHeadM && soulHeadM[2] && soulHeadM[2].trim()) {
+    if (!txt.includes("\n") && soulHeadM && soulHeadM[2] && soulHeadM[2].trim()) {
       clauses.push(soulHeadM[1].trim());
       clauses.push(soulHeadM[2].trim().replace(/\s*,\s*/g, " "));
-    } else if (setStatM && setStatM[1].trim()) {
+    } else if (!txt.includes("\n") && setStatM && setStatM[1].trim()) {
       clauses.push(setStatM[1].trim());
       clauses.push(setStatM[2].trim().replace(/\s*,\s*/g, " "));
     }
