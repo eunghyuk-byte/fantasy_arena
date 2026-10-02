@@ -159,9 +159,14 @@
     const acc = window.FSNet && FSNet.account();
     // v0.336: 프로필 영역 (예시 값) + 접속 상태는 오른쪽 위에 작게
     $("lobbyUser").innerHTML = profileHtml(L.online && !L.connectionLost
-      ? `<span class="lobby-user-name"><span class="online-dot">●</span> 연결됨</span><button class="lp-link" id="btnLobbyLogout">로그아웃</button>`
+      ? `<span class="lobby-user-name"><span class="online-dot">●</span> 연결됨</span>`
       : `<span class="lobby-user-name off">오프라인</span>${window.FSNet && FSNet.isOnline() ? '<button class="lp-link" id="btnLobbyLogin">로그인</button>' : ""}`);
-    const lo = $("btnLobbyLogout"); if (lo) lo.onclick = async () => { cancelMatch(); await FSNet.logout(); refresh(); };
+    const lo = $("btnLobbyLogout");
+    if (lo) {
+      lo.hidden = !L.online;
+      lo.disabled = matchBusy();
+      lo.onclick = async () => { cancelMatch(); $("btnSettingsClose").click(); await FSNet.logout(); await refresh(); };
+    }
     const li = $("btnLobbyLogin"); if (li) li.onclick = async () => { if (await login()) refresh(); };
 
     const d = selected();

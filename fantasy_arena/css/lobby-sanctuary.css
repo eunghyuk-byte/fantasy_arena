@@ -384,3 +384,29 @@ body:has(#lobby.active) > #settingsGearBtn { visibility:hidden; }
  #lobby .lobby-instruction { white-space:nowrap; }
  #lobby .sanctuary-rank { top:31.5cqh; }
 }
+
+/* Match the approved front silhouette; fog occludes the lower moving relief. */
+@media (min-width:1001px) {
+ #lobby .sanctuary-seal { width:77.8cqh;height:77.8cqh;top:-16.5cqh;mask-image:linear-gradient(#000 0 72%,#000b 77%,#0004 82%,transparent 88%); }
+ #lobby .sanctuary-seal::before { display:none; }
+ #lobby .lobby-deck-plinth { top:42cqh;left:26%;width:48%;height:10cqh;border:0;clip-path:none;box-shadow:none;background:linear-gradient(90deg,transparent,#231b1285 24%,#241b11e3 50%,#231b1285 76%,transparent); }
+ #lobby .lobby-deck-plinth::after { content:'';position:absolute;inset:0;pointer-events:none;background:url('../assets/img/lobby/plinth-lines.svg') center/100% 100% no-repeat; }
+ #lobby .lobby-deck-plinth::before { display:none; }
+}
+
+#lobby .lobby-deck { border:0;outline:0;border-radius:0;background:radial-gradient(ellipse at 50% 20%,#44341e80,transparent 72%),linear-gradient(125deg,#241c11,#11130f);box-shadow:none; }
+#lobby .lobby-deck.sel { border:0;outline:0;box-shadow:0 0 .6cqh #e9c77366;background:radial-gradient(ellipse at 50% 18%,#51402677,transparent 70%),linear-gradient(125deg,#241d12,#14170f); }
+#lobby .lobby-deck::before { opacity:.85; }
+#lobby .lobby-deck.sel::before { opacity:1; }
+@media (min-width:1001px) {
+ #lobby .sanctuary-actions { left:17.2%;width:65.7%;gap:1.6cqw; }
+ #lobby #btnLobbyAi { flex:none;width:10.65cqw; }
+ #lobby #btnLobbyEdit { flex:none;width:13.4cqw; }
+ #lobby #btnLobbyBack { flex:none;width:11.72cqw; }
+ #lobby .profile-settings { position:absolute;right:5cqw;width:4.3cqw;height:4.8cqh;border-left:1px solid #8d6d3859;border-radius:0;font-size:0;background:url('../assets/img/lobby/icon-settings.png') center/2.1cqh 2.5cqh no-repeat; }
+ #lobby .profile-status { position:absolute;right:1cqw;top:50%;transform:translateY(-50%);border:0;padding:0; }
+ #lobby .profile-status .lobby-user-name { font-size:1.4cqh;white-space:nowrap; }
+}
+
+#lobby .sanctuary-foreground { display:none; }
+@media (min-width:1001px) { #lobby .sanctuary-foreground { display:block;position:absolute;inset:0;z-index:1;pointer-events:none;background:url('../assets/img/lobby/fixed-pillar-brackets.png') center/100% 100% no-repeat; } }

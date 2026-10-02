@@ -103,6 +103,12 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   }
   assert.equal(await page.locator('.seal-element').count(),6);
   assert.equal(await page.locator('.lobby-deck[data-id]').count(),6);
+  assert.equal(await page.locator('#lobbyUser #btnLobbyLogout').count(),0,'logout belongs in settings, leaving the approved profile silhouette');
+  await page.click('.profile-settings');
+  assert.equal(await page.locator('#settingsPop #btnLobbyLogout').isVisible(),true,'connected account can reach logout through settings');
+  await page.click('#btnSettingsClose');
+  assert.ok(!(await page.locator('.lobby-sel-meta').textContent()).includes('이 기기'),'server decks never claim local storage');
+
   assert.deepEqual(await page.locator('.seal-element img').evaluateAll(els=>els.map(x=>x.getAttribute('src'))),['earth','fire','wind','water','dark','light'].map(x=>'assets/img/icons/'+x+'.png'));
   await page.locator('#lobbyUser .rank-trigger').hover();
   await page.locator('#lobbyRankPopover').waitFor({state:'visible'});
@@ -191,6 +197,14 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   const mobileLabel=await page.locator('#btnMatch').evaluate(el=>{const s=getComputedStyle(el,'::after');return{content:s.content,position:s.position,width:parseFloat(s.width),height:parseFloat(s.height),image:s.backgroundImage};});
   assert.equal(mobileLabel.content,'""','mobile source label generates a visible pseudo element');
   assert.equal(mobileLabel.position,'absolute');assert.ok(mobileLabel.width>100&&mobileLabel.height>20);assert.match(mobileLabel.image,/label-match-reference/);
+  const sourceRankGhost=await page.evaluate(async()=>{
+    const img=new Image();img.src='assets/img/lobby/sanctuary-reference-scene.png';await img.decode();
+    const c=document.createElement('canvas');c.width=170;c.height=49;const x=c.getContext('2d');
+    x.drawImage(img,964,454,170,49,0,0,170,49);const pixels=x.getImageData(0,0,170,49).data;
+    let cyan=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i+2]>90&&pixels[i+2]>pixels[i]+25)cyan++;
+    return cyan;
+  });
+  assert.equal(sourceRankGhost,0,'erased background retains no blue rank glyph behind responsive layout');
   await page.screenshot({path:path.join(out,'lobby-mobile.png'),fullPage:true});
   await page.locator('#lobbyUser .rank-trigger').tap();
   assert.equal(await page.locator('#lobbyRankPopover').isVisible(),true);
@@ -224,6 +238,7 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
     Lobby.open();await Lobby.refresh();
   });
   assert.equal(await page.locator('.lobby-deck[data-id]').count(),9);
+  assert.ok((await page.locator('.lobby-sel-meta').textContent()).includes('이 기기'),'real local decks retain their local-storage label');
   assert.equal(await page.locator('#btnMatch').isDisabled(),false,'offline selected deck can preview seal without real match');
   assert.equal(await page.locator('#lobbyUser .rank-trigger').count(),0,'no fabricated rank for offline profile');
   const ninth=page.locator('.lobby-deck[data-id="local:local-qa-8"]');
@@ -250,6 +265,18 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   assert.equal(await page.locator('.lobby-deck[data-id]').count(),9);
   assert.equal(await page.evaluate(()=>loadLocalDecks().filter(d=>d.id.startsWith('local-qa-')).length),8,'unrelated user decks retained');
   await page.screenshot({path:path.join(out,'local-decks-crud.png')});
+  const storedBeforeLogout=await page.evaluate(()=>JSON.stringify(loadLocalDecks()));
+  await page.evaluate(async()=>{
+    FSNet.isLoggedIn=()=>true;FSNet.isOnline=()=>true;
+    FSNet.logout=async()=>{window.__qaLogoutCount=(window.__qaLogoutCount||0)+1;FSNet.isLoggedIn=()=>false;return{ok:true};};
+    await Lobby.refresh();
+  });
+  await page.click('.profile-settings');await page.click('#settingsPop #btnLobbyLogout');
+  await page.waitForFunction(()=>window.__qaLogoutCount===1&&!Lobby._state.online);
+  assert.equal(await page.locator('#settingsPop').evaluate(e=>e.classList.contains('show')),false,'logout closes settings');
+  assert.equal(await page.evaluate(()=>JSON.stringify(loadLocalDecks())),storedBeforeLogout,'logout retains all local decks');
+  assert.equal(await page.locator('#btnLobbyLogout').isHidden(),true,'signed-out account hides logout');
+
   assert.deepEqual(errors,[]);
   const coldMobile=await context.newPage(),coldRequests=[];
   await coldMobile.setViewportSize({width:390,height:844});coldMobile.on('request',r=>coldRequests.push(r.url()));

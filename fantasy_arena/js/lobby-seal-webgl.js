@@ -60,6 +60,10 @@
       float erase=1.-smoothstep(.57,.61,radius);
       erase=max(erase,smoothstep(490.,510.,xy.y));
       erase=max(erase,smoothstep(1218.,1235.,xy.x)*(1.-smoothstep(85.,100.,xy.y)));
+      // Architectural brackets belong to fixed foreground pillars, never the rotor.
+      float bracketY=smoothstep(285.,303.,xy.y)*(1.-smoothstep(426.,443.,xy.y));
+      float bracketX=max(1.-smoothstep(776.,792.,xy.x),smoothstep(1338.,1354.,xy.x));
+      erase=max(erase,bracketY*bracketX);
       // Hidden areas have no source pixels. Reconstruct from a clean radial
       // sector of THIS reference, keeping band radii and original stone grain.
       float sector=-2.08+asin(sin(atan(-local.y,local.x)*3.))*.14;
