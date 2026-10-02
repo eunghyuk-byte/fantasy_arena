@@ -5,6 +5,24 @@ Branch: codex/element-sanctum-lobby
 Workspace: C:\Users\KEH\Documents\Codex\2026-10-02\task-4\fantasy_arena
 No main push, version bump, Pages deployment, or account-branch modification.
 
+APPROVED 4K BACKGROUND REPLACEMENT (after 59e2a97)
+Authenticated Drive source: 1dNed5y_IyjbhDEPnTTmzae6kLciXpn5z, supplied and approved by
+parent after authorized Higgsfield generation. No additional paid generation performed.
+Original preserved byte-for-byte at art_drop/lobby/sanctuary-4k-original.png:
+3840x2160, RGB, 13512793 bytes, SHA256
+B6F44830F8E91F1126810F7139AB8D60F9072EBE7976F220F2FCC66C10ADF7D0.
+Runtime files: sanctuary-4k.webp 3840x2160, 2264076 bytes (83.25% below source PNG),
+sanctuary-mobile.webp 1920x1080, 598622 bytes (95.57% below source PNG).
+Reproducible compression: sharp WebP quality94/effort6 at original resolution;
+mobile resize width1920 then WebP quality92/effort6. Original never resized/overwritten.
+Same-resolution RGB PSNR38.36dB, mean absolute channel error1.78/255; visual inspection
+confirmed pillars, stone cracks and teal atmosphere. Metrics are not a fidelity guarantee.
+CSS chooses mobile at viewport width <=1000px. Cold-mobile browser test verifies only
+mobile background requested, not desktop4K or archived PNG. Chrome Image.decode verifies
+dimensions; local decode timings in results.json are NOT internet/network benchmarks.
+4K background secured. Ring remains1254x1254 and reference-sampled button rim is not4K.
+Text/CSS/SVG and original element icons remain independent; do not call all artwork4K.
+
 PARENT PIXEL REVIEW FOLLOW-UP
 - Replaced improvised wordmark with the exact FantasySoul source used by the title screen
   (approved-title-source.png, original wordmark region; no fabricated lightning).
@@ -21,7 +39,8 @@ PARENT PIXEL REVIEW FOLLOW-UP
   has separate sizing: deck labels14px, CTA28px, logout12px, profile clears settings.
 - Current background/disc retained after parent asset comparison: cyan dais and blank
   centered concentric disc fit fixed center better. Alternative comparison screenshot
-  retained. Raster resolution limitation remains unchanged; DOM/SVG clarity is separate.
+  retained. This earlier background selection is superseded by approved4K replacement
+  above; ring/reference-rim resolution remains distinct from DOM/SVG clarity.
 - Public population simulation and animated dots preserved. No live telemetry claim.
 
 IMPLEMENTED
@@ -112,12 +131,13 @@ The suite serves only project files via Playwright authenticated test routing; n
 Evidence directory: C:\Users\KEH\Documents\Codex\2026-10-02\task-4\lobby-qa
 
 ASSETS AND RESOLUTION LIMIT
-assets/img/lobby/sanctuary.png: NEW built-in imagegen rendering, 1672x941 RGB.
+assets/img/lobby/sanctuary.png: earlier built-in imagegen rendering, 1672x941 RGB; no longer
+used by runtime. Approved4K runtime and preserved source are documented above.
 assets/img/lobby/seal.png: NEW built-in imagegen rendering, 1254x1254 RGBA.
 assets/img/lobby/match-frame.svg: resolution-independent authored metallic frame.
-No bitmap was enlarged and presented as native 4K. The built-in tool did not return the
-requested 3840x2160/2048 sizes. True 4K background detail remains an explicit limitation.
-Text, borders, controls, and decorative button frame are independent DOM/vector; all six
+The earlier built-in tool did not return requested3840x2160/2048 sizes. The later approved
+Higgsfield background is3840x2160; seal stays1254x1254. No local upscaling was performed.
+Text, CSS borders and controls are independent DOM/vector; CTA rim is reference texture. All six
 element icons reuse the original game assets, including the water ice crystal.
 Parents' alternate background/disc were pixel-inspected and compared in the same layout.
 Current background retains the approved cyan dais better; current blank-center disc avoids

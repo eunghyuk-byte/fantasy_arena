@@ -1,5 +1,5 @@
 {
-  "count": 832,
+  "count": 834,
   "items": [
     {
       "path": "assets/audio/bgm/BGM.md",
@@ -4102,6 +4102,16 @@
       "path": "assets/img/lobby/approved-lobby-source.png",
       "bytes": 2367843,
       "name": "approved-lobby-source"
+    },
+    {
+      "path": "assets/img/lobby/sanctuary-4k.webp",
+      "bytes": 2264076,
+      "name": "sanctuary-4k"
+    },
+    {
+      "path": "assets/img/lobby/sanctuary-mobile.webp",
+      "bytes": 598622,
+      "name": "sanctuary-mobile"
     }
   ]
 }

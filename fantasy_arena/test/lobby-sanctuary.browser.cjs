@@ -20,6 +20,17 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   });
   const page = await context.newPage(), errors=[];
   const clearances=[];
+  const backgroundLoads=[];
+  async function verifyBackground(target,label,expected,width,height) {
+    const result=await target.evaluate(async()=>{
+      const url=getComputedStyle(document.getElementById('lobby')).backgroundImage.match(/url\(["']?(.*?)["']?\)/)[1];
+      const img=new Image(),start=performance.now();img.src=url;await img.decode();
+      return {url,width:img.naturalWidth,height:img.naturalHeight,decodeMs:performance.now()-start};
+    });
+    assert.ok(result.url.endsWith(expected),label+' chooses expected background');
+    assert.equal(result.width,width);assert.equal(result.height,height);
+    backgroundLoads.push({viewport:label,...result,payloadBytes:fs.statSync(path.join(root,'assets/img/lobby',expected)).size});
+  }
   async function verifyOrbit(label) {
     const clearance=await page.evaluate(()=>{
       const rotor=document.getElementById('lobbySealRotor'),saved=rotor.style.transform;
@@ -143,9 +154,10 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   await page.setViewportSize({width:3840,height:2160});
   // Test actual 4K layout independently of the game's existing max resolution preset.
   await page.evaluate(()=>{const a=document.getElementById('app');a.style.width='3840px';a.style.height='2160px';});
-  await page.waitForTimeout(300);await verifyOrbit('3840x2160'); await page.screenshot({path:path.join(out,'lobby-4k.png')});
+  await page.waitForTimeout(300);await verifyOrbit('3840x2160');await verifyBackground(page,'3840x2160','sanctuary-4k.webp',3840,2160); await page.screenshot({path:path.join(out,'lobby-4k.png')});
   await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(300);
   await verifyOrbit('390x844');
+  await verifyBackground(page,'390x844','sanctuary-mobile.webp',1920,1080);
   const mobileCTA=await page.locator('#btnMatch').boundingBox();assert.ok(mobileCTA.y>=0&&mobileCTA.y+mobileCTA.height<=844,'portrait CTA visible without scrolling');
   await page.screenshot({path:path.join(out,'lobby-mobile.png'),fullPage:true});
   await page.locator('#lobbyUser .rank-trigger').tap();
@@ -207,7 +219,14 @@ const mime = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.pn
   assert.equal(await page.evaluate(()=>loadLocalDecks().filter(d=>d.id.startsWith('local-qa-')).length),8,'unrelated user decks retained');
   await page.screenshot({path:path.join(out,'local-decks-crud.png')});
   assert.deepEqual(errors,[]);
-  fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({errors,transforms,center,button,pop,clearances,checks:'PASS'},null,2));
+  const coldMobile=await context.newPage(),coldRequests=[];
+  await coldMobile.setViewportSize({width:390,height:844});coldMobile.on('request',r=>coldRequests.push(r.url()));
+  await coldMobile.goto('https://sanctuary.test');await coldMobile.waitForFunction(()=>!!window.Lobby);
+  await coldMobile.evaluate(()=>Lobby.open());await verifyBackground(coldMobile,'390 cold navigation','sanctuary-mobile.webp',1920,1080);
+  assert.ok(!coldRequests.some(u=>u.endsWith('sanctuary-4k.webp')),'mobile cold navigation avoids desktop4K payload');
+  assert.ok(!coldRequests.some(u=>u.endsWith('sanctuary-4k-original.png')),'archive source never downloaded by runtime');
+  await coldMobile.close();
+  fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({errors,transforms,center,button,pop,clearances,backgroundLoads,coldMobileAvoids4K:true,checks:'PASS'},null,2));
   await context.close(); await browser.close();
   console.log('PASS: sanctuary browser, motion, rank, 4K and mobile checks. Evidence: '+out);
 })().catch(e=>{console.error(e);process.exit(1);});

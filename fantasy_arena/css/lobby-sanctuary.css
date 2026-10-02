@@ -1,6 +1,7 @@
 /* Elemental sanctuary: scenery, rotating seal, fixed controls remain separate.
  * Labels and CSS borders render at display resolution; raster texture resolution is documented. */
-#lobby.screen.active { display:block; padding:0; isolation:isolate; background:#080e0e url('../assets/img/lobby/sanctuary.png') center/cover no-repeat; }
+#lobby.screen.active { display:block; padding:0; isolation:isolate; background:#080e0e url('../assets/img/lobby/sanctuary-4k.webp') center/cover no-repeat; }
+@media (max-width:1000px) { #lobby.screen.active { background-image:url('../assets/img/lobby/sanctuary-mobile.webp'); } }
 #lobby::before { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,#05050344,transparent 50%),linear-gradient(0deg,#02060422,transparent 40%); pointer-events:none; }
 #lobby .sanctuary-heading { position:absolute; top:2.8%; left:4.8%; display:flex; align-items:center; gap:2cqw; height:6cqh; color:#f5dfa6; }
 #lobby .sanctuary-heading h1 { font-size:4.2cqh; letter-spacing:.03em; margin:0; padding-left:2cqw; border-left:1px solid #80633a; text-shadow:0 2px 6px #000; }
