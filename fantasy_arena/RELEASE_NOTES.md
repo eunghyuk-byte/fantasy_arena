@@ -1,3 +1,9 @@
+## v0.4050
+- Publish the reviewed six equal circular medallions with official element shapes rendered as restrained gold relief; water retains the ice crystal.
+- Restore source stone grain and remove the eccentric central recess through full rotation. Keep the central portrait, labels, controls and existing inertial motion fixed in their approved behavior.
+- Preserve deck functions, card rules, network callbacks and server/account code. Refresh release/cache keys, including the updated fallback image.
+- Approved implementation 54878e3 passed 718 client and 2 server tests; release verification checks source preservation and the published assets/motion.
+
 ## v0.4049
 - Publish the reviewed reference-faithful sanctuary lobby: original scene layers, engraved 3D seal, translucent deck panel, refined deck frames and source-aligned controls.
 - Preserve visible source stone detail with precise texture coordinates and full display-resolution rendering. Keep the central portrait, labels and architectural brackets fixed during inertial seal rotation.

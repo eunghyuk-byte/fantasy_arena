@@ -1,3 +1,11 @@
+v0.4050 RELEASE
+Approved implementation: 54878e305e50186f1b2bbb6de76f32d61d6a6ef4.
+Final parent and independent visual review passed; user authorized public release.
+Fresh full validation on that SHA: 718 client tests and 2 server tests passed.
+Integrated by fast-forward from public main e7599f8, with release/cache keys and
+release notes only. No account branch or gameplay changes are included.
+Historical candidate notes below retain the earlier review and test chronology.
+
 Sanctuary medallion and central-surface correction (review candidate)
 Visual-quality follow-up to 383e686 (not publicly deployed)
 - Removed the broad dark central fill. Preserve visible source stone; repair the

@@ -306,7 +306,7 @@ body:has(#lobby.active) > #settingsGearBtn { visibility:hidden; }
    native 1672x941; controls, relief, text and interaction remain separate. */
 #lobby.screen.active { background-image:url('../assets/img/lobby/sanctuary-reference-scene.png'); }
 #lobby::before { background:none; }
-#lobby .seal-rotor { background-image:url('../assets/img/lobby/reference-seal-fallback.png');filter:none; }
+#lobby .seal-rotor { background-image:url('../assets/img/lobby/reference-seal-fallback.png?v=0.4050');filter:none; }
 #lobby .seal-element { visibility:hidden; }
 #lobby .sanctuary-actions .menu-btn { background:#17170ff5; }
 @media (min-width:1001px) {
